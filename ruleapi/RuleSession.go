@@ -1,6 +1,8 @@
 package ruleapi
 
 import (
+	"fmt"
+
 	"github.com/TIBCOSoftware/bego/common/model"
 	"github.com/TIBCOSoftware/bego/rete"
 )
@@ -11,6 +13,7 @@ type RuleSession interface {
 
 	Assert(tuple model.StreamTuple)
 	Retract(tuple model.StreamTuple)
+	PrintNetwork()
 }
 
 type rulesessionImpl struct {
@@ -50,10 +53,14 @@ func (rulesessionImplVar *rulesessionImpl) Retract(tuple model.StreamTuple) {
 	rulesessionImplVar.reteNetwork.Retract(tuple)
 }
 
+func (rulesessionImplVar *rulesessionImpl) PrintNetwork() {
+	fmt.Println(rulesessionImplVar.reteNetwork.String())
+}
 func convertAPIRuleToReteRule(apiRule Rule) rete.Rule {
 	reteRule := rete.NewRule(apiRule.GetName())
 	for _, c := range apiRule.GetConditions() {
 		reteRule.AddCondition(c.GetName(), c.GetStreamSource(), c.GetEvaluator())
 	}
+	reteRule.SetAction(apiRule.GetActionFn())
 	return reteRule
 }

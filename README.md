@@ -25,11 +25,12 @@ With this backgroud, let us see how it translates to API/code. *This is a draft 
 	//Create Rule with a name
 	rule := ruleapi.NewRule("My first rule")
 
-    //Add a condition named c1 o the rule, saying that this condition needs data from three stream sources called n1, n2 and n3 and the go function to evaluate this condition is myCondition
+    //Add a condition named c1 o the rule, saying that this condition needs data from three stream
+    // sources called n1, n2 and n3 and the go function to evaluate this condition is myCondition
     //(see the myCondition signature below)
 	rule.AddCondition("c1", []model.StreamSource{"n1", "n2", "n3"}, myCondition)
 
-    //Similarly, add another named c2 to the rule
+    //Similarly, add another named c2 to the rule, this one needs two streaming sources n1 and n2
     rule.AddCondition("c2", []model.StreamSource{"n1", "n2"}, myCondition)
 
     //Add an Action callback function myActionFn to the Rule
@@ -59,20 +60,23 @@ With this backgroud, let us see how it translates to API/code. *This is a draft 
     //You may remove the rule
     ruleSession.DeleteRule (rule.getName())
 
-
+    //Condition evaluator function. You can make any sort of checks by using values from the
+    //StreamTuple instances. Here, it simply returns true
     func myCondition(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple)     bool {
 	    fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
 	    return true
     }
 
+    //Once all conditions are satisfied, this function is invoked. the tuples are the combination of
+    //that passed all of the rule's conditions
     func myActionFn(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
 	    fmt.Printf("My Rule [%s] fired\n", ruleName)
     }
 
 ## Try it out
 * Check out the repo say at `/home/yourname/go` and set environment variable GOPATH to it
-* Goto github.com/TIBCOSoftware/bego such that your path looks like this
-* /home/yourname/go/src/github.com/TIBCOSoftware/bego
+* Goto `github.com/TIBCOSoftware/bego` such that your path looks like this
+* `/home/yourname/go/src/github.com/TIBCOSoftware/bego`
 * Go to that the folder above and 
 * `go install ./...`
 * This will create an example executable at `/home/yourname/go/bin/rulesapp`
@@ -85,6 +89,7 @@ With this backgroud, let us see how it translates to API/code. *This is a draft 
 * Review and refine the API
 * Client API (if required)
 * Transports/Channels (as required)
-* Forward-chaining/Conflict Resolution/Post-RTC etc
+* Forward-chaining/Conflict Resolution/Post-RTC etc (TDB: if required)
 * Timers and expiry
+* Storage 
 

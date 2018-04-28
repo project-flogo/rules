@@ -1,7 +1,6 @@
 package rete
 
 import (
-	"fmt"
 	"strconv"
 )
 
@@ -30,7 +29,7 @@ func (ruleNodeImplVar *ruleNodeImpl) String() string {
 }
 
 func (ruleNodeImplVar *ruleNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
-	fmt.Println("Rule " + ruleNodeImplVar.getRule().GetName() + " fired, total tuples:" + strconv.Itoa(len(handles)))
+	// fmt.Println("Rule " + ruleNodeImplVar.getRule().GetName() + " fired, total tuples:" + strconv.Itoa(len(handles)))
 	// tuples := copyIntoTupleArray(handles)
 	// ruleNodeImplVar.getRule.performAction(tuples)
 	tupleMap := copyIntoTupleMap(handles)
