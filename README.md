@@ -22,59 +22,86 @@ Similarly, removing a StreamTuple from the network is called `Retract`-ing it fr
 With this backgroud, let us see how it translates to API/code. *This is a draft Server-side API*
 
 
-	//Create Rule with a name
-	rule := ruleapi.NewRule("My first rule")
-
-    //Add a condition named c1 o the rule, saying that this condition needs data from three stream
-    // sources called n1, n2 and n3 and the go function to evaluate this condition is myCondition
-    //(see the myCondition signature below)
-	rule.AddCondition("c1", []model.StreamSource{"n1", "n2", "n3"}, myCondition)
-
-    //Similarly, add another named c2 to the rule, this one needs two streaming sources n1 and n2
-    rule.AddCondition("c2", []model.StreamSource{"n1", "n2"}, myCondition)
-
-    //Add an Action callback function myActionFn to the Rule
+	//Create Rule, define conditiond and set action callback
+	rule := ruleapi.NewRule("* Ensure n1.name is Bob and n2.name matches n1.name ie Bob in this case *")
+	fmt.Printf("Rule added: [%s]\n", rule.GetName())
+	rule.AddCondition("c1", []model.StreamSource{"n1"}, checkForBob)          // check for name "Bob" in n1
+	rule.AddCondition("c2", []model.StreamSource{"n1", "n2"}, checkSameNames) // match the "name" field in both tuples
+	//in effect, fire the rule when name field in both tuples in "Bob"
 	rule.SetActionFn(myActionFn)
 
-	//Create a RuleSession. All interactions happen via this session
+	//Create a RuleSession and add the above Rule
 	ruleSession := ruleapi.NewRuleSession()
-
-    //Add the rule to the session, you can add multiple rules such as above to the session
 	ruleSession.AddRule(rule)
 
-	//Simulate/create a few StreamTuples
-	streamTuple1 := model.NewStreamTuple("n1") //simulate a new tuple of type n1
-    streamTuple2 := model.NewStreamTuple("n2") //simulate a new tuple of type n2
-	streamTuple3 := model.NewStreamTuple("n3") //simulate a new tuple of type n3
-
-    //Assert them into the session
+	//Now assert a few facts and see if the Rule Action callback fires.
+	fmt.Println("Asserting n1 tuple with name=Bob")
+	streamTuple1 := model.NewStreamTuple("n1")
+	streamTuple1.SetString("name", "Bob")
 	ruleSession.Assert(streamTuple1)
+
+	fmt.Println("Asserting n1 tuple with name=Fred")
+	streamTuple2 := model.NewStreamTuple("n1")
+	streamTuple2.SetString("name", "Fred")
 	ruleSession.Assert(streamTuple2)
-    ruleSession.Assert(streamTuple3)
+
+	fmt.Println("Asserting n2 tuple with name=Fred")
+	streamTuple3 := model.NewStreamTuple("n2")
+	streamTuple3.SetString("name", "Fred")
+	ruleSession.Assert(streamTuple3)
+
+	fmt.Println("Asserting n2 tuple with name=Bob")
+	streamTuple4 := model.NewStreamTuple("n2")
+	streamTuple4.SetString("name", "Bob")
+	ruleSession.Assert(streamTuple4)
 
     //Retract them
     ruleSession.Retract (streamTuple1)
     ruleSession.Retract (streamTuple2)
     ruleSession.Retract (streamTuple3)
+    ruleSession.Retract (streamTuple4)
 
-    //You may remove the rule
+    //You may delete the rule
     ruleSession.DeleteRule (rule.getName())
 
-    //Condition evaluator function. You can make any sort of checks by using values from the
-    //StreamTuple instances. Here, it simply returns true
-    func myCondition(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple)     bool {
-	    fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
-	    return true
+    func checkForBob(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+        //This conditions filters on name="Bob"
+        streamTuple := tuples["n1"]
+        if streamTuple == nil {
+            fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
+            return false
+        }
+        name := streamTuple.GetString("name")
+        return name == "Bob"
     }
-
-    //Once all conditions are satisfied, this function is invoked. the tuples are the combination of
-    //that passed all of the rule's conditions
+    
+    func checkSameNames(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+        // fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
+        streamTuple1 := tuples["n1"]
+        streamTuple2 := tuples["n2"]
+        if streamTuple1 == nil || streamTuple2 == nil {
+            fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
+            return false
+        }
+        name1 := streamTuple1.GetString("name")
+        name2 := streamTuple2.GetString("name")
+        return name1 == name2
+    }
+    
     func myActionFn(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
-	    fmt.Printf("My Rule [%s] fired\n", ruleName)
+        fmt.Printf("Rule fired: [%s]\n", ruleName)
+        streamTuple1 := tuples["n1"]
+        streamTuple2 := tuples["n2"]
+        if streamTuple1 == nil || streamTuple2 == nil {
+            fmt.Println("Should not get nil tuples here in Action! This is an error")
+        }
+        name1 := streamTuple1.GetString("name")
+        name2 := streamTuple2.GetString("name")
+        fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
     }
 
 ## Try it out
-* Check out the repo say at `/home/yourname/go` and set environment variable GOPATH to it
+* Check out the repo say at `/home/yourname/go` and set environment variable `$GOPATH` to it
 * Goto `github.com/TIBCOSoftware/bego` such that your path looks like this
 * `/home/yourname/go/src/github.com/TIBCOSoftware/bego`
 * Go to that the folder above and 

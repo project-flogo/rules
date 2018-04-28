@@ -14,8 +14,8 @@ func main() {
 	//Create Rule, define conditiond and set action callback
 	rule := ruleapi.NewRule("* Ensure n1.name is Bob and n2.name matches n1.name ie Bob in this case *")
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
-	rule.AddCondition("c1", []model.StreamSource{"n1"}, myFilterCondition)     // check for name "Bob" in n1
-	rule.AddCondition("c2", []model.StreamSource{"n1", "n2"}, myJoinCondition) // match the "name" field in both tuples
+	rule.AddCondition("c1", []model.StreamSource{"n1"}, checkForBob)          // check for name "Bob" in n1
+	rule.AddCondition("c2", []model.StreamSource{"n1", "n2"}, checkSameNames) // match the "name" field in both tuples
 	//in effect, fire the rule when name field in both tuples in "Bob"
 	rule.SetActionFn(myActionFn)
 
@@ -44,9 +44,18 @@ func main() {
 	streamTuple4.SetString("name", "Bob")
 	ruleSession.Assert(streamTuple4)
 
+	//Retract them
+	ruleSession.Retract(streamTuple1)
+	ruleSession.Retract(streamTuple2)
+	ruleSession.Retract(streamTuple3)
+	ruleSession.Retract(streamTuple4)
+
+	//You may delete the rule
+	ruleSession.DeleteRule(rule.GetName())
+
 }
 
-func myFilterCondition(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+func checkForBob(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
 	//This conditions filters on name="Bob"
 	streamTuple := tuples["n1"]
 	if streamTuple == nil {
@@ -55,10 +64,9 @@ func myFilterCondition(ruleName string, condName string, tuples map[model.Stream
 	}
 	name := streamTuple.GetString("name")
 	return name == "Bob"
-
 }
 
-func myJoinCondition(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+func checkSameNames(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
 	// fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
 	streamTuple1 := tuples["n1"]
 	streamTuple2 := tuples["n2"]
@@ -68,7 +76,6 @@ func myJoinCondition(ruleName string, condName string, tuples map[model.StreamSo
 	}
 	name1 := streamTuple1.GetString("name")
 	name2 := streamTuple2.GetString("name")
-
 	return name1 == name2
 }
 
@@ -81,7 +88,5 @@ func myActionFn(ruleName string, tuples map[model.StreamSource]model.StreamTuple
 	}
 	name1 := streamTuple1.GetString("name")
 	name2 := streamTuple2.GetString("name")
-
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
-
 }
