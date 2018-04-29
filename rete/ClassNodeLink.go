@@ -1,6 +1,6 @@
 package rete
 
-//classNodeLink links the classNode to the rest of the rest of the Rule's network
+//classNodeLink links the classNode to the rest of the Rule's network
 type classNodeLink interface {
 	nodeLink
 	getIdentifier() Identifier

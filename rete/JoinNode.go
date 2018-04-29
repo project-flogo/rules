@@ -133,20 +133,6 @@ func (joinNodeImplVar *joinNodeImpl) String() string {
 		linkTo += strconv.Itoa(joinNodeImplVar.nodeLinkVar.getChild().getID())
 	}
 
-	// if joinNodeImplVar != nil {
-	// 	if joinNodeImplVar.nodeLink != nil {
-	// 		if joinNodeImplVar.nodeLink.getChild() != nil {
-
-	// 		} else {
-	// 			linkTo += "jn.nl.getchild is nil"
-	// 		}
-	// 	} else {
-	// 		linkTo += "jn.nl is nil"
-	// 	}
-	// } else {
-	// 	linkTo += "jn is nil"
-	// }
-
 	joinConditionStr := "nil"
 	joinConditionIdrsStr := "nil"
 	if joinNodeImplVar.conditionVar != nil {

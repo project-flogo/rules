@@ -5,7 +5,7 @@ import (
 	"github.com/TIBCOSoftware/bego/utils"
 )
 
-//classNode holds links to filer and join nodes eventually leading upto the rule node
+//classNode holds links to filter and join nodes eventually leading upto the rule node
 type classNode interface {
 	abstractNode
 	getName() string
