@@ -1,9 +1,9 @@
 package rete
 
-//Identifier An internal representation of a 'DataSource'
-type Identifier interface {
+//identifier An internal representation of a 'DataSource'
+type identifier interface {
 	getName() string
-	equals(Identifier) bool
+	equals(identifier) bool
 	String() string
 }
 
@@ -12,7 +12,7 @@ type identifierImpl struct {
 	// alias string
 }
 
-func newIdentifier(name string /* alias string */) Identifier {
+func newIdentifier(name string /* alias string */) identifier {
 	identifierImplVar := identifierImpl{}
 	identifierImplVar.initIdentifierImpl(name /*alias */)
 	return &identifierImplVar
@@ -26,7 +26,7 @@ func (identifierImplVar *identifierImpl) getName() string {
 	return identifierImplVar.name
 }
 
-func (identifierImplVar *identifierImpl) equals(other Identifier) bool {
+func (identifierImplVar *identifierImpl) equals(other identifier) bool {
 	return identifierImplVar.name == other.getName() /*&& identifierImplVar.alias == other.GetAlias()*/
 }
 

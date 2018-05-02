@@ -3,15 +3,15 @@ package rete
 //These set operations are used in building the rete network. See Network.buildNetwork
 
 //AppendIdentifiers ... Append identifiers from set2 to set1
-func AppendIdentifiers(set1 []Identifier, set2 []Identifier) []Identifier {
-	union := []Identifier{}
+func AppendIdentifiers(set1 []identifier, set2 []identifier) []identifier {
+	union := []identifier{}
 	union = append(union, set1...)
 	union = append(union, set2...)
 	return union
 }
 
 //ContainedByFirst ... true if second is a subset of first
-func ContainedByFirst(first []Identifier, second []Identifier) bool {
+func ContainedByFirst(first []identifier, second []identifier) bool {
 
 	if len(second) == 0 {
 		return true
@@ -35,21 +35,21 @@ func ContainedByFirst(first []Identifier, second []Identifier) bool {
 }
 
 //OtherTwoAreContainedByFirst ... true if second and third are part of first
-func OtherTwoAreContainedByFirst(first []Identifier, second []Identifier, third []Identifier) bool {
+func OtherTwoAreContainedByFirst(first []identifier, second []identifier, third []identifier) bool {
 	return ContainedByFirst(first, second) && ContainedByFirst(first, third)
 }
 
 //UnionIdentifiers ... union of the first and second sets
-func UnionIdentifiers(first []Identifier, second []Identifier) []Identifier {
-	union := []Identifier{}
+func UnionIdentifiers(first []identifier, second []identifier) []identifier {
+	union := []identifier{}
 	union = append(union, first...)
 	union = append(union, SecondMinusFirst(first, second)...)
 	return union
 }
 
 //SecondMinusFirst ... returns elements in the second that arent in the first
-func SecondMinusFirst(first []Identifier, second []Identifier) []Identifier {
-	minus := []Identifier{}
+func SecondMinusFirst(first []identifier, second []identifier) []identifier {
+	minus := []identifier{}
 outer:
 	for _, idrSecond := range second {
 		for _, idrFirst := range first {
@@ -63,8 +63,8 @@ outer:
 }
 
 //IntersectionIdentifiers .. intersection of the two sets
-func IntersectionIdentifiers(first []Identifier, second []Identifier) []Identifier {
-	intersect := []Identifier{}
+func IntersectionIdentifiers(first []identifier, second []identifier) []identifier {
+	intersect := []identifier{}
 	for _, idrSecond := range second {
 		for _, idrFirst := range first {
 			if idrSecond.equals(idrFirst) {
@@ -76,12 +76,12 @@ func IntersectionIdentifiers(first []Identifier, second []Identifier) []Identifi
 }
 
 //EqualSets ... compare two identifiers based on their contents
-func EqualSets(first []Identifier, second []Identifier) bool {
+func EqualSets(first []identifier, second []identifier) bool {
 	return len(SecondMinusFirst(first, second)) == 0 && len(SecondMinusFirst(first, second)) == 0
 }
 
 //GetIndex ... return the index of thisIdr in identifiers
-func GetIndex(identifiers []Identifier, thisIdr Identifier) int {
+func GetIndex(identifiers []identifier, thisIdr identifier) int {
 	for i, idr := range identifiers {
 		if idr.equals(thisIdr) {
 			return i
@@ -92,7 +92,7 @@ func GetIndex(identifiers []Identifier, thisIdr Identifier) int {
 }
 
 //IdentifiersToString Take a slice of Identifiers and return a string representation
-func IdentifiersToString(identifiers []Identifier) string {
+func IdentifiersToString(identifiers []identifier) string {
 	str := ""
 	for _, idr := range identifiers {
 		str += idr.String() + ", "

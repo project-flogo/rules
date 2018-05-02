@@ -5,7 +5,7 @@ import "github.com/TIBCOSoftware/bego/common/model"
 //condition ... is a rete condtion
 type condition interface {
 	getName() string
-	getIdentifiers() []Identifier
+	getIdentifiers() []identifier
 	// Eval([]model.StreamTuple) bool
 
 	//Stringer.String interface
@@ -17,7 +17,7 @@ type condition interface {
 type conditionImpl struct {
 	name        string
 	rule        Rule
-	identifiers []Identifier
+	identifiers []identifier
 	cfn         model.ConditionEvaluator
 }
 
@@ -38,7 +38,7 @@ func (conditionImplVar *conditionImpl) initConditionImpl(name string, rule Rule,
 	conditionImplVar.cfn = cfn
 }
 
-func (conditionImplVar *conditionImpl) getIdentifiers() []Identifier {
+func (conditionImplVar *conditionImpl) getIdentifiers() []identifier {
 	return conditionImplVar.identifiers
 }
 

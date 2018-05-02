@@ -62,8 +62,8 @@ func (reteNetworkImplVar *reteNetworkImpl) AddRule(rule Rule) int {
 	classNodeLinksOfRule := utils.NewArrayList()
 
 	if len(rule.GetConditions()) == 0 {
-		identifier := pickIdentifier(rule.GetIdentifiers())
-		reteNetworkImplVar.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, identifier, nil, nodeSet)
+		identifierVar := pickIdentifier(rule.GetIdentifiers())
+		reteNetworkImplVar.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, identifierVar, nil, nodeSet)
 	} else {
 		for i := 0; i < len(rule.GetConditions()); i++ {
 			if rule.GetConditions()[i].getIdentifiers() == nil || len(rule.GetConditions()[i].getIdentifiers()) == 0 {
@@ -174,8 +174,8 @@ func optimizeNetwork(key string, val interface{}, context []interface{}) {
 	}
 }
 
-func contains(nodeSet utils.ArrayList, identifier Identifier) bool {
-	identifiers := []Identifier{identifier}
+func contains(nodeSet utils.ArrayList, identifierVar identifier) bool {
+	identifiers := []identifier{identifierVar}
 	for i := 0; i < nodeSet.Len(); i++ {
 		node := nodeSet.Get(i).(node)
 		if ContainedByFirst(node.getIdentifiers(), identifiers) {
@@ -194,7 +194,7 @@ func (reteNetworkImplVar *reteNetworkImpl) buildNetwork(rule Rule, nodesOfRule u
 				//TODO: Re evaluate set later..
 
 				lastNode := node
-				//check conditions with no identifier
+				//check conditions with no identifierVar
 				for i := 0; i < conditionSetNoIdr.Len(); i++ {
 					conditionVar := conditionSetNoIdr.Get(i).(condition)
 					fNode := newFilterNode(node.getIdentifiers(), conditionVar)
@@ -336,11 +336,11 @@ func (reteNetworkImplVar *reteNetworkImpl) createJoinNodeFromSome(rule Rule, nod
 	return true
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) createClassFilterNode(rule Rule, nodesOfRule utils.ArrayList, classNodeLinksOfRule utils.ArrayList, identifier Identifier, conditionVar condition, nodeSet utils.ArrayList) filterNode {
-	identifiers := []Identifier{identifier}
-	classNodeVar := getClassNode(reteNetworkImplVar, identifier.getName())
+func (reteNetworkImplVar *reteNetworkImpl) createClassFilterNode(rule Rule, nodesOfRule utils.ArrayList, classNodeLinksOfRule utils.ArrayList, identifierVar identifier, conditionVar condition, nodeSet utils.ArrayList) filterNode {
+	identifiers := []identifier{identifierVar}
+	classNodeVar := getClassNode(reteNetworkImplVar, identifierVar.getName())
 	filterNodeVar := newFilterNode(identifiers, conditionVar)
-	classNodeLink := newClassNodeLink(classNodeVar, filterNodeVar, rule, identifier)
+	classNodeLink := newClassNodeLink(classNodeVar, filterNodeVar, rule, identifierVar)
 	classNodeVar.addClassNodeLink(classNodeLink)
 	nodesOfRule.Add(classNodeVar)
 	nodesOfRule.Add(filterNodeVar)
@@ -367,7 +367,7 @@ func (reteNetworkImplVar *reteNetworkImpl) createJoinNode(rule Rule, nodesOfRule
 	}
 }
 
-func findBestNode(nodeSet utils.ArrayList, matchIdentifiers []Identifier, notThis node) node {
+func findBestNode(nodeSet utils.ArrayList, matchIdentifiers []identifier, notThis node) node {
 	var foundNode node
 	foundNode = nil
 	foundIdr := 0
@@ -433,7 +433,7 @@ func (reteNetworkImplVar *reteNetworkImpl) String() string {
 	return str
 }
 
-func pickIdentifier(idrs []Identifier) Identifier {
+func pickIdentifier(idrs []identifier) identifier {
 	return idrs[0]
 }
 

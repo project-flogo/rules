@@ -11,16 +11,16 @@ type joinTable interface {
 type joinTableImpl struct {
 	id    int
 	table map[joinTableRow]joinTableRow
-	idr   []Identifier
+	idr   []identifier
 }
 
-func newJoinTable(identifiers []Identifier) joinTable {
+func newJoinTable(identifiers []identifier) joinTable {
 	jT := joinTableImpl{}
 	jT.initJoinTableImpl(identifiers)
 	return &jT
 }
 
-func (joinTableImplVar *joinTableImpl) initJoinTableImpl(identifiers []Identifier) {
+func (joinTableImplVar *joinTableImpl) initJoinTableImpl(identifiers []identifier) {
 	currentNodeID++
 	joinTableImplVar.id = currentNodeID
 	joinTableImplVar.idr = identifiers

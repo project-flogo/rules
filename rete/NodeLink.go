@@ -20,10 +20,10 @@ type nodeLinkImpl struct {
 	numIdentifiers int
 
 	parent    node
-	parentIds []Identifier
+	parentIds []identifier
 
 	child    node
-	childIds []Identifier
+	childIds []identifier
 
 	isRight bool
 	id      int

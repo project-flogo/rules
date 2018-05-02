@@ -11,7 +11,7 @@ type Rule interface {
 	GetName() string
 	GetID() int
 	GetConditions() []condition
-	GetIdentifiers() []Identifier
+	GetIdentifiers() []identifier
 	GetActionFn() model.ActionFunction
 	String() string
 }
@@ -26,7 +26,7 @@ type MutableRule interface {
 type ruleImpl struct {
 	id          int
 	name        string
-	identifiers []Identifier
+	identifiers []identifier
 	conditions  []condition
 	actionFn    model.ActionFunction
 }
@@ -56,7 +56,7 @@ func (ruleImplVar *ruleImpl) GetConditions() []condition {
 	return ruleImplVar.conditions
 }
 
-func (ruleImplVar *ruleImpl) GetIdentifiers() []Identifier {
+func (ruleImplVar *ruleImpl) GetIdentifiers() []identifier {
 	return ruleImplVar.identifiers
 }
 
@@ -74,7 +74,7 @@ func (ruleImplVar *ruleImpl) AddCondition(conditionName string, idrs []model.Str
 	return c
 }
 
-func (ruleImplVar *ruleImpl) addIdentifier(identifierName string) Identifier {
+func (ruleImplVar *ruleImpl) addIdentifier(identifierName string) identifier {
 
 	idrNew := newIdentifier(identifierName)
 	//TODO: Optimize this, perhaps using a map (need it to be ordered)

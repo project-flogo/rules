@@ -10,33 +10,33 @@ import (
 //node a building block of the rete network
 type node interface {
 	abstractNode
-	getIdentifiers() []Identifier
+	getIdentifiers() []identifier
 	getID() int
 	addNodeLink(nodeLink)
 	assertObjects(handles []reteHandle, isRight bool)
 }
 
 type nodeImpl struct {
-	identifiers []Identifier
+	identifiers []identifier
 	nodeLinkVar nodeLink
 	id          int
 }
 
 //NewNode ... returns a new node
-func newNode(identifiers []Identifier) node {
+func newNode(identifiers []identifier) node {
 	nodeImplVar := nodeImpl{}
 	nodeImplVar.initNodeImpl(identifiers)
 	return &nodeImplVar
 }
 
-func (nodeImplVar *nodeImpl) initNodeImpl(identifiers []Identifier) {
+func (nodeImplVar *nodeImpl) initNodeImpl(identifiers []identifier) {
 	currentNodeID++
 	nodeImplVar.id = currentNodeID
 
 	nodeImplVar.identifiers = identifiers
 }
 
-func (nodeImplVar *nodeImpl) getIdentifiers() []Identifier {
+func (nodeImplVar *nodeImpl) getIdentifiers() []identifier {
 	return nodeImplVar.identifiers
 }
 

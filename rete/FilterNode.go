@@ -18,13 +18,13 @@ type filterNodeImpl struct {
 }
 
 //NewFilterNode ... C'tor
-func newFilterNode(identifiers []Identifier, conditionVar condition) filterNode {
+func newFilterNode(identifiers []identifier, conditionVar condition) filterNode {
 	filterNodeImplVar := filterNodeImpl{}
 	filterNodeImplVar.initFilterNodeImpl(identifiers, conditionVar)
 	return &filterNodeImplVar
 }
 
-func (filterNodeImplVar *filterNodeImpl) initFilterNodeImpl(identifiers []Identifier, conditionVar condition) {
+func (filterNodeImplVar *filterNodeImpl) initFilterNodeImpl(identifiers []identifier, conditionVar condition) {
 	filterNodeImplVar.nodeImpl.initNodeImpl(identifiers)
 	filterNodeImplVar.conditionVar = conditionVar
 	filterNodeImplVar.setConvert()

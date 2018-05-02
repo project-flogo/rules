@@ -13,8 +13,8 @@ type joinNodeImpl struct {
 	nodeImpl
 	conditionVar condition
 
-	leftIdrs  []Identifier
-	rightIdrs []Identifier
+	leftIdrs  []identifier
+	rightIdrs []identifier
 
 	leftIdrLen  int
 	rightIdrLen int
@@ -27,13 +27,13 @@ type joinNodeImpl struct {
 	rightTable joinTable
 }
 
-func newJoinNode(leftIdrs []Identifier, rightIdrs []Identifier, conditionVar condition) joinNode {
+func newJoinNode(leftIdrs []identifier, rightIdrs []identifier, conditionVar condition) joinNode {
 	joinNodeImplVar := joinNodeImpl{}
 	joinNodeImplVar.initjoinNodeImplVar(leftIdrs, rightIdrs, conditionVar)
 	return &joinNodeImplVar
 }
 
-func (joinNodeImplVar *joinNodeImpl) initjoinNodeImplVar(leftIdrs []Identifier, rightIdrs []Identifier, conditionVar condition) {
+func (joinNodeImplVar *joinNodeImpl) initjoinNodeImplVar(leftIdrs []identifier, rightIdrs []identifier, conditionVar condition) {
 	joinNodeImplVar.initNodeImpl(nil)
 	joinNodeImplVar.leftIdrs = leftIdrs
 	joinNodeImplVar.rightIdrs = rightIdrs
@@ -43,11 +43,11 @@ func (joinNodeImplVar *joinNodeImpl) initjoinNodeImplVar(leftIdrs []Identifier, 
 	joinNodeImplVar.setJoinIdentifiers()
 }
 
-func (joinNodeImplVar *joinNodeImpl) GetLeftIdentifiers() []Identifier {
+func (joinNodeImplVar *joinNodeImpl) GetLeftIdentifiers() []identifier {
 	return joinNodeImplVar.leftIdrs
 }
 
-func (joinNodeImplVar *joinNodeImpl) GetRightIdentifiers() []Identifier {
+func (joinNodeImplVar *joinNodeImpl) GetRightIdentifiers() []identifier {
 	return joinNodeImplVar.rightIdrs
 }
 
@@ -56,7 +56,7 @@ func (joinNodeImplVar *joinNodeImpl) setJoinIdentifiers() {
 	joinNodeImplVar.rightIdrLen = len(joinNodeImplVar.rightIdrs)
 	joinNodeImplVar.totalIdrLen = joinNodeImplVar.leftIdrLen + joinNodeImplVar.rightIdrLen
 
-	joinNodeImplVar.identifiers = make([]Identifier, joinNodeImplVar.totalIdrLen)
+	joinNodeImplVar.identifiers = make([]identifier, joinNodeImplVar.totalIdrLen)
 
 	joinNodeImplVar.joinIndexForLeft = make([]int, joinNodeImplVar.leftIdrLen)
 	joinNodeImplVar.joinIndexForRight = make([]int, joinNodeImplVar.rightIdrLen)
@@ -140,10 +140,10 @@ func (joinNodeImplVar *joinNodeImpl) String() string {
 		joinConditionIdrsStr = IdentifiersToString(joinNodeImplVar.conditionVar.getIdentifiers())
 	}
 	return "\t[JoinNode(" + joinNodeImplVar.nodeImpl.String() + ") link(" + linkTo + ")\n" +
-		"\t\tLeft Identifier      = " + IdentifiersToString(joinNodeImplVar.leftIdrs) + ";\n" +
-		"\t\tRight Identifier     = " + IdentifiersToString(joinNodeImplVar.rightIdrs) + ";\n" +
-		"\t\tOut Identifier       = " + IdentifiersToString(joinNodeImplVar.identifiers) + ";\n" +
-		"\t\tCondition Identifier = " + joinConditionIdrsStr + ";\n" +
+		"\t\tLeft identifier      = " + IdentifiersToString(joinNodeImplVar.leftIdrs) + ";\n" +
+		"\t\tRight identifier     = " + IdentifiersToString(joinNodeImplVar.rightIdrs) + ";\n" +
+		"\t\tOut identifier       = " + IdentifiersToString(joinNodeImplVar.identifiers) + ";\n" +
+		"\t\tCondition identifier = " + joinConditionIdrsStr + ";\n" +
 		"\t\tJoin Left Index      = " + joinIdsForLeftStr + ";\n" +
 		"\t\tJoin Right Index     = " + joinIdsForRightStr + ";\n" +
 		"\t\tCondition            = " + joinConditionStr + "]\n"
