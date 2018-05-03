@@ -17,7 +17,7 @@ func TestIdentifier(t *testing.T) {
 		fmt.Printf("yes they are NOT equal!")
 	}
 
-	ids := []Identifier{i1, i2}
+	ids := []identifier{i1, i2}
 
 	node := newNode(ids)
 

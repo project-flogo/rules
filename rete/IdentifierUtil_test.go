@@ -13,8 +13,8 @@ func TestIdentifierUtils(t *testing.T) {
 
 }
 func first(t *testing.T) {
-	first := []Identifier{newIdentifier("1"), newIdentifier("2")}
-	second := []Identifier{newIdentifier("1"), newIdentifier("2")}
+	first := []identifier{newIdentifier("1"), newIdentifier("2")}
+	second := []identifier{newIdentifier("1"), newIdentifier("2")}
 	if len(UnionIdentifiers(first, second)) != 2 {
 		t.Error("Failed")
 	}
@@ -34,14 +34,11 @@ func first(t *testing.T) {
 	if GetIndex(first, newIdentifier("2")) != 1 {
 		t.Error("Failed")
 	}
-	if GetIndex(first, newIdentifier("2")) != -1 {
-		t.Error("Failed")
-	}
 }
 
 func second(t *testing.T) {
-	first := []Identifier{newIdentifier("1")}
-	second := []Identifier{newIdentifier("1"), newIdentifier("2")}
+	first := []identifier{newIdentifier("1")}
+	second := []identifier{newIdentifier("1"), newIdentifier("2")}
 	if len(UnionIdentifiers(first, second)) != 2 {
 		t.Error("Failed")
 	}
@@ -57,8 +54,8 @@ func second(t *testing.T) {
 }
 
 func third(t *testing.T) {
-	first := []Identifier{newIdentifier("1"), newIdentifier("2")}
-	second := []Identifier{newIdentifier("1")}
+	first := []identifier{newIdentifier("1"), newIdentifier("2")}
+	second := []identifier{newIdentifier("1")}
 	if len(UnionIdentifiers(first, second)) != 2 {
 		t.Error("Failed")
 	}
@@ -74,9 +71,9 @@ func third(t *testing.T) {
 }
 
 func fourth(t *testing.T) {
-	first := []Identifier{newIdentifier("1"), newIdentifier("2")}
-	second := []Identifier{newIdentifier("1"), newIdentifier("2")}
-	third := []Identifier{newIdentifier("1"), newIdentifier("2"),
+	first := []identifier{newIdentifier("1"), newIdentifier("2")}
+	second := []identifier{newIdentifier("1"), newIdentifier("2")}
+	third := []identifier{newIdentifier("1"), newIdentifier("2"),
 		newIdentifier("3")}
 
 	if OtherTwoAreContainedByFirst(first, second, third) {
