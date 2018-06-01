@@ -30,58 +30,58 @@ type nodeLinkImpl struct {
 }
 
 func newNodeLink(parent node, child node, isRight bool) nodeLink {
-	nodeLinkImplVar := nodeLinkImpl{}
-	nodeLinkImplVar.initNodeLink(parent, child, isRight)
-	return &nodeLinkImplVar
+	nl := nodeLinkImpl{}
+	nl.initNodeLink(parent, child, isRight)
+	return &nl
 }
 
-func (nodeLinkImplVar *nodeLinkImpl) initNodeLink(parent node, child node, isRight bool) {
-	nodeLinkImplVar.id = currentNodeID
-	nodeLinkImplVar.child = child
-	nodeLinkImplVar.isRight = isRight
+func (nl *nodeLinkImpl) initNodeLink(parent node, child node, isRight bool) {
+	nl.id = currentNodeID
+	nl.child = child
+	nl.isRight = isRight
 
 	switch v := child.(type) {
 
 	case *joinNodeImpl:
 		if isRight {
-			nodeLinkImplVar.childIds = v.rightIdrs
+			nl.childIds = v.rightIdrs
 		} else {
-			nodeLinkImplVar.childIds = v.leftIdrs
+			nl.childIds = v.leftIdrs
 		}
 	case *nodeImpl:
-		nodeLinkImplVar.childIds = v.identifiers
+		nl.childIds = v.identifiers
 	}
-	nodeLinkImplVar.parent = parent
-	nodeLinkImplVar.setConvert()
-	parent.addNodeLink(nodeLinkImplVar)
+	nl.parent = parent
+	nl.setConvert()
+	parent.addNodeLink(nl)
 }
 
 //initialize node link : for use with ClassNodeLink
-func initClassNodeLink(nodeLinkImplVar *nodeLinkImpl, child node) {
+func initClassNodeLink(nl *nodeLinkImpl, child node) {
 	currentNodeID++
-	nodeLinkImplVar.id = currentNodeID
-	nodeLinkImplVar.child = child
-	nodeLinkImplVar.childIds = child.getIdentifiers()
+	nl.id = currentNodeID
+	nl.child = child
+	nl.childIds = child.getIdentifiers()
 }
 
-func (nodeLinkImplVar *nodeLinkImpl) getChild() node {
-	return nodeLinkImplVar.child
+func (nl *nodeLinkImpl) getChild() node {
+	return nl.child
 }
 
-func (nodeLinkImplVar *nodeLinkImpl) setConvert() {
+func (nl *nodeLinkImpl) setConvert() {
 
-	if len(nodeLinkImplVar.parentIds) != len(nodeLinkImplVar.childIds) {
+	if len(nl.parentIds) != len(nl.childIds) {
 		//TODO: ERROR handling
 	}
-	nodeLinkImplVar.numIdentifiers = len(nodeLinkImplVar.parentIds)
-	nodeLinkImplVar.convert = make([]int, nodeLinkImplVar.numIdentifiers)
+	nl.numIdentifiers = len(nl.parentIds)
+	nl.convert = make([]int, nl.numIdentifiers)
 
-	for i := 0; i < nodeLinkImplVar.numIdentifiers; i++ {
+	for i := 0; i < nl.numIdentifiers; i++ {
 		found := false
-		for j := 0; j < nodeLinkImplVar.numIdentifiers; j++ {
-			if nodeLinkImplVar.parentIds[i].equals(nodeLinkImplVar.childIds[j]) {
+		for j := 0; j < nl.numIdentifiers; j++ {
+			if nl.parentIds[i].equals(nl.childIds[j]) {
 				found = true
-				nodeLinkImplVar.convert[i] = j
+				nl.convert[i] = j
 				break
 			}
 		}
@@ -91,50 +91,50 @@ func (nodeLinkImplVar *nodeLinkImpl) setConvert() {
 	}
 
 	need := false
-	for i := 0; i < nodeLinkImplVar.numIdentifiers; i++ {
-		if nodeLinkImplVar.convert[i] != i {
+	for i := 0; i < nl.numIdentifiers; i++ {
+		if nl.convert[i] != i {
 			need = true
 			break
 		}
 	}
 	if !need {
-		nodeLinkImplVar.convert = nil
+		nl.convert = nil
 	}
 }
 
-func (nodeLinkImplVar *nodeLinkImpl) String() string {
+func (nl *nodeLinkImpl) String() string {
 	nextNode := ""
-	switch nodeLinkImplVar.child.(type) {
+	switch nl.child.(type) {
 	case *joinNodeImpl:
-		if nodeLinkImplVar.isRight {
-			nextNode += "j" + strconv.Itoa(nodeLinkImplVar.child.getID()) + "R"
+		if nl.isRight {
+			nextNode += "j" + strconv.Itoa(nl.child.getID()) + "R"
 		} else {
-			nextNode += "j" + strconv.Itoa(nodeLinkImplVar.child.getID()) + "L"
+			nextNode += "j" + strconv.Itoa(nl.child.getID()) + "L"
 		}
 	case *filterNodeImpl:
-		nextNode += "f" + strconv.Itoa(nodeLinkImplVar.child.getID())
+		nextNode += "f" + strconv.Itoa(nl.child.getID())
 	}
 	return "link (" + nextNode + ")"
 }
 
-func (nodeLinkImplVar *nodeLinkImpl) isRightNode() bool {
-	return nodeLinkImplVar.isRight
+func (nl *nodeLinkImpl) isRightNode() bool {
+	return nl.isRight
 }
 
-func (nodeLinkImplVar *nodeLinkImpl) setChild(child node) {
-	nodeLinkImplVar.child = child
+func (nl *nodeLinkImpl) setChild(child node) {
+	nl.child = child
 }
-func (nodeLinkImplVar *nodeLinkImpl) setIsRightChild(isRight bool) {
-	nodeLinkImplVar.isRight = isRight
+func (nl *nodeLinkImpl) setIsRightChild(isRight bool) {
+	nl.isRight = isRight
 }
 
-func (nodeLinkImplVar *nodeLinkImpl) propagateObjects(handles []reteHandle) {
-	if nodeLinkImplVar.convert != nil {
-		convertedHandles := make([]reteHandle, nodeLinkImplVar.numIdentifiers)
-		for i := 0; i < nodeLinkImplVar.numIdentifiers; i++ {
-			convertedHandles[nodeLinkImplVar.convert[i]] = handles[i]
+func (nl *nodeLinkImpl) propagateObjects(handles []reteHandle) {
+	if nl.convert != nil {
+		convertedHandles := make([]reteHandle, nl.numIdentifiers)
+		for i := 0; i < nl.numIdentifiers; i++ {
+			convertedHandles[nl.convert[i]] = handles[i]
 		}
 		handles = convertedHandles
 	}
-	nodeLinkImplVar.child.assertObjects(handles, nodeLinkImplVar.isRightNode())
+	nl.child.assertObjects(handles, nl.isRightNode())
 }

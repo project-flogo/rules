@@ -40,16 +40,16 @@ func NewReteNetwork() Network {
 	return &reteNetworkImpl
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) initReteNetwork() {
-	reteNetworkImplVar.allRules = utils.NewHashMap()
-	reteNetworkImplVar.allClassNodes = utils.NewHashMap()
-	reteNetworkImplVar.ruleNameNodesOfRule = utils.NewHashMap()
-	reteNetworkImplVar.ruleNameClassNodeLinksOfRule = utils.NewHashMap()
+func (nw *reteNetworkImpl) initReteNetwork() {
+	nw.allRules = utils.NewHashMap()
+	nw.allClassNodes = utils.NewHashMap()
+	nw.ruleNameNodesOfRule = utils.NewHashMap()
+	nw.ruleNameClassNodeLinksOfRule = utils.NewHashMap()
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) AddRule(rule Rule) int {
+func (nw *reteNetworkImpl) AddRule(rule Rule) int {
 
-	if reteNetworkImplVar.allRules.Get(rule.GetName()) != nil {
+	if nw.allRules.Get(rule.GetName()) != nil {
 		fmt.Println("Rule already exists.." + rule.GetName())
 		return 1
 	}
@@ -63,7 +63,7 @@ func (reteNetworkImplVar *reteNetworkImpl) AddRule(rule Rule) int {
 
 	if len(rule.GetConditions()) == 0 {
 		identifierVar := pickIdentifier(rule.GetIdentifiers())
-		reteNetworkImplVar.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, identifierVar, nil, nodeSet)
+		nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, identifierVar, nil, nodeSet)
 	} else {
 		for i := 0; i < len(rule.GetConditions()); i++ {
 			if rule.GetConditions()[i].getIdentifiers() == nil || len(rule.GetConditions()[i].getIdentifiers()) == 0 {
@@ -72,55 +72,55 @@ func (reteNetworkImplVar *reteNetworkImpl) AddRule(rule Rule) int {
 			} else if len(rule.GetConditions()[i].getIdentifiers()) == 1 &&
 				!contains(nodeSet, rule.GetConditions()[i].getIdentifiers()[0]) {
 				cond := rule.GetConditions()[i]
-				reteNetworkImplVar.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, cond.getIdentifiers()[0], cond, nodeSet)
+				nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, cond.getIdentifiers()[0], cond, nodeSet)
 			} else {
 				conditionSet.Add(rule.GetConditions()[i])
 			}
 		}
 	}
 
-	reteNetworkImplVar.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
+	nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
 
 	context := make([]interface{}, 2)
-	context[0] = reteNetworkImplVar
+	context[0] = nw
 	context[1] = nodesOfRule
 
-	reteNetworkImplVar.allClassNodes.ForEach(optimizeNetwork, context)
-	// reteNetworkImplVar.optimizeNetwork(nodesOfRule)
+	nw.allClassNodes.ForEach(optimizeNetwork, context)
+	// nw.optimizeNetwork(nodesOfRule)
 
-	reteNetworkImplVar.setClassNodeAndLinkJoinTables(nodesOfRule, classNodeLinksOfRule)
+	nw.setClassNodeAndLinkJoinTables(nodesOfRule, classNodeLinksOfRule)
 
 	//Add the rule to the network
-	reteNetworkImplVar.allRules.Put(rule.GetName(), rule)
+	nw.allRules.Put(rule.GetName(), rule)
 
 	//Add RuleNodes
-	reteNetworkImplVar.ruleNameNodesOfRule.Put(rule.GetName(), nodesOfRule)
+	nw.ruleNameNodesOfRule.Put(rule.GetName(), nodesOfRule)
 
 	//Add NodeLinks
-	reteNetworkImplVar.ruleNameClassNodeLinksOfRule.Put(rule.GetName(), classNodeLinksOfRule)
+	nw.ruleNameClassNodeLinksOfRule.Put(rule.GetName(), classNodeLinksOfRule)
 	return 0
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) setClassNodeAndLinkJoinTables(nodesOfRule utils.ArrayList,
+func (nw *reteNetworkImpl) setClassNodeAndLinkJoinTables(nodesOfRule utils.ArrayList,
 	classNodeLinksOfRule utils.ArrayList) {
 	//TODO: add join table ids to nodes and links
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) RemoveRule(ruleName string) Rule {
+func (nw *reteNetworkImpl) RemoveRule(ruleName string) Rule {
 
-	val := reteNetworkImplVar.allRules.Remove(ruleName)
+	val := nw.allRules.Remove(ruleName)
 	if val == nil {
 		//TODO: log a message
 		return nil
 	}
 	rule := val.(Rule)
 
-	classNodeLinksOfRule := reteNetworkImplVar.ruleNameClassNodeLinksOfRule.Remove(ruleName).(utils.ArrayList)
+	classNodeLinksOfRule := nw.ruleNameClassNodeLinksOfRule.Remove(ruleName).(utils.ArrayList)
 	if classNodeLinksOfRule != nil {
 		classNodeLinksOfRule.ForEach(removeRuleHelper, nil)
 	}
 
-	nodesOfRuleItem := reteNetworkImplVar.ruleNameNodesOfRule.Remove(ruleName)
+	nodesOfRuleItem := nw.ruleNameNodesOfRule.Remove(ruleName)
 	if nodesOfRuleItem != nil {
 		nodesOfRule := nodesOfRuleItem.(utils.ArrayList)
 		for i := 0; i < nodesOfRule.Len(); i++ {
@@ -137,7 +137,7 @@ func (reteNetworkImplVar *reteNetworkImpl) RemoveRule(ruleName string) Rule {
 		}
 	}
 
-	reteNetworkImplVar.ruleNameNodesOfRule.Remove(ruleName)
+	nw.ruleNameNodesOfRule.Remove(ruleName)
 	return rule
 }
 
@@ -185,7 +185,7 @@ func contains(nodeSet utils.ArrayList, identifierVar identifier) bool {
 	return false
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) buildNetwork(rule Rule, nodesOfRule utils.ArrayList, classNodeLinksOfRule utils.ArrayList,
+func (nw *reteNetworkImpl) buildNetwork(rule Rule, nodesOfRule utils.ArrayList, classNodeLinksOfRule utils.ArrayList,
 	conditionSet utils.ArrayList, nodeSet utils.ArrayList, conditionSetNoIdr utils.ArrayList) {
 	if conditionSet.Len() == 0 {
 		if nodeSet.Len() == 1 {
@@ -208,31 +208,31 @@ func (reteNetworkImplVar *reteNetworkImpl) buildNetwork(rule Rule, nodesOfRule u
 				nodesOfRule.Add(ruleNode)
 			} else {
 				idrs := SecondMinusFirst(node.getIdentifiers(), rule.GetIdentifiers())
-				fNode := reteNetworkImplVar.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, idrs[0], nil, nodeSet)
-				reteNetworkImplVar.createJoinNode(rule, nodesOfRule, node, fNode, nil, conditionSet, nodeSet)
-				reteNetworkImplVar.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
+				fNode := nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, idrs[0], nil, nodeSet)
+				nw.createJoinNode(rule, nodesOfRule, node, fNode, nil, conditionSet, nodeSet)
+				nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
 			}
 		} else {
 			nodes := findSimilarNodes(nodeSet)
-			reteNetworkImplVar.createJoinNode(rule, nodesOfRule, nodes[0], nodes[1], nil, conditionSet, nodeSet)
-			reteNetworkImplVar.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
+			nw.createJoinNode(rule, nodesOfRule, nodes[0], nodes[1], nil, conditionSet, nodeSet)
+			nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
 		}
 	} else {
-		if reteNetworkImplVar.createFilterNode(rule, nodesOfRule, conditionSet, nodeSet) {
-			reteNetworkImplVar.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
-		} else if reteNetworkImplVar.createJoinNodeFromExisting(rule, nodesOfRule, conditionSet, nodeSet) {
-			reteNetworkImplVar.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
-		} else if reteNetworkImplVar.createJoinNodeFromSome(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet) {
-			reteNetworkImplVar.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
+		if nw.createFilterNode(rule, nodesOfRule, conditionSet, nodeSet) {
+			nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
+		} else if nw.createJoinNodeFromExisting(rule, nodesOfRule, conditionSet, nodeSet) {
+			nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
+		} else if nw.createJoinNodeFromSome(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet) {
+			nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
 		} else {
-			conditionVar := reteNetworkImplVar.findConditionWithLeastIdentifiers(conditionSet)
-			reteNetworkImplVar.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, conditionVar.getIdentifiers()[0], nil, nodeSet)
-			reteNetworkImplVar.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
+			conditionVar := nw.findConditionWithLeastIdentifiers(conditionSet)
+			nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, conditionVar.getIdentifiers()[0], nil, nodeSet)
+			nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
 		}
 	}
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) createFilterNode(rule Rule, nodesOfRule utils.ArrayList, conditionSet utils.ArrayList, nodeSet utils.ArrayList) bool {
+func (nw *reteNetworkImpl) createFilterNode(rule Rule, nodesOfRule utils.ArrayList, conditionSet utils.ArrayList, nodeSet utils.ArrayList) bool {
 	for i := 0; i < conditionSet.Len(); i++ {
 		conditionVar := conditionSet.Get(i).(condition)
 		for i := 0; i < nodeSet.Len(); i++ {
@@ -252,7 +252,7 @@ func (reteNetworkImplVar *reteNetworkImpl) createFilterNode(rule Rule, nodesOfRu
 	return false
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) createJoinNodeFromExisting(rule Rule, nodesOfRule utils.ArrayList, conditionSet utils.ArrayList, nodeSet utils.ArrayList) bool {
+func (nw *reteNetworkImpl) createJoinNodeFromExisting(rule Rule, nodesOfRule utils.ArrayList, conditionSet utils.ArrayList, nodeSet utils.ArrayList) bool {
 	maxCommonIdr := -1
 	numOfIdentifiers := 0
 	joinThese := make([]node, 2)
@@ -284,7 +284,7 @@ func (reteNetworkImplVar *reteNetworkImpl) createJoinNodeFromExisting(rule Rule,
 			}
 		}
 		if maxCommonIdr != -1 {
-			reteNetworkImplVar.createJoinNode(rule, nodesOfRule, joinThese[0], joinThese[1], targetCondition, conditionSet, nodeSet)
+			nw.createJoinNode(rule, nodesOfRule, joinThese[0], joinThese[1], targetCondition, conditionSet, nodeSet)
 			return true
 		}
 	}
@@ -292,7 +292,7 @@ func (reteNetworkImplVar *reteNetworkImpl) createJoinNodeFromExisting(rule Rule,
 	return false
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) createJoinNodeFromSome(rule Rule, nodesOfRule utils.ArrayList,
+func (nw *reteNetworkImpl) createJoinNodeFromSome(rule Rule, nodesOfRule utils.ArrayList,
 	classNodeLinksOfRule utils.ArrayList, conditionSet utils.ArrayList, nodeSet utils.ArrayList) bool {
 	leastNeeded := math.MaxUint32
 	maxIdentifier := -1
@@ -322,23 +322,23 @@ func (reteNetworkImplVar *reteNetworkImpl) createJoinNodeFromSome(rule Rule, nod
 	}
 	nodeIdentifiers := SecondMinusFirst(targetNode.getIdentifiers(), targetCondition.getIdentifiers())
 	if leastNeeded == 1 {
-		filterNode := reteNetworkImplVar.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, nodeIdentifiers[0], nil, nodeSet)
-		reteNetworkImplVar.createJoinNode(rule, nodesOfRule, targetNode, filterNode, targetCondition, conditionSet, nodeSet)
+		filterNode := nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, nodeIdentifiers[0], nil, nodeSet)
+		nw.createJoinNode(rule, nodesOfRule, targetNode, filterNode, targetCondition, conditionSet, nodeSet)
 	} else {
 		useThis := findBestNode(nodeSet, nodeIdentifiers, targetNode)
 		if useThis == nil {
-			reteNetworkImplVar.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, nodeIdentifiers[0], nil, nodeSet)
+			nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, nodeIdentifiers[0], nil, nodeSet)
 		} else {
-			reteNetworkImplVar.createJoinNode(rule, nodesOfRule, targetNode, useThis, nil, conditionSet, nodeSet)
+			nw.createJoinNode(rule, nodesOfRule, targetNode, useThis, nil, conditionSet, nodeSet)
 		}
 	}
 
 	return true
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) createClassFilterNode(rule Rule, nodesOfRule utils.ArrayList, classNodeLinksOfRule utils.ArrayList, identifierVar identifier, conditionVar condition, nodeSet utils.ArrayList) filterNode {
+func (nw *reteNetworkImpl) createClassFilterNode(rule Rule, nodesOfRule utils.ArrayList, classNodeLinksOfRule utils.ArrayList, identifierVar identifier, conditionVar condition, nodeSet utils.ArrayList) filterNode {
 	identifiers := []identifier{identifierVar}
-	classNodeVar := getClassNode(reteNetworkImplVar, identifierVar.getName())
+	classNodeVar := getClassNode(nw, identifierVar.getName())
 	filterNodeVar := newFilterNode(identifiers, conditionVar)
 	classNodeLink := newClassNodeLink(classNodeVar, filterNodeVar, rule, identifierVar)
 	classNodeVar.addClassNodeLink(classNodeLink)
@@ -350,7 +350,7 @@ func (reteNetworkImplVar *reteNetworkImpl) createClassFilterNode(rule Rule, node
 	return filterNodeVar
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) createJoinNode(rule Rule, nodesOfRule utils.ArrayList, leftNode node, rightNode node, joinCondition condition, conditionSet utils.ArrayList, nodeSet utils.ArrayList) {
+func (nw *reteNetworkImpl) createJoinNode(rule Rule, nodesOfRule utils.ArrayList, leftNode node, rightNode node, joinCondition condition, conditionSet utils.ArrayList, nodeSet utils.ArrayList) {
 
 	//TODO handle equivJoins later..
 
@@ -386,7 +386,7 @@ func findBestNode(nodeSet utils.ArrayList, matchIdentifiers []identifier, notThi
 	return foundNode
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) findConditionWithLeastIdentifiers(conditionSet utils.ArrayList) condition {
+func (nw *reteNetworkImpl) findConditionWithLeastIdentifiers(conditionSet utils.ArrayList) condition {
 	least := math.MaxUint16
 	var leastIdentifiers condition
 	for i := 0; i < conditionSet.Len(); i++ {
@@ -403,31 +403,31 @@ func (reteNetworkImplVar *reteNetworkImpl) findConditionWithLeastIdentifiers(con
 	return leastIdentifiers
 }
 
-func getClassNode(reteNetworkImplVar *reteNetworkImpl, name string) classNode {
+func getClassNode(nw *reteNetworkImpl, name string) classNode {
 	var classNodeVar classNode
-	val := reteNetworkImplVar.allClassNodes.Get(name)
+	val := nw.allClassNodes.Get(name)
 	if val == nil {
 		classNodeVar = newClassNode(name)
-		reteNetworkImplVar.allClassNodes.Put(name, classNodeVar)
+		nw.allClassNodes.Put(name, classNodeVar)
 	} else {
 		classNodeVar = val.(classNode)
 	}
 	return classNodeVar
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) String() string {
+func (nw *reteNetworkImpl) String() string {
 
 	str := "\n>>> Class View <<<\n"
 
-	for _, val := range reteNetworkImplVar.allClassNodes.GetMap() {
+	for _, val := range nw.allClassNodes.GetMap() {
 		classNodeImpl := val.(classNode)
 		str += classNodeImpl.String() + "\n"
 	}
 	str += ">>>> Rule View <<<<\n"
 
-	for _, val := range reteNetworkImplVar.allRules.GetMap() {
+	for _, val := range nw.allRules.GetMap() {
 		rule := val.(Rule)
-		str += reteNetworkImplVar.PrintRule(rule)
+		str += nw.PrintRule(rule)
 	}
 
 	return str
@@ -437,10 +437,10 @@ func pickIdentifier(idrs []identifier) identifier {
 	return idrs[0]
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) PrintRule(rule Rule) string {
+func (nw *reteNetworkImpl) PrintRule(rule Rule) string {
 	str := "[Rule (" + rule.GetName() + ") Id(" + strconv.Itoa(rule.GetID()) + ")]\n"
 
-	nodesOfRule := reteNetworkImplVar.ruleNameNodesOfRule.Get(rule.GetName()).(utils.ArrayList)
+	nodesOfRule := nw.ruleNameNodesOfRule.Get(rule.GetName()).(utils.ArrayList)
 
 	for i := 0; i < nodesOfRule.Len(); i++ {
 		node := nodesOfRule.Get(i).(abstractNode)
@@ -450,7 +450,7 @@ func (reteNetworkImplVar *reteNetworkImpl) PrintRule(rule Rule) string {
 		case *joinNodeImpl:
 			str += nodeImpl.String()
 		case *classNodeImpl:
-			str += reteNetworkImplVar.printClassNode(rule.GetName(), nodeImpl)
+			str += nw.printClassNode(rule.GetName(), nodeImpl)
 		case *ruleNodeImpl:
 			str += nodeImpl.String()
 		}
@@ -459,8 +459,8 @@ func (reteNetworkImplVar *reteNetworkImpl) PrintRule(rule Rule) string {
 	return str
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classNodeImpl) string {
-	classNodesLinksOfRule := reteNetworkImplVar.ruleNameClassNodeLinksOfRule.Get(ruleName).(utils.ArrayList)
+func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classNodeImpl) string {
+	classNodesLinksOfRule := nw.ruleNameClassNodeLinksOfRule.Get(ruleName).(utils.ArrayList)
 	links := ""
 	for i := 0; i < classNodesLinksOfRule.Len(); i++ {
 		classNodeLinkOfRule := classNodesLinksOfRule.Get(i).(classNodeLink)
@@ -471,9 +471,9 @@ func (reteNetworkImplVar *reteNetworkImpl) printClassNode(ruleName string, class
 	return "\t[ClassNode Class(" + classNodeImpl.getName() + ")" + links + "]\n"
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) Assert(tuple model.StreamTuple) {
+func (nw *reteNetworkImpl) Assert(tuple model.StreamTuple) {
 	dataSource := tuple.GetStreamDataSource()
-	listItem := reteNetworkImplVar.allClassNodes.Get(string(dataSource))
+	listItem := nw.allClassNodes.Get(string(dataSource))
 	if listItem != nil {
 		classNodeVar := listItem.(classNode)
 		classNodeVar.assert(tuple)
@@ -482,7 +482,7 @@ func (reteNetworkImplVar *reteNetworkImpl) Assert(tuple model.StreamTuple) {
 	}
 }
 
-func (reteNetworkImplVar *reteNetworkImpl) Retract(tuple model.StreamTuple) {
+func (nw *reteNetworkImpl) Retract(tuple model.StreamTuple) {
 
 	reteHandle := allHandles[tuple]
 	if reteHandle == nil {

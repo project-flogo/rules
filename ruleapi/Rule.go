@@ -25,37 +25,37 @@ type ruleImpl struct {
 
 //NewRule ... Create a new rule
 func NewRule(name string) MutableRule {
-	ruleImplVar := ruleImpl{}
-	ruleImplVar.initRuleImpl(name)
-	return &ruleImplVar
+	rule := ruleImpl{}
+	rule.initRuleImpl(name)
+	return &rule
 }
-func (ruleImplVar *ruleImpl) initRuleImpl(name string) {
-	ruleImplVar.name = name
-}
-
-func (ruleImplVar *ruleImpl) GetName() string {
-	return ruleImplVar.name
+func (rule *ruleImpl) initRuleImpl(name string) {
+	rule.name = name
 }
 
-func (ruleImplVar *ruleImpl) GetActionFn() model.ActionFunction {
-	return ruleImplVar.actionFn
+func (rule *ruleImpl) GetName() string {
+	return rule.name
 }
 
-func (ruleImplVar *ruleImpl) GetConditions() []condition {
-	return ruleImplVar.conditions
+func (rule *ruleImpl) GetActionFn() model.ActionFunction {
+	return rule.actionFn
 }
 
-func (ruleImplVar *ruleImpl) SetActionFn(actionFn model.ActionFunction) {
-	ruleImplVar.actionFn = actionFn
+func (rule *ruleImpl) GetConditions() []condition {
+	return rule.conditions
 }
 
-func (ruleImplVar *ruleImpl) AddCondition(conditionName string, idrs []model.StreamSource, cfn model.ConditionEvaluator) {
-	condition := NewCondition(conditionName, ruleImplVar, idrs, cfn)
-	ruleImplVar.conditions = append(ruleImplVar.conditions, condition)
+func (rule *ruleImpl) SetActionFn(actionFn model.ActionFunction) {
+	rule.actionFn = actionFn
 }
 
-func (ruleImplVar *ruleImpl) String() string {
+func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.StreamSource, cfn model.ConditionEvaluator) {
+	condition := NewCondition(conditionName, rule, idrs, cfn)
+	rule.conditions = append(rule.conditions, condition)
+}
+
+func (rule *ruleImpl) String() string {
 	str := ""
-	str += "[Rule: (" + ruleImplVar.name + "\n"
+	str += "[Rule: (" + rule.name + "\n"
 	return str
 }

@@ -27,33 +27,33 @@ func newCondition(name string, rule Rule, identifiers []string, cfn model.Condit
 	return &c
 }
 
-func (conditionImplVar *conditionImpl) initConditionImpl(name string, rule Rule, identifiers []string, cfn model.ConditionEvaluator) {
-	conditionImplVar.name = name
-	conditionImplVar.rule = rule
+func (cnd *conditionImpl) initConditionImpl(name string, rule Rule, identifiers []string, cfn model.ConditionEvaluator) {
+	cnd.name = name
+	cnd.rule = rule
 	for i := 0; i < len(identifiers); i++ {
 		idName := identifiers[i]
 		idr := newIdentifier(idName)
-		conditionImplVar.identifiers = append(conditionImplVar.identifiers, idr)
+		cnd.identifiers = append(cnd.identifiers, idr)
 	}
-	conditionImplVar.cfn = cfn
+	cnd.cfn = cfn
 }
 
-func (conditionImplVar *conditionImpl) getIdentifiers() []identifier {
-	return conditionImplVar.identifiers
+func (cnd *conditionImpl) getIdentifiers() []identifier {
+	return cnd.identifiers
 }
 
-func (conditionImplVar *conditionImpl) getEvaluator() model.ConditionEvaluator {
-	return conditionImplVar.cfn
+func (cnd *conditionImpl) getEvaluator() model.ConditionEvaluator {
+	return cnd.cfn
 }
 
-func (conditionImplVar *conditionImpl) String() string {
-	return "[Condition: name:" + conditionImplVar.name + ", idrs:" + IdentifiersToString(conditionImplVar.identifiers) + "]"
+func (cnd *conditionImpl) String() string {
+	return "[Condition: name:" + cnd.name + ", idrs:" + IdentifiersToString(cnd.identifiers) + "]"
 }
 
-func (conditionImplVar *conditionImpl) getName() string {
-	return conditionImplVar.name
+func (cnd *conditionImpl) getName() string {
+	return cnd.name
 }
 
-func (conditionImplVar *conditionImpl) getRule() Rule {
-	return conditionImplVar.rule
+func (cnd *conditionImpl) getRule() Rule {
+	return cnd.rule
 }

@@ -9,15 +9,15 @@ type joinTableRowImpl struct {
 }
 
 func newJoinTableRow(handles []reteHandle) joinTableRow {
-	joinTableRowImplVar := joinTableRowImpl{}
-	joinTableRowImplVar.initJoinTableRow(handles)
-	return &joinTableRowImplVar
+	jtr := joinTableRowImpl{}
+	jtr.initJoinTableRow(handles)
+	return &jtr
 }
 
-func (joinTableRowImplVar *joinTableRowImpl) initJoinTableRow(handles []reteHandle) {
-	joinTableRowImplVar.handles = append([]reteHandle{}, handles...)
+func (jtr *joinTableRowImpl) initJoinTableRow(handles []reteHandle) {
+	jtr.handles = append([]reteHandle{}, handles...)
 }
 
-func (joinTableRowImplVar *joinTableRowImpl) getHandles() []reteHandle {
-	return joinTableRowImplVar.handles
+func (jtr *joinTableRowImpl) getHandles() []reteHandle {
+	return jtr.handles
 }

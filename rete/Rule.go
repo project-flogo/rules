@@ -33,83 +33,83 @@ type ruleImpl struct {
 
 //NewRule ... Create a new rule
 func NewRule(name string) MutableRule {
-	ruleImplVar := ruleImpl{}
-	ruleImplVar.initRuleImpl(name)
-	return &ruleImplVar
+	rule := ruleImpl{}
+	rule.initRuleImpl(name)
+	return &rule
 }
-func (ruleImplVar *ruleImpl) initRuleImpl(name string) {
+func (rule *ruleImpl) initRuleImpl(name string) {
 	currentNodeID++
-	ruleImplVar.id = currentNodeID
-	ruleImplVar.name = name
+	rule.id = currentNodeID
+	rule.name = name
 }
 
-func (ruleImplVar *ruleImpl) GetName() string {
-	return ruleImplVar.name
+func (rule *ruleImpl) GetName() string {
+	return rule.name
 }
 
-func (ruleImplVar *ruleImpl) GetID() int {
-	return ruleImplVar.id
+func (rule *ruleImpl) GetID() int {
+	return rule.id
 }
 
 //GetConditions ... get the rule's condition set
-func (ruleImplVar *ruleImpl) GetConditions() []condition {
-	return ruleImplVar.conditions
+func (rule *ruleImpl) GetConditions() []condition {
+	return rule.conditions
 }
 
-func (ruleImplVar *ruleImpl) GetIdentifiers() []identifier {
-	return ruleImplVar.identifiers
+func (rule *ruleImpl) GetIdentifiers() []identifier {
+	return rule.identifiers
 }
 
-func (ruleImplVar *ruleImpl) AddCondition(conditionName string, idrs []model.StreamSource, cfn model.ConditionEvaluator) condition {
+func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.StreamSource, cfn model.ConditionEvaluator) condition {
 	strIds := make([]string, len(idrs))
 	for i := 0; i < len(idrs); i++ {
 		strIds[i] = string(idrs[i])
 	}
-	c := newCondition(conditionName, ruleImplVar, strIds, cfn)
-	ruleImplVar.conditions = append(ruleImplVar.conditions, c)
+	c := newCondition(conditionName, rule, strIds, cfn)
+	rule.conditions = append(rule.conditions, c)
 	for _, idr := range strIds {
-		// ruleImplVar.addIdentifier(idr[0], idr[1])
-		ruleImplVar.addIdentifier(idr)
+		// rule.addIdentifier(idr[0], idr[1])
+		rule.addIdentifier(idr)
 	}
 	return c
 }
 
-func (ruleImplVar *ruleImpl) addIdentifier(identifierName string) identifier {
+func (rule *ruleImpl) addIdentifier(identifierName string) identifier {
 
 	idrNew := newIdentifier(identifierName)
 	//TODO: Optimize this, perhaps using a map (need it to be ordered)
 	//search for the idr. if exists, skip, else add it
 
-	for _, idr := range ruleImplVar.identifiers {
+	for _, idr := range rule.identifiers {
 		if idr.equals(idrNew) {
 			return idr
 		}
 	}
 
-	ruleImplVar.identifiers = append(ruleImplVar.identifiers, idrNew)
+	rule.identifiers = append(rule.identifiers, idrNew)
 	return idrNew
 }
 
-func (ruleImplVar *ruleImpl) String() string {
+func (rule *ruleImpl) String() string {
 	str := ""
-	str += "[Rule: (" + strconv.Itoa(ruleImplVar.id) + ") " + ruleImplVar.name + "\n"
+	str += "[Rule: (" + strconv.Itoa(rule.id) + ") " + rule.name + "\n"
 	str += "\t[Conditions:\n"
-	for _, cond := range ruleImplVar.conditions {
+	for _, cond := range rule.conditions {
 		str += "\t\t" + cond.String() + "\n"
 	}
 	// idrs := ""
-	// for i := 0; i < len(ruleImplVar.identifiers); i++ {
-	// 	idrs += ruleImplVar.identifiers[i].String() + ", "
+	// for i := 0; i < len(rule.identifiers); i++ {
+	// 	idrs += rule.identifiers[i].String() + ", "
 	// }
-	str += "\t[Idrs:" + IdentifiersToString(ruleImplVar.identifiers) + "]\n"
+	str += "\t[Idrs:" + IdentifiersToString(rule.identifiers) + "]\n"
 	return str
 	// return str + idrs + "]\n"
 }
 
-func (ruleImplVar *ruleImpl) SetAction(actionFn model.ActionFunction) {
-	ruleImplVar.actionFn = actionFn
+func (rule *ruleImpl) SetAction(actionFn model.ActionFunction) {
+	rule.actionFn = actionFn
 }
 
-func (ruleImplVar *ruleImpl) GetActionFn() model.ActionFunction {
-	return ruleImplVar.actionFn
+func (rule *ruleImpl) GetActionFn() model.ActionFunction {
+	return rule.actionFn
 }

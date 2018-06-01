@@ -24,33 +24,33 @@ type nodeImpl struct {
 
 //NewNode ... returns a new node
 func newNode(identifiers []identifier) node {
-	nodeImplVar := nodeImpl{}
-	nodeImplVar.initNodeImpl(identifiers)
-	return &nodeImplVar
+	n := nodeImpl{}
+	n.initNodeImpl(identifiers)
+	return &n
 }
 
-func (nodeImplVar *nodeImpl) initNodeImpl(identifiers []identifier) {
+func (n *nodeImpl) initNodeImpl(identifiers []identifier) {
 	currentNodeID++
-	nodeImplVar.id = currentNodeID
+	n.id = currentNodeID
 
-	nodeImplVar.identifiers = identifiers
+	n.identifiers = identifiers
 }
 
-func (nodeImplVar *nodeImpl) getIdentifiers() []identifier {
-	return nodeImplVar.identifiers
+func (n *nodeImpl) getIdentifiers() []identifier {
+	return n.identifiers
 }
 
-func (nodeImplVar *nodeImpl) getID() int {
-	return nodeImplVar.id
+func (n *nodeImpl) getID() int {
+	return n.id
 }
 
-func (nodeImplVar *nodeImpl) addNodeLink(nl nodeLink) {
-	nodeImplVar.nodeLinkVar = nl
+func (n *nodeImpl) addNodeLink(nl nodeLink) {
+	n.nodeLinkVar = nl
 }
 
-func (nodeImplVar *nodeImpl) String() string {
-	str := "id:" + strconv.Itoa(nodeImplVar.id) + ", idrs:"
-	for _, nodeIdentifier := range nodeImplVar.identifiers {
+func (n *nodeImpl) String() string {
+	str := "id:" + strconv.Itoa(n.id) + ", idrs:"
+	for _, nodeIdentifier := range n.identifiers {
 		str += nodeIdentifier.String() + ","
 	}
 	return str
@@ -83,6 +83,6 @@ func findSimilarNodes(nodeSet utils.ArrayList) []node {
 	return similarNodes
 }
 
-func (nodeImplVar *nodeImpl) assertObjects(handles []reteHandle, isRight bool) {
+func (n *nodeImpl) assertObjects(handles []reteHandle, isRight bool) {
 	fmt.Println("Abstract method here.., see filterNodeImpl and joinNodeImpl")
 }

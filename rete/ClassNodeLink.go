@@ -15,28 +15,28 @@ type classNodeLinkImpl struct {
 }
 
 func newClassNodeLink(classNodeVar classNode, child node, rule Rule, identifierVar identifier) classNodeLink {
-	classNodeLinkImplVar := classNodeLinkImpl{}
-	classNodeLinkImplVar.initClassNodeLinkImpl(classNodeVar, child, rule, identifierVar)
-	return &classNodeLinkImplVar
+	cnl := classNodeLinkImpl{}
+	cnl.initClassNodeLinkImpl(classNodeVar, child, rule, identifierVar)
+	return &cnl
 }
 
-func (classNodeLinkImplVar *classNodeLinkImpl) initClassNodeLinkImpl(classNodeVar classNode, child node, rule Rule, identifierVar identifier) {
-	initClassNodeLink(&classNodeLinkImplVar.nodeLinkImpl, child)
-	classNodeLinkImplVar.classNodeVar = classNodeVar
-	classNodeLinkImplVar.rule = rule
-	classNodeLinkImplVar.identifierVar = identifierVar
+func (cnl *classNodeLinkImpl) initClassNodeLinkImpl(classNodeVar classNode, child node, rule Rule, identifierVar identifier) {
+	initClassNodeLink(&cnl.nodeLinkImpl, child)
+	cnl.classNodeVar = classNodeVar
+	cnl.rule = rule
+	cnl.identifierVar = identifierVar
 }
 
-func (classNodeLinkImplVar *classNodeLinkImpl) getIdentifier() identifier {
-	return classNodeLinkImplVar.identifierVar
+func (cnl *classNodeLinkImpl) getIdentifier() identifier {
+	return cnl.identifierVar
 }
 
-func (classNodeLinkImplVar *classNodeLinkImpl) getClassNode() classNode {
-	return classNodeLinkImplVar.classNodeVar
+func (cnl *classNodeLinkImpl) getClassNode() classNode {
+	return cnl.classNodeVar
 }
 
-func (classNodeLinkImplVar *classNodeLinkImpl) String() string {
-	str := classNodeLinkImplVar.nodeLinkImpl.String()
+func (cnl *classNodeLinkImpl) String() string {
+	str := cnl.nodeLinkImpl.String()
 	return str
 	//TODO: tableids, loadstop, mask, etc
 }

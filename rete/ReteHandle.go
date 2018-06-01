@@ -19,16 +19,16 @@ type handleImpl struct {
 	tablesAndRows map[joinTable]utils.ArrayList
 }
 
-func (handleImplVar *handleImpl) setTuple(tuple model.StreamTuple) {
-	handleImplVar.tuple = tuple
+func (hdl *handleImpl) setTuple(tuple model.StreamTuple) {
+	hdl.tuple = tuple
 }
 
-func (handleImplVar *handleImpl) initHandleImpl() {
-	handleImplVar.tablesAndRows = make(map[joinTable]utils.ArrayList)
+func (hdl *handleImpl) initHandleImpl() {
+	hdl.tablesAndRows = make(map[joinTable]utils.ArrayList)
 }
 
-func (handleImplVar *handleImpl) getTuple() model.StreamTuple {
-	return handleImplVar.tuple
+func (hdl *handleImpl) getTuple() model.StreamTuple {
+	return hdl.tuple
 }
 
 func getOrCreateHandle(tuple model.StreamTuple) reteHandle {
@@ -43,22 +43,22 @@ func getOrCreateHandle(tuple model.StreamTuple) reteHandle {
 	return h
 }
 
-func (handleImplVar *handleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable) {
+func (hdl *handleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable) {
 
-	rowsForJoinTable := handleImplVar.tablesAndRows[joinTableVar]
+	rowsForJoinTable := hdl.tablesAndRows[joinTableVar]
 	if rowsForJoinTable == nil {
 		rowsForJoinTable = utils.NewArrayList()
-		handleImplVar.tablesAndRows[joinTableVar] = rowsForJoinTable
+		hdl.tablesAndRows[joinTableVar] = rowsForJoinTable
 	}
 	rowsForJoinTable.Add(joinTableRowVar)
 
 }
 
-func (handleImplVar *handleImpl) removeJoinTableRowRefs() {
+func (hdl *handleImpl) removeJoinTableRowRefs() {
 
 	emptyJoinTables := utils.NewArrayList()
 
-	for joinTable, listOfRows := range handleImplVar.tablesAndRows {
+	for joinTable, listOfRows := range hdl.tablesAndRows {
 		for i := 0; i < listOfRows.Len(); i++ {
 			row := listOfRows.Get(i).(joinTableRow)
 			joinTable.removeRow(row)
@@ -70,14 +70,14 @@ func (handleImplVar *handleImpl) removeJoinTableRowRefs() {
 
 	for i := 0; i < emptyJoinTables.Len(); i++ {
 		emptyJoinTable := emptyJoinTables.Get(i).(joinTable)
-		delete(handleImplVar.tablesAndRows, emptyJoinTable)
+		delete(hdl.tablesAndRows, emptyJoinTable)
 	}
 }
 
 //Used when a rule is deleted. See Network.RemoveRule
-func (handleImplVar *handleImpl) removeJoinTable(joinTableVar joinTable) {
-	_, ok := handleImplVar.tablesAndRows[joinTableVar]
+func (hdl *handleImpl) removeJoinTable(joinTableVar joinTable) {
+	_, ok := hdl.tablesAndRows[joinTableVar]
 	if ok {
-		delete(handleImplVar.tablesAndRows, joinTableVar)
+		delete(hdl.tablesAndRows, joinTableVar)
 	}
 }

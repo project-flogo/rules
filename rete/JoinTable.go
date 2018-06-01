@@ -20,33 +20,33 @@ func newJoinTable(identifiers []identifier) joinTable {
 	return &jT
 }
 
-func (joinTableImplVar *joinTableImpl) initJoinTableImpl(identifiers []identifier) {
+func (jt *joinTableImpl) initJoinTableImpl(identifiers []identifier) {
 	currentNodeID++
-	joinTableImplVar.id = currentNodeID
-	joinTableImplVar.idr = identifiers
-	joinTableImplVar.table = map[joinTableRow]joinTableRow{}
+	jt.id = currentNodeID
+	jt.idr = identifiers
+	jt.table = map[joinTableRow]joinTableRow{}
 }
 
-func (joinTableImplVar *joinTableImpl) getID() int {
-	return joinTableImplVar.id
+func (jt *joinTableImpl) getID() int {
+	return jt.id
 }
 
-func (joinTableImplVar *joinTableImpl) addRow(row joinTableRow) {
-	joinTableImplVar.table[row] = row
+func (jt *joinTableImpl) addRow(row joinTableRow) {
+	jt.table[row] = row
 	for i := 0; i < len(row.getHandles()); i++ {
 		handle := row.getHandles()[i]
-		handle.addJoinTableRowRef(row, joinTableImplVar)
+		handle.addJoinTableRowRef(row, jt)
 	}
 }
 
-func (joinTableImplVar *joinTableImpl) removeRow(row joinTableRow) {
-	delete(joinTableImplVar.table, row)
+func (jt *joinTableImpl) removeRow(row joinTableRow) {
+	delete(jt.table, row)
 }
 
-func (joinTableImplVar *joinTableImpl) len() int {
-	return len(joinTableImplVar.table)
+func (jt *joinTableImpl) len() int {
+	return len(jt.table)
 }
 
-func (joinTableImplVar *joinTableImpl) getMap() map[joinTableRow]joinTableRow {
-	return joinTableImplVar.table
+func (jt *joinTableImpl) getMap() map[joinTableRow]joinTableRow {
+	return jt.table
 }

@@ -27,34 +27,34 @@ func NewRuleSession() RuleSession {
 	return &rs
 }
 
-func (rulesessionImplVar *rulesessionImpl) initRuleSession() {
-	rulesessionImplVar.reteNetwork = rete.NewReteNetwork()
+func (rs *rulesessionImpl) initRuleSession() {
+	rs.reteNetwork = rete.NewReteNetwork()
 }
 
-func (rulesessionImplVar *rulesessionImpl) AddRule(apiRule Rule) (int, bool) {
+func (rs *rulesessionImpl) AddRule(apiRule Rule) (int, bool) {
 	rule := convertAPIRuleToReteRule(apiRule)
 
-	ret := rulesessionImplVar.reteNetwork.AddRule(rule)
+	ret := rs.reteNetwork.AddRule(rule)
 	if ret == 0 {
 		return 0, true
 	}
 	return ret, false
 }
 
-func (rulesessionImplVar *rulesessionImpl) DeleteRule(ruleName string) {
-	rulesessionImplVar.reteNetwork.RemoveRule(ruleName)
+func (rs *rulesessionImpl) DeleteRule(ruleName string) {
+	rs.reteNetwork.RemoveRule(ruleName)
 }
 
-func (rulesessionImplVar *rulesessionImpl) Assert(tuple model.StreamTuple) {
-	rulesessionImplVar.reteNetwork.Assert(tuple)
+func (rs *rulesessionImpl) Assert(tuple model.StreamTuple) {
+	rs.reteNetwork.Assert(tuple)
 }
 
-func (rulesessionImplVar *rulesessionImpl) Retract(tuple model.StreamTuple) {
-	rulesessionImplVar.reteNetwork.Retract(tuple)
+func (rs *rulesessionImpl) Retract(tuple model.StreamTuple) {
+	rs.reteNetwork.Retract(tuple)
 }
 
-func (rulesessionImplVar *rulesessionImpl) PrintNetwork() {
-	fmt.Println(rulesessionImplVar.reteNetwork.String())
+func (rs *rulesessionImpl) PrintNetwork() {
+	fmt.Println(rs.reteNetwork.String())
 }
 func convertAPIRuleToReteRule(apiRule Rule) rete.Rule {
 	reteRule := rete.NewRule(apiRule.GetName())

@@ -13,24 +13,24 @@ type identifierImpl struct {
 }
 
 func newIdentifier(name string /* alias string */) identifier {
-	identifierImplVar := identifierImpl{}
-	identifierImplVar.initIdentifierImpl(name /*alias */)
-	return &identifierImplVar
+	idr := identifierImpl{}
+	idr.initIdentifierImpl(name /*alias */)
+	return &idr
 }
-func (identifierImplVar *identifierImpl) initIdentifierImpl(name string /*alias string*/) {
-	identifierImplVar.name = name
-	// identifierImplVar.alias = alias
-}
-
-func (identifierImplVar *identifierImpl) getName() string {
-	return identifierImplVar.name
+func (idr *identifierImpl) initIdentifierImpl(name string /*alias string*/) {
+	idr.name = name
+	// idr.alias = alias
 }
 
-func (identifierImplVar *identifierImpl) equals(other identifier) bool {
-	return identifierImplVar.name == other.getName() /*&& identifierImplVar.alias == other.GetAlias()*/
+func (idr *identifierImpl) getName() string {
+	return idr.name
 }
 
-func (identifierImplVar *identifierImpl) String() string {
-	// return "[" + identifierImplVar.name + "," + identifierImplVar.alias + "]"
-	return "[" + identifierImplVar.name + "]"
+func (idr *identifierImpl) equals(other identifier) bool {
+	return idr.name == other.getName() /*&& idr.alias == other.GetAlias()*/
+}
+
+func (idr *identifierImpl) String() string {
+	// return "[" + idr.name + "," + idr.alias + "]"
+	return "[" + idr.name + "]"
 }

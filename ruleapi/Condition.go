@@ -26,32 +26,32 @@ func NewCondition(name string, rule Rule, identifiers []model.StreamSource, cfn 
 	return &c
 }
 
-func (conditionImplVar *conditionImpl) initConditionImpl(name string, rule Rule, identifiers []model.StreamSource, cfn model.ConditionEvaluator) {
-	conditionImplVar.name = name
-	conditionImplVar.rule = rule
-	conditionImplVar.identifiers = append(conditionImplVar.identifiers, identifiers...)
-	conditionImplVar.cfn = cfn
+func (cnd *conditionImpl) initConditionImpl(name string, rule Rule, identifiers []model.StreamSource, cfn model.ConditionEvaluator) {
+	cnd.name = name
+	cnd.rule = rule
+	cnd.identifiers = append(cnd.identifiers, identifiers...)
+	cnd.cfn = cfn
 }
 
-func (conditionImplVar *conditionImpl) GetIdentifiers() []model.StreamSource {
-	return conditionImplVar.identifiers
+func (cnd *conditionImpl) GetIdentifiers() []model.StreamSource {
+	return cnd.identifiers
 }
 
-func (conditionImplVar *conditionImpl) GetEvaluator() model.ConditionEvaluator {
-	return conditionImplVar.cfn
+func (cnd *conditionImpl) GetEvaluator() model.ConditionEvaluator {
+	return cnd.cfn
 }
 
-func (conditionImplVar *conditionImpl) String() string {
-	return "[Condition: name:" + conditionImplVar.name + ", idrs: TODO]"
+func (cnd *conditionImpl) String() string {
+	return "[Condition: name:" + cnd.name + ", idrs: TODO]"
 }
 
-func (conditionImplVar *conditionImpl) GetName() string {
-	return conditionImplVar.name
+func (cnd *conditionImpl) GetName() string {
+	return cnd.name
 }
 
-func (conditionImplVar *conditionImpl) GetRule() Rule {
-	return conditionImplVar.rule
+func (cnd *conditionImpl) GetRule() Rule {
+	return cnd.rule
 }
-func (conditionImplVar *conditionImpl) GetStreamSource() []model.StreamSource {
-	return conditionImplVar.identifiers
+func (cnd *conditionImpl) GetStreamSource() []model.StreamSource {
+	return cnd.identifiers
 }

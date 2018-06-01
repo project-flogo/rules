@@ -28,59 +28,59 @@ type joinNodeImpl struct {
 }
 
 func newJoinNode(leftIdrs []identifier, rightIdrs []identifier, conditionVar condition) joinNode {
-	joinNodeImplVar := joinNodeImpl{}
-	joinNodeImplVar.initjoinNodeImplVar(leftIdrs, rightIdrs, conditionVar)
-	return &joinNodeImplVar
+	jn := joinNodeImpl{}
+	jn.initjoinNodeImplVar(leftIdrs, rightIdrs, conditionVar)
+	return &jn
 }
 
-func (joinNodeImplVar *joinNodeImpl) initjoinNodeImplVar(leftIdrs []identifier, rightIdrs []identifier, conditionVar condition) {
-	joinNodeImplVar.initNodeImpl(nil)
-	joinNodeImplVar.leftIdrs = leftIdrs
-	joinNodeImplVar.rightIdrs = rightIdrs
-	joinNodeImplVar.conditionVar = conditionVar
-	joinNodeImplVar.leftTable = newJoinTable(leftIdrs)
-	joinNodeImplVar.rightTable = newJoinTable(rightIdrs)
-	joinNodeImplVar.setJoinIdentifiers()
+func (jn *joinNodeImpl) initjoinNodeImplVar(leftIdrs []identifier, rightIdrs []identifier, conditionVar condition) {
+	jn.initNodeImpl(nil)
+	jn.leftIdrs = leftIdrs
+	jn.rightIdrs = rightIdrs
+	jn.conditionVar = conditionVar
+	jn.leftTable = newJoinTable(leftIdrs)
+	jn.rightTable = newJoinTable(rightIdrs)
+	jn.setJoinIdentifiers()
 }
 
-func (joinNodeImplVar *joinNodeImpl) GetLeftIdentifiers() []identifier {
-	return joinNodeImplVar.leftIdrs
+func (jn *joinNodeImpl) GetLeftIdentifiers() []identifier {
+	return jn.leftIdrs
 }
 
-func (joinNodeImplVar *joinNodeImpl) GetRightIdentifiers() []identifier {
-	return joinNodeImplVar.rightIdrs
+func (jn *joinNodeImpl) GetRightIdentifiers() []identifier {
+	return jn.rightIdrs
 }
 
-func (joinNodeImplVar *joinNodeImpl) setJoinIdentifiers() {
-	joinNodeImplVar.leftIdrLen = len(joinNodeImplVar.leftIdrs)
-	joinNodeImplVar.rightIdrLen = len(joinNodeImplVar.rightIdrs)
-	joinNodeImplVar.totalIdrLen = joinNodeImplVar.leftIdrLen + joinNodeImplVar.rightIdrLen
+func (jn *joinNodeImpl) setJoinIdentifiers() {
+	jn.leftIdrLen = len(jn.leftIdrs)
+	jn.rightIdrLen = len(jn.rightIdrs)
+	jn.totalIdrLen = jn.leftIdrLen + jn.rightIdrLen
 
-	joinNodeImplVar.identifiers = make([]identifier, joinNodeImplVar.totalIdrLen)
+	jn.identifiers = make([]identifier, jn.totalIdrLen)
 
-	joinNodeImplVar.joinIndexForLeft = make([]int, joinNodeImplVar.leftIdrLen)
-	joinNodeImplVar.joinIndexForRight = make([]int, joinNodeImplVar.rightIdrLen)
+	jn.joinIndexForLeft = make([]int, jn.leftIdrLen)
+	jn.joinIndexForRight = make([]int, jn.rightIdrLen)
 
-	for i := 0; i < joinNodeImplVar.leftIdrLen; i++ {
-		joinNodeImplVar.joinIndexForLeft[i] = -1
+	for i := 0; i < jn.leftIdrLen; i++ {
+		jn.joinIndexForLeft[i] = -1
 	}
-	for i := 0; i < joinNodeImplVar.rightIdrLen; i++ {
-		joinNodeImplVar.joinIndexForRight[i] = -1
+	for i := 0; i < jn.rightIdrLen; i++ {
+		jn.joinIndexForRight[i] = -1
 	}
 	conditionIdrLen := 0
-	if joinNodeImplVar.conditionVar != nil {
-		conditionIdrLen = len(joinNodeImplVar.conditionVar.getIdentifiers())
+	if jn.conditionVar != nil {
+		conditionIdrLen = len(jn.conditionVar.getIdentifiers())
 		for i := 0; i < conditionIdrLen; i++ {
-			idx := GetIndex(joinNodeImplVar.leftIdrs, joinNodeImplVar.conditionVar.getIdentifiers()[i])
+			idx := GetIndex(jn.leftIdrs, jn.conditionVar.getIdentifiers()[i])
 			if idx != -1 {
-				joinNodeImplVar.joinIndexForLeft[idx] = i
-				joinNodeImplVar.identifiers[i] = joinNodeImplVar.leftIdrs[idx]
+				jn.joinIndexForLeft[idx] = i
+				jn.identifiers[i] = jn.leftIdrs[idx]
 				continue
 			}
-			idx = GetIndex(joinNodeImplVar.rightIdrs, joinNodeImplVar.conditionVar.getIdentifiers()[i])
+			idx = GetIndex(jn.rightIdrs, jn.conditionVar.getIdentifiers()[i])
 			if idx != -1 {
-				joinNodeImplVar.joinIndexForRight[idx] = i
-				joinNodeImplVar.identifiers[i] = joinNodeImplVar.rightIdrs[idx]
+				jn.joinIndexForRight[idx] = i
+				jn.identifiers[i] = jn.rightIdrs[idx]
 				continue
 			}
 			//TODO ERROR HANDLING!
@@ -88,147 +88,147 @@ func (joinNodeImplVar *joinNodeImpl) setJoinIdentifiers() {
 	}
 
 	outIndex := conditionIdrLen
-	for i := 0; i < joinNodeImplVar.leftIdrLen; i++ {
-		if joinNodeImplVar.joinIndexForLeft[i] == -1 {
-			joinNodeImplVar.joinIndexForLeft[i] = outIndex
-			joinNodeImplVar.identifiers[outIndex] = joinNodeImplVar.leftIdrs[i]
+	for i := 0; i < jn.leftIdrLen; i++ {
+		if jn.joinIndexForLeft[i] == -1 {
+			jn.joinIndexForLeft[i] = outIndex
+			jn.identifiers[outIndex] = jn.leftIdrs[i]
 			outIndex++
 		}
 	}
-	for i := 0; i < joinNodeImplVar.rightIdrLen; i++ {
-		if joinNodeImplVar.joinIndexForRight[i] == -1 {
-			joinNodeImplVar.joinIndexForRight[i] = outIndex
-			joinNodeImplVar.identifiers[outIndex] = joinNodeImplVar.rightIdrs[i]
+	for i := 0; i < jn.rightIdrLen; i++ {
+		if jn.joinIndexForRight[i] == -1 {
+			jn.joinIndexForRight[i] = outIndex
+			jn.identifiers[outIndex] = jn.rightIdrs[i]
 			outIndex++
 		}
 	}
 
-	if outIndex != joinNodeImplVar.totalIdrLen {
+	if outIndex != jn.totalIdrLen {
 		//TODO ERROR HANDLING!
 	}
 }
 
 //String Stringer.String interface
-func (joinNodeImplVar *joinNodeImpl) String() string {
+func (jn *joinNodeImpl) String() string {
 
 	joinIdsForLeftStr := ""
-	for i := range joinNodeImplVar.joinIndexForLeft {
+	for i := range jn.joinIndexForLeft {
 		joinIdsForLeftStr += strconv.Itoa(i) + ", "
 	}
 
 	joinIdsForRightStr := ""
-	for i := range joinNodeImplVar.joinIndexForRight {
+	for i := range jn.joinIndexForRight {
 		joinIdsForRightStr += strconv.Itoa(i) + ", "
 	}
 
 	linkTo := ""
-	switch joinNodeImplVar.nodeLinkVar.getChild().(type) {
+	switch jn.nodeLinkVar.getChild().(type) {
 	case *joinNodeImpl:
-		if joinNodeImplVar.nodeLinkVar.isRightNode() {
-			linkTo += strconv.Itoa(joinNodeImplVar.nodeLinkVar.getChild().getID()) + "R"
+		if jn.nodeLinkVar.isRightNode() {
+			linkTo += strconv.Itoa(jn.nodeLinkVar.getChild().getID()) + "R"
 		} else {
-			linkTo += strconv.Itoa(joinNodeImplVar.nodeLinkVar.getChild().getID()) + "L"
+			linkTo += strconv.Itoa(jn.nodeLinkVar.getChild().getID()) + "L"
 		}
 	default:
-		linkTo += strconv.Itoa(joinNodeImplVar.nodeLinkVar.getChild().getID())
+		linkTo += strconv.Itoa(jn.nodeLinkVar.getChild().getID())
 	}
 
 	joinConditionStr := "nil"
 	joinConditionIdrsStr := "nil"
-	if joinNodeImplVar.conditionVar != nil {
-		joinConditionStr = joinNodeImplVar.conditionVar.String()
-		joinConditionIdrsStr = IdentifiersToString(joinNodeImplVar.conditionVar.getIdentifiers())
+	if jn.conditionVar != nil {
+		joinConditionStr = jn.conditionVar.String()
+		joinConditionIdrsStr = IdentifiersToString(jn.conditionVar.getIdentifiers())
 	}
-	return "\t[JoinNode(" + joinNodeImplVar.nodeImpl.String() + ") link(" + linkTo + ")\n" +
-		"\t\tLeft identifier      = " + IdentifiersToString(joinNodeImplVar.leftIdrs) + ";\n" +
-		"\t\tRight identifier     = " + IdentifiersToString(joinNodeImplVar.rightIdrs) + ";\n" +
-		"\t\tOut identifier       = " + IdentifiersToString(joinNodeImplVar.identifiers) + ";\n" +
+	return "\t[JoinNode(" + jn.nodeImpl.String() + ") link(" + linkTo + ")\n" +
+		"\t\tLeft identifier      = " + IdentifiersToString(jn.leftIdrs) + ";\n" +
+		"\t\tRight identifier     = " + IdentifiersToString(jn.rightIdrs) + ";\n" +
+		"\t\tOut identifier       = " + IdentifiersToString(jn.identifiers) + ";\n" +
 		"\t\tCondition identifier = " + joinConditionIdrsStr + ";\n" +
 		"\t\tJoin Left Index      = " + joinIdsForLeftStr + ";\n" +
 		"\t\tJoin Right Index     = " + joinIdsForRightStr + ";\n" +
 		"\t\tCondition            = " + joinConditionStr + "]\n"
 }
 
-func (joinNodeImplVar *joinNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
+func (jn *joinNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
 	//TODO:
-	joinedHandles := make([]reteHandle, joinNodeImplVar.totalIdrLen)
+	joinedHandles := make([]reteHandle, jn.totalIdrLen)
 	if isRight {
-		joinNodeImplVar.assertFromRight(handles, joinedHandles)
+		jn.assertFromRight(handles, joinedHandles)
 	} else {
-		joinNodeImplVar.assertFromLeft(handles, joinedHandles)
+		jn.assertFromLeft(handles, joinedHandles)
 	}
 }
 
-func (joinNodeImplVar *joinNodeImpl) assertFromRight(handles []reteHandle, joinedHandles []reteHandle) {
+func (jn *joinNodeImpl) assertFromRight(handles []reteHandle, joinedHandles []reteHandle) {
 	//TODO: other stuff. right now focus on tuple table
-	joinNodeImplVar.joinRightObjects(handles, joinedHandles)
+	jn.joinRightObjects(handles, joinedHandles)
 	tupleTableRow := newJoinTableRow(handles)
-	joinNodeImplVar.rightTable.addRow(tupleTableRow)
+	jn.rightTable.addRow(tupleTableRow)
 	//TODO: rete listeners etc.
-	for tupleTableRowLeft := range joinNodeImplVar.leftTable.getMap() {
-		success := joinNodeImplVar.joinLeftObjects(tupleTableRowLeft.getHandles(), joinedHandles)
+	for tupleTableRowLeft := range jn.leftTable.getMap() {
+		success := jn.joinLeftObjects(tupleTableRowLeft.getHandles(), joinedHandles)
 		if !success {
 			//TODO: handle it
 			continue
 		}
 		toPropagate := false
-		if joinNodeImplVar.conditionVar == nil {
+		if jn.conditionVar == nil {
 			toPropagate = true
 		} else {
 			tupleMap := copyIntoTupleMap(joinedHandles)
-			cv := joinNodeImplVar.conditionVar
+			cv := jn.conditionVar
 			toPropagate = cv.getEvaluator()(cv.getName(), cv.getRule().GetName(), tupleMap)
 		}
 		if toPropagate {
-			joinNodeImplVar.nodeLinkVar.propagateObjects(joinedHandles)
+			jn.nodeLinkVar.propagateObjects(joinedHandles)
 		}
 	}
 }
 
-func (joinNodeImplVar *joinNodeImpl) joinLeftObjects(leftHandles []reteHandle, joinedHandles []reteHandle) bool {
-	for i := 0; i < joinNodeImplVar.leftIdrLen; i++ {
+func (jn *joinNodeImpl) joinLeftObjects(leftHandles []reteHandle, joinedHandles []reteHandle) bool {
+	for i := 0; i < jn.leftIdrLen; i++ {
 		handle := leftHandles[i]
 		if handle.getTuple() == nil {
 			return false
 		}
-		joinedHandles[joinNodeImplVar.joinIndexForLeft[i]] = handle
+		joinedHandles[jn.joinIndexForLeft[i]] = handle
 	}
 	return true
 }
 
-func (joinNodeImplVar *joinNodeImpl) joinRightObjects(rightHandles []reteHandle, joinedHandles []reteHandle) bool {
-	for i := 0; i < joinNodeImplVar.rightIdrLen; i++ {
+func (jn *joinNodeImpl) joinRightObjects(rightHandles []reteHandle, joinedHandles []reteHandle) bool {
+	for i := 0; i < jn.rightIdrLen; i++ {
 		handle := rightHandles[i]
 		if handle.getTuple() == nil {
 			return false
 		}
-		joinedHandles[joinNodeImplVar.joinIndexForRight[i]] = handle
+		joinedHandles[jn.joinIndexForRight[i]] = handle
 	}
 	return true
 }
 
-func (joinNodeImplVar *joinNodeImpl) assertFromLeft(handles []reteHandle, joinedHandles []reteHandle) {
-	joinNodeImplVar.joinLeftObjects(handles, joinedHandles)
+func (jn *joinNodeImpl) assertFromLeft(handles []reteHandle, joinedHandles []reteHandle) {
+	jn.joinLeftObjects(handles, joinedHandles)
 	//TODO: other stuff. right now focus on tuple table
 	tupleTableRow := newJoinTableRow(handles)
-	joinNodeImplVar.leftTable.addRow(tupleTableRow)
+	jn.leftTable.addRow(tupleTableRow)
 	//TODO: rete listeners etc.
-	for tupleTableRowRight := range joinNodeImplVar.rightTable.getMap() {
-		success := joinNodeImplVar.joinRightObjects(tupleTableRowRight.getHandles(), joinedHandles)
+	for tupleTableRowRight := range jn.rightTable.getMap() {
+		success := jn.joinRightObjects(tupleTableRowRight.getHandles(), joinedHandles)
 		if !success {
 			//TODO: handle it
 			continue
 		}
 		toPropagate := false
-		if joinNodeImplVar.conditionVar == nil {
+		if jn.conditionVar == nil {
 			toPropagate = true
 		} else {
 			tupleMap := copyIntoTupleMap(joinedHandles)
-			cv := joinNodeImplVar.conditionVar
+			cv := jn.conditionVar
 			toPropagate = cv.getEvaluator()(cv.getName(), cv.getRule().GetName(), tupleMap)
 		}
 		if toPropagate {
-			joinNodeImplVar.nodeLinkVar.propagateObjects(joinedHandles)
+			jn.nodeLinkVar.propagateObjects(joinedHandles)
 		}
 	}
 }

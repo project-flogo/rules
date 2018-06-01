@@ -21,50 +21,50 @@ type classNodeImpl struct {
 }
 
 func newClassNode(name string) classNode {
-	classNodeImplVar := classNodeImpl{}
-	classNodeImplVar.initClassNodeImpl(name)
-	return &classNodeImplVar
+	cn := classNodeImpl{}
+	cn.initClassNodeImpl(name)
+	return &cn
 }
 
-func (classNodeImplVar *classNodeImpl) initClassNodeImpl(name string) {
-	classNodeImplVar.name = name
-	classNodeImplVar.classNodeLinks = utils.NewArrayList()
+func (cn *classNodeImpl) initClassNodeImpl(name string) {
+	cn.name = name
+	cn.classNodeLinks = utils.NewArrayList()
 }
 
-func (classNodeImplVar *classNodeImpl) addClassNodeLink(classNodeLinkVar classNodeLink) {
-	classNodeImplVar.classNodeLinks.Add(classNodeLinkVar)
+func (cn *classNodeImpl) addClassNodeLink(classNodeLinkVar classNodeLink) {
+	cn.classNodeLinks.Add(classNodeLinkVar)
 }
 
-func (classNodeImplVar *classNodeImpl) removeClassNodeLink(classNodeLinkInList classNodeLink) {
+func (cn *classNodeImpl) removeClassNodeLink(classNodeLinkInList classNodeLink) {
 
-	for i := 0; i < classNodeImplVar.getClassNodeLinks().Len(); i++ {
-		classNodeLinkInList := classNodeImplVar.getClassNodeLinks().Get(i)
+	for i := 0; i < cn.getClassNodeLinks().Len(); i++ {
+		classNodeLinkInList := cn.getClassNodeLinks().Get(i)
 		if classNodeLinkInList != nil && classNodeLinkInList == classNodeLinkInList {
-			classNodeImplVar.getClassNodeLinks().RemoveAt(i)
+			cn.getClassNodeLinks().RemoveAt(i)
 			break
 		}
 	}
 }
 
-func (classNodeImplVar *classNodeImpl) getClassNodeLinks() utils.ArrayList {
-	return classNodeImplVar.classNodeLinks
+func (cn *classNodeImpl) getClassNodeLinks() utils.ArrayList {
+	return cn.classNodeLinks
 }
 
-func (classNodeImplVar *classNodeImpl) getName() string {
-	return classNodeImplVar.name
+func (cn *classNodeImpl) getName() string {
+	return cn.name
 }
 
 //Implements Stringer.String
-func (classNodeImplVar *classNodeImpl) String() string {
+func (cn *classNodeImpl) String() string {
 	links := ""
-	for i := classNodeImplVar.classNodeLinks.Len() - 1; i >= 0; i-- {
-		nl := classNodeImplVar.classNodeLinks.Get(i).(classNodeLink)
+	for i := cn.classNodeLinks.Len() - 1; i >= 0; i-- {
+		nl := cn.classNodeLinks.Get(i).(classNodeLink)
 		links += "\t" + nl.String()
-		if i != classNodeImplVar.classNodeLinks.Len()-1 {
+		if i != cn.classNodeLinks.Len()-1 {
 			links += "\n"
 		}
 	}
-	ret := "[ClassNode Class(" + classNodeImplVar.name + ")"
+	ret := "[ClassNode Class(" + cn.name + ")"
 	if len(links) > 0 {
 		ret += "\n" + links + "]" + "\n"
 	} else {
@@ -73,14 +73,14 @@ func (classNodeImplVar *classNodeImpl) String() string {
 	return ret
 }
 
-func (classNodeImplVar *classNodeImpl) assert(tuple model.StreamTuple) {
+func (cn *classNodeImpl) assert(tuple model.StreamTuple) {
 	handle := getOrCreateHandle(tuple)
 
 	handles := make([]reteHandle, 1)
 	handles[0] = handle
 
-	for i := 0; i < classNodeImplVar.getClassNodeLinks().Len(); i++ {
-		classNodeLinkVar := classNodeImplVar.getClassNodeLinks().Get(i).(classNodeLink)
+	for i := 0; i < cn.getClassNodeLinks().Len(); i++ {
+		classNodeLinkVar := cn.getClassNodeLinks().Get(i).(classNodeLink)
 		classNodeLinkVar.propagateObjects(handles)
 	}
 

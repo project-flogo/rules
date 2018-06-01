@@ -22,23 +22,23 @@ func newRuleNode(rule Rule) ruleNode {
 	return &rn
 }
 
-func (ruleNodeImplVar *ruleNodeImpl) String() string {
-	return "\t[RuleNode id(" + strconv.Itoa(ruleNodeImplVar.id) + "): \n" +
-		"\t\tIdentifier           = " + IdentifiersToString(ruleNodeImplVar.identifiers) + " ;\n" +
-		"\t\tRule                 = " + ruleNodeImplVar.rule.GetName() + "]\n"
+func (rn *ruleNodeImpl) String() string {
+	return "\t[RuleNode id(" + strconv.Itoa(rn.id) + "): \n" +
+		"\t\tIdentifier           = " + IdentifiersToString(rn.identifiers) + " ;\n" +
+		"\t\tRule                 = " + rn.rule.GetName() + "]\n"
 }
 
-func (ruleNodeImplVar *ruleNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
-	// fmt.Println("Rule " + ruleNodeImplVar.getRule().GetName() + " fired, total tuples:" + strconv.Itoa(len(handles)))
+func (rn *ruleNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
+	// fmt.Println("Rule " + rn.getRule().GetName() + " fired, total tuples:" + strconv.Itoa(len(handles)))
 	// tuples := copyIntoTupleArray(handles)
-	// ruleNodeImplVar.getRule.performAction(tuples)
+	// rn.getRule.performAction(tuples)
 	tupleMap := copyIntoTupleMap(handles)
-	actionFn := ruleNodeImplVar.getRule().GetActionFn()
+	actionFn := rn.getRule().GetActionFn()
 	if actionFn != nil {
-		actionFn(ruleNodeImplVar.getRule().GetName(), tupleMap)
+		actionFn(rn.getRule().GetName(), tupleMap)
 	}
 
 }
-func (ruleNodeImplVar *ruleNodeImpl) getRule() Rule {
-	return ruleNodeImplVar.rule
+func (rn *ruleNodeImpl) getRule() Rule {
+	return rn.rule
 }
