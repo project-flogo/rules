@@ -22,7 +22,7 @@ Similarly, removing a StreamTuple from the network is called `Retract`-ing it fr
 With this backgroud, let us see how it translates to API/code. *This is a draft Server-side API*
 
 
-	//Create Rule, define conditiond and set action callback
+	//Create Rule, define conditions and set action callback
 	rule := ruleapi.NewRule("* Ensure n1.name is Bob and n2.name matches n1.name ie Bob in this case *")
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
 	rule.AddCondition("c1", []model.StreamSource{"n1"}, checkForBob)          // check for name "Bob" in n1
