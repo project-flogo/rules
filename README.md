@@ -104,9 +104,9 @@ With this backgroud, let us see how it translates to API/code. *This is a draft 
 * Check out the repo say at `/home/yourname/go` and set environment variable `$GOPATH` to it
 * Goto `github.com/TIBCOSoftware/bego` such that your path looks like this
 * `/home/yourname/go/src/github.com/TIBCOSoftware/bego`
-* Go to that the folder above and 
+* Go to the folder above and 
 * `go install ./...`
-* This will create an example executable at `/home/yourname/go/bin/rulesapp`
+* This will create the example executable at `/home/yourname/go/bin/rulesapp`
 * `cd /home/yourname/go/bin`
 * `./rulesapp`
 
