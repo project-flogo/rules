@@ -5,9 +5,9 @@ BE*Go* is a lightweight rules engine written in Go.
 ## Definitions
 A `StreamSource` represents a streaming data source a.k.a Channel
 
-A `StreamTuple` is an instance tuple of a certain `StreamSource`
+A `StreamTuple` is an instance of a certain type of `StreamSource`
 
-A `Rule` constitutes of multiple Conditions and the rule trigers when all its conditions pass
+A `Rule` constitutes of multiple Conditions and the rule triggers when all its conditions pass
 
 A `Condition` is an expression comprising of data tuples from one or more StreamSources. When the expression evaluates to true, the condition passes. Thus a Condition is characterized by the number and types of StreamSource involved in its evaluation. In order to optimize a Rule's evaluation, the Rule network needs to know of the number and type of stream sources in each of its Conditions. Thus the Condition can either be defined upfront with the number of and type of StreamSources or this can be inferred (for a start, we choose the former)
 
@@ -19,7 +19,7 @@ When streaming data arrives, a StreamTuple is formed, and is `Assert`-ed into th
 Similarly, removing a StreamTuple from the network is called `Retract`-ing it from the network. You may retract when for example, the TTL of a StreamTuple expires based on a certain expiration policy
 
 ## Server API
-With this backgroud, let us see how it translates to API/code. *This is a draft Server-side API*
+With this background, let us see how it translates to API/code. *This is a draft Server-side API*
 
 
 	//Create Rule, define conditions and set action callback
@@ -27,7 +27,7 @@ With this backgroud, let us see how it translates to API/code. *This is a draft 
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
 	rule.AddCondition("c1", []model.StreamSource{"n1"}, checkForBob)          // check for name "Bob" in n1
 	rule.AddCondition("c2", []model.StreamSource{"n1", "n2"}, checkSameNames) // match the "name" field in both tuples
-	//in effect, fire the rule when name field in both tuples in "Bob"
+	//in effect, fire the rule when name field in both tuples is "Bob"
 	rule.SetActionFn(myActionFn)
 
 	//Create a RuleSession and add the above Rule
@@ -101,7 +101,7 @@ With this backgroud, let us see how it translates to API/code. *This is a draft 
     }
 
 ## Try it out
-* Check out the repo say at `/home/yourname/go` and set environment variable `$GOPATH` to it
+* Checkout the repo at say `/home/yourname/go` and set environment variable `$GOPATH` to it
 * Goto `github.com/TIBCOSoftware/bego` such that your path looks like this
 * `/home/yourname/go/src/github.com/TIBCOSoftware/bego`
 * Go to the folder above and 
