@@ -12,7 +12,7 @@ type nodeLink interface {
 
 	setChild(child node)
 	setIsRightChild(isRight bool)
-	propagateObjects(handles []reteHandle)
+	propagateObjects(handles []reteHandle, cr conflictRes)
 }
 
 type nodeLinkImpl struct {
@@ -128,7 +128,7 @@ func (nl *nodeLinkImpl) setIsRightChild(isRight bool) {
 	nl.isRight = isRight
 }
 
-func (nl *nodeLinkImpl) propagateObjects(handles []reteHandle) {
+func (nl *nodeLinkImpl) propagateObjects(handles []reteHandle, cr conflictRes) {
 	if nl.convert != nil {
 		convertedHandles := make([]reteHandle, nl.numIdentifiers)
 		for i := 0; i < nl.numIdentifiers; i++ {
@@ -136,5 +136,5 @@ func (nl *nodeLinkImpl) propagateObjects(handles []reteHandle) {
 		}
 		handles = convertedHandles
 	}
-	nl.child.assertObjects(handles, nl.isRightNode())
+	nl.child.assertObjects(handles, nl.isRightNode(), cr)
 }

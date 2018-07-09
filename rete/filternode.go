@@ -76,9 +76,9 @@ func (fn *filterNodeImpl) String() string {
 		"\t\tCondition             = " + fn.conditionVar.String() + "]"
 }
 
-func (fn *filterNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
+func (fn *filterNodeImpl) assertObjects(handles []reteHandle, isRight bool, cr conflictRes) {
 	if fn.conditionVar == nil {
-		fn.nodeLinkVar.propagateObjects(handles)
+		fn.nodeLinkVar.propagateObjects(handles, cr)
 	} else {
 		//TODO: rete listeners...
 		var tuples []model.StreamTuple
@@ -96,7 +96,7 @@ func (fn *filterNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
 		cv := fn.conditionVar
 		toPropagate := cv.getEvaluator()(cv.getName(), cv.getRule().GetName(), tupleMap)
 		if toPropagate {
-			fn.nodeLinkVar.propagateObjects(handles)
+			fn.nodeLinkVar.propagateObjects(handles, cr)
 		}
 	}
 }

@@ -472,24 +472,25 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 }
 
 func (nw *reteNetworkImpl) Assert(tuple model.StreamTuple) {
+	cr := newConflictRes()
 	dataSource := tuple.GetStreamDataSource()
 	listItem := nw.allClassNodes.Get(string(dataSource))
 	if listItem != nil {
 		classNodeVar := listItem.(classNode)
-		classNodeVar.assert(tuple)
+		classNodeVar.assert(tuple, cr)
 	} else {
 		fmt.Println("No rule exists for data stream: " + dataSource)
 	}
+
+	cr.resolveConflict()
+
 }
 
 func (nw *reteNetworkImpl) Retract(tuple model.StreamTuple) {
-
 	reteHandle := allHandles[tuple]
 	if reteHandle == nil {
 		//TODO: Nothing to retract!
 		return
 	}
-
 	reteHandle.removeJoinTableRowRefs()
-
 }

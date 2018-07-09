@@ -28,15 +28,18 @@ func (rn *ruleNodeImpl) String() string {
 		"\t\tRule                 = " + rn.rule.GetName() + "]\n"
 }
 
-func (rn *ruleNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
+func (rn *ruleNodeImpl) assertObjects(handles []reteHandle, isRight bool, cr conflictRes) {
 	// fmt.Println("Rule " + rn.getRule().GetName() + " fired, total tuples:" + strconv.Itoa(len(handles)))
 	// tuples := copyIntoTupleArray(handles)
 	// rn.getRule.performAction(tuples)
 	tupleMap := copyIntoTupleMap(handles)
-	actionFn := rn.getRule().GetActionFn()
-	if actionFn != nil {
-		actionFn(rn.getRule().GetName(), tupleMap)
-	}
+
+	cr.addAgendaItem(rn.getRule(), tupleMap)
+
+	// actionFn := rn.getRule().GetActionFn()
+	// if actionFn != nil {
+	// 	actionFn(rn.getRule().GetName(), tupleMap)
+	// }
 
 }
 func (rn *ruleNodeImpl) getRule() Rule {

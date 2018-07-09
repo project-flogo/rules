@@ -12,7 +12,7 @@ type classNode interface {
 	addClassNodeLink(classNodeLink)
 	removeClassNodeLink(classNodeLink)
 	getClassNodeLinks() utils.ArrayList
-	assert(tuple model.StreamTuple)
+	assert(tuple model.StreamTuple, cr conflictRes)
 }
 
 type classNodeImpl struct {
@@ -73,7 +73,7 @@ func (cn *classNodeImpl) String() string {
 	return ret
 }
 
-func (cn *classNodeImpl) assert(tuple model.StreamTuple) {
+func (cn *classNodeImpl) assert(tuple model.StreamTuple, cr conflictRes) {
 	handle := getOrCreateHandle(tuple)
 
 	handles := make([]reteHandle, 1)
@@ -81,7 +81,7 @@ func (cn *classNodeImpl) assert(tuple model.StreamTuple) {
 
 	for i := 0; i < cn.getClassNodeLinks().Len(); i++ {
 		classNodeLinkVar := cn.getClassNodeLinks().Get(i).(classNodeLink)
-		classNodeLinkVar.propagateObjects(handles)
+		classNodeLinkVar.propagateObjects(handles, cr)
 	}
 
 }

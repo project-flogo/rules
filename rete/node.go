@@ -13,7 +13,7 @@ type node interface {
 	getIdentifiers() []identifier
 	getID() int
 	addNodeLink(nodeLink)
-	assertObjects(handles []reteHandle, isRight bool)
+	assertObjects(handles []reteHandle, isRight bool, cr conflictRes)
 }
 
 type nodeImpl struct {
@@ -83,6 +83,6 @@ func findSimilarNodes(nodeSet utils.ArrayList) []node {
 	return similarNodes
 }
 
-func (n *nodeImpl) assertObjects(handles []reteHandle, isRight bool) {
+func (n *nodeImpl) assertObjects(handles []reteHandle, isRight bool, cr conflictRes) {
 	fmt.Println("Abstract method here.., see filterNodeImpl and joinNodeImpl")
 }

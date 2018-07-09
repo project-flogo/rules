@@ -149,17 +149,17 @@ func (jn *joinNodeImpl) String() string {
 		"\t\tCondition            = " + joinConditionStr + "]\n"
 }
 
-func (jn *joinNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
+func (jn *joinNodeImpl) assertObjects(handles []reteHandle, isRight bool, cr conflictRes) {
 	//TODO:
 	joinedHandles := make([]reteHandle, jn.totalIdrLen)
 	if isRight {
-		jn.assertFromRight(handles, joinedHandles)
+		jn.assertFromRight(handles, joinedHandles, cr)
 	} else {
-		jn.assertFromLeft(handles, joinedHandles)
+		jn.assertFromLeft(handles, joinedHandles, cr)
 	}
 }
 
-func (jn *joinNodeImpl) assertFromRight(handles []reteHandle, joinedHandles []reteHandle) {
+func (jn *joinNodeImpl) assertFromRight(handles []reteHandle, joinedHandles []reteHandle, cr conflictRes) {
 	//TODO: other stuff. right now focus on tuple table
 	jn.joinRightObjects(handles, joinedHandles)
 	tupleTableRow := newJoinTableRow(handles)
@@ -180,7 +180,7 @@ func (jn *joinNodeImpl) assertFromRight(handles []reteHandle, joinedHandles []re
 			toPropagate = cv.getEvaluator()(cv.getName(), cv.getRule().GetName(), tupleMap)
 		}
 		if toPropagate {
-			jn.nodeLinkVar.propagateObjects(joinedHandles)
+			jn.nodeLinkVar.propagateObjects(joinedHandles, cr)
 		}
 	}
 }
@@ -207,7 +207,7 @@ func (jn *joinNodeImpl) joinRightObjects(rightHandles []reteHandle, joinedHandle
 	return true
 }
 
-func (jn *joinNodeImpl) assertFromLeft(handles []reteHandle, joinedHandles []reteHandle) {
+func (jn *joinNodeImpl) assertFromLeft(handles []reteHandle, joinedHandles []reteHandle, cr conflictRes) {
 	jn.joinLeftObjects(handles, joinedHandles)
 	//TODO: other stuff. right now focus on tuple table
 	tupleTableRow := newJoinTableRow(handles)
@@ -228,7 +228,7 @@ func (jn *joinNodeImpl) assertFromLeft(handles []reteHandle, joinedHandles []ret
 			toPropagate = cv.getEvaluator()(cv.getName(), cv.getRule().GetName(), tupleMap)
 		}
 		if toPropagate {
-			jn.nodeLinkVar.propagateObjects(joinedHandles)
+			jn.nodeLinkVar.propagateObjects(joinedHandles, cr)
 		}
 	}
 }
