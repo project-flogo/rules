@@ -1,6 +1,7 @@
 package rete
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/TIBCOSoftware/bego/common/model"
@@ -76,9 +77,9 @@ func (fn *filterNodeImpl) String() string {
 		"\t\tCondition             = " + fn.conditionVar.String() + "]"
 }
 
-func (fn *filterNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
+func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []reteHandle, isRight bool) {
 	if fn.conditionVar == nil {
-		fn.nodeLinkVar.propagateObjects(handles)
+		fn.nodeLinkVar.propagateObjects(ctx, handles)
 	} else {
 		//TODO: rete listeners...
 		var tuples []model.StreamTuple
@@ -96,7 +97,7 @@ func (fn *filterNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
 		cv := fn.conditionVar
 		toPropagate := cv.getEvaluator()(cv.getName(), cv.getRule().GetName(), tupleMap)
 		if toPropagate {
-			fn.nodeLinkVar.propagateObjects(handles)
+			fn.nodeLinkVar.propagateObjects(ctx, handles)
 		}
 	}
 }

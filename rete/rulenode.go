@@ -1,6 +1,7 @@
 package rete
 
 import (
+	"context"
 	"strconv"
 )
 
@@ -28,16 +29,20 @@ func (rn *ruleNodeImpl) String() string {
 		"\t\tRule                 = " + rn.rule.GetName() + "]\n"
 }
 
-func (rn *ruleNodeImpl) assertObjects(handles []reteHandle, isRight bool) {
+func (rn *ruleNodeImpl) assertObjects(ctx context.Context, handles []reteHandle, isRight bool) {
 	// fmt.Println("Rule " + rn.getRule().GetName() + " fired, total tuples:" + strconv.Itoa(len(handles)))
 	// tuples := copyIntoTupleArray(handles)
 	// rn.getRule.performAction(tuples)
 	tupleMap := copyIntoTupleMap(handles)
-	actionFn := rn.getRule().GetActionFn()
-	if actionFn != nil {
-		actionFn(rn.getRule().GetName(), tupleMap)
-	}
 
+	cr := getCrFromContext(ctx)
+
+	cr.addAgendaItem(rn.getRule(), tupleMap)
+
+	// actionFn := rn.getRule().GetActionFn()
+	// if actionFn != nil {
+	// 	actionFn(rn.getRule().GetName(), tupleMap)
+	// }
 }
 func (rn *ruleNodeImpl) getRule() Rule {
 	return rn.rule

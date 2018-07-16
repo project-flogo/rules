@@ -1,6 +1,7 @@
 package ruleapi
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/TIBCOSoftware/bego/common/model"
@@ -11,7 +12,7 @@ type RuleSession interface {
 	AddRule(rule Rule) (int, bool)
 	DeleteRule(ruleName string)
 
-	Assert(tuple model.StreamTuple)
+	Assert(ctx context.Context, tuple model.StreamTuple)
 	Retract(tuple model.StreamTuple)
 	PrintNetwork()
 }
@@ -45,8 +46,8 @@ func (rs *rulesessionImpl) DeleteRule(ruleName string) {
 	rs.reteNetwork.RemoveRule(ruleName)
 }
 
-func (rs *rulesessionImpl) Assert(tuple model.StreamTuple) {
-	rs.reteNetwork.Assert(tuple)
+func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.StreamTuple) {
+	rs.reteNetwork.Assert(ctx, tuple)
 }
 
 func (rs *rulesessionImpl) Retract(tuple model.StreamTuple) {

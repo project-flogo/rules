@@ -1,6 +1,8 @@
 package rete
 
 import (
+	"context"
+
 	"github.com/TIBCOSoftware/bego/common/model"
 	"github.com/TIBCOSoftware/bego/utils"
 )
@@ -12,7 +14,7 @@ type classNode interface {
 	addClassNodeLink(classNodeLink)
 	removeClassNodeLink(classNodeLink)
 	getClassNodeLinks() utils.ArrayList
-	assert(tuple model.StreamTuple)
+	assert(ctx context.Context, tuple model.StreamTuple)
 }
 
 type classNodeImpl struct {
@@ -73,7 +75,7 @@ func (cn *classNodeImpl) String() string {
 	return ret
 }
 
-func (cn *classNodeImpl) assert(tuple model.StreamTuple) {
+func (cn *classNodeImpl) assert(ctx context.Context, tuple model.StreamTuple) {
 	handle := getOrCreateHandle(tuple)
 
 	handles := make([]reteHandle, 1)
@@ -81,7 +83,7 @@ func (cn *classNodeImpl) assert(tuple model.StreamTuple) {
 
 	for i := 0; i < cn.getClassNodeLinks().Len(); i++ {
 		classNodeLinkVar := cn.getClassNodeLinks().Get(i).(classNodeLink)
-		classNodeLinkVar.propagateObjects(handles)
+		classNodeLinkVar.propagateObjects(ctx, handles)
 	}
 
 }

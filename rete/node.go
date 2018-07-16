@@ -1,6 +1,7 @@
 package rete
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -13,7 +14,7 @@ type node interface {
 	getIdentifiers() []identifier
 	getID() int
 	addNodeLink(nodeLink)
-	assertObjects(handles []reteHandle, isRight bool)
+	assertObjects(ctx context.Context, handles []reteHandle, isRight bool)
 }
 
 type nodeImpl struct {
@@ -83,6 +84,6 @@ func findSimilarNodes(nodeSet utils.ArrayList) []node {
 	return similarNodes
 }
 
-func (n *nodeImpl) assertObjects(handles []reteHandle, isRight bool) {
+func (n *nodeImpl) assertObjects(ctx context.Context, handles []reteHandle, isRight bool) {
 	fmt.Println("Abstract method here.., see filterNodeImpl and joinNodeImpl")
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/TIBCOSoftware/bego/common/model"
@@ -22,44 +23,46 @@ func main1() {
 	ruleSession := ruleapi.NewRuleSession()
 	ruleSession.AddRule(rule)
 
+	ctx := context.Background()
+
 	//Now assert a few facts and see if the Rule Action callback fires.
 	streamTuple1 := model.NewStreamTuple("n1")
-	ruleSession.Assert(streamTuple1)
+	ruleSession.Assert(ctx, streamTuple1)
 
 	streamTuple2 := model.NewStreamTuple("n1")
-	ruleSession.Assert(streamTuple2)
+	ruleSession.Assert(ctx, streamTuple2)
 
 	streamTuple3 := model.NewStreamTuple("n1")
-	ruleSession.Assert(streamTuple3)
+	ruleSession.Assert(ctx, streamTuple3)
 
 	streamTuple4 := model.NewStreamTuple("n2")
-	ruleSession.Assert(streamTuple4)
+	ruleSession.Assert(ctx, streamTuple4)
 
 	streamTuple5 := model.NewStreamTuple("n2")
-	ruleSession.Assert(streamTuple5)
+	ruleSession.Assert(ctx, streamTuple5)
 
 	streamTuple6 := model.NewStreamTuple("n3")
-	ruleSession.Assert(streamTuple6)
+	ruleSession.Assert(ctx, streamTuple6)
 
 	streamTuple7 := model.NewStreamTuple("n3")
-	ruleSession.Assert(streamTuple7)
+	ruleSession.Assert(ctx, streamTuple7)
 
 	ruleSession.Retract(streamTuple7)
 
 	fmt.Println("After retracting n3")
 
 	streamTuple8 := model.NewStreamTuple("n1")
-	ruleSession.Assert(streamTuple8)
+	ruleSession.Assert(ctx, streamTuple8)
 
 	ruleSession.DeleteRule("first rule")
 	fmt.Println("After deleting 'first rule'")
 
-	ruleSession.Assert(streamTuple1)
-	ruleSession.Assert(streamTuple4)
-	ruleSession.Assert(streamTuple6)
+	ruleSession.Assert(ctx, streamTuple1)
+	ruleSession.Assert(ctx, streamTuple4)
+	ruleSession.Assert(ctx, streamTuple6)
 
 	// streamTuple8 := model.NewStreamTuple("n2")
-	// ruleSession.Assert(streamTuple8)
+	// ruleSession.Assert(ctx, streamTuple8)
 	// fmt.Println("Rules fired after retracting n1s...")
 	// ruleSession.Retract(streamTuple1)
 	// ruleSession.Retract(streamTuple2)
@@ -67,7 +70,7 @@ func main1() {
 	// ruleSession.Retract(streamTuple4)
 	// ruleSession.Retract(streamTuple5)
 
-	// ruleSession.Assert(streamTuple8)
+	// ruleSession.Assert(ctx, streamTuple8)
 
 }
 

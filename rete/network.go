@@ -1,6 +1,7 @@
 package rete
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"strconv"
@@ -15,7 +16,7 @@ type Network interface {
 	AddRule(Rule) int
 	String() string
 	RemoveRule(string) Rule
-	Assert(tuple model.StreamTuple)
+	Assert(ctx context.Context, tuple model.StreamTuple)
 	Retract(tuple model.StreamTuple)
 }
 
@@ -471,25 +472,44 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 	return "\t[ClassNode Class(" + classNodeImpl.getName() + ")" + links + "]\n"
 }
 
-func (nw *reteNetworkImpl) Assert(tuple model.StreamTuple) {
+func (nw *reteNetworkImpl) Assert(ctx context.Context, tuple model.StreamTuple) {
+
+	var cr conflictRes
+	var reteCtxValPtr *reteCtxValType
+	if ctx == nil {
+		reteCtxValPtr = NewReteCtx()
+		ctx = context.WithValue(context.Background(), reteCTXKEY, reteCtxValPtr)
+	} else {
+		intf := ctx.Value(reteCTXKEY)
+		if intf == nil {
+			reteCtxValPtr = NewReteCtx()
+			ctx = context.WithValue(ctx, reteCTXKEY, reteCtxValPtr)
+			cr = newConflictRes()
+			reteCtxValPtr.context["conflictRes"] = cr
+		} else { //Assert called from inside
+			reteCtxValPtr = intf.(*reteCtxValType)
+			cr = reteCtxValPtr.context["conflictRes"].(conflictRes)
+		}
+	}
+
 	dataSource := tuple.GetStreamDataSource()
 	listItem := nw.allClassNodes.Get(string(dataSource))
 	if listItem != nil {
 		classNodeVar := listItem.(classNode)
-		classNodeVar.assert(tuple)
+		classNodeVar.assert(ctx, tuple)
 	} else {
 		fmt.Println("No rule exists for data stream: " + dataSource)
 	}
+
+	cr.resolveConflict(ctx)
+
 }
 
 func (nw *reteNetworkImpl) Retract(tuple model.StreamTuple) {
-
 	reteHandle := allHandles[tuple]
 	if reteHandle == nil {
 		//TODO: Nothing to retract!
 		return
 	}
-
 	reteHandle.removeJoinTableRowRefs()
-
 }
