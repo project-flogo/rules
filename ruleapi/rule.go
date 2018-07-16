@@ -8,6 +8,7 @@ type Rule interface {
 	GetActionFn() model.ActionFunction
 	String() string
 	GetConditions() []condition
+	GetPriority() int
 }
 
 //MutableRule interface has methods to add conditions and actions
@@ -15,12 +16,14 @@ type MutableRule interface {
 	Rule
 	AddCondition(conditionName string, idrs []model.StreamSource, cFn model.ConditionEvaluator)
 	SetActionFn(actionFn model.ActionFunction)
+	SetPriority(priority int)
 }
 
 type ruleImpl struct {
 	name       string
 	conditions []condition
 	actionFn   model.ActionFunction
+	priority   int
 }
 
 //NewRule ... Create a new rule
@@ -52,6 +55,14 @@ func (rule *ruleImpl) SetActionFn(actionFn model.ActionFunction) {
 func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.StreamSource, cfn model.ConditionEvaluator) {
 	condition := NewCondition(conditionName, rule, idrs, cfn)
 	rule.conditions = append(rule.conditions, condition)
+}
+
+func (rule *ruleImpl) GetPriority() int {
+	return rule.priority
+}
+
+func (rule *ruleImpl) SetPriority(priority int) {
+	rule.priority = priority
 }
 
 func (rule *ruleImpl) String() string {

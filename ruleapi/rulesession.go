@@ -63,5 +63,6 @@ func convertAPIRuleToReteRule(apiRule Rule) rete.Rule {
 		reteRule.AddCondition(c.GetName(), c.GetStreamSource(), c.GetEvaluator())
 	}
 	reteRule.SetAction(apiRule.GetActionFn())
+	reteRule.SetPriority(apiRule.GetPriority())
 	return reteRule
 }

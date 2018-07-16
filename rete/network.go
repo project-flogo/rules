@@ -502,7 +502,6 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, tuple model.StreamTuple) 
 	}
 
 	cr.resolveConflict(ctx)
-
 }
 
 func (nw *reteNetworkImpl) Retract(tuple model.StreamTuple) {

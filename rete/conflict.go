@@ -3,7 +3,6 @@ package rete
 import (
 	"container/list"
 	"context"
-
 	"github.com/TIBCOSoftware/bego/common/model"
 )
 

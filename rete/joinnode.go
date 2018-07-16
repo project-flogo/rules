@@ -161,6 +161,7 @@ func (jn *joinNodeImpl) assertObjects(ctx context.Context, handles []reteHandle,
 }
 
 func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []reteHandle, joinedHandles []reteHandle) {
+
 	//TODO: other stuff. right now focus on tuple table
 	jn.joinRightObjects(handles, joinedHandles)
 	tupleTableRow := newJoinTableRow(handles)
