@@ -13,7 +13,7 @@ type RuleSession interface {
 	DeleteRule(ruleName string)
 
 	Assert(ctx context.Context, tuple model.StreamTuple)
-	Retract(tuple model.StreamTuple)
+	Retract(ctx context.Context, tuple model.StreamTuple)
 	PrintNetwork()
 }
 
@@ -50,7 +50,7 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.StreamTuple) 
 	rs.reteNetwork.Assert(ctx, tuple)
 }
 
-func (rs *rulesessionImpl) Retract(tuple model.StreamTuple) {
+func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.StreamTuple) {
 	rs.reteNetwork.Retract(tuple)
 }
 
@@ -65,4 +65,8 @@ func convertAPIRuleToReteRule(apiRule Rule) rete.Rule {
 	reteRule.SetAction(apiRule.GetActionFn())
 	reteRule.SetPriority(apiRule.GetPriority())
 	return reteRule
+}
+
+func newCtx() {
+
 }

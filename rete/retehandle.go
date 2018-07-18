@@ -1,6 +1,8 @@
 package rete
 
 import (
+	"context"
+
 	"github.com/TIBCOSoftware/bego/common/model"
 	"github.com/TIBCOSoftware/bego/utils"
 )
@@ -31,16 +33,9 @@ func (hdl *handleImpl) getTuple() model.StreamTuple {
 	return hdl.tuple
 }
 
-func getOrCreateHandle(tuple model.StreamTuple) reteHandle {
-	h := allHandles[tuple]
-	if h == nil {
-		h1 := handleImpl{}
-		h1.initHandleImpl()
-		h1.setTuple(tuple)
-		h = &h1
-		allHandles[tuple] = h
-	}
-	return h
+func getOrCreateHandle(ctx context.Context, tuple model.StreamTuple) reteHandle {
+	reteCtxVar := getReteCtx(ctx)
+	return reteCtxVar.getNetwork().getOrCreateHandle(tuple)
 }
 
 func (hdl *handleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable) {

@@ -47,7 +47,7 @@ func main1() {
 	streamTuple7 := model.NewStreamTuple("n3")
 	ruleSession.Assert(ctx, streamTuple7)
 
-	ruleSession.Retract(streamTuple7)
+	ruleSession.Retract(ctx, streamTuple7)
 
 	fmt.Println("After retracting n3")
 

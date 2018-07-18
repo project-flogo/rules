@@ -18,6 +18,9 @@ type Network interface {
 	RemoveRule(string) Rule
 	Assert(ctx context.Context, tuple model.StreamTuple)
 	Retract(tuple model.StreamTuple)
+
+	assertInternal(ctx context.Context, tuple model.StreamTuple)
+	getOrCreateHandle(tuple model.StreamTuple) reteHandle
 }
 
 type reteNetworkImpl struct {
@@ -32,6 +35,8 @@ type reteNetworkImpl struct {
 
 	//Holds the Rule name as key and a pointer to a slice of NodeLinks as value
 	ruleNameClassNodeLinksOfRule utils.Map //utils.ArrayList of ClassNodeLink
+
+	allHandles map[model.StreamTuple]reteHandle
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -46,6 +51,7 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 	nw.allClassNodes = utils.NewHashMap()
 	nw.ruleNameNodesOfRule = utils.NewHashMap()
 	nw.ruleNameClassNodeLinksOfRule = utils.NewHashMap()
+	nw.allHandles = make(map[model.StreamTuple]reteHandle)
 }
 
 func (nw *reteNetworkImpl) AddRule(rule Rule) int {
@@ -474,24 +480,32 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 
 func (nw *reteNetworkImpl) Assert(ctx context.Context, tuple model.StreamTuple) {
 
-	var cr conflictRes
-	var reteCtxValPtr *reteCtxValType
-	if ctx == nil {
-		reteCtxValPtr = NewReteCtx()
-		ctx = context.WithValue(context.Background(), reteCTXKEY, reteCtxValPtr)
-	} else {
-		intf := ctx.Value(reteCTXKEY)
-		if intf == nil {
-			reteCtxValPtr = NewReteCtx()
-			ctx = context.WithValue(ctx, reteCTXKEY, reteCtxValPtr)
-			cr = newConflictRes()
-			reteCtxValPtr.context["conflictRes"] = cr
-		} else { //Assert called from inside
-			reteCtxValPtr = intf.(*reteCtxValType)
-			cr = reteCtxValPtr.context["conflictRes"].(conflictRes)
-		}
+	var reteCtxVar reteCtx
+	fromOutside := false
+	if ctx == nil { //user dint pass context, so create one
+		ctx, reteCtxVar = newCtx(nw)
+		fromOutside = true
+	} else { //caller passed a context but it may not have a rete context
+		reteCtxVar, fromOutside = getOrSetReteCtx(ctx, nw)
 	}
 
+	if fromOutside {
+		nw.assertInternal(ctx, tuple)
+	} else {
+		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple))
+	}
+
+	reteCtxVar.getConflictResolver().resolveConflict(ctx)
+}
+
+func (nw *reteNetworkImpl) Retract(tuple model.StreamTuple) {
+	reteHandle := nw.allHandles[tuple]
+	if reteHandle != nil {
+		reteHandle.removeJoinTableRowRefs()
+	}
+}
+
+func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.StreamTuple) {
 	dataSource := tuple.GetStreamDataSource()
 	listItem := nw.allClassNodes.Get(string(dataSource))
 	if listItem != nil {
@@ -500,15 +514,16 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, tuple model.StreamTuple) 
 	} else {
 		fmt.Println("No rule exists for data stream: " + dataSource)
 	}
-
-	cr.resolveConflict(ctx)
 }
 
-func (nw *reteNetworkImpl) Retract(tuple model.StreamTuple) {
-	reteHandle := allHandles[tuple]
-	if reteHandle == nil {
-		//TODO: Nothing to retract!
-		return
+func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.StreamTuple) reteHandle {
+	h := nw.allHandles[tuple]
+	if h == nil {
+		h1 := handleImpl{}
+		h1.initHandleImpl()
+		h1.setTuple(tuple)
+		h = &h1
+		nw.allHandles[tuple] = h
 	}
-	reteHandle.removeJoinTableRowRefs()
+	return h
 }

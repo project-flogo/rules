@@ -17,7 +17,7 @@ func copyIntoTupleMap(handles []reteHandle) map[model.StreamSource]model.StreamT
 	tuples := make([]model.StreamTuple, len(handles))
 	for i := 0; i < len(handles); i++ {
 		tuples[i] = handles[i].getTuple()
-		tupleMap[tuples[i].GetStreamDataSource()] = tuples[i]
+		tupleMap[tuples[i].GetStreamDataSource()] = tuples[i] //assuming no self-joins! need to correct this!
 	}
 	return tupleMap
 }

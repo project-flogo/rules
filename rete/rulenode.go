@@ -35,7 +35,7 @@ func (rn *ruleNodeImpl) assertObjects(ctx context.Context, handles []reteHandle,
 	// rn.getRule.performAction(tuples)
 	tupleMap := copyIntoTupleMap(handles)
 
-	cr := getCrFromContext(ctx)
+	cr := getReteCtx(ctx).getConflictResolver()
 
 	cr.addAgendaItem(rn.getRule(), tupleMap)
 
