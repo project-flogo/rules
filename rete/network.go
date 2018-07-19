@@ -16,7 +16,7 @@ type Network interface {
 	AddRule(Rule) int
 	String() string
 	RemoveRule(string) Rule
-	Assert(ctx context.Context, tuple model.StreamTuple)
+	Assert(ctx context.Context, rs model.RuleSession, tuple model.StreamTuple)
 	Retract(tuple model.StreamTuple)
 
 	assertInternal(ctx context.Context, tuple model.StreamTuple)
@@ -478,24 +478,17 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 	return "\t[ClassNode Class(" + classNodeImpl.getName() + ")" + links + "]\n"
 }
 
-func (nw *reteNetworkImpl) Assert(ctx context.Context, tuple model.StreamTuple) {
+func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.StreamTuple) {
 
-	var reteCtxVar reteCtx
-	fromOutside := false
-	if ctx == nil { //user dint pass context, so create one
-		ctx, reteCtxVar = newCtx(nw)
-		fromOutside = true
-	} else { //caller passed a context but it may not have a rete context
-		reteCtxVar, fromOutside = getOrSetReteCtx(ctx, nw)
-	}
+	reteCtxVar, isRecursive, newCtx := getOrSetReteCtx(ctx, nw, rs)
 
-	if fromOutside {
-		nw.assertInternal(ctx, tuple)
+	if !isRecursive {
+		nw.assertInternal(newCtx, tuple)
 	} else {
 		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple))
 	}
 
-	reteCtxVar.getConflictResolver().resolveConflict(ctx)
+	reteCtxVar.getConflictResolver().resolveConflict(newCtx)
 }
 
 func (nw *reteNetworkImpl) Retract(tuple model.StreamTuple) {

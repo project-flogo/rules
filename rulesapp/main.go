@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/TIBCOSoftware/bego/common/model"
@@ -116,7 +117,7 @@ func checkSameNames(ruleName string, condName string, tuples map[model.StreamSou
 	return name1 == name2
 }
 
-func myActionFn(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+func myActionFn(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
 	fmt.Printf("Rule fired: [%s]\n", ruleName)
 	streamTuple1 := tuples["n1"]
 	streamTuple2 := tuples["n2"]
@@ -128,7 +129,7 @@ func myActionFn(ruleName string, tuples map[model.StreamSource]model.StreamTuple
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
 }
 
-func checkForTomAction(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+func checkForTomAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
 	fmt.Printf("Rule fired: [%s]\n", ruleName)
 	streamTuple1 := tuples["n1"]
 
@@ -136,7 +137,7 @@ func checkForTomAction(ruleName string, tuples map[model.StreamSource]model.Stre
 	fmt.Printf("n1.name = [%s]\n", name1)
 }
 
-func checkForTomAction2(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+func checkForTomAction2(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
 	fmt.Printf("Rule fired: [%s]\n", ruleName)
 	streamTuple1 := tuples["n1"]
 

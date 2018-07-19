@@ -1,6 +1,7 @@
 package rulesapp
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -130,7 +131,7 @@ func myActionFn(ruleName string, tuples map[model.StreamSource]model.StreamTuple
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
 }
 
-func bobRuleFired(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+func bobRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
 	fmt.Printf("Bob Rule fired: [%s]\n", ruleName)
 	streamTuple1 := tuples["n1"]
 	if streamTuple1 == nil {
@@ -138,9 +139,10 @@ func bobRuleFired(ruleName string, tuples map[model.StreamSource]model.StreamTup
 	}
 	name1 := streamTuple1.GetString("name")
 	fmt.Printf("n1.name = [%s]\n", name1)
+	assertTom(ctx, rs)
 }
 
-func tomRuleFired(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+func tomRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
 	fmt.Printf("Tom Rule fired: [%s]\n", ruleName)
 	streamTuple1 := tuples["n1"]
 
@@ -157,4 +159,11 @@ func checkForTomAction2(ruleName string, tuples map[model.StreamSource]model.Str
 
 	return
 
+}
+
+func assertTom(ctx context.Context, rs model.RuleSession) {
+	fmt.Println("Asserting n1 tuple with name=Tom")
+	streamTuple5 := model.NewStreamTuple("n1")
+	streamTuple5.SetString("name", "Tom")
+	rs.Assert(ctx, streamTuple5)
 }

@@ -3,17 +3,10 @@ package ruleapi
 import "github.com/TIBCOSoftware/bego/common/model"
 
 //Rule ... a Rule interface
-type Rule interface {
-	GetName() string
-	GetActionFn() model.ActionFunction
-	String() string
-	GetConditions() []condition
-	GetPriority() int
-}
 
 //MutableRule interface has methods to add conditions and actions
 type MutableRule interface {
-	Rule
+	model.Rule
 	AddCondition(conditionName string, idrs []model.StreamSource, cFn model.ConditionEvaluator)
 	SetActionFn(actionFn model.ActionFunction)
 	SetPriority(priority int)
@@ -21,7 +14,7 @@ type MutableRule interface {
 
 type ruleImpl struct {
 	name       string
-	conditions []condition
+	conditions []model.Condition
 	actionFn   model.ActionFunction
 	priority   int
 }
@@ -44,7 +37,7 @@ func (rule *ruleImpl) GetActionFn() model.ActionFunction {
 	return rule.actionFn
 }
 
-func (rule *ruleImpl) GetConditions() []condition {
+func (rule *ruleImpl) GetConditions() []model.Condition {
 	return rule.conditions
 }
 

@@ -55,7 +55,7 @@ func (me *modifyEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
 	reteCtx.getConflictResolver().deleteAgendaFor(ctx, me.tuple)
 	reteCtx.getNetwork().Retract(me.tuple)
-	reteCtx.getNetwork().Assert(ctx, me.tuple)
+	reteCtx.getNetwork().Assert(ctx, reteCtx.getRuleSession(), me.tuple)
 }
 
 //Delete Entry

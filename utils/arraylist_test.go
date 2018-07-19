@@ -65,4 +65,23 @@ func TestOne(t *testing.T) {
 		i := e.Value.(int)
 		fmt.Printf("%d\n", i)
 	}
+
+	var a A
+	a = nil
+	var b B
+	b = nil
+	F(a)
+	F(b)
+
+}
+
+type A interface {
+	M()
+}
+type B interface {
+	M()
+}
+
+func F(a A) {
+
 }

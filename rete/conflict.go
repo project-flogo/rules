@@ -55,9 +55,22 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 			actionTuples := item.getTuples()
 			actionFn := item.getRule().GetActionFn()
 			if actionFn != nil {
-				actionFn(item.getRule().GetName(), actionTuples)
+				reteCtx := getReteCtx(ctx)
+				actionFn(ctx, reteCtx.getRuleSession(), item.getRule().GetName(), actionTuples)
 			}
 		}
+
+		reteCtxV := getReteCtx(ctx)
+		if reteCtxV != nil {
+			opsFront := reteCtxV.getOpsList().Front()
+			for opsFront != nil {
+				opsVal := reteCtxV.getOpsList().Remove(opsFront)
+				oprn := opsVal.(opsEntry)
+				oprn.execute(ctx)
+				opsFront = reteCtxV.getOpsList().Front()
+			}
+		}
+
 		front = cr.agendaList.Front()
 	}
 }
