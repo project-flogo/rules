@@ -7,16 +7,14 @@ import (
 	"github.com/TIBCOSoftware/bego/common/model"
 )
 
-type retecontextKeyType struct {
-}
-
-var reteCTXKEY = retecontextKeyType{}
+var reteCTXKEY = model.RetecontextKeyType{}
 
 type reteCtx interface {
 	getConflictResolver() conflictRes
 	getOpsList() *list.List
 	getNetwork() Network
 	getRuleSession() model.RuleSession
+	OnValueChange(tuple model.StreamTuple)
 }
 
 //store any context, may not know all keys upfront
@@ -38,8 +36,13 @@ func (rctx *reteCtxImpl) getOpsList() *list.List {
 func (rctx *reteCtxImpl) getNetwork() Network {
 	return rctx.network
 }
+
 func (rctx *reteCtxImpl) getRuleSession() model.RuleSession {
 	return rctx.rs
+}
+
+func (rctx *reteCtxImpl) OnValueChange(tuple model.StreamTuple) {
+	rctx.opsList.PushBack(newModifyEntry(tuple))
 }
 
 func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {

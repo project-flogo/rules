@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 //StreamTuple is a runtime representation of a stream of data
 type StreamTuple interface {
@@ -14,10 +17,10 @@ type StreamTuple interface {
 //MutableStreamTuple mutable part of the stream tuple
 type MutableStreamTuple interface {
 	StreamTuple
-	SetString(name string, value string)
-	SetInt(name string, value int)
-	SetFloat(name string, value float64)
-	SetDatetime(name string, value time.Time)
+	SetString(ctx context.Context, name string, value string)
+	SetInt(ctx context.Context, name string, value int)
+	SetFloat(ctx context.Context, name string, value float64)
+	SetDatetime(ctx context.Context, name string, value time.Time)
 }
 
 type streamImpl struct {
@@ -57,15 +60,29 @@ func (streamImplVar *streamImpl) GetDateTime(name string) time.Time {
 	return v.(time.Time)
 }
 
-func (streamImplVar *streamImpl) SetString(name string, value string) {
+func (streamImplVar *streamImpl) SetString(ctx context.Context, name string, value string) {
 	streamImplVar.tuples[name] = value
+	callChangeListener(ctx, streamImplVar)
 }
-func (streamImplVar *streamImpl) SetInt(name string, value int) {
+func (streamImplVar *streamImpl) SetInt(ctx context.Context, name string, value int) {
 	streamImplVar.tuples[name] = value
+	callChangeListener(ctx, streamImplVar)
 }
-func (streamImplVar *streamImpl) SetFloat(name string, value float64) {
+func (streamImplVar *streamImpl) SetFloat(ctx context.Context, name string, value float64) {
 	streamImplVar.tuples[name] = value
+	callChangeListener(ctx, streamImplVar)
 }
-func (streamImplVar *streamImpl) SetDatetime(name string, value time.Time) {
+func (streamImplVar *streamImpl) SetDatetime(ctx context.Context, name string, value time.Time) {
 	streamImplVar.tuples[name] = value
+	callChangeListener(ctx, streamImplVar)
+}
+
+func callChangeListener(ctx context.Context, tuple StreamTuple) {
+	if ctx != nil {
+		valChangeListerI := ctx.Value(reteCTXKEY)
+		if valChangeListerI != nil {
+			valChangeLister := valChangeListerI.(ValueChangeHandler)
+			valChangeLister.OnValueChange(tuple)
+		}
+	}
 }
