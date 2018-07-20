@@ -61,20 +61,28 @@ func (streamImplVar *streamImpl) GetDateTime(name string) time.Time {
 }
 
 func (streamImplVar *streamImpl) SetString(ctx context.Context, name string, value string) {
-	streamImplVar.tuples[name] = value
-	callChangeListener(ctx, streamImplVar)
+	if streamImplVar.tuples[name] != value {
+		streamImplVar.tuples[name] = value
+		callChangeListener(ctx, streamImplVar)
+	}
 }
 func (streamImplVar *streamImpl) SetInt(ctx context.Context, name string, value int) {
-	streamImplVar.tuples[name] = value
-	callChangeListener(ctx, streamImplVar)
+	if streamImplVar.tuples[name] != value {
+		streamImplVar.tuples[name] = value
+		callChangeListener(ctx, streamImplVar)
+	}
 }
 func (streamImplVar *streamImpl) SetFloat(ctx context.Context, name string, value float64) {
-	streamImplVar.tuples[name] = value
-	callChangeListener(ctx, streamImplVar)
+	if streamImplVar.tuples[name] != value {
+		streamImplVar.tuples[name] = value
+		callChangeListener(ctx, streamImplVar)
+	}
 }
 func (streamImplVar *streamImpl) SetDatetime(ctx context.Context, name string, value time.Time) {
-	streamImplVar.tuples[name] = value
-	callChangeListener(ctx, streamImplVar)
+	if streamImplVar.tuples[name] != value {
+		streamImplVar.tuples[name] = value
+		callChangeListener(ctx, streamImplVar)
+	}
 }
 
 func callChangeListener(ctx context.Context, tuple StreamTuple) {
