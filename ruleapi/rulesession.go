@@ -48,9 +48,10 @@ func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.StreamTuple)
 	rs.reteNetwork.Retract(tuple)
 }
 
-func (rs *rulesessionImpl) PrintNetwork() {
+func (rs *rulesessionImpl) printNetwork() {
 	fmt.Println(rs.reteNetwork.String())
 }
+
 func convertAPIRuleToReteRule(apiRule model.Rule) rete.Rule {
 	reteRule := rete.NewRule(apiRule.GetName())
 	for _, c := range apiRule.GetConditions() {

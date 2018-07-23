@@ -18,7 +18,7 @@ type RuleSession interface {
 
 	Assert(ctx context.Context, tuple StreamTuple)
 	Retract(ctx context.Context, tuple StreamTuple)
-	PrintNetwork()
+	// PrintNetwork()
 }
 
 type Rule interface {
@@ -37,11 +37,6 @@ type Condition interface {
 	//Stringer.String interface
 	String() string
 }
-
-type RetecontextKeyType struct {
-}
-
-var reteCTXKEY = RetecontextKeyType{}
 
 type ValueChangeHandler interface {
 	OnValueChange(tuple StreamTuple)
