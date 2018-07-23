@@ -47,27 +47,27 @@ func main() {
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	streamTuple1 := model.NewStreamTuple("n1")
-	streamTuple1.SetString("name", "Bob")
+	streamTuple1.SetString(nil, "name", "Bob")
 	ruleSession.Assert(nil, streamTuple1)
 
 	fmt.Println("Asserting n1 tuple with name=Fred")
 	streamTuple2 := model.NewStreamTuple("n1")
-	streamTuple2.SetString("name", "Fred")
+	streamTuple2.SetString(nil, "name", "Fred")
 	ruleSession.Assert(nil, streamTuple2)
 
 	fmt.Println("Asserting n2 tuple with name=Fred")
 	streamTuple3 := model.NewStreamTuple("n2")
-	streamTuple3.SetString("name", "Fred")
+	streamTuple3.SetString(nil, "name", "Fred")
 	ruleSession.Assert(nil, streamTuple3)
 
 	fmt.Println("Asserting n2 tuple with name=Bob")
 	streamTuple4 := model.NewStreamTuple("n2")
-	streamTuple4.SetString("name", "Bob")
+	streamTuple4.SetString(nil, "name", "Bob")
 	ruleSession.Assert(nil, streamTuple4)
 
 	fmt.Println("Asserting n1 tuple with name=Tom")
 	streamTuple5 := model.NewStreamTuple("n1")
-	streamTuple5.SetString("name", "Tom")
+	streamTuple5.SetString(nil, "name", "Tom")
 	ruleSession.Assert(nil, streamTuple5)
 
 	//Retract them
