@@ -9,7 +9,6 @@ import (
 )
 
 type rulesessionImpl struct {
-	//allRules    map[string]model.Rule
 	reteNetwork rete.Network
 }
 
