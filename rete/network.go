@@ -20,6 +20,7 @@ type Network interface {
 
 	assertInternal(ctx context.Context, tuple model.StreamTuple)
 	getOrCreateHandle(tuple model.StreamTuple) reteHandle
+	incrementAndGetId() int
 }
 
 type reteNetworkImpl struct {
@@ -36,6 +37,8 @@ type reteNetworkImpl struct {
 	ruleNameClassNodeLinksOfRule map[string]*list.List //*list.List of ClassNodeLink
 
 	allHandles map[model.StreamTuple]reteHandle
+
+	currentId int
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -216,14 +219,14 @@ func (nw *reteNetworkImpl) buildNetwork(rule model.Rule, nodesOfRule *list.List,
 				//check conditions with no identifierVar
 				for e := conditionSetNoIdr.Front(); e != nil; e = e.Next() {
 					conditionVar := e.Value.(model.Condition)
-					fNode := newFilterNode(node.getIdentifiers(), conditionVar)
+					fNode := newFilterNode(nw, node.getIdentifiers(), conditionVar)
 					nodesOfRule.PushBack(fNode)
-					newNodeLink(lastNode, fNode, false)
+					newNodeLink(nw, lastNode, fNode, false)
 					lastNode = fNode
 				}
 				//Yoohoo! We have a Rule!!
 				ruleNode := newRuleNode(rule)
-				newNodeLink(node, ruleNode, false)
+				newNodeLink(nw, node, ruleNode, false)
 				nodesOfRule.PushBack(ruleNode)
 			} else {
 				idrs := SecondMinusFirst(node.getIdentifiers(), rule.GetIdentifiers())
@@ -258,8 +261,8 @@ func (nw *reteNetworkImpl) createFilterNode(rule model.Rule, nodesOfRule *list.L
 			node := f.Value.(node)
 			if ContainedByFirst(node.getIdentifiers(), conditionVar.GetIdentifiers()) {
 				//TODO
-				filterNode := newFilterNode(nil, conditionVar)
-				newNodeLink(node, filterNode, false)
+				filterNode := newFilterNode(nw, nil, conditionVar)
+				newNodeLink(nw, node, filterNode, false)
 				removeFromList(nodeSet, node)
 				nodeSet.PushBack(filterNode)
 				nodesOfRule.PushBack(filterNode)
@@ -358,8 +361,8 @@ func (nw *reteNetworkImpl) createJoinNodeFromSome(rule model.Rule, nodesOfRule *
 func (nw *reteNetworkImpl) createClassFilterNode(rule model.Rule, nodesOfRule *list.List, classNodeLinksOfRule *list.List, identifierVar model.TupleTypeAlias, conditionVar model.Condition, nodeSet *list.List) filterNode {
 	identifiers := []model.TupleTypeAlias{identifierVar}
 	classNodeVar := getClassNode(nw, identifierVar)
-	filterNodeVar := newFilterNode(identifiers, conditionVar)
-	classNodeLink := newClassNodeLink(classNodeVar, filterNodeVar, rule, identifierVar)
+	filterNodeVar := newFilterNode(nw, identifiers, conditionVar)
+	classNodeLink := newClassNodeLink(nw, classNodeVar, filterNodeVar, rule, identifierVar)
 	classNodeVar.addClassNodeLink(classNodeLink)
 	nodesOfRule.PushBack(classNodeVar)
 	nodesOfRule.PushBack(filterNodeVar)
@@ -373,10 +376,10 @@ func (nw *reteNetworkImpl) createJoinNode(rule model.Rule, nodesOfRule *list.Lis
 
 	//TODO handle equivJoins later..
 
-	joinNode := newJoinNode(leftNode.getIdentifiers(), rightNode.getIdentifiers(), joinCondition)
+	joinNode := newJoinNode(nw, leftNode.getIdentifiers(), rightNode.getIdentifiers(), joinCondition)
 
-	newNodeLink(leftNode, joinNode, false)
-	newNodeLink(rightNode, joinNode, true)
+	newNodeLink(nw, leftNode, joinNode, false)
+	newNodeLink(nw, rightNode, joinNode, true)
 	removeFromList(nodeSet, leftNode)
 	removeFromList(nodeSet, rightNode)
 	nodeSet.PushBack(joinNode)
@@ -531,4 +534,9 @@ func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.StreamTuple) reteHandle
 		nw.allHandles[tuple] = h
 	}
 	return h
+}
+
+func (nw *reteNetworkImpl) incrementAndGetId() int {
+	nw.currentId++
+	return nw.currentId
 }

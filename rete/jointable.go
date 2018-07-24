@@ -16,15 +16,14 @@ type joinTableImpl struct {
 	idr   []model.TupleTypeAlias
 }
 
-func newJoinTable(identifiers []model.TupleTypeAlias) joinTable {
+func newJoinTable(nw Network, identifiers []model.TupleTypeAlias) joinTable {
 	jT := joinTableImpl{}
-	jT.initJoinTableImpl(identifiers)
+	jT.initJoinTableImpl(nw, identifiers)
 	return &jT
 }
 
-func (jt *joinTableImpl) initJoinTableImpl(identifiers []model.TupleTypeAlias) {
-	currentNodeID++
-	jt.id = currentNodeID
+func (jt *joinTableImpl) initJoinTableImpl(nw Network, identifiers []model.TupleTypeAlias) {
+	jt.id = nw.incrementAndGetId()
 	jt.idr = identifiers
 	jt.table = map[joinTableRow]joinTableRow{}
 }

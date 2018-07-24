@@ -2,8 +2,9 @@ package rete
 
 import (
 	"context"
-	"github.com/TIBCOSoftware/bego/common/model"
 	"strconv"
+
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //nodelink connects 2 nodes, a rete building block
@@ -31,14 +32,14 @@ type nodeLinkImpl struct {
 	id      int
 }
 
-func newNodeLink(parent node, child node, isRight bool) nodeLink {
+func newNodeLink(nw Network, parent node, child node, isRight bool) nodeLink {
 	nl := nodeLinkImpl{}
-	nl.initNodeLink(parent, child, isRight)
+	nl.initNodeLink(nw, parent, child, isRight)
 	return &nl
 }
 
-func (nl *nodeLinkImpl) initNodeLink(parent node, child node, isRight bool) {
-	nl.id = currentNodeID
+func (nl *nodeLinkImpl) initNodeLink(nw Network, parent node, child node, isRight bool) {
+	nl.id = nw.incrementAndGetId()
 	nl.child = child
 	nl.isRight = isRight
 
@@ -59,9 +60,8 @@ func (nl *nodeLinkImpl) initNodeLink(parent node, child node, isRight bool) {
 }
 
 //initialize node link : for use with ClassNodeLink
-func initClassNodeLink(nl *nodeLinkImpl, child node) {
-	currentNodeID++
-	nl.id = currentNodeID
+func initClassNodeLink(nw Network, nl *nodeLinkImpl, child node) {
+	nl.id = nw.incrementAndGetId()
 	nl.child = child
 	nl.childIds = child.getIdentifiers()
 }

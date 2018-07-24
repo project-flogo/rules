@@ -25,15 +25,15 @@ type nodeImpl struct {
 }
 
 //NewNode ... returns a new node
-func newNode(identifiers []model.TupleTypeAlias) node {
+func newNode(nw Network, identifiers []model.TupleTypeAlias) node {
 	n := nodeImpl{}
-	n.initNodeImpl(identifiers)
+	n.initNodeImpl(nw, identifiers)
 	return &n
 }
 
-func (n *nodeImpl) initNodeImpl(identifiers []model.TupleTypeAlias) {
-	currentNodeID++
-	n.id = currentNodeID
+func (n *nodeImpl) initNodeImpl(nw Network, identifiers []model.TupleTypeAlias) {
+
+	n.id = nw.incrementAndGetId()
 
 	n.identifiers = identifiers
 }

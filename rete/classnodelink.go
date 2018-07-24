@@ -16,14 +16,14 @@ type classNodeLinkImpl struct {
 	classNodeVar  classNode
 }
 
-func newClassNodeLink(classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleTypeAlias) classNodeLink {
+func newClassNodeLink(nw Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleTypeAlias) classNodeLink {
 	cnl := classNodeLinkImpl{}
-	cnl.initClassNodeLinkImpl(classNodeVar, child, rule, identifierVar)
+	cnl.initClassNodeLinkImpl(nw, classNodeVar, child, rule, identifierVar)
 	return &cnl
 }
 
-func (cnl *classNodeLinkImpl) initClassNodeLinkImpl(classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleTypeAlias) {
-	initClassNodeLink(&cnl.nodeLinkImpl, child)
+func (cnl *classNodeLinkImpl) initClassNodeLinkImpl(nw Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleTypeAlias) {
+	initClassNodeLink(nw, &cnl.nodeLinkImpl, child)
 	cnl.classNodeVar = classNodeVar
 	cnl.rule = rule
 	cnl.identifierVar = identifierVar

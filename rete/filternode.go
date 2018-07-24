@@ -19,14 +19,14 @@ type filterNodeImpl struct {
 }
 
 //NewFilterNode ... C'tor
-func newFilterNode(identifiers []model.TupleTypeAlias, conditionVar model.Condition) filterNode {
+func newFilterNode(nw Network, identifiers []model.TupleTypeAlias, conditionVar model.Condition) filterNode {
 	fn := filterNodeImpl{}
-	fn.initFilterNodeImpl(identifiers, conditionVar)
+	fn.initFilterNodeImpl(nw, identifiers, conditionVar)
 	return &fn
 }
 
-func (fn *filterNodeImpl) initFilterNodeImpl(identifiers []model.TupleTypeAlias, conditionVar model.Condition) {
-	fn.nodeImpl.initNodeImpl(identifiers)
+func (fn *filterNodeImpl) initFilterNodeImpl(nw Network, identifiers []model.TupleTypeAlias, conditionVar model.Condition) {
+	fn.nodeImpl.initNodeImpl(nw, identifiers)
 	fn.conditionVar = conditionVar
 	fn.setConvert()
 }

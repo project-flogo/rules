@@ -2,8 +2,9 @@ package rete
 
 import (
 	"context"
-	"github.com/TIBCOSoftware/bego/common/model"
 	"strconv"
+
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //joinNode holds the join tables for unmatched entries
@@ -29,19 +30,19 @@ type joinNodeImpl struct {
 	rightTable joinTable
 }
 
-func newJoinNode(leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) joinNode {
+func newJoinNode(nw Network, leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) joinNode {
 	jn := joinNodeImpl{}
-	jn.initjoinNodeImplVar(leftIdrs, rightIdrs, conditionVar)
+	jn.initjoinNodeImplVar(nw, leftIdrs, rightIdrs, conditionVar)
 	return &jn
 }
 
-func (jn *joinNodeImpl) initjoinNodeImplVar(leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) {
-	jn.initNodeImpl(nil)
+func (jn *joinNodeImpl) initjoinNodeImplVar(nw Network, leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) {
+	jn.initNodeImpl(nw, nil)
 	jn.leftIdrs = leftIdrs
 	jn.rightIdrs = rightIdrs
 	jn.conditionVar = conditionVar
-	jn.leftTable = newJoinTable(leftIdrs)
-	jn.rightTable = newJoinTable(rightIdrs)
+	jn.leftTable = newJoinTable(nw, leftIdrs)
+	jn.rightTable = newJoinTable(nw, rightIdrs)
 	jn.setJoinIdentifiers()
 }
 

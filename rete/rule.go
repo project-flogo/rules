@@ -12,14 +12,13 @@ type ruleImpl struct {
 }
 
 //NewRule ... Create a new rule
-func NewRule(name string) model.MutableRule {
+func NewRule(nw Network, name string) model.MutableRule {
 	rule := ruleImpl{}
-	rule.initRuleImpl(name)
+	rule.initRuleImpl(nw, name)
 	return &rule
 }
-func (rule *ruleImpl) initRuleImpl(name string) {
-	currentNodeID++
-	rule.id = currentNodeID
+func (rule *ruleImpl) initRuleImpl(nw Network, name string) {
+	rule.id = nw.incrementAndGetId()
 	rule.name = name
 }
 
