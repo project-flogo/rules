@@ -14,18 +14,18 @@ type filterNode interface {
 
 type filterNodeImpl struct {
 	nodeImpl
-	conditionVar condition
+	conditionVar model.Condition
 	convert      []int
 }
 
 //NewFilterNode ... C'tor
-func newFilterNode(identifiers []identifier, conditionVar condition) filterNode {
+func newFilterNode(identifiers []model.TupleTypeAlias, conditionVar model.Condition) filterNode {
 	fn := filterNodeImpl{}
 	fn.initFilterNodeImpl(identifiers, conditionVar)
 	return &fn
 }
 
-func (fn *filterNodeImpl) initFilterNodeImpl(identifiers []identifier, conditionVar condition) {
+func (fn *filterNodeImpl) initFilterNodeImpl(identifiers []model.TupleTypeAlias, conditionVar model.Condition) {
 	fn.nodeImpl.initNodeImpl(identifiers)
 	fn.conditionVar = conditionVar
 	fn.setConvert()
@@ -36,7 +36,7 @@ func (fn *filterNodeImpl) setConvert() {
 	if fn.conditionVar == nil {
 		return
 	}
-	conIdrs := fn.conditionVar.getIdentifiers()
+	conIdrs := fn.conditionVar.GetIdentifiers()
 
 	if conIdrs != nil && len(conIdrs) == 0 {
 		for i, condIdr := range conIdrs {
@@ -53,8 +53,8 @@ func (fn *filterNodeImpl) setConvert() {
 
 func (fn *filterNodeImpl) String() string {
 	cond := ""
-	for _, idr := range fn.conditionVar.getIdentifiers() {
-		cond += idr.String() + " "
+	for _, idr := range fn.conditionVar.GetIdentifiers() {
+		cond += string(idr) + " "
 	}
 
 	linkTo := ""
@@ -72,7 +72,7 @@ func (fn *filterNodeImpl) String() string {
 	}
 
 	return "\t[FilterNode id(" + strconv.Itoa(fn.nodeImpl.id) + ") link(" + linkTo + "):\n" +
-		"\t\tIdentifier            = " + IdentifiersToString(fn.identifiers) + " ;\n" +
+		"\t\tIdentifier            = " + model.IdentifiersToString(fn.identifiers) + " ;\n" +
 		"\t\tCondition Identifiers = " + cond + ";\n" +
 		"\t\tCondition             = " + fn.conditionVar.String() + "]"
 }
@@ -83,19 +83,19 @@ func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []reteHandl
 	} else {
 		//TODO: rete listeners...
 		var tuples []model.StreamTuple
-		// tupleMap := map[model.StreamSource]model.StreamTuple{}
+		// tupleMap := map[model.TupleTypeAlias]model.StreamTuple{}
 		if fn.convert == nil {
 			tuples = copyIntoTupleArray(handles)
 		} else {
 			tuples = make([]model.StreamTuple, len(fn.convert))
 			for i := 0; i < len(fn.convert); i++ {
 				tuples[i] = handles[fn.convert[i]].getTuple()
-				// tupleMap[tuples[i].GetStreamDataSource()] = tuples[i]
+				// tupleMap[tuples[i].GetTypeAlias()] = tuples[i]
 			}
 		}
 		tupleMap := convertToTupleMap(tuples)
 		cv := fn.conditionVar
-		toPropagate := cv.getEvaluator()(cv.getName(), cv.getRule().GetName(), tupleMap)
+		toPropagate := cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap)
 		if toPropagate {
 			fn.nodeLinkVar.propagateObjects(ctx, handles)
 		}

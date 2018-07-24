@@ -12,20 +12,20 @@ func copyIntoTupleArray(handles []reteHandle) []model.StreamTuple {
 	return tuples
 }
 
-func copyIntoTupleMap(handles []reteHandle) map[model.StreamSource]model.StreamTuple {
-	tupleMap := map[model.StreamSource]model.StreamTuple{}
+func copyIntoTupleMap(handles []reteHandle) map[model.TupleTypeAlias]model.StreamTuple {
+	tupleMap := map[model.TupleTypeAlias]model.StreamTuple{}
 	tuples := make([]model.StreamTuple, len(handles))
 	for i := 0; i < len(handles); i++ {
 		tuples[i] = handles[i].getTuple()
-		tupleMap[tuples[i].GetStreamDataSource()] = tuples[i] //assuming no self-joins! need to correct this!
+		tupleMap[tuples[i].GetTypeAlias()] = tuples[i] //assuming no self-joins! need to correct this!
 	}
 	return tupleMap
 }
 
-func convertToTupleMap(tuples []model.StreamTuple) map[model.StreamSource]model.StreamTuple {
-	tupleMap := map[model.StreamSource]model.StreamTuple{}
+func convertToTupleMap(tuples []model.StreamTuple) map[model.TupleTypeAlias]model.StreamTuple {
+	tupleMap := map[model.TupleTypeAlias]model.StreamTuple{}
 	for i := 0; i < len(tuples); i++ {
-		tupleMap[tuples[i].GetStreamDataSource()] = tuples[i]
+		tupleMap[tuples[i].GetTypeAlias()] = tuples[i]
 	}
 	return tupleMap
 }

@@ -14,10 +14,10 @@ func main1() {
 
 	//Create Rule, define conditiond and set action callback
 	rule := ruleapi.NewRule("first rule")
-	rule.AddCondition("c1", []model.StreamSource{"n1"}, myC11)
-	rule.AddCondition("c2", []model.StreamSource{"n1", "n2", "n3"}, myC31)
-	rule.AddCondition("c3", []model.StreamSource{"n1", "n2"}, myC21)
-	rule.SetActionFn(myActionFn)
+	rule.AddCondition("c1", []model.TupleTypeAlias{"n1"}, myC11)
+	rule.AddCondition("c2", []model.TupleTypeAlias{"n1", "n2", "n3"}, myC31)
+	rule.AddCondition("c3", []model.TupleTypeAlias{"n1", "n2"}, myC21)
+	rule.SetAction(myActionFn)
 
 	//Create a RuleSession and add the above Rule
 	ruleSession := ruleapi.NewRuleSession()
@@ -74,22 +74,22 @@ func main1() {
 
 }
 
-func myC11(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+func myC11(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
 	fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
 	return true
 }
 
-func myC21(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+func myC21(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
 	fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
 	return true
 }
 
-func myC31(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+func myC31(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
 	fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
 	return true
 }
 
-func myActionFn1(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+func myActionFn1(ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
 	fmt.Printf("My Rule [%s] fired\n", ruleName)
 	//for key := range tuples {
 	//	fmt.Println("\tmatched tuple entry:" + string(key))

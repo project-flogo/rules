@@ -1,17 +1,19 @@
 package rete
 
+import "github.com/TIBCOSoftware/bego/common/model"
+
 //These set operations are used in building the rete network. See Network.buildNetwork
 
 //AppendIdentifiers ... Append identifiers from set2 to set1
-func AppendIdentifiers(set1 []identifier, set2 []identifier) []identifier {
-	union := []identifier{}
+func AppendIdentifiers(set1 []model.TupleTypeAlias, set2 []model.TupleTypeAlias) []model.TupleTypeAlias {
+	union := []model.TupleTypeAlias{}
 	union = append(union, set1...)
 	union = append(union, set2...)
 	return union
 }
 
 //ContainedByFirst ... true if second is a subset of first
-func ContainedByFirst(first []identifier, second []identifier) bool {
+func ContainedByFirst(first []model.TupleTypeAlias, second []model.TupleTypeAlias) bool {
 
 	if len(second) == 0 {
 		return true
@@ -21,7 +23,7 @@ func ContainedByFirst(first []identifier, second []identifier) bool {
 	for _, idFromSecond := range second {
 		contains := false
 		for _, idFromFirst := range first {
-			if idFromSecond.equals(idFromFirst) {
+			if idFromSecond == idFromFirst {
 				contains = true
 				break
 			}
@@ -35,25 +37,25 @@ func ContainedByFirst(first []identifier, second []identifier) bool {
 }
 
 //OtherTwoAreContainedByFirst ... true if second and third are part of first
-func OtherTwoAreContainedByFirst(first []identifier, second []identifier, third []identifier) bool {
+func OtherTwoAreContainedByFirst(first []model.TupleTypeAlias, second []model.TupleTypeAlias, third []model.TupleTypeAlias) bool {
 	return ContainedByFirst(first, second) && ContainedByFirst(first, third)
 }
 
 //UnionIdentifiers ... union of the first and second sets
-func UnionIdentifiers(first []identifier, second []identifier) []identifier {
-	union := []identifier{}
+func UnionIdentifiers(first []model.TupleTypeAlias, second []model.TupleTypeAlias) []model.TupleTypeAlias {
+	union := []model.TupleTypeAlias{}
 	union = append(union, first...)
 	union = append(union, SecondMinusFirst(first, second)...)
 	return union
 }
 
 //SecondMinusFirst ... returns elements in the second that arent in the first
-func SecondMinusFirst(first []identifier, second []identifier) []identifier {
-	minus := []identifier{}
+func SecondMinusFirst(first []model.TupleTypeAlias, second []model.TupleTypeAlias) []model.TupleTypeAlias {
+	minus := []model.TupleTypeAlias{}
 outer:
 	for _, idrSecond := range second {
 		for _, idrFirst := range first {
-			if idrSecond.equals(idrFirst) {
+			if idrSecond == idrFirst {
 				continue outer
 			}
 		}
@@ -63,11 +65,11 @@ outer:
 }
 
 //IntersectionIdentifiers .. intersection of the two sets
-func IntersectionIdentifiers(first []identifier, second []identifier) []identifier {
-	intersect := []identifier{}
+func IntersectionIdentifiers(first []model.TupleTypeAlias, second []model.TupleTypeAlias) []model.TupleTypeAlias {
+	intersect := []model.TupleTypeAlias{}
 	for _, idrSecond := range second {
 		for _, idrFirst := range first {
-			if idrSecond.equals(idrFirst) {
+			if idrSecond == idrFirst {
 				intersect = append(intersect, idrSecond)
 			}
 		}
@@ -76,26 +78,17 @@ func IntersectionIdentifiers(first []identifier, second []identifier) []identifi
 }
 
 //EqualSets ... compare two identifiers based on their contents
-func EqualSets(first []identifier, second []identifier) bool {
+func EqualSets(first []model.TupleTypeAlias, second []model.TupleTypeAlias) bool {
 	return len(SecondMinusFirst(first, second)) == 0 && len(SecondMinusFirst(first, second)) == 0
 }
 
 //GetIndex ... return the index of thisIdr in identifiers
-func GetIndex(identifiers []identifier, thisIdr identifier) int {
+func GetIndex(identifiers []model.TupleTypeAlias, thisIdr model.TupleTypeAlias) int {
 	for i, idr := range identifiers {
-		if idr.equals(thisIdr) {
+		if idr == thisIdr {
 			return i
 		}
 		i++
 	}
 	return -1
-}
-
-//IdentifiersToString Take a slice of Identifiers and return a string representation
-func IdentifiersToString(identifiers []identifier) string {
-	str := ""
-	for _, idr := range identifiers {
-		str += idr.String() + ", "
-	}
-	return str
 }

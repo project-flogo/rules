@@ -3,21 +3,23 @@ package rete
 import (
 	"fmt"
 	"testing"
+
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 func TestIdentifier(t *testing.T) {
 
-	i1 := newIdentifier("1")
+	i1 := model.TupleTypeAlias("1")
 
-	i2 := newIdentifier("1")
+	i2 := model.TupleTypeAlias("1")
 
-	if i1.equals(i2) {
+	if i1 == i2 {
 		fmt.Printf("yes they are equal!")
 	} else {
 		fmt.Printf("yes they are NOT equal!")
 	}
 
-	ids := []identifier{i1, i2}
+	ids := []model.TupleTypeAlias{i1, i2}
 
 	node := newNode(ids)
 

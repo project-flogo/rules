@@ -23,8 +23,8 @@ func (rs *rulesessionImpl) initRuleSession() {
 	rs.reteNetwork = rete.NewReteNetwork()
 }
 
-func (rs *rulesessionImpl) AddRule(apiRule model.Rule) (int, bool) {
-	rule := convertAPIRuleToReteRule(apiRule)
+func (rs *rulesessionImpl) AddRule(rule model.Rule) (int, bool) {
+	//rule := convertAPIRuleToReteRule(apiRule)
 
 	ret := rs.reteNetwork.AddRule(rule)
 	if ret == 0 {
@@ -52,12 +52,12 @@ func (rs *rulesessionImpl) printNetwork() {
 	fmt.Println(rs.reteNetwork.String())
 }
 
-func convertAPIRuleToReteRule(apiRule model.Rule) rete.Rule {
-	reteRule := rete.NewRule(apiRule.GetName())
-	for _, c := range apiRule.GetConditions() {
-		reteRule.AddCondition(c.GetName(), c.GetStreamSource(), c.GetEvaluator())
-	}
-	reteRule.SetAction(apiRule.GetActionFn())
-	reteRule.SetPriority(apiRule.GetPriority())
-	return reteRule
-}
+//func convertAPIRuleToReteRule(apiRule model.Rule) rete.Rule {
+//	reteRule := rete.NewRule(apiRule.GetName())
+//	for _, c := range apiRule.GetConditions() {
+//		reteRule.AddCondition(c.GetName(), c.GetTupleTypeAlias(), c.GetEvaluator())
+//	}
+//	reteRule.SetAction(apiRule.GetActionFn())
+//	reteRule.SetPriority(apiRule.GetPriority())
+//	return reteRule
+//}

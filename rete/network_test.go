@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"context"
+
 	"github.com/TIBCOSoftware/bego/common/model"
 )
 
@@ -30,19 +32,19 @@ func TestNetworkSimple(t *testing.T) {
 	// network.AddRule(r1)
 
 	streamTuple1 := model.NewStreamTuple("n1")
-	network.Assert(streamTuple1)
+	network.Assert(nil, nil, streamTuple1)
 
 	streamTuple2 := model.NewStreamTuple("n1")
-	network.Assert(streamTuple2)
+	network.Assert(nil, nil, streamTuple2)
 
 	streamTuple3 := model.NewStreamTuple("n1")
-	network.Assert(streamTuple3)
+	network.Assert(nil, nil, streamTuple3)
 
 	streamTuple4 := model.NewStreamTuple("n1")
-	network.Assert(streamTuple4)
+	network.Assert(nil, nil, streamTuple4)
 
 	streamTuple5 := model.NewStreamTuple("n1")
-	network.Assert(streamTuple5)
+	network.Assert(nil, nil, streamTuple5)
 
 	// streamTuple6 := model.NewStreamTuple("n6")
 	// network.Assert(streamTuple6)
@@ -51,7 +53,7 @@ func TestNetworkSimple(t *testing.T) {
 	// network.Assert(streamTuple7)
 
 	streamTuple8 := model.NewStreamTuple("n2")
-	network.Assert(streamTuple8)
+	network.Assert(nil, nil, streamTuple8)
 	fmt.Println("Rules fired after retracting n1s...")
 	network.Retract(streamTuple1)
 	network.Retract(streamTuple2)
@@ -59,12 +61,12 @@ func TestNetworkSimple(t *testing.T) {
 	network.Retract(streamTuple4)
 	network.Retract(streamTuple5)
 
-	network.Assert(streamTuple8)
+	network.Assert(nil, nil, streamTuple8)
 
 	network.RemoveRule(r2.GetName())
 }
 
-func c1(conditionName string, ruleName string, tupleMap map[model.StreamSource]model.StreamTuple) bool {
+func c1(conditionName string, ruleName string, tupleMap map[model.TupleTypeAlias]model.StreamTuple) bool {
 	// fmt.Printf("evaluating condition [%s] for rule [%s]\n", conditionName, ruleName)
 	// for key := range tupleMap {
 	// 	fmt.Println("\tcond. eval" + string(key))
@@ -73,24 +75,24 @@ func c1(conditionName string, ruleName string, tupleMap map[model.StreamSource]m
 	return true
 }
 
-func createR1(name string) Rule {
+func createR1(name string) model.Rule {
 	rule := NewRule(name)
-	rule.AddCondition("c1", []model.StreamSource{"n1"}, c1)
-	rule.AddCondition("c2", []model.StreamSource{"n2"}, c1)
-	rule.AddCondition("c3", []model.StreamSource{"n1", "n2"}, c1)
-	rule.AddCondition("c4", []model.StreamSource{"n4", "n3"}, c1)
-	rule.AddCondition("c6", []model.StreamSource{"n5", "n6"}, c1)
-	rule.AddCondition("c5", []model.StreamSource{"n1", "n2", "n3"}, c1)
-	rule.AddCondition("c6", []model.StreamSource{"n4", "n5", "n6"}, c1)
+	rule.AddCondition("c1", []model.TupleTypeAlias{"n1"}, c1)
+	rule.AddCondition("c2", []model.TupleTypeAlias{"n2"}, c1)
+	rule.AddCondition("c3", []model.TupleTypeAlias{"n1", "n2"}, c1)
+	rule.AddCondition("c4", []model.TupleTypeAlias{"n4", "n3"}, c1)
+	rule.AddCondition("c6", []model.TupleTypeAlias{"n5", "n6"}, c1)
+	rule.AddCondition("c5", []model.TupleTypeAlias{"n1", "n2", "n3"}, c1)
+	rule.AddCondition("c6", []model.TupleTypeAlias{"n4", "n5", "n6"}, c1)
 	rule.SetAction(r1Action)
 	fmt.Println(rule)
 	return rule
 }
 
-func createR2(name string) Rule {
+func createR2(name string) model.Rule {
 	rule := NewRule(name)
-	rule.AddCondition("c1", []model.StreamSource{"n1"}, c1)
-	rule.AddCondition("c2", []model.StreamSource{"n2"}, c1)
+	rule.AddCondition("c1", []model.TupleTypeAlias{"n1"}, c1)
+	rule.AddCondition("c2", []model.TupleTypeAlias{"n2"}, c1)
 	// rule.AddCondition("c3", []string{"n1", "n2")
 	// rule.AddCondition("c4", []string{"n1", "n3")
 	// rule.AddCondition("c6", []string{"n5", "n6")
@@ -101,7 +103,7 @@ func createR2(name string) Rule {
 	return rule
 }
 
-func r1Action(ruleName string, tupleMap map[model.StreamSource]model.StreamTuple) {
+func r1Action(context context.Context, ruleSession model.RuleSession, ruleName string, tupleMap map[model.TupleTypeAlias]model.StreamTuple) {
 	fmt.Printf("Rule [%s] fired", ruleName)
 	for key := range tupleMap {
 		fmt.Println("\tmatched tuple entry:" + string(key))
@@ -109,7 +111,7 @@ func r1Action(ruleName string, tupleMap map[model.StreamSource]model.StreamTuple
 	fmt.Printf("Rule [%s] fired and done!\n", ruleName)
 }
 
-func r2Action(ruleName string, tupleMap map[model.StreamSource]model.StreamTuple) {
+func r2Action(context context.Context, ruleSession model.RuleSession, ruleName string, tupleMap map[model.TupleTypeAlias]model.StreamTuple) {
 	fmt.Printf("Rule [%s] fired\n", ruleName)
 	for key := range tupleMap {
 		fmt.Println("\tmatched tuple entry:" + string(key))

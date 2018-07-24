@@ -3,6 +3,7 @@ package rete
 import (
 	"context"
 	"strconv"
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //nodelink connects 2 nodes, a rete building block
@@ -21,10 +22,10 @@ type nodeLinkImpl struct {
 	numIdentifiers int
 
 	parent    node
-	parentIds []identifier
+	parentIds []model.TupleTypeAlias
 
 	child    node
-	childIds []identifier
+	childIds []model.TupleTypeAlias
 
 	isRight bool
 	id      int
@@ -80,7 +81,7 @@ func (nl *nodeLinkImpl) setConvert() {
 	for i := 0; i < nl.numIdentifiers; i++ {
 		found := false
 		for j := 0; j < nl.numIdentifiers; j++ {
-			if nl.parentIds[i].equals(nl.childIds[j]) {
+			if nl.parentIds[i] == nl.childIds[j] {
 				found = true
 				nl.convert[i] = j
 				break

@@ -8,7 +8,7 @@ import (
 )
 
 type conflictRes interface {
-	addAgendaItem(rule Rule, tupleMap map[model.StreamSource]model.StreamTuple)
+	addAgendaItem(rule model.Rule, tupleMap map[model.TupleTypeAlias]model.StreamTuple)
 	resolveConflict(ctx context.Context)
 	deleteAgendaFor(ctx context.Context, tuple model.StreamTuple)
 }
@@ -27,7 +27,7 @@ func (cr *conflictResImpl) initCR() {
 	cr.agendaList = list.List{}
 }
 
-func (cr *conflictResImpl) addAgendaItem(rule Rule, tupleMap map[model.StreamSource]model.StreamTuple) {
+func (cr *conflictResImpl) addAgendaItem(rule model.Rule, tupleMap map[model.TupleTypeAlias]model.StreamTuple) {
 	item := newAgendaItem(rule, tupleMap)
 	v := rule.GetPriority()
 	found := false

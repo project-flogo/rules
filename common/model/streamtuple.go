@@ -5,41 +5,23 @@ import (
 	"time"
 )
 
-//StreamTuple is a runtime representation of a stream of data
-type StreamTuple interface {
-	GetStreamDataSource() StreamSource
-	GetString(name string) string
-	GetInt(name string) int
-	GetFloat(name string) float64
-	GetDateTime(name string) time.Time
-}
-
-//MutableStreamTuple mutable part of the stream tuple
-type MutableStreamTuple interface {
-	StreamTuple
-	SetString(ctx context.Context, name string, value string)
-	SetInt(ctx context.Context, name string, value int)
-	SetFloat(ctx context.Context, name string, value float64)
-	SetDatetime(ctx context.Context, name string, value time.Time)
-}
-
 type streamImpl struct {
-	dataSource StreamSource
+	dataSource TupleTypeAlias
 	tuples     map[string]interface{}
 }
 
-func NewStreamTuple(dataSource StreamSource) MutableStreamTuple {
+func NewStreamTuple(dataSource TupleTypeAlias) MutableStreamTuple {
 	streamImplVar := streamImpl{}
 	streamImplVar.initStreamTuple(dataSource)
 	return &streamImplVar
 }
 
-func (streamImplVar *streamImpl) initStreamTuple(dataSource StreamSource) {
+func (streamImplVar *streamImpl) initStreamTuple(dataSource TupleTypeAlias) {
 	streamImplVar.tuples = make(map[string]interface{})
 	streamImplVar.dataSource = dataSource
 }
 
-func (streamImplVar *streamImpl) GetStreamDataSource() StreamSource {
+func (streamImplVar *streamImpl) GetTypeAlias() TupleTypeAlias {
 	return streamImplVar.dataSource
 }
 

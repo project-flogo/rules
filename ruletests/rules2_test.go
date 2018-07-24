@@ -16,15 +16,15 @@ func TestTwo(t *testing.T) {
 	//Create Rule, define conditiond and set action callback
 	rule := ruleapi.NewRule("Name is Bob")
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
-	rule.AddCondition("c1", []model.StreamSource{"n1"}, checkForBob) // check for name "Bob" in n1
-	rule.SetActionFn(bobRuleFired)
+	rule.AddCondition("c1", []model.TupleTypeAlias{"n1"}, checkForBob) // check for name "Bob" in n1
+	rule.SetAction(bobRuleFired)
 	rule.SetPriority(1)
 
 	//Create Rule, define conditiond and set action callback
 	rule2 := ruleapi.NewRule("Bobs age is 35")
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
-	rule2.AddCondition("c1", []model.StreamSource{"n1"}, checkForBobAge) // check for name "Bob" in n1
-	rule2.SetActionFn(bobAgeRuleFired)
+	rule2.AddCondition("c1", []model.TupleTypeAlias{"n1"}, checkForBobAge) // check for name "Bob" in n1
+	rule2.SetAction(bobAgeRuleFired)
 	rule2.SetPriority(2)
 
 	//Create a RuleSession and add the above Rule
@@ -51,7 +51,7 @@ func TestTwo(t *testing.T) {
 
 }
 
-func checkForBobAge(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+func checkForBobAge(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
 	//This conditions filters on name="Bob"
 	streamTuple := tuples["n1"]
 	if streamTuple == nil {
@@ -62,7 +62,7 @@ func checkForBobAge(ruleName string, condName string, tuples map[model.StreamSou
 	return age == 35
 }
 
-func bobAgeRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+func bobAgeRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
 	fmt.Printf("Rule [%s] fired\n", ruleName)
 	streamTuple1 := tuples["n1"]
 	if streamTuple1 == nil {

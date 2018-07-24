@@ -3,6 +3,7 @@ package rete
 import (
 	"context"
 	"strconv"
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //joinNode holds the join tables for unmatched entries
@@ -12,10 +13,10 @@ type joinNode interface {
 
 type joinNodeImpl struct {
 	nodeImpl
-	conditionVar condition
+	conditionVar model.Condition
 
-	leftIdrs  []identifier
-	rightIdrs []identifier
+	leftIdrs  []model.TupleTypeAlias
+	rightIdrs []model.TupleTypeAlias
 
 	leftIdrLen  int
 	rightIdrLen int
@@ -28,13 +29,13 @@ type joinNodeImpl struct {
 	rightTable joinTable
 }
 
-func newJoinNode(leftIdrs []identifier, rightIdrs []identifier, conditionVar condition) joinNode {
+func newJoinNode(leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) joinNode {
 	jn := joinNodeImpl{}
 	jn.initjoinNodeImplVar(leftIdrs, rightIdrs, conditionVar)
 	return &jn
 }
 
-func (jn *joinNodeImpl) initjoinNodeImplVar(leftIdrs []identifier, rightIdrs []identifier, conditionVar condition) {
+func (jn *joinNodeImpl) initjoinNodeImplVar(leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) {
 	jn.initNodeImpl(nil)
 	jn.leftIdrs = leftIdrs
 	jn.rightIdrs = rightIdrs
@@ -44,11 +45,11 @@ func (jn *joinNodeImpl) initjoinNodeImplVar(leftIdrs []identifier, rightIdrs []i
 	jn.setJoinIdentifiers()
 }
 
-func (jn *joinNodeImpl) GetLeftIdentifiers() []identifier {
+func (jn *joinNodeImpl) GetLeftIdentifiers() []model.TupleTypeAlias {
 	return jn.leftIdrs
 }
 
-func (jn *joinNodeImpl) GetRightIdentifiers() []identifier {
+func (jn *joinNodeImpl) GetRightIdentifiers() []model.TupleTypeAlias {
 	return jn.rightIdrs
 }
 
@@ -57,7 +58,7 @@ func (jn *joinNodeImpl) setJoinIdentifiers() {
 	jn.rightIdrLen = len(jn.rightIdrs)
 	jn.totalIdrLen = jn.leftIdrLen + jn.rightIdrLen
 
-	jn.identifiers = make([]identifier, jn.totalIdrLen)
+	jn.identifiers = make([]model.TupleTypeAlias, jn.totalIdrLen)
 
 	jn.joinIndexForLeft = make([]int, jn.leftIdrLen)
 	jn.joinIndexForRight = make([]int, jn.rightIdrLen)
@@ -70,15 +71,15 @@ func (jn *joinNodeImpl) setJoinIdentifiers() {
 	}
 	conditionIdrLen := 0
 	if jn.conditionVar != nil {
-		conditionIdrLen = len(jn.conditionVar.getIdentifiers())
+		conditionIdrLen = len(jn.conditionVar.GetIdentifiers())
 		for i := 0; i < conditionIdrLen; i++ {
-			idx := GetIndex(jn.leftIdrs, jn.conditionVar.getIdentifiers()[i])
+			idx := GetIndex(jn.leftIdrs, jn.conditionVar.GetIdentifiers()[i])
 			if idx != -1 {
 				jn.joinIndexForLeft[idx] = i
 				jn.identifiers[i] = jn.leftIdrs[idx]
 				continue
 			}
-			idx = GetIndex(jn.rightIdrs, jn.conditionVar.getIdentifiers()[i])
+			idx = GetIndex(jn.rightIdrs, jn.conditionVar.GetIdentifiers()[i])
 			if idx != -1 {
 				jn.joinIndexForRight[idx] = i
 				jn.identifiers[i] = jn.rightIdrs[idx]
@@ -138,13 +139,13 @@ func (jn *joinNodeImpl) String() string {
 	joinConditionIdrsStr := "nil"
 	if jn.conditionVar != nil {
 		joinConditionStr = jn.conditionVar.String()
-		joinConditionIdrsStr = IdentifiersToString(jn.conditionVar.getIdentifiers())
+		joinConditionIdrsStr = model.IdentifiersToString(jn.conditionVar.GetIdentifiers())
 	}
 	return "\t[JoinNode(" + jn.nodeImpl.String() + ") link(" + linkTo + ")\n" +
-		"\t\tLeft identifier      = " + IdentifiersToString(jn.leftIdrs) + ";\n" +
-		"\t\tRight identifier     = " + IdentifiersToString(jn.rightIdrs) + ";\n" +
-		"\t\tOut identifier       = " + IdentifiersToString(jn.identifiers) + ";\n" +
-		"\t\tCondition identifier = " + joinConditionIdrsStr + ";\n" +
+		"\t\tLeft model.TupleTypeAlias      = " + model.IdentifiersToString(jn.leftIdrs) + ";\n" +
+		"\t\tRight model.TupleTypeAlias     = " + model.IdentifiersToString(jn.rightIdrs) + ";\n" +
+		"\t\tOut model.TupleTypeAlias       = " + model.IdentifiersToString(jn.identifiers) + ";\n" +
+		"\t\tCondition model.TupleTypeAlias = " + joinConditionIdrsStr + ";\n" +
 		"\t\tJoin Left Index      = " + joinIdsForLeftStr + ";\n" +
 		"\t\tJoin Right Index     = " + joinIdsForRightStr + ";\n" +
 		"\t\tCondition            = " + joinConditionStr + "]\n"
@@ -179,7 +180,7 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []reteHandl
 		} else {
 			tupleMap := copyIntoTupleMap(joinedHandles)
 			cv := jn.conditionVar
-			toPropagate = cv.getEvaluator()(cv.getName(), cv.getRule().GetName(), tupleMap)
+			toPropagate = cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap)
 		}
 		if toPropagate {
 			jn.nodeLinkVar.propagateObjects(ctx, joinedHandles)
@@ -227,7 +228,7 @@ func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []reteHandle
 		} else {
 			tupleMap := copyIntoTupleMap(joinedHandles)
 			cv := jn.conditionVar
-			toPropagate = cv.getEvaluator()(cv.getName(), cv.getRule().GetName(), tupleMap)
+			toPropagate = cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap)
 		}
 		if toPropagate {
 			jn.nodeLinkVar.propagateObjects(ctx, joinedHandles)

@@ -6,38 +6,39 @@ import (
 	"strconv"
 
 	"github.com/TIBCOSoftware/bego/utils"
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //node a building block of the rete network
 type node interface {
 	abstractNode
-	getIdentifiers() []identifier
+	getIdentifiers() []model.TupleTypeAlias
 	getID() int
 	addNodeLink(nodeLink)
 	assertObjects(ctx context.Context, handles []reteHandle, isRight bool)
 }
 
 type nodeImpl struct {
-	identifiers []identifier
+	identifiers []model.TupleTypeAlias
 	nodeLinkVar nodeLink
 	id          int
 }
 
 //NewNode ... returns a new node
-func newNode(identifiers []identifier) node {
+func newNode(identifiers []model.TupleTypeAlias) node {
 	n := nodeImpl{}
 	n.initNodeImpl(identifiers)
 	return &n
 }
 
-func (n *nodeImpl) initNodeImpl(identifiers []identifier) {
+func (n *nodeImpl) initNodeImpl(identifiers []model.TupleTypeAlias) {
 	currentNodeID++
 	n.id = currentNodeID
 
 	n.identifiers = identifiers
 }
 
-func (n *nodeImpl) getIdentifiers() []identifier {
+func (n *nodeImpl) getIdentifiers() []model.TupleTypeAlias {
 	return n.identifiers
 }
 
@@ -52,7 +53,7 @@ func (n *nodeImpl) addNodeLink(nl nodeLink) {
 func (n *nodeImpl) String() string {
 	str := "id:" + strconv.Itoa(n.id) + ", idrs:"
 	for _, nodeIdentifier := range n.identifiers {
-		str += nodeIdentifier.String() + ","
+		str += string(nodeIdentifier) + ","
 	}
 	return str
 }
