@@ -2,8 +2,8 @@ package rete
 
 import (
 	"context"
-	"strconv"
 	"github.com/TIBCOSoftware/bego/common/model"
+	"strconv"
 )
 
 //joinNode holds the join tables for unmatched entries

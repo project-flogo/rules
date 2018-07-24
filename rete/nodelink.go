@@ -2,8 +2,8 @@ package rete
 
 import (
 	"context"
-	"strconv"
 	"github.com/TIBCOSoftware/bego/common/model"
+	"strconv"
 )
 
 //nodelink connects 2 nodes, a rete building block

@@ -1,11 +1,11 @@
 package rete
 
 import (
+	"container/list"
 	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/TIBCOSoftware/bego/utils"
 	"github.com/TIBCOSoftware/bego/common/model"
 )
 
@@ -59,17 +59,17 @@ func (n *nodeImpl) String() string {
 }
 
 //FindSimilarNodes find similar nodes
-func findSimilarNodes(nodeSet utils.ArrayList) []node {
+func findSimilarNodes(nodeSet *list.List) []node {
 	if nodeSet.Len() < 2 {
 		//TODO: Handle error
 		return nil
 	}
 	maxCommon := 0
 	similarNodes := make([]node, 2)
-	for i := 0; i < nodeSet.Len()-1; i++ {
-		node1 := nodeSet.Get(i).(node)
-		for j := i + 1; j < nodeSet.Len(); j++ {
-			node2 := nodeSet.Get(j).(node)
+	for e := nodeSet.Front(); e != nil; e = e.Next() {
+		node1 := e.Value.(node)
+		for j := e.Next(); j != nil; j = j.Next() {
+			node2 := j.Value.(node)
 			common := len(IntersectionIdentifiers(node1.getIdentifiers(), node2.getIdentifiers()))
 			if common > maxCommon {
 				maxCommon = common
@@ -79,8 +79,8 @@ func findSimilarNodes(nodeSet utils.ArrayList) []node {
 		}
 	}
 	if maxCommon == 0 {
-		similarNodes[0] = nodeSet.Get(0).(node)
-		similarNodes[1] = nodeSet.Get(1).(node)
+		similarNodes[0] = nodeSet.Front().Value.(node)
+		similarNodes[1] = nodeSet.Front().Next().Value.(node)
 	}
 	return similarNodes
 }
