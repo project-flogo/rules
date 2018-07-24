@@ -40,7 +40,7 @@ func (rule *ruleImpl) SetActionFn(actionFn model.ActionFunction) {
 }
 
 func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleTypeAlias, cfn model.ConditionEvaluator) {
-	condition := NewCondition(conditionName, rule, idrs, cfn)
+	condition := newCondition(conditionName, rule, idrs, cfn)
 	rule.conditions = append(rule.conditions, condition)
 }
 

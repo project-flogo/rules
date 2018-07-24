@@ -62,12 +62,6 @@ func getReteCtx(ctx context.Context) reteCtx {
 	return intr.(reteCtx)
 }
 
-// func newCtx(network Network) (context.Context, reteCtx) {
-// 	reteCtxVar := newReteCtxImpl(network)
-// 	ctx := context.WithValue(context.Background(), reteCTXKEY, reteCtxVar)
-// 	return ctx, reteCtxVar
-// }
-
 func newReteCtx(ctx context.Context, network Network, rs model.RuleSession) (context.Context, reteCtx) {
 	reteCtxVar := newReteCtxImpl(network, rs)
 	ctx = context.WithValue(ctx, reteCTXKEY, reteCtxVar)

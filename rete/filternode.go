@@ -18,7 +18,6 @@ type filterNodeImpl struct {
 	convert      []int
 }
 
-//NewFilterNode ... C'tor
 func newFilterNode(nw Network, identifiers []model.TupleTypeAlias, conditionVar model.Condition) filterNode {
 	fn := filterNodeImpl{}
 	fn.initFilterNodeImpl(nw, identifiers, conditionVar)

@@ -9,7 +9,7 @@ import (
 )
 
 type rulesessionImpl struct {
-	allRules    map[string]model.Rule
+	//allRules    map[string]model.Rule
 	reteNetwork rete.Network
 }
 
@@ -24,8 +24,6 @@ func (rs *rulesessionImpl) initRuleSession() {
 }
 
 func (rs *rulesessionImpl) AddRule(rule model.Rule) (int, bool) {
-	//rule := convertAPIRuleToReteRule(apiRule)
-
 	ret := rs.reteNetwork.AddRule(rule)
 	if ret == 0 {
 		return 0, true
@@ -51,13 +49,3 @@ func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.StreamTuple)
 func (rs *rulesessionImpl) printNetwork() {
 	fmt.Println(rs.reteNetwork.String())
 }
-
-//func convertAPIRuleToReteRule(apiRule model.Rule) rete.Rule {
-//	reteRule := rete.NewRule(apiRule.GetName())
-//	for _, c := range apiRule.GetConditions() {
-//		reteRule.AddCondition(c.GetName(), c.GetTupleTypeAlias(), c.GetEvaluator())
-//	}
-//	reteRule.SetAction(apiRule.GetActionFn())
-//	reteRule.SetPriority(apiRule.GetPriority())
-//	return reteRule
-//}

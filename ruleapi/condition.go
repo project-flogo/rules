@@ -2,8 +2,6 @@ package ruleapi
 
 import "github.com/TIBCOSoftware/bego/common/model"
 
-//condition ... is a rete condtion
-
 type conditionImpl struct {
 	name        string
 	rule        model.Rule
@@ -12,7 +10,7 @@ type conditionImpl struct {
 }
 
 //NewCondition ... a new Condition
-func NewCondition(name string, rule model.Rule, identifiers []model.TupleTypeAlias, cfn model.ConditionEvaluator) model.Condition {
+func newCondition(name string, rule model.Rule, identifiers []model.TupleTypeAlias, cfn model.ConditionEvaluator) model.Condition {
 	c := conditionImpl{}
 	c.initConditionImpl(name, rule, identifiers, cfn)
 	return &c
