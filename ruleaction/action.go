@@ -78,16 +78,14 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 
 	streamTuple := model.NewStreamTuple("n1") //n1 -> will be replaced by contextual information coming in the data
 
+
+	queryParams := inputs["queryParams"].Value().(map[string]string)
+
+
+
 	//map input data into stream tuples, only string. ignore the rest for now
-	for key, value := range inputs {
-
-		switch value.Type() {
-		case data.TypeString:
-			streamTuple.SetString(key, value.Value().(string))
-		case data.TypeInteger:
-			streamTuple.SetInt(key, value.Value().(int))
-		}
-
+	for key, value := range queryParams {
+		streamTuple.SetString(key, value)
 	}
 
 	a.rs.Assert(streamTuple)
@@ -121,5 +119,5 @@ func myActionFn(ruleName string, tuples map[model.StreamSource]model.StreamTuple
 		fmt.Println("Should not get nil tuples here in Action! This is an error")
 	}
 	name1 := streamTuple1.GetString("name")
-	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1)
+	fmt.Printf("n1.name = [%s]", name1)
 }
