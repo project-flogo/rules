@@ -1,27 +1,18 @@
 package ruleapi
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/TIBCOSoftware/bego/common/model"
 	"github.com/TIBCOSoftware/bego/rete"
 )
 
-type RuleSession interface {
-	AddRule(rule Rule) (int, bool)
-	DeleteRule(ruleName string)
-
-	Assert(tuple model.StreamTuple)
-	Retract(tuple model.StreamTuple)
-	PrintNetwork()
-}
-
 type rulesessionImpl struct {
-	allRules    map[string]Rule
 	reteNetwork rete.Network
 }
 
-func NewRuleSession() RuleSession {
+func NewRuleSession() model.RuleSession {
 	rs := rulesessionImpl{}
 	rs.initRuleSession()
 	return &rs
@@ -31,9 +22,7 @@ func (rs *rulesessionImpl) initRuleSession() {
 	rs.reteNetwork = rete.NewReteNetwork()
 }
 
-func (rs *rulesessionImpl) AddRule(apiRule Rule) (int, bool) {
-	rule := convertAPIRuleToReteRule(apiRule)
-
+func (rs *rulesessionImpl) AddRule(rule model.Rule) (int, bool) {
 	ret := rs.reteNetwork.AddRule(rule)
 	if ret == 0 {
 		return 0, true
@@ -45,23 +34,17 @@ func (rs *rulesessionImpl) DeleteRule(ruleName string) {
 	rs.reteNetwork.RemoveRule(ruleName)
 }
 
-func (rs *rulesessionImpl) Assert(tuple model.StreamTuple) {
-	rs.reteNetwork.Assert(tuple)
+func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.StreamTuple) {
+	if ctx == nil {
+		ctx = context.Context(context.Background())
+	}
+	rs.reteNetwork.Assert(ctx, rs, tuple)
 }
 
-func (rs *rulesessionImpl) Retract(tuple model.StreamTuple) {
+func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.StreamTuple) {
 	rs.reteNetwork.Retract(tuple)
 }
 
-func (rs *rulesessionImpl) PrintNetwork() {
+func (rs *rulesessionImpl) printNetwork() {
 	fmt.Println(rs.reteNetwork.String())
-}
-func convertAPIRuleToReteRule(apiRule Rule) rete.Rule {
-	reteRule := rete.NewRule(apiRule.GetName())
-	for _, c := range apiRule.GetConditions() {
-		reteRule.AddCondition(c.GetName(), c.GetStreamSource(), c.GetEvaluator())
-	}
-	reteRule.SetAction(apiRule.GetActionFn())
-	reteRule.SetPriority(apiRule.GetPriority())
-	return reteRule
 }

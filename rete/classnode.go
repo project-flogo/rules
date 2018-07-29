@@ -1,8 +1,11 @@
 package rete
 
 import (
+	"context"
+
+	"container/list"
+
 	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/utils"
 )
 
 //classNode holds links to filter and join nodes eventually leading upto the rule node
@@ -11,12 +14,12 @@ type classNode interface {
 	getName() string
 	addClassNodeLink(classNodeLink)
 	removeClassNodeLink(classNodeLink)
-	getClassNodeLinks() utils.ArrayList
-	assert(tuple model.StreamTuple, cr conflictRes)
+	getClassNodeLinks() *list.List
+	assert(ctx context.Context, tuple model.StreamTuple)
 }
 
 type classNodeImpl struct {
-	classNodeLinks utils.ArrayList
+	classNodeLinks *list.List
 	name           string
 }
 
@@ -28,25 +31,25 @@ func newClassNode(name string) classNode {
 
 func (cn *classNodeImpl) initClassNodeImpl(name string) {
 	cn.name = name
-	cn.classNodeLinks = utils.NewArrayList()
+	cn.classNodeLinks = list.New()
 }
 
 func (cn *classNodeImpl) addClassNodeLink(classNodeLinkVar classNodeLink) {
-	cn.classNodeLinks.Add(classNodeLinkVar)
+	cn.classNodeLinks.PushBack(classNodeLinkVar)
 }
 
-func (cn *classNodeImpl) removeClassNodeLink(classNodeLinkInList classNodeLink) {
+func (cn *classNodeImpl) removeClassNodeLink(classNodeLinkVar classNodeLink) {
 
-	for i := 0; i < cn.getClassNodeLinks().Len(); i++ {
-		classNodeLinkInList := cn.getClassNodeLinks().Get(i)
-		if classNodeLinkInList != nil && classNodeLinkInList == classNodeLinkInList {
-			cn.getClassNodeLinks().RemoveAt(i)
+	for e := cn.getClassNodeLinks().Front(); e != nil; e = e.Next() {
+		classNodeLinkInList := e.Value
+		if classNodeLinkInList != nil && classNodeLinkVar == classNodeLinkInList {
+			cn.getClassNodeLinks().Remove(e)
 			break
 		}
 	}
 }
 
-func (cn *classNodeImpl) getClassNodeLinks() utils.ArrayList {
+func (cn *classNodeImpl) getClassNodeLinks() *list.List {
 	return cn.classNodeLinks
 }
 
@@ -56,14 +59,13 @@ func (cn *classNodeImpl) getName() string {
 
 //Implements Stringer.String
 func (cn *classNodeImpl) String() string {
-	links := ""
-	for i := cn.classNodeLinks.Len() - 1; i >= 0; i-- {
-		nl := cn.classNodeLinks.Get(i).(classNodeLink)
+	links := "\n"
+
+	for e := cn.classNodeLinks.Back(); e != nil; e = e.Prev() {
+		nl := e.Value.(classNodeLink)
 		links += "\t" + nl.String()
-		if i != cn.classNodeLinks.Len()-1 {
-			links += "\n"
-		}
 	}
+
 	ret := "[ClassNode Class(" + cn.name + ")"
 	if len(links) > 0 {
 		ret += "\n" + links + "]" + "\n"
@@ -73,15 +75,15 @@ func (cn *classNodeImpl) String() string {
 	return ret
 }
 
-func (cn *classNodeImpl) assert(tuple model.StreamTuple, cr conflictRes) {
-	handle := getOrCreateHandle(tuple)
+func (cn *classNodeImpl) assert(ctx context.Context, tuple model.StreamTuple) {
+	handle := getOrCreateHandle(ctx, tuple)
 
 	handles := make([]reteHandle, 1)
 	handles[0] = handle
 
-	for i := 0; i < cn.getClassNodeLinks().Len(); i++ {
-		classNodeLinkVar := cn.getClassNodeLinks().Get(i).(classNodeLink)
-		classNodeLinkVar.propagateObjects(handles, cr)
+	for e := cn.getClassNodeLinks().Front(); e != nil; e = e.Next() {
+		classNodeLinkVar := e.Value.(classNodeLink)
+		classNodeLinkVar.propagateObjects(ctx, handles)
 	}
 
 }

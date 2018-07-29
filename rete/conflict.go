@@ -2,13 +2,15 @@ package rete
 
 import (
 	"container/list"
+	"context"
 
 	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 type conflictRes interface {
-	addAgendaItem(rule Rule, tupleMap map[model.StreamSource]model.StreamTuple)
-	resolveConflict()
+	addAgendaItem(rule model.Rule, tupleMap map[model.TupleTypeAlias]model.StreamTuple)
+	resolveConflict(ctx context.Context)
+	deleteAgendaFor(ctx context.Context, tuple model.StreamTuple)
 }
 
 type conflictResImpl struct {
@@ -25,7 +27,7 @@ func (cr *conflictResImpl) initCR() {
 	cr.agendaList = list.List{}
 }
 
-func (cr *conflictResImpl) addAgendaItem(rule Rule, tupleMap map[model.StreamSource]model.StreamTuple) {
+func (cr *conflictResImpl) addAgendaItem(rule model.Rule, tupleMap map[model.TupleTypeAlias]model.StreamTuple) {
 	item := newAgendaItem(rule, tupleMap)
 	v := rule.GetPriority()
 	found := false
@@ -42,7 +44,7 @@ func (cr *conflictResImpl) addAgendaItem(rule Rule, tupleMap map[model.StreamSou
 	}
 }
 
-func (cr *conflictResImpl) resolveConflict() {
+func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 	var item agendaItem
 
 	front := cr.agendaList.Front()
@@ -53,9 +55,41 @@ func (cr *conflictResImpl) resolveConflict() {
 			actionTuples := item.getTuples()
 			actionFn := item.getRule().GetActionFn()
 			if actionFn != nil {
-				actionFn(item.getRule().GetName(), actionTuples)
+				reteCtx := getReteCtx(ctx)
+				actionFn(ctx, reteCtx.getRuleSession(), item.getRule().GetName(), actionTuples)
 			}
 		}
+
+		reteCtxV := getReteCtx(ctx)
+		if reteCtxV != nil {
+			opsFront := reteCtxV.getOpsList().Front()
+			for opsFront != nil {
+				opsVal := reteCtxV.getOpsList().Remove(opsFront)
+				oprn := opsVal.(opsEntry)
+				oprn.execute(ctx)
+				opsFront = reteCtxV.getOpsList().Front()
+			}
+		}
+
 		front = cr.agendaList.Front()
 	}
+}
+
+func (cr *conflictResImpl) deleteAgendaFor(ctx context.Context, modifiedTuple model.StreamTuple) {
+
+	hdlModified := getOrCreateHandle(ctx, modifiedTuple)
+
+	for e := cr.agendaList.Front(); e != nil; {
+		item := e.Value.(agendaItem)
+		next := e.Next()
+		for _, tuple := range item.getTuples() {
+			hdl := getOrCreateHandle(ctx, tuple)
+			if hdl == hdlModified { //this agendaitem has the modified tuple, remove the agenda item!
+				cr.agendaList.Remove(e)
+				break
+			}
+		}
+		e = next
+	}
+
 }

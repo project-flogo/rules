@@ -3,13 +3,13 @@
 BE*Go* is a lightweight rules engine written in Go.
 
 ## Definitions
-A `StreamSource` represents a streaming data source a.k.a Channel
+A `TupleTypeAlias` represents a streaming data source a.k.a Channel
 
-A `StreamTuple` is an instance of a certain type of `StreamSource`
+A `StreamTuple` is an instance of a certain type of `TupleTypeAlias`
 
 A `Rule` constitutes of multiple Conditions and the rule triggers when all its conditions pass
 
-A `Condition` is an expression comprising of data tuples from one or more StreamSources. When the expression evaluates to true, the condition passes. Thus a Condition is characterized by the number and types of StreamSource involved in its evaluation. In order to optimize a Rule's evaluation, the Rule network needs to know of the number and type of stream sources in each of its Conditions. Thus the Condition can either be defined upfront with the number of and type of StreamSources or this can be inferred (for a start, we choose the former)
+A `Condition` is an expression comprising of data tuples from one or more TupleTypeAliass. When the expression evaluates to true, the condition passes. Thus a Condition is characterized by the number and types of TupleTypeAlias involved in its evaluation. In order to optimize a Rule's evaluation, the Rule network needs to know of the number and type of stream sources in each of its Conditions. Thus the Condition can either be defined upfront with the number of and type of TupleTypeAliass or this can be inferred (for a start, we choose the former)
 
 The rule's `Action` is a function that is invoked once each time that a matching combination of tuples is found that result in a true evaluation of all its conditions. Thus the `Action` function takes as an argument, the matching tuples.
 
@@ -25,8 +25,8 @@ With this background, let us see how it translates to API/code. *This is a draft
 	//Create Rule, define conditions and set action callback
 	rule := ruleapi.NewRule("* Ensure n1.name is Bob and n2.name matches n1.name ie Bob in this case *")
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
-	rule.AddCondition("c1", []model.StreamSource{"n1"}, checkForBob)          // check for name "Bob" in n1
-	rule.AddCondition("c2", []model.StreamSource{"n1", "n2"}, checkSameNames) // match the "name" field in both tuples
+	rule.AddCondition("c1", []model.TupleTypeAlias{"n1"}, checkForBob)          // check for name "Bob" in n1
+	rule.AddCondition("c2", []model.TupleTypeAlias{"n1", "n2"}, checkSameNames) // match the "name" field in both tuples
 	//in effect, fire the rule when name field in both tuples is "Bob"
 	rule.SetActionFn(myActionFn)
 
@@ -64,7 +64,7 @@ With this background, let us see how it translates to API/code. *This is a draft
     //You may delete the rule
     ruleSession.DeleteRule (rule.getName())
 
-    func checkForBob(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+    func checkForBob(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
         //This conditions filters on name="Bob"
         streamTuple := tuples["n1"]
         if streamTuple == nil {
@@ -75,7 +75,7 @@ With this background, let us see how it translates to API/code. *This is a draft
         return name == "Bob"
     }
     
-    func checkSameNames(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+    func checkSameNames(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
         // fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
         streamTuple1 := tuples["n1"]
         streamTuple2 := tuples["n2"]
@@ -88,7 +88,7 @@ With this background, let us see how it translates to API/code. *This is a draft
         return name1 == name2
     }
     
-    func myActionFn(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+    func myActionFn(ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
         fmt.Printf("Rule fired: [%s]\n", ruleName)
         streamTuple1 := tuples["n1"]
         streamTuple2 := tuples["n2"]

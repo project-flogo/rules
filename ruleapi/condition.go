@@ -2,38 +2,28 @@ package ruleapi
 
 import "github.com/TIBCOSoftware/bego/common/model"
 
-//condition ... is a rete condtion
-type condition interface {
-	GetName() string
-	GetEvaluator() model.ConditionEvaluator
-	GetRule() Rule
-	GetStreamSource() []model.StreamSource
-	//Stringer.String interface
-	String() string
-}
-
 type conditionImpl struct {
 	name        string
-	rule        Rule
-	identifiers []model.StreamSource
+	rule        model.Rule
+	identifiers []model.TupleTypeAlias
 	cfn         model.ConditionEvaluator
 }
 
 //NewCondition ... a new Condition
-func NewCondition(name string, rule Rule, identifiers []model.StreamSource, cfn model.ConditionEvaluator) condition {
+func newCondition(name string, rule model.Rule, identifiers []model.TupleTypeAlias, cfn model.ConditionEvaluator) model.Condition {
 	c := conditionImpl{}
 	c.initConditionImpl(name, rule, identifiers, cfn)
 	return &c
 }
 
-func (cnd *conditionImpl) initConditionImpl(name string, rule Rule, identifiers []model.StreamSource, cfn model.ConditionEvaluator) {
+func (cnd *conditionImpl) initConditionImpl(name string, rule model.Rule, identifiers []model.TupleTypeAlias, cfn model.ConditionEvaluator) {
 	cnd.name = name
 	cnd.rule = rule
 	cnd.identifiers = append(cnd.identifiers, identifiers...)
 	cnd.cfn = cfn
 }
 
-func (cnd *conditionImpl) GetIdentifiers() []model.StreamSource {
+func (cnd *conditionImpl) GetIdentifiers() []model.TupleTypeAlias {
 	return cnd.identifiers
 }
 
@@ -49,9 +39,9 @@ func (cnd *conditionImpl) GetName() string {
 	return cnd.name
 }
 
-func (cnd *conditionImpl) GetRule() Rule {
+func (cnd *conditionImpl) GetRule() model.Rule {
 	return cnd.rule
 }
-func (cnd *conditionImpl) GetStreamSource() []model.StreamSource {
+func (cnd *conditionImpl) GetTupleTypeAlias() []model.TupleTypeAlias {
 	return cnd.identifiers
 }

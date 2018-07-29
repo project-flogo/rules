@@ -1,7 +1,10 @@
 package rete
 
 import (
+	"context"
 	"strconv"
+
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //nodelink connects 2 nodes, a rete building block
@@ -12,7 +15,7 @@ type nodeLink interface {
 
 	setChild(child node)
 	setIsRightChild(isRight bool)
-	propagateObjects(handles []reteHandle, cr conflictRes)
+	propagateObjects(ctx context.Context, handles []reteHandle)
 }
 
 type nodeLinkImpl struct {
@@ -20,23 +23,23 @@ type nodeLinkImpl struct {
 	numIdentifiers int
 
 	parent    node
-	parentIds []identifier
+	parentIds []model.TupleTypeAlias
 
 	child    node
-	childIds []identifier
+	childIds []model.TupleTypeAlias
 
 	isRight bool
 	id      int
 }
 
-func newNodeLink(parent node, child node, isRight bool) nodeLink {
+func newNodeLink(nw Network, parent node, child node, isRight bool) nodeLink {
 	nl := nodeLinkImpl{}
-	nl.initNodeLink(parent, child, isRight)
+	nl.initNodeLink(nw, parent, child, isRight)
 	return &nl
 }
 
-func (nl *nodeLinkImpl) initNodeLink(parent node, child node, isRight bool) {
-	nl.id = currentNodeID
+func (nl *nodeLinkImpl) initNodeLink(nw Network, parent node, child node, isRight bool) {
+	nl.id = nw.incrementAndGetId()
 	nl.child = child
 	nl.isRight = isRight
 
@@ -57,9 +60,8 @@ func (nl *nodeLinkImpl) initNodeLink(parent node, child node, isRight bool) {
 }
 
 //initialize node link : for use with ClassNodeLink
-func initClassNodeLink(nl *nodeLinkImpl, child node) {
-	currentNodeID++
-	nl.id = currentNodeID
+func initClassNodeLink(nw Network, nl *nodeLinkImpl, child node) {
+	nl.id = nw.incrementAndGetId()
 	nl.child = child
 	nl.childIds = child.getIdentifiers()
 }
@@ -79,7 +81,7 @@ func (nl *nodeLinkImpl) setConvert() {
 	for i := 0; i < nl.numIdentifiers; i++ {
 		found := false
 		for j := 0; j < nl.numIdentifiers; j++ {
-			if nl.parentIds[i].equals(nl.childIds[j]) {
+			if nl.parentIds[i] == nl.childIds[j] {
 				found = true
 				nl.convert[i] = j
 				break
@@ -128,7 +130,7 @@ func (nl *nodeLinkImpl) setIsRightChild(isRight bool) {
 	nl.isRight = isRight
 }
 
-func (nl *nodeLinkImpl) propagateObjects(handles []reteHandle, cr conflictRes) {
+func (nl *nodeLinkImpl) propagateObjects(ctx context.Context, handles []reteHandle) {
 	if nl.convert != nil {
 		convertedHandles := make([]reteHandle, nl.numIdentifiers)
 		for i := 0; i < nl.numIdentifiers; i++ {
@@ -136,5 +138,5 @@ func (nl *nodeLinkImpl) propagateObjects(handles []reteHandle, cr conflictRes) {
 		}
 		handles = convertedHandles
 	}
-	nl.child.assertObjects(handles, nl.isRightNode(), cr)
+	nl.child.assertObjects(ctx, handles, nl.isRightNode())
 }

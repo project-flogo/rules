@@ -1,42 +1,27 @@
 package model
 
-import "time"
-
-//StreamTuple is a runtime representation of a stream of data
-type StreamTuple interface {
-	GetStreamDataSource() StreamSource
-	GetString(name string) string
-	GetInt(name string) int
-	GetFloat(name string) float64
-	GetDateTime(name string) time.Time
-}
-
-//MutableStreamTuple mutable part of the stream tuple
-type MutableStreamTuple interface {
-	StreamTuple
-	SetString(name string, value string)
-	SetInt(name string, value int)
-	SetFloat(name string, value float64)
-	SetDatetime(name string, value time.Time)
-}
+import (
+	"context"
+	"time"
+)
 
 type streamImpl struct {
-	dataSource StreamSource
+	dataSource TupleTypeAlias
 	tuples     map[string]interface{}
 }
 
-func NewStreamTuple(dataSource StreamSource) MutableStreamTuple {
+func NewStreamTuple(dataSource TupleTypeAlias) MutableStreamTuple {
 	streamImplVar := streamImpl{}
 	streamImplVar.initStreamTuple(dataSource)
 	return &streamImplVar
 }
 
-func (streamImplVar *streamImpl) initStreamTuple(dataSource StreamSource) {
+func (streamImplVar *streamImpl) initStreamTuple(dataSource TupleTypeAlias) {
 	streamImplVar.tuples = make(map[string]interface{})
 	streamImplVar.dataSource = dataSource
 }
 
-func (streamImplVar *streamImpl) GetStreamDataSource() StreamSource {
+func (streamImplVar *streamImpl) GetTypeAlias() TupleTypeAlias {
 	return streamImplVar.dataSource
 }
 
@@ -57,15 +42,37 @@ func (streamImplVar *streamImpl) GetDateTime(name string) time.Time {
 	return v.(time.Time)
 }
 
-func (streamImplVar *streamImpl) SetString(name string, value string) {
-	streamImplVar.tuples[name] = value
+func (streamImplVar *streamImpl) SetString(ctx context.Context, name string, value string) {
+	if streamImplVar.tuples[name] != value {
+		streamImplVar.tuples[name] = value
+		callChangeListener(ctx, streamImplVar)
+	}
 }
-func (streamImplVar *streamImpl) SetInt(name string, value int) {
-	streamImplVar.tuples[name] = value
+func (streamImplVar *streamImpl) SetInt(ctx context.Context, name string, value int) {
+	if streamImplVar.tuples[name] != value {
+		streamImplVar.tuples[name] = value
+		callChangeListener(ctx, streamImplVar)
+	}
 }
-func (streamImplVar *streamImpl) SetFloat(name string, value float64) {
-	streamImplVar.tuples[name] = value
+func (streamImplVar *streamImpl) SetFloat(ctx context.Context, name string, value float64) {
+	if streamImplVar.tuples[name] != value {
+		streamImplVar.tuples[name] = value
+		callChangeListener(ctx, streamImplVar)
+	}
 }
-func (streamImplVar *streamImpl) SetDatetime(name string, value time.Time) {
-	streamImplVar.tuples[name] = value
+func (streamImplVar *streamImpl) SetDatetime(ctx context.Context, name string, value time.Time) {
+	if streamImplVar.tuples[name] != value {
+		streamImplVar.tuples[name] = value
+		callChangeListener(ctx, streamImplVar)
+	}
+}
+
+func callChangeListener(ctx context.Context, tuple StreamTuple) {
+	if ctx != nil {
+		valChangeListerI := ctx.Value(reteCTXKEY)
+		if valChangeListerI != nil {
+			valChangeLister := valChangeListerI.(ValueChangeHandler)
+			valChangeLister.OnValueChange(tuple)
+		}
+	}
 }

@@ -1,5 +1,7 @@
 package rete
 
+import "github.com/TIBCOSoftware/bego/common/model"
+
 type joinTable interface {
 	addRow(row joinTableRow) //list of StreamTuples
 	getID() int
@@ -11,18 +13,17 @@ type joinTable interface {
 type joinTableImpl struct {
 	id    int
 	table map[joinTableRow]joinTableRow
-	idr   []identifier
+	idr   []model.TupleTypeAlias
 }
 
-func newJoinTable(identifiers []identifier) joinTable {
+func newJoinTable(nw Network, identifiers []model.TupleTypeAlias) joinTable {
 	jT := joinTableImpl{}
-	jT.initJoinTableImpl(identifiers)
+	jT.initJoinTableImpl(nw, identifiers)
 	return &jT
 }
 
-func (jt *joinTableImpl) initJoinTableImpl(identifiers []identifier) {
-	currentNodeID++
-	jt.id = currentNodeID
+func (jt *joinTableImpl) initJoinTableImpl(nw Network, identifiers []model.TupleTypeAlias) {
+	jt.id = nw.incrementAndGetId()
 	jt.idr = identifiers
 	jt.table = map[joinTableRow]joinTableRow{}
 }

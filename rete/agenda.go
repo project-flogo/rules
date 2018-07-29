@@ -5,24 +5,24 @@ import (
 )
 
 type agendaItem interface {
-	getRule() Rule
-	getTuples() map[model.StreamSource]model.StreamTuple
+	getRule() model.Rule
+	getTuples() map[model.TupleTypeAlias]model.StreamTuple
 }
 
 type agendaItemImpl struct {
-	rule     Rule
-	tupleMap map[model.StreamSource]model.StreamTuple
+	rule     model.Rule
+	tupleMap map[model.TupleTypeAlias]model.StreamTuple
 }
 
-func newAgendaItem(rule Rule, tupleMap map[model.StreamSource]model.StreamTuple) agendaItem {
+func newAgendaItem(rule model.Rule, tupleMap map[model.TupleTypeAlias]model.StreamTuple) agendaItem {
 	ai := agendaItemImpl{rule, tupleMap}
 	return &ai
 }
 
-func (ai *agendaItemImpl) getRule() Rule {
+func (ai *agendaItemImpl) getRule() model.Rule {
 	return ai.rule
 }
 
-func (ai *agendaItemImpl) getTuples() map[model.StreamSource]model.StreamTuple {
+func (ai *agendaItemImpl) getTuples() map[model.TupleTypeAlias]model.StreamTuple {
 	return ai.tupleMap
 }

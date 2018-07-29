@@ -1,21 +1,24 @@
 package rete
 
 import (
+	"context"
 	"strconv"
+
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //ruleNode the leaf node of the rule network for a Rule
 type ruleNode interface {
 	node
-	getRule() Rule
+	getRule() model.Rule
 }
 
 type ruleNodeImpl struct {
 	nodeImpl
-	rule Rule
+	rule model.Rule
 }
 
-func newRuleNode(rule Rule) ruleNode {
+func newRuleNode(rule model.Rule) ruleNode {
 	rn := ruleNodeImpl{}
 	rn.identifiers = rule.GetIdentifiers()
 	rn.rule = rule
@@ -24,24 +27,20 @@ func newRuleNode(rule Rule) ruleNode {
 
 func (rn *ruleNodeImpl) String() string {
 	return "\t[RuleNode id(" + strconv.Itoa(rn.id) + "): \n" +
-		"\t\tIdentifier           = " + IdentifiersToString(rn.identifiers) + " ;\n" +
+		"\t\tIdentifier           = " + model.IdentifiersToString(rn.identifiers) + " ;\n" +
 		"\t\tRule                 = " + rn.rule.GetName() + "]\n"
 }
 
-func (rn *ruleNodeImpl) assertObjects(handles []reteHandle, isRight bool, cr conflictRes) {
-	// fmt.Println("Rule " + rn.getRule().GetName() + " fired, total tuples:" + strconv.Itoa(len(handles)))
-	// tuples := copyIntoTupleArray(handles)
-	// rn.getRule.performAction(tuples)
+func (rn *ruleNodeImpl) assertObjects(ctx context.Context, handles []reteHandle, isRight bool) {
+
 	tupleMap := copyIntoTupleMap(handles)
+
+	cr := getReteCtx(ctx).getConflictResolver()
 
 	cr.addAgendaItem(rn.getRule(), tupleMap)
 
-	// actionFn := rn.getRule().GetActionFn()
-	// if actionFn != nil {
-	// 	actionFn(rn.getRule().GetName(), tupleMap)
-	// }
-
 }
-func (rn *ruleNodeImpl) getRule() Rule {
+
+func (rn *ruleNodeImpl) getRule() model.Rule {
 	return rn.rule
 }
