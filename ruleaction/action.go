@@ -20,7 +20,7 @@ const (
 )
 
 type RuleAction struct {
-	rs ruleapi.RuleSession
+	rs model.RuleSession
 }
 type ActionFactory struct {
 }
@@ -84,7 +84,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 	}
 	fmt.Printf("Received event from stream source [%s]", h.Name)
 
-	streamSrc := model.StreamSource(h.Name)
+	streamSrc := model.TupleTypeAlias(h.Name)
 
 	streamTuple := model.NewStreamTuple(streamSrc) //n1 -> will be replaced by contextual information coming in the data
 
@@ -94,51 +94,51 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 
 	//map input data into stream tuples, only string. ignore the rest for now
 	for key, value := range queryParams {
-		streamTuple.SetString(key, value)
+		streamTuple.SetString(ctx, key, value)
 	}
 
-	a.rs.Assert(streamTuple)
+	a.rs.Assert(ctx, streamTuple)
 	return nil, nil
 }
 
-func loadRules(rs ruleapi.RuleSession) {
+func loadRules(rs model.RuleSession) {
 
 	rule := ruleapi.NewRule("customer-event")
-	rule.AddCondition("customer", []model.StreamSource{"customerevent"}, truecondition) // check for name "Bob" in n1
-	rule.SetActionFn(customer)
+	rule.AddCondition("customer", []model.TupleTypeAlias{"customerevent"}, truecondition) // check for name "Bob" in n1
+	rule.SetAction(customerEvent)
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
 
 	rule2 := ruleapi.NewRule("debit-event")
-	rule2.AddCondition("debitevent", []model.StreamSource{"debitevent"}, truecondition)
-	rule2.SetActionFn(debit)
+	rule2.AddCondition("debitevent", []model.TupleTypeAlias{"debitevent"}, truecondition)
+	rule2.SetAction(debitEvent)
 	rule2.SetPriority(2)
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
 	rule3 := ruleapi.NewRule("customer-debit")
-	rule3.AddCondition("customerdebit", []model.StreamSource{"debitevent", "customerevent"}, customerdebitjoincondition)
-	rule3.SetActionFn(debitAction)
+	rule3.AddCondition("customerdebit", []model.TupleTypeAlias{"debitevent", "customerevent"}, customerdebitjoincondition)
+	rule3.SetAction(debitAction)
 	rule3.SetPriority(3)
 	rs.AddRule(rule3)
 	fmt.Printf("Rule added: [%s]\n", rule3.GetName())
 
-	//rule4 := ruleapi.NewRule("check-balance")
-	//rule4.AddCondition("customerdebit", []model.StreamSource{"customerevent"}, checkBalance) // check for name "Bob" in n1
-	//rule4.SetActionFn(balanceAlert)
-	//rule4.SetPriority(4)
-	//rs.AddRule(rule4)
-	//fmt.Printf("Rule added: [%s]\n", rule4.GetName())
+	rule4 := ruleapi.NewRule("check-balance")
+	rule4.AddCondition("customerdebit", []model.TupleTypeAlias{"customerevent"}, checkBalance) // check for name "Bob" in n1
+	rule4.SetAction(balanceAlert)
+	rule4.SetPriority(4)
+	rs.AddRule(rule4)
+	fmt.Printf("Rule added: [%s]\n", rule4.GetName())
 
 
 }
 
 
-func truecondition (ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+func truecondition (ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
 	return true
 }
-func customer(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+func customerEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
 	streamTuple := tuples["customerevent"]
 	if streamTuple == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
@@ -147,7 +147,7 @@ func customer(ruleName string, tuples map[model.StreamSource]model.StreamTuple) 
 		fmt.Printf("Received a customer event with customer name [%s]\n", name)
 	}
 }
-func debit(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+func debitEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
 	streamTuple := tuples["debitevent"]
 	if streamTuple == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
@@ -159,7 +159,7 @@ func debit(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
 	}
 }
 
-func customerdebitjoincondition(ruleName string, condName string, tuples map[model.StreamSource]model.StreamTuple) bool {
+func customerdebitjoincondition(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
 
 	customerTuple := tuples["customerevent"]
 	debitTuple := tuples["debitevent"]
@@ -175,13 +175,32 @@ func customerdebitjoincondition(ruleName string, condName string, tuples map[mod
 
 }
 
-func debitAction(ruleName string, tuples map[model.StreamSource]model.StreamTuple) {
+func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
 	//fmt.Printf("Rule fired: [%s]\n", ruleName)
 	customerTuple := tuples["customerevent"].(model.MutableStreamTuple)
 	debitTuple := tuples["debitevent"]
 	dbt := debitTuple.GetString("debit")
 	debitAmt, _ := strconv.ParseFloat(dbt, 64)
 	currBal := customerTuple.GetFloat("balance")
-	customerTuple.SetFloat("balance", customerTuple.GetFloat("balance") - debitAmt)
+	if (customerTuple.GetFloat("balance")-debitAmt >= 0) {
+		customerTuple.SetFloat(ctx, "balance", customerTuple.GetFloat("balance")-debitAmt)
+	}
 	fmt.Printf("Customer [%s], Balance [%f], Debit [%f], NewBalance [%f]\n", customerTuple.GetString("name"), currBal, debitAmt, customerTuple.GetFloat("balance"))
+}
+
+func checkBalance(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+	customerTuple := tuples["customerevent"]
+	if customerTuple == nil {
+		fmt.Println("Should not get a nil tuple here! This is an error")
+		return false
+	}
+	balance := customerTuple.GetFloat("balance")
+
+	return balance <= 0
+}
+
+func balanceAlert(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+	//fmt.Printf("Rule fired: [%s]\n", ruleName)
+	customerTuple := tuples["customerevent"]
+	fmt.Printf("Customer balance is 0 or negative ! [%s], Balance [%f]\n", customerTuple.GetString("name"), customerTuple.GetFloat("balance"))
 }
