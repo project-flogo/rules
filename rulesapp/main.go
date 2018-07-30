@@ -8,7 +8,7 @@ import (
 	"github.com/TIBCOSoftware/bego/ruleapi"
 )
 
-func main1() {
+func main() {
 
 	fmt.Println("** Welcome to BEGo **")
 
