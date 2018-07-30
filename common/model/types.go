@@ -19,6 +19,8 @@ type RuleSession interface {
 
 	Assert(ctx context.Context, tuple StreamTuple)
 	Retract(ctx context.Context, tuple StreamTuple)
+	Unregister() //remove itself from the package map
+	GetName() string
 }
 
 //Rule ... a Rule interface

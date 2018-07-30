@@ -28,7 +28,7 @@ func TestTwo(t *testing.T) {
 	rule2.SetPriority(2)
 
 	//Create a RuleSession and add the above Rule
-	ruleSession := ruleapi.NewRuleSession()
+	ruleSession := ruleapi.GetOrCreateRuleSession("testsession")
 	ruleSession.AddRule(rule)
 	ruleSession.AddRule(rule2)
 	// ruleSession.AddRule(rule3)

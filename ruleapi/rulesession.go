@@ -1,21 +1,34 @@
 package ruleapi
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/TIBCOSoftware/bego/common/model"
 	"github.com/TIBCOSoftware/bego/rete"
+	"github.com/TIBCOSoftware/bego/common/model"
+	"fmt"
 )
 
+
+
+import (
+	"context"
+	"sync"
+)
+var (
+	sessionMap sync.Map
+)
+func init() {
+
+}
 type rulesessionImpl struct {
+	name string
 	reteNetwork rete.Network
 }
 
-func NewRuleSession() model.RuleSession {
+func GetOrCreateRuleSession(name string) model.RuleSession {
+
 	rs := rulesessionImpl{}
 	rs.initRuleSession()
-	return &rs
+	rs1, _ :=  sessionMap.LoadOrStore(name, &rs)
+	return rs1.(*rulesessionImpl)
 }
 
 func (rs *rulesessionImpl) initRuleSession() {
@@ -42,9 +55,17 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.StreamTuple) 
 }
 
 func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.StreamTuple) {
-	rs.reteNetwork.Retract(tuple)
+	rs.reteNetwork.Retract(ctx, tuple)
 }
 
 func (rs *rulesessionImpl) printNetwork() {
 	fmt.Println(rs.reteNetwork.String())
+}
+
+func (rs *rulesessionImpl) GetName() string {
+	return rs.name
+}
+
+func (rs *rulesessionImpl) Unregister() {
+	sessionMap.Delete(rs.name)
 }

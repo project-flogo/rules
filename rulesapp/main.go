@@ -8,7 +8,7 @@ import (
 	"github.com/TIBCOSoftware/bego/ruleapi"
 )
 
-func main() {
+func main1() {
 
 	fmt.Println("** Welcome to BEGo **")
 
@@ -37,7 +37,7 @@ func main() {
 	rule3.SetPriority(1000)
 
 	//Create a RuleSession and add the above Rule
-	ruleSession := ruleapi.NewRuleSession()
+	ruleSession := ruleapi.GetOrCreateRuleSession("asession")
 	ruleSession.AddRule(rule)
 	ruleSession.AddRule(rule2)
 	ruleSession.AddRule(rule3)
@@ -79,6 +79,8 @@ func main() {
 
 	//You may delete the rule
 	ruleSession.DeleteRule(rule.GetName())
+
+	ruleSession.Unregister()
 
 }
 

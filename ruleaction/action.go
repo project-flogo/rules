@@ -43,7 +43,7 @@ type ActionData struct {
 func (ff *ActionFactory) New(config *action.Config) (action.Action, error) {
 
 	ruleAction := &RuleAction{}
-	ruleAction.rs = ruleapi.NewRuleSession()
+	ruleAction.rs = ruleapi.GetOrCreateRuleSession("flogosession")
 
 	var actionData ActionData
 	err := json.Unmarshal(config.Data, &actionData)

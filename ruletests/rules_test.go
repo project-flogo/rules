@@ -26,7 +26,7 @@ func TestOne(t *testing.T) {
 	rule2.SetAction(tomRuleFired)
 
 	//Create a RuleSession and add the above Rule
-	ruleSession := ruleapi.NewRuleSession()
+	ruleSession := ruleapi.GetOrCreateRuleSession("testsession")
 	ruleSession.AddRule(rule)
 	ruleSession.AddRule(rule2)
 

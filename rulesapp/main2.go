@@ -8,7 +8,7 @@ import (
 	"github.com/TIBCOSoftware/bego/ruleapi"
 )
 
-func main1() {
+func main2() {
 
 	fmt.Println("My first BEGo test!")
 
@@ -20,7 +20,7 @@ func main1() {
 	rule.SetAction(myActionFn)
 
 	//Create a RuleSession and add the above Rule
-	ruleSession := ruleapi.NewRuleSession()
+	ruleSession := ruleapi.GetOrCreateRuleSession("asession")
 	ruleSession.AddRule(rule)
 
 	ctx := context.Background()

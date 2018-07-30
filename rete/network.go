@@ -8,6 +8,7 @@ import (
 	"github.com/TIBCOSoftware/bego/common/model"
 
 	"container/list"
+	"sync"
 )
 
 //Network ... the rete network
@@ -16,7 +17,7 @@ type Network interface {
 	String() string
 	RemoveRule(string) model.Rule
 	Assert(ctx context.Context, rs model.RuleSession, tuple model.StreamTuple)
-	Retract(tuple model.StreamTuple)
+	Retract(ctx context.Context, tuple model.StreamTuple)
 
 	assertInternal(ctx context.Context, tuple model.StreamTuple)
 	getOrCreateHandle(tuple model.StreamTuple) reteHandle
@@ -39,6 +40,9 @@ type reteNetworkImpl struct {
 	allHandles map[model.StreamTuple]reteHandle
 
 	currentId int
+
+	assertLock sync.Mutex
+	crudLock sync.Mutex
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -57,6 +61,9 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) int {
+
+	nw.crudLock.Lock()
+	defer nw.crudLock.Unlock()
 
 	if nw.allRules[rule.GetName()] != nil {
 		fmt.Println("Rule already exists.." + rule.GetName())
@@ -118,6 +125,9 @@ func (nw *reteNetworkImpl) setClassNodeAndLinkJoinTables(nodesOfRule *list.List,
 }
 
 func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
+
+	nw.crudLock.Lock()
+	defer nw.crudLock.Unlock()
 
 	rule := nw.allRules[ruleName]
 	delete(nw.allRules, ruleName)
@@ -498,6 +508,8 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	reteCtxVar, isRecursive, newCtx := getOrSetReteCtx(ctx, nw, rs)
 
 	if !isRecursive {
+		nw.crudLock.Lock()
+		defer nw.crudLock.Unlock()
 		nw.assertInternal(newCtx, tuple)
 	} else {
 		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple))
@@ -506,11 +518,22 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	reteCtxVar.getConflictResolver().resolveConflict(newCtx)
 }
 
-func (nw *reteNetworkImpl) Retract(tuple model.StreamTuple) {
+func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.StreamTuple) {
+
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	_, isRecursive, _:= getOrSetReteCtx(ctx, nw, nil)
+
+	if !isRecursive {
+		nw.crudLock.Lock()
+		defer nw.crudLock.Unlock()
+	}
 	reteHandle := nw.allHandles[tuple]
 	if reteHandle != nil {
 		reteHandle.removeJoinTableRowRefs()
 	}
+
 }
 
 func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.StreamTuple) {

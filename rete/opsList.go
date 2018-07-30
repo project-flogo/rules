@@ -54,7 +54,7 @@ func newModifyEntry(tuple model.StreamTuple) modifyEntry {
 func (me *modifyEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
 	reteCtx.getConflictResolver().deleteAgendaFor(ctx, me.tuple)
-	reteCtx.getNetwork().Retract(me.tuple)
+	reteCtx.getNetwork().Retract(ctx, me.tuple)
 	reteCtx.getNetwork().Assert(ctx, reteCtx.getRuleSession(), me.tuple)
 }
 
@@ -77,5 +77,5 @@ func newDeleteEntry(tuple model.StreamTuple) deleteEntry {
 func (de *deleteEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
 	reteCtx.getConflictResolver().deleteAgendaFor(ctx, de.tuple)
-	reteCtx.getNetwork().Retract(de.tuple)
+	reteCtx.getNetwork().Retract(ctx, de.tuple)
 }

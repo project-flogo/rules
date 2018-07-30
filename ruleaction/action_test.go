@@ -9,14 +9,13 @@ import (
 
 
 func TestAction (t *testing.T) {
-	rs := ruleapi.NewRuleSession()
+	rs := ruleapi.GetOrCreateRuleSession("asession")
 
 	loadRules(rs)
 
 	st1 := model.NewStreamTuple(model.TupleTypeAlias("customerevent"))
 	st1.SetString (nil,"name", "Bob")
 	st1.SetString (nil,"status", "active")
-
 	st1.SetFloat (nil,"balance", 1000)
 	rs.Assert(nil, st1)
 
@@ -27,5 +26,4 @@ func TestAction (t *testing.T) {
 		debit.SetString(nil,"debit", fs)
 		rs.Assert(nil, debit)
 	}
-
 }
