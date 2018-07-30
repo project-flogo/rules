@@ -127,7 +127,7 @@ func loadRules(rs model.RuleSession) {
 	rule4 := ruleapi.NewRule("check-balance")
 	rule4.AddCondition("customerdebit", []model.TupleTypeAlias{"customerevent"}, checkBalance) // check for name "Bob" in n1
 	rule4.SetAction(balanceAlert)
-	rule4.SetPriority(4)
+	rule4.SetPriority(-1)
 	rs.AddRule(rule4)
 	fmt.Printf("Rule added: [%s]\n", rule4.GetName())
 
@@ -182,7 +182,7 @@ func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tup
 	dbt := debitTuple.GetString("debit")
 	debitAmt, _ := strconv.ParseFloat(dbt, 64)
 	currBal := customerTuple.GetFloat("balance")
-	if (customerTuple.GetFloat("balance")-debitAmt >= 0) {
+	if (customerTuple.GetString("status") == "active") {
 		customerTuple.SetFloat(ctx, "balance", customerTuple.GetFloat("balance")-debitAmt)
 	}
 	fmt.Printf("Customer [%s], Balance [%f], Debit [%f], NewBalance [%f]\n", customerTuple.GetString("name"), currBal, debitAmt, customerTuple.GetFloat("balance"))
@@ -195,12 +195,14 @@ func checkBalance(ruleName string, condName string, tuples map[model.TupleTypeAl
 		return false
 	}
 	balance := customerTuple.GetFloat("balance")
+	issuspended := customerTuple.GetString("status")
 
-	return balance <= 0
+	return balance <= 0 && issuspended == "active"
 }
 
 func balanceAlert(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
 	//fmt.Printf("Rule fired: [%s]\n", ruleName)
-	customerTuple := tuples["customerevent"]
-	fmt.Printf("Customer balance is 0 or negative ! [%s], Balance [%f]\n", customerTuple.GetString("name"), customerTuple.GetFloat("balance"))
+	customerTuple := tuples["customerevent"].(model.MutableStreamTuple)
+	fmt.Printf("**** Account Suspended *** Customer balance is 0 or negative ! [%s], Balance [%f]\n", customerTuple.GetString("name"), customerTuple.GetFloat("balance"))
+	customerTuple.SetString(ctx,"status", "suspended")
 }
