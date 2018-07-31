@@ -1,0 +1,38 @@
+[
+  {
+    "Name": "customerevent",
+    "Expiry": 10,
+    "Props": {
+      "name": {
+        "Name": "name",
+        "PropType": "string"
+      },
+      "status": {
+        "Name": "status",
+        "PropType": "string"
+      },
+      "balance": {
+        "Name": "balance",
+        "PropType": "string"
+      },
+      "addr": {
+        "Name": "addr",
+        "PropType": "string"
+      }
+    }
+  },
+  {
+    "Name": "debitevent",
+    "Expiry": 0,
+    "Props": {
+      "name": {
+        "Name": "name",
+        "PropType": "string"
+      },
+      "debit": {
+        "Name": "debit",
+        "PropType": "string"
+      }
+    }
+  }
+]

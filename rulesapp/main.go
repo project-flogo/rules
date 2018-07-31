@@ -12,6 +12,18 @@ func main() {
 
 	fmt.Println("** Welcome to BEGo **")
 
+	//A json string describing the types of tuples that will be asserted.
+	//The descriptor is used for property type/value validations as well as other information such as expiry of the tuple, etc.
+	//Expiry = -1 means explicit retraction. 0 means, retract at the end of RTC, non-zero means retract after that much timeout
+	//in milliseconds
+	//In a real application, this type descriptor will usually be externalized to a file
+	tupleDescriptor := "[{\"Name\": \"n1\",\"Expiry\": -1,\"Props\": {\"name\": {\"Name\": \"name\",\"PropType\": \"string\"}}}," +
+		                "{\"Name\": \"n2\",\"Expiry\": -1,\"Props\": {\"name\": {\"Name\": \"name\",\"PropType\": \"string\"}}}]"
+
+	//Create a RuleSession and register the type descriptors.
+	rs := ruleapi.GetOrCreateRuleSession("asession")
+	rs.RegisterTupleDescriptors(tupleDescriptor)
+
 	//Create Rule, define conditiond and set action callback
 	rule := ruleapi.NewRule("* Ensure n1.name is Bob and n2.name matches n1.name ie Bob in this case *")
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
@@ -37,50 +49,49 @@ func main() {
 	rule3.SetPriority(1000)
 
 	//Create a RuleSession and add the above Rule
-	ruleSession := ruleapi.GetOrCreateRuleSession("asession")
-	ruleSession.AddRule(rule)
-	ruleSession.AddRule(rule2)
-	ruleSession.AddRule(rule3)
+	rs.AddRule(rule)
+	rs.AddRule(rule2)
+	rs.AddRule(rule3)
 
 	// ctx := context.Background()
 
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	streamTuple1 := model.NewStreamTuple("n1")
-	streamTuple1.SetString(nil, "name", "Bob")
-	ruleSession.Assert(nil, streamTuple1)
+	streamTuple1.SetString(nil, rs,"name", "Bob")
+	rs.Assert(nil, streamTuple1)
 
 	fmt.Println("Asserting n1 tuple with name=Fred")
 	streamTuple2 := model.NewStreamTuple("n1")
-	streamTuple2.SetString(nil, "name", "Fred")
-	ruleSession.Assert(nil, streamTuple2)
+	streamTuple2.SetString(nil, rs,"name", "Fred")
+	rs.Assert(nil, streamTuple2)
 
 	fmt.Println("Asserting n2 tuple with name=Fred")
 	streamTuple3 := model.NewStreamTuple("n2")
-	streamTuple3.SetString(nil, "name", "Fred")
-	ruleSession.Assert(nil, streamTuple3)
+	streamTuple3.SetString(nil, rs,"name", "Fred")
+	rs.Assert(nil, streamTuple3)
 
 	fmt.Println("Asserting n2 tuple with name=Bob")
 	streamTuple4 := model.NewStreamTuple("n2")
-	streamTuple4.SetString(nil, "name", "Bob")
-	ruleSession.Assert(nil, streamTuple4)
+	streamTuple4.SetString(nil, rs,"name", "Bob")
+	rs.Assert(nil, streamTuple4)
 
 	fmt.Println("Asserting n1 tuple with name=Tom")
 	streamTuple5 := model.NewStreamTuple("n1")
-	streamTuple5.SetString(nil, "name", "Tom")
-	ruleSession.Assert(nil, streamTuple5)
+	streamTuple5.SetString(nil, rs,"name", "Tom")
+	rs.Assert(nil, streamTuple5)
 
 	//Retract them
-	ruleSession.Retract(nil, streamTuple1)
-	ruleSession.Retract(nil, streamTuple2)
-	ruleSession.Retract(nil, streamTuple3)
-	ruleSession.Retract(nil, streamTuple4)
-	ruleSession.Retract(nil, streamTuple5)
+	rs.Retract(nil, streamTuple1)
+	rs.Retract(nil, streamTuple2)
+	rs.Retract(nil, streamTuple3)
+	rs.Retract(nil, streamTuple4)
+	rs.Retract(nil, streamTuple5)
 
 	//You may delete the rule
-	ruleSession.DeleteRule(rule.GetName())
+	rs.DeleteRule(rule.GetName())
 
-	ruleSession.Unregister()
+	rs.Unregister()
 
 }
 

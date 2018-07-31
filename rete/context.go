@@ -14,7 +14,7 @@ type reteCtx interface {
 	getOpsList() *list.List
 	getNetwork() Network
 	getRuleSession() model.RuleSession
-	OnValueChange(tuple model.StreamTuple)
+	OnValueChange(tuple model.StreamTuple, prop string)
 }
 
 //store any context, may not know all keys upfront
@@ -23,6 +23,21 @@ type reteCtxImpl struct {
 	opsList *list.List
 	network Network
 	rs      model.RuleSession
+
+	//in each action, this map is updated with new ones
+	//key is the added tuple, value is true
+	// (we simply want the unique set of newly added tuples)
+	addMap map[model.StreamTuple]bool
+
+	//in each action, this map is updated with modifications
+	//key is the added tuple, value is a map of the changed property to true
+	// (we simply want unique modified tuples and unique props in each that changed)
+	modifyMap map[model.StreamTuple]map[string]bool
+
+	//in each action, this map is updated with deletions
+	//key is the deleted tuple value is always true
+	// (we simply want a unique set of deleted tuples)
+	deleteMap map[model.StreamTuple]bool
 }
 
 func (rctx *reteCtxImpl) getConflictResolver() conflictRes {
@@ -41,8 +56,15 @@ func (rctx *reteCtxImpl) getRuleSession() model.RuleSession {
 	return rctx.rs
 }
 
-func (rctx *reteCtxImpl) OnValueChange(tuple model.StreamTuple) {
-	rctx.opsList.PushBack(newModifyEntry(tuple))
+func (rctx *reteCtxImpl) OnValueChange(tuple model.StreamTuple, prop string) {
+	propMap := rctx.modifyMap[tuple]
+	if propMap == nil {
+		propMap = make(map[string]bool)
+		propMap[prop] = true
+		rctx.modifyMap[tuple] = propMap
+	} else {
+		propMap[prop] = true
+	}
 }
 
 func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
@@ -51,6 +73,9 @@ func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
 	reteCtxVal.opsList = list.New()
 	reteCtxVal.network = network
 	reteCtxVal.rs = rs
+	reteCtxVal.addMap = make (map[model.StreamTuple]bool)
+	reteCtxVal.modifyMap = make(map[model.StreamTuple]map[string]bool)
+	reteCtxVal.deleteMap = make (map[model.StreamTuple]bool)
 	return &reteCtxVal
 }
 

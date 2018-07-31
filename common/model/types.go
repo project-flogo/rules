@@ -5,14 +5,6 @@ import (
 	"time"
 )
 
-//ConditionEvaluator is a function pointer for handling condition evaluations on the server side
-//i.e, part of the server side API
-type ConditionEvaluator func(string, string, map[TupleTypeAlias]StreamTuple) bool
-
-//ActionFunction is a function pointer for handling action callbacks on the server side
-//i.e part of the server side API
-type ActionFunction func(context.Context, RuleSession, string, map[TupleTypeAlias]StreamTuple)
-
 type RuleSession interface {
 	AddRule(rule Rule) (int, bool)
 	DeleteRule(ruleName string)
@@ -21,6 +13,9 @@ type RuleSession interface {
 	Retract(ctx context.Context, tuple StreamTuple)
 	Unregister() //remove itself from the package map
 	GetName() string
+	RegisterTupleDescriptors (jsonRegistry string) //a json describing types
+	//NewStreamTuple(dataSource TupleTypeAlias) MutableStreamTuple
+	ValidateUpdate(alias TupleTypeAlias, name string, value interface{}) bool
 }
 
 //Rule ... a Rule interface
@@ -59,17 +54,27 @@ type StreamTuple interface {
 	GetInt(name string) int
 	GetFloat(name string) float64
 	GetDateTime(name string) time.Time
+	GetProperties() []string
 }
 
-type ValueChangeHandler interface {
-	OnValueChange(tuple StreamTuple)
-}
 
 //MutableStreamTuple mutable part of the stream tuple
 type MutableStreamTuple interface {
 	StreamTuple
-	SetString(ctx context.Context, name string, value string)
-	SetInt(ctx context.Context, name string, value int)
-	SetFloat(ctx context.Context, name string, value float64)
-	SetDatetime(ctx context.Context, name string, value time.Time)
+	SetString(ctx context.Context, rs RuleSession, name string, value string)
+	SetInt(ctx context.Context, rs RuleSession, name string, value int)
+	SetFloat(ctx context.Context, rs RuleSession, name string, value float64)
+	SetDatetime(ctx context.Context, rs RuleSession, name string, value time.Time)
+}
+
+//ConditionEvaluator is a function pointer for handling condition evaluations on the server side
+//i.e, part of the server side API
+type ConditionEvaluator func(string, string, map[TupleTypeAlias]StreamTuple) bool
+
+//ActionFunction is a function pointer for handling action callbacks on the server side
+//i.e part of the server side API
+type ActionFunction func(context.Context, RuleSession, string, map[TupleTypeAlias]StreamTuple)
+
+type ValueChangeHandler interface {
+	OnValueChange(tuple StreamTuple, prop string)
 }

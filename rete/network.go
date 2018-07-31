@@ -16,12 +16,15 @@ type Network interface {
 	AddRule(model.Rule) int
 	String() string
 	RemoveRule(string) model.Rule
-	Assert(ctx context.Context, rs model.RuleSession, tuple model.StreamTuple)
+	//changedProps are the properties that changed in a previous action
+	Assert(ctx context.Context, rs model.RuleSession, tuple model.StreamTuple, changedProps map[string]bool)
 	Retract(ctx context.Context, tuple model.StreamTuple)
 
-	assertInternal(ctx context.Context, tuple model.StreamTuple)
+	assertInternal(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool)
 	getOrCreateHandle(tuple model.StreamTuple) reteHandle
 	incrementAndGetId() int
+	RegisterTupleDescriptors (tds[] model.TupleDescriptor)
+	GetTupleDescriptor (typeAlias model.TupleTypeAlias) *model.TupleDescriptor
 }
 
 type reteNetworkImpl struct {
@@ -43,6 +46,8 @@ type reteNetworkImpl struct {
 
 	assertLock sync.Mutex
 	crudLock sync.Mutex
+
+	tds map[model.TupleTypeAlias]model.TupleDescriptor
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -58,6 +63,7 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 	nw.ruleNameNodesOfRule = make(map[string]*list.List)
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
 	nw.allHandles = make(map[model.StreamTuple]reteHandle)
+	nw.tds = make(map[model.TupleTypeAlias]model.TupleDescriptor)
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) int {
@@ -499,7 +505,13 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 	return "\t[ClassNode Class(" + classNodeImpl.getName() + ")" + links + "]\n"
 }
 
-func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.StreamTuple) {
+func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.StreamTuple, changedProps map[string]bool) {
+
+	if !nw.validateTuple(tuple) {
+		//TODO: Panic. For now, simply return
+		fmt.Printf("Stream tuple not compatible with its type\n")
+		return
+	}
 
 	if ctx == nil {
 		ctx = context.Background()
@@ -510,12 +522,24 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	if !isRecursive {
 		nw.crudLock.Lock()
 		defer nw.crudLock.Unlock()
-		nw.assertInternal(newCtx, tuple)
+		nw.assertInternal(newCtx, tuple, changedProps)
+
+
+
 	} else {
 		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple))
 	}
 
 	reteCtxVar.getConflictResolver().resolveConflict(newCtx)
+
+	//if Timeout is 0, remove it from rete
+	td := nw.GetTupleDescriptor(tuple.GetTypeAlias())
+	if td != nil && td.Expiry == 0 {
+		reteHandle := nw.allHandles[tuple]
+		if reteHandle != nil {
+			reteHandle.removeJoinTableRowRefs()
+		}
+	}
 }
 
 func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.StreamTuple) {
@@ -536,7 +560,7 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.StreamTuple)
 
 }
 
-func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.StreamTuple) {
+func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool) {
 	dataSource := tuple.GetTypeAlias()
 	listItem := nw.allClassNodes[string(dataSource)]
 	if listItem != nil {
@@ -562,4 +586,35 @@ func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.StreamTuple) reteHandle
 func (nw *reteNetworkImpl) incrementAndGetId() int {
 	nw.currentId++
 	return nw.currentId
+}
+
+func (nw *reteNetworkImpl) RegisterTupleDescriptors (tds []model.TupleDescriptor) {
+	for _, key := range tds {
+		nw.tds[model.TupleTypeAlias(key.Name)] = key
+	}
+}
+
+func (nw *reteNetworkImpl)  GetTupleDescriptor (typeAlias model.TupleTypeAlias) *model.TupleDescriptor {
+	ts := nw.tds[typeAlias]
+	return &ts
+}
+
+func (nw *reteNetworkImpl) validateTuple (tuple model.StreamTuple) bool {
+
+	td := nw.GetTupleDescriptor(tuple.GetTypeAlias())
+	if (td != nil) {
+
+		for _, key := range tuple.GetProperties() {
+			//tde := model.TuplePropertyDescriptor{}
+			_, ok := td.GetProperty(key)
+			if  !ok {
+				return false
+			}
+			//TODO: data type validation
+		}
+
+		return true
+	}
+	//TODO: if a descriptor isnt found, thats ok, no validation
+	return true
 }

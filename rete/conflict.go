@@ -55,12 +55,21 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 			actionTuples := item.getTuples()
 			actionFn := item.getRule().GetActionFn()
 			if actionFn != nil {
-				reteCtx := getReteCtx(ctx)
-				actionFn(ctx, reteCtx.getRuleSession(), item.getRule().GetName(), actionTuples)
+				reteCtxV := getReteCtx(ctx)
+				actionFn(ctx, reteCtxV.getRuleSession(), item.getRule().GetName(), actionTuples)
 			}
 		}
 
-		reteCtxV := getReteCtx(ctx)
+		reteCtxV := getReteCtx(ctx).(*reteCtxImpl)
+
+		for mTuple, props := range reteCtxV.modifyMap {
+			//fmt.Printf("props len = [%d]\n", len(props))
+			reteCtxV.getOpsList().PushBack(newModifyEntry(mTuple, props))
+		}
+		//clear the map for the next run
+		reteCtxV.modifyMap = make(map[model.StreamTuple]map[string]bool)
+
+
 		if reteCtxV != nil {
 			opsFront := reteCtxV.getOpsList().Front()
 			for opsFront != nil {

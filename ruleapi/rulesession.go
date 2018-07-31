@@ -11,6 +11,7 @@ import (
 import (
 	"context"
 	"sync"
+	"encoding/json"
 )
 var (
 	sessionMap sync.Map
@@ -51,7 +52,7 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.StreamTuple) 
 	if ctx == nil {
 		ctx = context.Context(context.Background())
 	}
-	rs.reteNetwork.Assert(ctx, rs, tuple)
+	rs.reteNetwork.Assert(ctx, rs, tuple, nil)
 }
 
 func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.StreamTuple) {
@@ -69,3 +70,30 @@ func (rs *rulesessionImpl) GetName() string {
 func (rs *rulesessionImpl) Unregister() {
 	sessionMap.Delete(rs.name)
 }
+
+func (rs *rulesessionImpl) RegisterTupleDescriptors (jsonRegistry string) {
+
+	tds := make([]model.TupleDescriptor, 0)
+
+	json.Unmarshal([]byte(jsonRegistry),&tds)
+
+	rs.reteNetwork.RegisterTupleDescriptors(tds)
+}
+
+func (rs *rulesessionImpl) ValidateUpdate(alias model.TupleTypeAlias, name string, value interface{}) bool {
+
+	td := rs.reteNetwork.GetTupleDescriptor(alias)
+	//TODO: type not registered, meaning no validation
+	if  td == nil {
+		return true
+	}
+
+	//TODO: Check property's type and value's type compatibility
+	_, _ok := td.GetProperty(name)
+	if !_ok {
+		return false
+	}
+
+	return true
+}
+

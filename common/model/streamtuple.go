@@ -5,74 +5,95 @@ import (
 	"time"
 )
 
-type streamImpl struct {
+type streamTupleImpl struct {
 	dataSource TupleTypeAlias
 	tuples     map[string]interface{}
 }
 
 func NewStreamTuple(dataSource TupleTypeAlias) MutableStreamTuple {
-	streamImplVar := streamImpl{}
-	streamImplVar.initStreamTuple(dataSource)
-	return &streamImplVar
+	st := streamTupleImpl{}
+	st.initStreamTuple(dataSource)
+	return &st
 }
 
-func (streamImplVar *streamImpl) initStreamTuple(dataSource TupleTypeAlias) {
-	streamImplVar.tuples = make(map[string]interface{})
-	streamImplVar.dataSource = dataSource
+func (st *streamTupleImpl) initStreamTuple(dataSource TupleTypeAlias) {
+	st.tuples = make(map[string]interface{})
+	st.dataSource = dataSource
 }
 
-func (streamImplVar *streamImpl) GetTypeAlias() TupleTypeAlias {
-	return streamImplVar.dataSource
+func (st *streamTupleImpl) GetTypeAlias() TupleTypeAlias {
+	return st.dataSource
 }
 
-func (streamImplVar *streamImpl) GetString(name string) string {
-	v := streamImplVar.tuples[name]
+func (st *streamTupleImpl) GetString(name string) string {
+	v := st.tuples[name]
 	return v.(string)
 }
-func (streamImplVar *streamImpl) GetInt(name string) int {
-	v := streamImplVar.tuples[name]
+func (st *streamTupleImpl) GetInt(name string) int {
+	v := st.tuples[name]
 	return v.(int)
 }
-func (streamImplVar *streamImpl) GetFloat(name string) float64 {
-	v := streamImplVar.tuples[name]
+func (st *streamTupleImpl) GetFloat(name string) float64 {
+	v := st.tuples[name]
 	return v.(float64)
 }
-func (streamImplVar *streamImpl) GetDateTime(name string) time.Time {
-	v := streamImplVar.tuples[name]
+func (st *streamTupleImpl) GetDateTime(name string) time.Time {
+	v := st.tuples[name]
 	return v.(time.Time)
 }
 
-func (streamImplVar *streamImpl) SetString(ctx context.Context, name string, value string) {
-	if streamImplVar.tuples[name] != value {
-		streamImplVar.tuples[name] = value
-		callChangeListener(ctx, streamImplVar)
+func (st *streamTupleImpl) SetString(ctx context.Context, rs RuleSession, name string, value string) {
+	if rs == nil || rs != nil && !rs.ValidateUpdate(st.dataSource, name, value) {
+		return
+	}
+	if st.tuples[name] != value {
+		st.tuples[name] = value
+		callChangeListener(ctx, st, name)
+	}
+
+}
+func (st *streamTupleImpl) SetInt(ctx context.Context, rs RuleSession, name string, value int) {
+	if rs == nil || rs != nil && !rs.ValidateUpdate(st.dataSource, name, value) {
+		return
+	}
+	if st.tuples[name] != value {
+		st.tuples[name] = value
+		callChangeListener(ctx, st, name)
 	}
 }
-func (streamImplVar *streamImpl) SetInt(ctx context.Context, name string, value int) {
-	if streamImplVar.tuples[name] != value {
-		streamImplVar.tuples[name] = value
-		callChangeListener(ctx, streamImplVar)
+func (st *streamTupleImpl) SetFloat(ctx context.Context, rs RuleSession, name string, value float64) {
+	if rs == nil || rs != nil && !rs.ValidateUpdate(st.dataSource, name, value) {
+		return
+	}
+	if st.tuples[name] != value {
+		st.tuples[name] = value
+		callChangeListener(ctx, st, name)
 	}
 }
-func (streamImplVar *streamImpl) SetFloat(ctx context.Context, name string, value float64) {
-	if streamImplVar.tuples[name] != value {
-		streamImplVar.tuples[name] = value
-		callChangeListener(ctx, streamImplVar)
+func (st *streamTupleImpl) SetDatetime(ctx context.Context, rs RuleSession, name string, value time.Time) {
+	if rs == nil || rs != nil && !rs.ValidateUpdate(st.dataSource, name, value) {
+		return
 	}
-}
-func (streamImplVar *streamImpl) SetDatetime(ctx context.Context, name string, value time.Time) {
-	if streamImplVar.tuples[name] != value {
-		streamImplVar.tuples[name] = value
-		callChangeListener(ctx, streamImplVar)
+	if st.tuples[name] != value {
+		st.tuples[name] = value
+		callChangeListener(ctx, st, name)
 	}
 }
 
-func callChangeListener(ctx context.Context, tuple StreamTuple) {
+func callChangeListener(ctx context.Context, tuple StreamTuple, prop string) {
 	if ctx != nil {
-		valChangeListerI := ctx.Value(reteCTXKEY)
-		if valChangeListerI != nil {
-			valChangeLister := valChangeListerI.(ValueChangeHandler)
-			valChangeLister.OnValueChange(tuple)
+		ctxR := ctx.Value(reteCTXKEY)
+		if ctxR != nil {
+			valChangeLister := ctxR.(ValueChangeHandler)
+			valChangeLister.OnValueChange(tuple, prop)
 		}
 	}
+}
+
+func (st *streamTupleImpl) GetProperties() []string {
+	keys := []string{}
+	for k := range st.tuples {
+		keys = append(keys, k)
+	}
+	return keys
 }

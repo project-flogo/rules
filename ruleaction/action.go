@@ -94,7 +94,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 
 	//map input data into stream tuples, only string. ignore the rest for now
 	for key, value := range queryParams {
-		streamTuple.SetString(ctx, key, value)
+		streamTuple.SetString(ctx, a.rs, key, value)
 	}
 
 	a.rs.Assert(ctx, streamTuple)
@@ -183,7 +183,7 @@ func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tup
 	debitAmt, _ := strconv.ParseFloat(dbt, 64)
 	currBal := customerTuple.GetFloat("balance")
 	if (customerTuple.GetString("status") == "active") {
-		customerTuple.SetFloat(ctx, "balance", customerTuple.GetFloat("balance")-debitAmt)
+		customerTuple.SetFloat(ctx, rs,"balance", customerTuple.GetFloat("balance")-debitAmt)
 	}
 	fmt.Printf("Customer [%s], Balance [%f], Debit [%f], NewBalance [%f]\n", customerTuple.GetString("name"), currBal, debitAmt, customerTuple.GetFloat("balance"))
 }
@@ -204,5 +204,5 @@ func balanceAlert(ctx context.Context, rs model.RuleSession, ruleName string, tu
 	//fmt.Printf("Rule fired: [%s]\n", ruleName)
 	customerTuple := tuples["customerevent"].(model.MutableStreamTuple)
 	fmt.Printf("**** Account Suspended *** Customer balance is 0 or negative ! [%s], Balance [%f]\n", customerTuple.GetString("name"), customerTuple.GetFloat("balance"))
-	customerTuple.SetString(ctx,"status", "suspended")
+	customerTuple.SetString(ctx,rs,"status", "suspended")
 }

@@ -32,7 +32,7 @@ func newAssertEntry(tuple model.StreamTuple) assertEntry {
 
 func (ai *assertEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
-	reteCtx.getNetwork().assertInternal(ctx, ai.tuple)
+	reteCtx.getNetwork().assertInternal(ctx, ai.tuple, nil)
 }
 
 //Modify Entry
@@ -43,11 +43,14 @@ type modifyEntry interface {
 
 type modifyEntryImpl struct {
 	opsEntryImpl
+	props map[string]bool
+
 }
 
-func newModifyEntry(tuple model.StreamTuple) modifyEntry {
+func newModifyEntry(tuple model.StreamTuple, props map[string]bool) modifyEntry {
 	mEntry := modifyEntryImpl{}
 	mEntry.tuple = tuple
+	mEntry.props = props
 	return &mEntry
 }
 
@@ -55,7 +58,7 @@ func (me *modifyEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
 	reteCtx.getConflictResolver().deleteAgendaFor(ctx, me.tuple)
 	reteCtx.getNetwork().Retract(ctx, me.tuple)
-	reteCtx.getNetwork().Assert(ctx, reteCtx.getRuleSession(), me.tuple)
+	reteCtx.getNetwork().Assert(ctx, reteCtx.getRuleSession(), me.tuple, me.props)
 }
 
 //Delete Entry
