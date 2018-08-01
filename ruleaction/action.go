@@ -51,6 +51,9 @@ func (ff *ActionFactory) New(config *action.Config) (action.Action, error) {
 		return nil, fmt.Errorf("failed to read rule action data '%s' error '%s'", config.Id, err.Error())
 	}
 
+	fmt.Printf ("**ACTION DATA: [%s]\n**", actionData.Ref)
+
+
 	loadRules(ruleAction.rs)
 
 	return ruleAction, nil
