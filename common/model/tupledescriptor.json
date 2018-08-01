@@ -34,5 +34,89 @@
         "PropType": "string"
       }
     }
+  },
+  {
+    "Name": "packageevent",
+    "Expiry": 0,
+    "Props": {
+      "packageid": {
+        "Name": "packageid",
+        "PropType": "string"
+      },
+      "next": {
+        "Name": "next",
+        "PropType": "string"
+      },
+      "status": {
+        "Name": "status",
+        "PropType": "string"
+      },
+      "isnew": {
+        "Name": "isnew",
+        "PropType": "string"
+      }
+    }
+  },
+  {
+    "Name": "package",
+    "Expiry": 10,
+    "Props": {
+      "packageid": {
+        "Name": "packageid",
+        "PropType": "string"
+      },
+      "curr": {
+        "Name": "curr",
+        "PropType": "string"
+      },
+      "next": {
+        "Name": "next",
+        "PropType": "string"
+      },
+      "status": {
+        "Name": "status",
+        "PropType": "string"
+      },
+      "isnew": {
+        "Name": "isnew",
+        "PropType": "string"
+      }
+    }
+  },
+  {
+    "Name": "scanevent",
+    "Expiry": 0,
+    "Props": {
+      "packageid": {
+        "Name": "packageid",
+        "PropType": "string"
+      },
+      "curr": {
+        "Name": "curr",
+        "PropType": "string"
+      },
+      "next": {
+        "Name": "next",
+        "PropType": "string"
+      },
+      "eta": {
+        "Name": "eta",
+        "PropType": "string"
+      }
+    }
+  },
+  {
+    "Name": "scantimeout",
+    "Expiry": 0,
+    "Props": {
+      "packageid": {
+        "Name": "packageid",
+        "PropType": "string"
+      },
+      "next": {
+        "Name": "next",
+        "PropType": "string"
+      }
+    }
   }
 ]

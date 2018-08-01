@@ -57,13 +57,18 @@ func (rctx *reteCtxImpl) getRuleSession() model.RuleSession {
 }
 
 func (rctx *reteCtxImpl) OnValueChange(tuple model.StreamTuple, prop string) {
-	propMap := rctx.modifyMap[tuple]
-	if propMap == nil {
-		propMap = make(map[string]bool)
-		propMap[prop] = true
-		rctx.modifyMap[tuple] = propMap
-	} else {
-		propMap[prop] = true
+
+	//if handle does not exist means its new
+	if nil != rctx.network.getHandle(tuple) {
+
+		propMap := rctx.modifyMap[tuple]
+		if propMap == nil {
+			propMap = make(map[string]bool)
+			propMap[prop] = true
+			rctx.modifyMap[tuple] = propMap
+		} else {
+			propMap[prop] = true
+		}
 	}
 }
 
