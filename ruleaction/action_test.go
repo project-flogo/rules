@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"fmt"
+	"time"
 )
 
 
@@ -73,4 +74,34 @@ func TestActionTwo (t *testing.T) {
 		rs.Assert(nil, debit)
 	}
 
+}
+
+func TestActionThree (t *testing.T) {
+
+	e := &EventTimer{151}
+
+	scheduleTask(5, e)
+
+	time.Sleep(time.Minute)
+}
+
+type Task interface {
+	performOps()
+}
+
+type EventTimer struct {
+	x int
+}
+
+func (e *EventTimer) performOps() {
+	fmt.Printf ("The task is to print myself [%d]\n", e.x)
+}
+
+func scheduleTask (period int, t Task) *time.Timer {
+
+	tmr := time.AfterFunc(time.Second * time.Duration(period), func() {
+		t.performOps()
+	})
+
+	return tmr
 }

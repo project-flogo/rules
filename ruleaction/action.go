@@ -13,6 +13,8 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"strconv"
+	"io/ioutil"
+	"log"
 )
 
 const (
@@ -51,6 +53,14 @@ func (ff *ActionFactory) New(config *action.Config) (action.Action, error) {
 		return nil, fmt.Errorf("failed to read rule action data '%s' error '%s'", config.Id, err.Error())
 	}
 
+	dat, err := ioutil.ReadFile("/home/bala/go/src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("desc [%s]\n", string(dat))
+
+	ruleAction.rs.RegisterTupleDescriptors(string(dat))
 	fmt.Printf ("**ACTION DATA: [%s]\n**", actionData.Ref)
 
 
@@ -91,16 +101,19 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 
 	streamTuple := model.NewStreamTuple(streamSrc) //n1 -> will be replaced by contextual information coming in the data
 
-
+	i := 0
 	queryParams := inputs["queryParams"].Value().(map[string]string)
 
 
 	//map input data into stream tuples, only string. ignore the rest for now
 	for key, value := range queryParams {
+		fmt.Printf("[%s]\n", i)
+		i++
 		streamTuple.SetString(ctx, a.rs, key, value)
 	}
 
 	a.rs.Assert(ctx, streamTuple)
+	fmt.Printf("[%s]\n", i)
 	return nil, nil
 }
 
