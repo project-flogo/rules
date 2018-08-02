@@ -1,6 +1,6 @@
 # BE*Go*
 
-BE*Go* is a lightweight rules engine written in Go.
+BE*Go* is a lightweight rules library written in Go that enable Real-time Contextual Decisions
 
 ## Definitions
 A `TupleTypeAlias` represents a streaming data source a.k.a Channel
