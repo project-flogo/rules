@@ -71,36 +71,42 @@ func TestPkgFlowNormal (t *testing.T) {
 
 func loadPkgRules(rs model.RuleSession) {
 
+	//handle a package event, create a package in the packageAction
 	rule := ruleapi.NewRule("packageevent")
-	rule.AddCondition("packageevent", []model.TupleTypeAlias{"packageevent"}, truecondition) // check for name "Bob" in n1
+	rule.AddCondition("packageevent", []model.TupleTypeAlias{"packageevent"}, truecondition)
 	rule.SetAction(packageeventAction)
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
 
+	//handle a package, print package details in the packageAction
 	rule1:= ruleapi.NewRule("package")
-	rule1.AddCondition("packageevent1", []model.TupleTypeAlias{"package"}, packageCondition) // check for name "Bob" in n1
+	rule1.AddCondition("packageevent1", []model.TupleTypeAlias{"package"}, packageCondition)
 	rule1.SetAction(packageAction)
 	rule1.SetPriority(2)
 	rs.AddRule(rule1)
 	fmt.Printf("Rule added: [%s]\n", rule1.GetName())
-	//
+
+	//handle a scan event, see if there is matching package if so, do necessary things such as set off a timer
+	//for the next destination, etc in the scaneventAction
 	rule2 := ruleapi.NewRule("scanevent")
-	rule2.AddCondition("scanevent", []model.TupleTypeAlias{"package", "scanevent"}, scaneventCondition) // check for name "Bob" in n1
+	rule2.AddCondition("scanevent", []model.TupleTypeAlias{"package", "scanevent"}, scaneventCondition)
 	rule2.SetAction(scaneventAction)
 	rule2.SetPriority(2)
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
-	//
+
+	//handle a timeout event, triggered by scaneventAction, mark the package as delayed in scantimeoutAction
 	rule3 := ruleapi.NewRule("scantimeout")
-	rule3.AddCondition("packageevent", []model.TupleTypeAlias{"package", "scantimeout"}, scantimeoutCondition) // check for name "Bob" in n1
+	rule3.AddCondition("packageevent", []model.TupleTypeAlias{"package", "scantimeout"}, scantimeoutCondition)
 	rule3.SetAction(scantimeoutAction)
 	rule3.SetPriority(1)
 	rs.AddRule(rule3)
 	fmt.Printf("Rule added: [%s]\n", rule3.GetName())
 
+	//notify when a package is marked as delayed, print as such in the packagedelayedAction
 	rule4 := ruleapi.NewRule("packagedelayed")
-	rule4.AddCondition("packageevent", []model.TupleTypeAlias{"package"}, packageDelayedCheck) // check for name "Bob" in n1
+	rule4.AddCondition("packageevent", []model.TupleTypeAlias{"package"}, packageDelayedCheck)
 	rule4.SetAction(packagedelayedAction)
 	rule4.SetPriority(1)
 	rs.AddRule(rule4)

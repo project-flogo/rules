@@ -2,7 +2,7 @@ package model
 
 type TupleDescriptor struct {
 	Name string //`json:"alias"`
-	Expiry int //`json:"timeout"`
+	TTLInSeconds int //`json:"timeout"`
 	Props map[string]TuplePropertyDescriptor
 }
 

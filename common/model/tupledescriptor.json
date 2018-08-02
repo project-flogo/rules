@@ -1,7 +1,7 @@
 [
   {
     "Name": "customerevent",
-    "Expiry": 10,
+    "TTLInSeconds": 10,
     "Props": {
       "name": {
         "Name": "name",
@@ -23,7 +23,7 @@
   },
   {
     "Name": "debitevent",
-    "Expiry": 0,
+    "TTLInSeconds": 0,
     "Props": {
       "name": {
         "Name": "name",
@@ -37,7 +37,7 @@
   },
   {
     "Name": "packageevent",
-    "Expiry": 0,
+    "TTLInSeconds": 0,
     "Props": {
       "packageid": {
         "Name": "packageid",
@@ -59,7 +59,7 @@
   },
   {
     "Name": "package",
-    "Expiry": 10,
+    "TTLInSeconds": 10,
     "Props": {
       "packageid": {
         "Name": "packageid",
@@ -85,7 +85,7 @@
   },
   {
     "Name": "scanevent",
-    "Expiry": 0,
+    "TTLInSeconds": 0,
     "Props": {
       "packageid": {
         "Name": "packageid",
@@ -107,7 +107,7 @@
   },
   {
     "Name": "scantimeout",
-    "Expiry": 0,
+    "TTLInSeconds": 0,
     "Props": {
       "packageid": {
         "Name": "packageid",
