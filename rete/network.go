@@ -9,6 +9,7 @@ import (
 
 	"container/list"
 	"sync"
+	"time"
 )
 
 //Network ... the rete network
@@ -525,9 +526,6 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 		nw.crudLock.Lock()
 		defer nw.crudLock.Unlock()
 		nw.assertInternal(newCtx, tuple, changedProps)
-
-
-
 	} else {
 		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple))
 	}
@@ -536,11 +534,21 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 
 	//if Timeout is 0, remove it from rete
 	td := nw.GetTupleDescriptor(tuple.GetTypeAlias())
-	if td != nil && td.Expiry == 0 {
-		reteHandle := nw.allHandles[tuple]
-		if reteHandle != nil {
-			reteHandle.removeJoinTableRowRefs()
+	if td != nil {
+		if td.TTLInSeconds == 0 { //remove immediately.
+			nw.removeTupleFromRete(tuple)
+		} else { // TTL for the tuple type, after that, remove it from RETE
+			go time.AfterFunc(time.Second * time.Duration (td.TTLInSeconds), func() {
+				nw.removeTupleFromRete(tuple)
+			})
 		}
+	}
+}
+func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.StreamTuple) {
+	reteHandle, found:= nw.allHandles[tuple]
+	if found && reteHandle != nil {
+		delete(nw.allHandles, tuple)
+		reteHandle.removeJoinTableRowRefs()
 	}
 }
 
