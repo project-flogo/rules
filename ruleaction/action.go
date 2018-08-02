@@ -13,6 +13,10 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"strconv"
+	//"io/ioutil"
+	//"log"
+	"io/ioutil"
+	"log"
 )
 
 const (
@@ -37,22 +41,26 @@ func (ff *ActionFactory) Init() error {
 }
 
 type ActionData struct {
-	Ref string `json:"ref"`
+	Tds []model.TupleDescriptor
 }
 
 func (ff *ActionFactory) New(config *action.Config) (action.Action, error) {
 
 	ruleAction := &RuleAction{}
+
 	ruleAction.rs = ruleapi.GetOrCreateRuleSession("flogosession")
 
-	var actionData ActionData
+	actionData := ActionData{}
+	actionData.Tds = []model.TupleDescriptor{}
+
 	err := json.Unmarshal(config.Data, &actionData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read rule action data '%s' error '%s'", config.Id, err.Error())
 	}
+	tdss , _:= json.Marshal(&actionData.Tds)
+	fmt.Printf ("**ACTION DATA: [%s]\n**", string(tdss))
 
-	fmt.Printf ("**ACTION DATA: [%s]\n**", actionData.Ref)
-
+	ruleAction.rs.RegisterTupleDescriptors(string(tdss))
 
 	loadRules(ruleAction.rs)
 
@@ -85,7 +93,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 	if !_ok {
 		return nil, nil
 	}
-	fmt.Printf("Received event from stream source [%s]", h.Name)
+	//fmt.Printf("Received event from stream source [%s]", h.Name)
 
 	streamSrc := model.TupleTypeAlias(h.Name)
 
@@ -97,10 +105,17 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 
 	//map input data into stream tuples, only string. ignore the rest for now
 	for key, value := range queryParams {
-		streamTuple.SetString(ctx, a.rs, key, value)
+		fmt.Printf("[%s]\n", "a")
+		if key == "balance" {
+			f, _ := strconv.ParseFloat(value, 64)
+			streamTuple.SetFloat(ctx, a.rs, key, f)
+		} else {
+			streamTuple.SetString(ctx, a.rs, key, value)
+		}
 	}
 
 	a.rs.Assert(ctx, streamTuple)
+	fmt.Printf("[%s]\n", "b")
 	return nil, nil
 }
 
@@ -133,6 +148,15 @@ func loadRules(rs model.RuleSession) {
 	rule4.SetPriority(-1)
 	rs.AddRule(rule4)
 	fmt.Printf("Rule added: [%s]\n", rule4.GetName())
+
+
+	rule5 := ruleapi.NewRule("timeout-rule")
+	rule5.AddCondition("packagetimeout", []model.TupleTypeAlias{"packagetimeout"}, truecondition) // check for name "Bob" in n1
+	rule5.SetAction(packageTimeout)
+	rule5.SetPriority(-1)
+	rs.AddRule(rule5)
+	fmt.Printf("Rule added: [%s]\n", rule5.GetName())
+
 
 
 }
@@ -203,9 +227,31 @@ func checkBalance(ruleName string, condName string, tuples map[model.TupleTypeAl
 	return balance <= 0 && issuspended == "active"
 }
 
+
 func balanceAlert(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
 	//fmt.Printf("Rule fired: [%s]\n", ruleName)
 	customerTuple := tuples["customerevent"].(model.MutableStreamTuple)
 	fmt.Printf("**** Account Suspended *** Customer balance is 0 or negative ! [%s], Balance [%f]\n", customerTuple.GetString("name"), customerTuple.GetFloat("balance"))
 	customerTuple.SetString(ctx,rs,"status", "suspended")
+}
+
+func packageTimeout(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+	packageTimeout := tuples["packagetimeout"]
+	if packageTimeout == nil {
+		fmt.Println("Should not get a nil tuple here! This is an error")
+		return
+	}
+	fmt.Printf("Received a package timeout event for package-id [%s]\n", packageTimeout.GetString("packageid"))
+}
+
+func createRuleSessionAndRules() model.RuleSession {
+	rs := ruleapi.GetOrCreateRuleSession("asession")
+	dat, err := ioutil.ReadFile("/home/bala/go/src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	//fmt.Printf("Tuple descriptors: [%s]\n", string(dat))
+	rs.RegisterTupleDescriptors(string(dat))
+	loadRules(rs)
+	return rs
 }

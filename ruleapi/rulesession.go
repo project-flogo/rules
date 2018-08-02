@@ -12,6 +12,7 @@ import (
 	"context"
 	"sync"
 	"encoding/json"
+	"time"
 )
 var (
 	sessionMap sync.Map
@@ -22,18 +23,22 @@ func init() {
 type rulesessionImpl struct {
 	name string
 	reteNetwork rete.Network
+
+	timers map[interface{}]*time.Timer
 }
 
 func GetOrCreateRuleSession(name string) model.RuleSession {
 
 	rs := rulesessionImpl{}
-	rs.initRuleSession()
+	rs.initRuleSession(name)
 	rs1, _ :=  sessionMap.LoadOrStore(name, &rs)
 	return rs1.(*rulesessionImpl)
 }
 
-func (rs *rulesessionImpl) initRuleSession() {
+func (rs *rulesessionImpl) initRuleSession(name string) {
 	rs.reteNetwork = rete.NewReteNetwork()
+	rs.name = name
+	rs.timers = make (map[interface{}]*time.Timer)
 }
 
 func (rs *rulesessionImpl) AddRule(rule model.Rule) (int, bool) {
@@ -73,7 +78,7 @@ func (rs *rulesessionImpl) Unregister() {
 
 func (rs *rulesessionImpl) RegisterTupleDescriptors (jsonRegistry string) {
 
-	tds := make([]model.TupleDescriptor, 0)
+	tds := []model.TupleDescriptor{}
 
 	json.Unmarshal([]byte(jsonRegistry),&tds)
 
@@ -97,3 +102,23 @@ func (rs *rulesessionImpl) ValidateUpdate(alias model.TupleTypeAlias, name strin
 	return true
 }
 
+
+func (rs *rulesessionImpl) DelayedAssert (ctx context.Context, delayInMillis uint64, key interface{}, tuple model.StreamTuple) {
+
+	timer := time.AfterFunc(time.Millisecond * time.Duration(delayInMillis), func() {
+		ctxNew := context.TODO()
+		delete(rs.timers, key)
+		rs.Assert(ctxNew, tuple)
+	})
+
+	rs.timers[key] = timer
+}
+
+func (rs *rulesessionImpl) CancelDelayedAssert (ctx context.Context, key interface{}) {
+	timer, ok := rs.timers[key]
+	if ok {
+		fmt.Printf("Cancelling timer attached to key [%v]\n", key)
+		delete(rs.timers, key)
+		timer.Stop()
+	}
+}

@@ -22,6 +22,8 @@ type Network interface {
 
 	assertInternal(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool)
 	getOrCreateHandle(tuple model.StreamTuple) reteHandle
+	getHandle(tuple model.StreamTuple) reteHandle
+
 	incrementAndGetId() int
 	RegisterTupleDescriptors (tds[] model.TupleDescriptor)
 	GetTupleDescriptor (typeAlias model.TupleTypeAlias) *model.TupleDescriptor
@@ -571,7 +573,7 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Strea
 	}
 }
 
-func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.StreamTuple) reteHandle {
+func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.StreamTuple) (reteHandle) {
 	h := nw.allHandles[tuple]
 	if h == nil {
 		h1 := handleImpl{}
@@ -580,6 +582,12 @@ func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.StreamTuple) reteHandle
 		h = &h1
 		nw.allHandles[tuple] = h
 	}
+	return h
+}
+
+func (nw *reteNetworkImpl) getHandle(tuple model.StreamTuple) (reteHandle) {
+	h := nw.allHandles[tuple]
+
 	return h
 }
 

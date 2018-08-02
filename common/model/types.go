@@ -16,6 +16,9 @@ type RuleSession interface {
 	RegisterTupleDescriptors (jsonRegistry string) //a json describing types
 	//NewStreamTuple(dataSource TupleTypeAlias) MutableStreamTuple
 	ValidateUpdate(alias TupleTypeAlias, name string, value interface{}) bool
+
+	DelayedAssert(ctx context.Context, delayInMillis uint64, key interface{}, tuple StreamTuple)
+	CancelDelayedAssert (ctx context.Context, key interface{})
 }
 
 //Rule ... a Rule interface
