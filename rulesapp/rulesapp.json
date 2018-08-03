@@ -1,7 +1,7 @@
 [
   {
     "Name": "n1",
-    "Expiry": -1,
+    "TTLInSeconds": -1,
     "Props": {
       "name": {
         "Name": "name",
@@ -11,7 +11,7 @@
   },
   {
     "Name": "n2",
-    "Expiry": -1,
+    "TTLInSeconds": -1,
     "Props": {
       "name": {
         "Name": "name",

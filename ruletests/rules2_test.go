@@ -38,8 +38,8 @@ func TestTwo(t *testing.T) {
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	streamTuple1 := model.NewStreamTuple("n1")
-	streamTuple1.SetString(nil, "name", "Bob")
-	streamTuple1.SetInt(nil, "age", 35)
+	streamTuple1.SetString(nil, ruleSession, "name", "Bob")
+	streamTuple1.SetInt(nil, ruleSession,"age", 35)
 
 	ruleSession.Assert(nil, streamTuple1)
 

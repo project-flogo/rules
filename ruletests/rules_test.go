@@ -33,7 +33,7 @@ func TestOne(t *testing.T) {
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	streamTuple1 := model.NewStreamTuple("n1")
-	streamTuple1.SetString(nil, "name", "Bob")
+	streamTuple1.SetString(nil, ruleSession, "name", "Bob")
 	ruleSession.Assert(nil, streamTuple1)
 
 	//Retract them
@@ -125,6 +125,6 @@ func checkForTomAction2(ruleName string, tuples map[model.TupleTypeAlias]model.S
 func assertTom(ctx context.Context, rs model.RuleSession) {
 	fmt.Println("Asserting n1 tuple with name=Tom")
 	streamTuple5 := model.NewStreamTuple("n1")
-	streamTuple5.SetString(ctx, "name", "Tom")
+	streamTuple5.SetString(ctx, rs, "name", "Tom")
 	rs.Assert(ctx, streamTuple5)
 }
