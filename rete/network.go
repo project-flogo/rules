@@ -537,13 +537,14 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	if td != nil {
 		if td.TTLInSeconds == 0 { //remove immediately.
 			nw.removeTupleFromRete(tuple)
-		} else { // TTL for the tuple type, after that, remove it from RETE
-			go time.AfterFunc(time.Second * time.Duration (td.TTLInSeconds), func() {
+		} else if td.TTLInSeconds > 0 { // TTL for the tuple type, after that, remove it from RETE
+			go time.AfterFunc(time.Second*time.Duration(td.TTLInSeconds), func() {
 				nw.removeTupleFromRete(tuple)
 			})
-		}
+		} //else, its -ve and means, never expire
 	}
 }
+
 func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.StreamTuple) {
 	reteHandle, found:= nw.allHandles[tuple]
 	if found && reteHandle != nil {
