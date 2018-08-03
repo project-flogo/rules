@@ -17,6 +17,8 @@ import (
 	//"log"
 	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 )
 
 const (
@@ -246,7 +248,10 @@ func packageTimeout(ctx context.Context, rs model.RuleSession, ruleName string, 
 
 func createRuleSessionAndRules() model.RuleSession {
 	rs := ruleapi.GetOrCreateRuleSession("asession")
-	dat, err := ioutil.ReadFile("/home/bala/go/src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
+
+	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
+
+	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -254,4 +259,30 @@ func createRuleSessionAndRules() model.RuleSession {
 	rs.RegisterTupleDescriptors(string(dat))
 	loadRules(rs)
 	return rs
+}
+
+func getAbsPathForResource (resourcepath string) string {
+
+
+	GOPATH := os.Getenv("GOPATH")
+	fmt.Printf("path[%s]\n", GOPATH)
+
+	paths := strings.Split(GOPATH, ":")
+
+	for _, path:= range paths {
+
+		fmt.Printf("path[%s]\n", path)
+
+		absPath := path + "/" + resourcepath
+
+		_, err := os.Stat(absPath)
+
+		if err == nil {
+			return absPath
+		}
+
+	}
+
+	return ""
+
 }
