@@ -6,20 +6,29 @@ import (
 
 	"github.com/TIBCOSoftware/bego/common/model"
 	"github.com/TIBCOSoftware/bego/ruleapi"
+	"os"
+	"strings"
+	"io/ioutil"
+	"log"
 )
 
 func main() {
 
 	fmt.Println("** Welcome to BEGo **")
 
-	//A json string describing the types of tuples that will be asserted.
-	//The descriptor is used for property type/value validations as well as other information such as expiry of the tuple, etc.
-	//Expiry = -1 means explicit retraction. 0 means, retract at the end of RTC, non-zero means retract after that much timeout
-	//in milliseconds
-	//In a real application, this type descriptor will usually be externalized to a file
-	tupleDescriptor := "[{\"Name\": \"n1\",\"Expiry\": -1,\"Props\": {\"name\": {\"Name\": \"name\",\"PropType\": \"string\"}}}," +
-		                "{\"Name\": \"n2\",\"Expiry\": -1,\"Props\": {\"name\": {\"Name\": \"name\",\"PropType\": \"string\"}}}]"
+	////A json string describing the types of tuples that will be asserted.
+	////The descriptor is used for property type/value validations as well as other information such as expiry of the tuple, etc.
+	////Expiry = -1 means explicit retraction. 0 means, retract at the end of RTC, non-zero means retract after that much timeout
+	////in milliseconds
+	////In a real application, this type descriptor will usually be externalized to a file
+	//tupleDescriptor := "[{\"Name\": \"n1\",\"Expiry\": -1,\"Props\": {\"name\": {\"Name\": \"name\",\"PropType\": \"string\"}}}," +
+	//	                "{\"Name\": \"n2\",\"Expiry\": -1,\"Props\": {\"name\": {\"Name\": \"name\",\"PropType\": \"string\"}}}]"
 
+	tupleDescriptorFileNm := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/rulesapp/rulesapp.json")
+
+	tupleDescriptor := fileToString(tupleDescriptorFileNm)
+
+	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//Create a RuleSession and register the type descriptors.
 	rs := ruleapi.GetOrCreateRuleSession("asession")
 	rs.RegisterTupleDescriptors(tupleDescriptor)
@@ -159,4 +168,27 @@ func checkForTomAction2(ctx context.Context, rs model.RuleSession, ruleName stri
 
 	return
 
+}
+
+func getAbsPathForResource (resourcepath string) string {
+	GOPATH := os.Getenv("GOPATH")
+	paths := strings.Split(GOPATH, ":")
+	for _, path:= range paths {
+		absPath := path + "/" + resourcepath
+		_, err := os.Stat(absPath)
+		if err == nil {
+			return absPath
+		}
+	}
+	return ""
+}
+
+func fileToString(fileName string)string {
+
+	dat, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Fatal(err)
+		return ""
+	}
+	return string(dat)
 }

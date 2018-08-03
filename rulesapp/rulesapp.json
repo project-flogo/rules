@@ -1,0 +1,22 @@
+[
+  {
+    "Name": "n1",
+    "Expiry": -1,
+    "Props": {
+      "name": {
+        "Name": "name",
+        "PropType": "string"
+      }
+    }
+  },
+  {
+    "Name": "n2",
+    "Expiry": -1,
+    "Props": {
+      "name": {
+        "Name": "name",
+        "PropType": "string"
+      }
+    }
+  }
+]
