@@ -7,9 +7,10 @@ import (
 	"github.com/TIBCOSoftware/bego/common/model"
 	"github.com/TIBCOSoftware/bego/ruleapi"
 	"os"
-	"strings"
 	"io/ioutil"
 	"log"
+	"regexp"
+	"strings"
 )
 
 func main() {
@@ -123,9 +124,17 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 
 func getAbsPathForResource (resourcepath string) string {
 	GOPATH := os.Getenv("GOPATH")
-	paths := strings.Split(GOPATH, ":")
+	regex, err := regexp.Compile(":|;")
+	if err != nil {
+		return ""
+	}
+	paths := regex.Split(GOPATH, -1)
+	if os.PathListSeparator == ';' {
+		//windows
+		resourcepath = strings.Replace(resourcepath, "/", string(os.PathSeparator), -1)
+	}
 	for _, path:= range paths {
-		absPath := path + "/" + resourcepath
+		absPath := path + string(os.PathSeparator) + resourcepath
 		_, err := os.Stat(absPath)
 		if err == nil {
 			return absPath
