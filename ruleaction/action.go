@@ -120,7 +120,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 	}
 
 	a.rs.Assert(ctx, streamTuple)
-	fmt.Printf("[%s]\n", "b")
+	//fmt.Printf("[%s]\n", "b")
 	return nil, nil
 }
 
