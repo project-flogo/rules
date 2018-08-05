@@ -110,7 +110,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 
 	//map input data into stream tuples, only string. ignore the rest for now
 	for key, value := range queryParams {
-		fmt.Printf("[%s]\n", "a")
+		//fmt.Printf("[%s]\n", "a")
 		if key == "balance" {
 			f, _ := strconv.ParseFloat(value, 64)
 			streamTuple.SetFloat(ctx, a.rs, key, f)
