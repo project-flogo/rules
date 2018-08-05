@@ -1,7 +1,7 @@
 [
   {
     "Name": "customerevent",
-    "TTLInSeconds": 10,
+    "TTLInSeconds": -1,
     "Props": {
       "name": {
         "Name": "name",
@@ -59,7 +59,7 @@
   },
   {
     "Name": "package",
-    "TTLInSeconds": 10,
+    "TTLInSeconds": -1,
     "Props": {
       "packageid": {
         "Name": "packageid",
