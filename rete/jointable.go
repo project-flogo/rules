@@ -8,24 +8,27 @@ type joinTable interface {
 	len() int
 	getMap() map[joinTableRow]joinTableRow
 	removeRow(row joinTableRow)
+	getRule() model.Rule
 }
 
 type joinTableImpl struct {
 	id    int
 	table map[joinTableRow]joinTableRow
 	idr   []model.TupleTypeAlias
+	rule  model.Rule
 }
 
-func newJoinTable(nw Network, identifiers []model.TupleTypeAlias) joinTable {
+func newJoinTable(nw Network, rule model.Rule, identifiers []model.TupleTypeAlias) joinTable {
 	jT := joinTableImpl{}
-	jT.initJoinTableImpl(nw, identifiers)
+	jT.initJoinTableImpl(nw, rule, identifiers)
 	return &jT
 }
 
-func (jt *joinTableImpl) initJoinTableImpl(nw Network, identifiers []model.TupleTypeAlias) {
+func (jt *joinTableImpl) initJoinTableImpl(nw Network, rule model.Rule, identifiers []model.TupleTypeAlias) {
 	jt.id = nw.incrementAndGetId()
 	jt.idr = identifiers
 	jt.table = map[joinTableRow]joinTableRow{}
+	jt.rule = rule
 }
 
 func (jt *joinTableImpl) getID() int {
@@ -50,4 +53,8 @@ func (jt *joinTableImpl) len() int {
 
 func (jt *joinTableImpl) getMap() map[joinTableRow]joinTableRow {
 	return jt.table
+}
+
+func (jt *joinTableImpl) getRule() model.Rule {
+	return jt.rule
 }

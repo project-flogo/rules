@@ -12,7 +12,7 @@ type reteHandle interface {
 	setTuple(streamTuple model.StreamTuple)
 	getTuple() model.StreamTuple
 	addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable)
-	removeJoinTableRowRefs()
+	removeJoinTableRowRefs(changedProps map[string]bool)
 	removeJoinTable(joinTableVar joinTable)
 }
 
@@ -49,11 +49,36 @@ func (hdl *handleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTabl
 
 }
 
-func (hdl *handleImpl) removeJoinTableRowRefs() {
+func (hdl *handleImpl) removeJoinTableRowRefs(changedProps map[string]bool) {
+
+	tuple := hdl.tuple
+	alias := tuple.GetTypeAlias()
 
 	emptyJoinTables := list.New()
 
 	for joinTable, listOfRows := range hdl.tablesAndRows {
+
+		toDelete := false
+		if changedProps != nil {
+			rule := joinTable.getRule()
+			depProps, found := rule.GetDeps()[alias]
+			if found { // rule depends on this type
+				for changedProp, _ := range changedProps {
+					_, foundProp := depProps[changedProp]
+					if foundProp {
+						toDelete = true
+						break
+					}
+				}
+			}
+		} else {
+			toDelete = true
+		}
+
+		if !toDelete {
+			continue
+		}
+
 		for e := listOfRows.Front(); e != nil; e = e.Next() {
 			row := e.Value.(joinTableRow)
 			joinTable.removeRow(row)

@@ -6,11 +6,71 @@ import (
 	"time"
 )
 
-func TestPkgFlowTimeout (t *testing.T) {
+//func TestPkgFlowTimeout (t *testing.T) {
+//
+//	rs := createRuleSessionAndRules()
+//
+//	//loadPkgRules(rs)
+//
+//	pkgEvt := model.NewStreamTuple(model.TupleTypeAlias("packageevent"))
+//	//ctx := context.TODO()
+//	pkgEvt.SetString(nil, rs, "packageid", "1")
+//	pkgEvt.SetString(nil, rs, "next", "sfo")
+//	pkgEvt.SetString(nil, rs, "status", "normal")
+//	pkgEvt.SetString(nil, rs, "isnew", "true")
+//
+//	rs.Assert(nil, pkgEvt)
+//	scanEv := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+//	scanEv.SetString(nil, rs, "packageid", "1")
+//	scanEv.SetString(nil, rs, "curr", "sfo")
+//	scanEv.SetString(nil, rs, "next", "ny")
+//	scanEv.SetString(nil, rs, "eta", "5")
+//
+//	rs.Assert(nil, scanEv)
+//
+//	time.Sleep(time.Second*10)
+//
+//}
+//
+//func TestPkgFlowNormal (t *testing.T) {
+//
+//	rs := createRuleSessionAndRules()
+//
+//	//loadPkgRules(rs)
+//
+//	pkgEvt := model.NewStreamTuple(model.TupleTypeAlias("packageevent"))
+//	//ctx := context.TODO()
+//	pkgEvt.SetString(nil, rs, "packageid", "1")
+//	pkgEvt.SetString(nil, rs, "next", "sfo")
+//	pkgEvt.SetString(nil, rs, "status", "normal")
+//	pkgEvt.SetString(nil, rs, "isnew", "true")
+//
+//	rs.Assert(nil, pkgEvt)
+//	time.Sleep(time.Second*20)
+//	scanEv := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+//	scanEv.SetString(nil, rs, "packageid", "1")
+//	scanEv.SetString(nil, rs, "curr", "sfo")
+//	scanEv.SetString(nil, rs, "next", "ny")
+//	scanEv.SetString(nil, rs, "eta", "5")
+//
+//	rs.Assert(nil, scanEv)
+//
+//	scanEv1 := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+//	scanEv1.SetString(nil, rs, "packageid", "1")
+//	scanEv1.SetString(nil, rs, "curr", "ny")
+//	scanEv1.SetString(nil, rs, "next", "done")
+//	scanEv1.SetString(nil, rs, "eta", "5")
+//	rs.Assert(nil, scanEv1)
+//
+//
+//
+//}
+
+func TestPkgFlowNormalWithDeps (t *testing.T) {
 
 	rs := createRuleSessionAndRules()
 
-	loadPkgRules(rs)
+	loadPkgRulesWithDeps(rs)
 
 	pkgEvt := model.NewStreamTuple(model.TupleTypeAlias("packageevent"))
 	//ctx := context.TODO()
@@ -20,33 +80,7 @@ func TestPkgFlowTimeout (t *testing.T) {
 	pkgEvt.SetString(nil, rs, "isnew", "true")
 
 	rs.Assert(nil, pkgEvt)
-	scanEv := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
-	scanEv.SetString(nil, rs, "packageid", "1")
-	scanEv.SetString(nil, rs, "curr", "sfo")
-	scanEv.SetString(nil, rs, "next", "ny")
-	scanEv.SetString(nil, rs, "eta", "5")
-
-	rs.Assert(nil, scanEv)
-
-	time.Sleep(time.Second*10)
-
-}
-
-func TestPkgFlowNormal (t *testing.T) {
-
-	rs := createRuleSessionAndRules()
-
-	loadPkgRules(rs)
-
-	pkgEvt := model.NewStreamTuple(model.TupleTypeAlias("packageevent"))
-	//ctx := context.TODO()
-	pkgEvt.SetString(nil, rs, "packageid", "1")
-	pkgEvt.SetString(nil, rs, "next", "sfo")
-	pkgEvt.SetString(nil, rs, "status", "normal")
-	pkgEvt.SetString(nil, rs, "isnew", "true")
-
-	rs.Assert(nil, pkgEvt)
-	time.Sleep(time.Second*20)
+	//time.Sleep(time.Second*20)
 	scanEv := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
 	scanEv.SetString(nil, rs, "packageid", "1")
 	scanEv.SetString(nil, rs, "curr", "sfo")
@@ -62,6 +96,41 @@ func TestPkgFlowNormal (t *testing.T) {
 	scanEv1.SetString(nil, rs, "eta", "5")
 	rs.Assert(nil, scanEv1)
 
+
+
+}
+
+func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
+
+	rs := createRuleSessionAndRules()
+
+	loadPkgRulesWithDeps(rs)
+
+	pkgEvt := model.NewStreamTuple(model.TupleTypeAlias("packageevent"))
+	//ctx := context.TODO()
+	pkgEvt.SetString(nil, rs, "packageid", "1")
+	pkgEvt.SetString(nil, rs, "next", "sfo")
+	pkgEvt.SetString(nil, rs, "status", "normal")
+	pkgEvt.SetString(nil, rs, "isnew", "true")
+
+	rs.Assert(nil, pkgEvt)
+	//time.Sleep(time.Second*20)
+	scanEv := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+	scanEv.SetString(nil, rs, "packageid", "1")
+	scanEv.SetString(nil, rs, "curr", "sfo")
+	scanEv.SetString(nil, rs, "next", "ny")
+	scanEv.SetString(nil, rs, "eta", "5")
+
+	rs.Assert(nil, scanEv)
+
+	//scanEv1 := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+	//scanEv1.SetString(nil, rs, "packageid", "1")
+	//scanEv1.SetString(nil, rs, "curr", "ny")
+	//scanEv1.SetString(nil, rs, "next", "done")
+	//scanEv1.SetString(nil, rs, "eta", "5")
+	//rs.Assert(nil, scanEv1)
+
+	time.Sleep(time.Second * time.Duration(20))
 
 
 }

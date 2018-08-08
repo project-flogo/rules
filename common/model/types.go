@@ -29,12 +29,14 @@ type Rule interface {
 	GetActionFn() ActionFunction
 	String() string
 	GetPriority() int
+	GetDeps() map[TupleTypeAlias]map[string]bool
 }
 
 //MutableRule interface has methods to add conditions and actions
 type MutableRule interface {
 	Rule
 	AddCondition(conditionName string, idrs []TupleTypeAlias, cFn ConditionEvaluator)
+	AddConditionWithDependency(conditionName string, idrs []string, cFn ConditionEvaluator)
 	SetAction(actionFn ActionFunction)
 	SetPriority(priority int)
 }

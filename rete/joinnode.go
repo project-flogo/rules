@@ -30,19 +30,19 @@ type joinNodeImpl struct {
 	rightTable joinTable
 }
 
-func newJoinNode(nw Network, leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) joinNode {
+func newJoinNode(nw Network, rule model.Rule, leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) joinNode {
 	jn := joinNodeImpl{}
-	jn.initjoinNodeImplVar(nw, leftIdrs, rightIdrs, conditionVar)
+	jn.initjoinNodeImplVar(nw, rule, leftIdrs, rightIdrs, conditionVar)
 	return &jn
 }
 
-func (jn *joinNodeImpl) initjoinNodeImplVar(nw Network, leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) {
-	jn.initNodeImpl(nw, nil)
+func (jn *joinNodeImpl) initjoinNodeImplVar(nw Network, rule model.Rule, leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) {
+	jn.initNodeImpl(nw, rule,nil)
 	jn.leftIdrs = leftIdrs
 	jn.rightIdrs = rightIdrs
 	jn.conditionVar = conditionVar
-	jn.leftTable = newJoinTable(nw, leftIdrs)
-	jn.rightTable = newJoinTable(nw, rightIdrs)
+	jn.leftTable = newJoinTable(nw, rule, leftIdrs)
+	jn.rightTable = newJoinTable(nw, rule, rightIdrs)
 	jn.setJoinIdentifiers()
 }
 

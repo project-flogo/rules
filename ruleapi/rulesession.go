@@ -61,7 +61,7 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.StreamTuple) 
 }
 
 func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.StreamTuple) {
-	rs.reteNetwork.Retract(ctx, tuple)
+	rs.reteNetwork.Retract(ctx, tuple, nil)
 }
 
 func (rs *rulesessionImpl) printNetwork() {

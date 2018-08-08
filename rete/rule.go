@@ -1,6 +1,9 @@
 package rete
 
-import "github.com/TIBCOSoftware/bego/common/model"
+import (
+	"github.com/TIBCOSoftware/bego/common/model"
+	"strings"
+)
 
 type ruleImpl struct {
 	id          int
@@ -9,6 +12,7 @@ type ruleImpl struct {
 	conditions  []model.Condition
 	actionFn    model.ActionFunction
 	priority    int
+	deps 		map[model.TupleTypeAlias]map[string]bool
 }
 
 //NewRule ... Create a new rule
@@ -20,6 +24,7 @@ func NewRule(nw Network, name string) model.MutableRule {
 func (rule *ruleImpl) initRuleImpl(nw Network, name string) {
 	rule.id = nw.incrementAndGetId()
 	rule.name = name
+	rule.deps = make (map[model.TupleTypeAlias]map[string]bool)
 }
 
 func (rule *ruleImpl) GetName() string {
@@ -100,4 +105,36 @@ func (rule *ruleImpl) String() string {
 	str += "\t[Idrs:" + model.IdentifiersToString(rule.identifiers) + "]\n"
 	return str
 	// return str + idrs + "]\n"
+}
+
+func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []string, cFn model.ConditionEvaluator) {
+	typeDepMap := map[model.TupleTypeAlias]bool{}
+
+	for _, idr := range idrs {
+		aliasProp := strings.Split(idr, ".")
+
+		alias := model.TupleTypeAlias(aliasProp[0])
+		typeDepMap[alias] = true
+		prop := aliasProp[1]
+
+		propMap, found := rule.deps [alias]
+		if !found {
+			propMap = map[string]bool{}
+			rule.deps[alias] = propMap
+		}
+		propMap[prop] = true
+	}
+	typeDeps := []model.TupleTypeAlias{}
+
+	for key, _ := range typeDepMap {
+		typeDeps = append(typeDeps, key)
+	}
+
+	rule.AddCondition(conditionName, typeDeps, cFn)
+
+
+}
+
+func (rule *ruleImpl) GetDeps() map[model.TupleTypeAlias]map[string]bool {
+	return rule.deps
 }

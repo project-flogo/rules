@@ -19,8 +19,8 @@ type Network interface {
 	RemoveRule(string) model.Rule
 	//changedProps are the properties that changed in a previous action
 	Assert(ctx context.Context, rs model.RuleSession, tuple model.StreamTuple, changedProps map[string]bool)
-	Retract(ctx context.Context, tuple model.StreamTuple)
-
+	Retract(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool)
+	
 	assertInternal(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool)
 	getOrCreateHandle(tuple model.StreamTuple) reteHandle
 	getHandle(tuple model.StreamTuple) reteHandle
@@ -238,7 +238,7 @@ func (nw *reteNetworkImpl) buildNetwork(rule model.Rule, nodesOfRule *list.List,
 				//check conditions with no identifierVar
 				for e := conditionSetNoIdr.Front(); e != nil; e = e.Next() {
 					conditionVar := e.Value.(model.Condition)
-					fNode := newFilterNode(nw, node.getIdentifiers(), conditionVar)
+					fNode := newFilterNode(nw, rule, node.getIdentifiers(), conditionVar)
 					nodesOfRule.PushBack(fNode)
 					newNodeLink(nw, lastNode, fNode, false)
 					lastNode = fNode
@@ -280,7 +280,7 @@ func (nw *reteNetworkImpl) createFilterNode(rule model.Rule, nodesOfRule *list.L
 			node := f.Value.(node)
 			if ContainedByFirst(node.getIdentifiers(), conditionVar.GetIdentifiers()) {
 				//TODO
-				filterNode := newFilterNode(nw, nil, conditionVar)
+				filterNode := newFilterNode(nw, rule, nil, conditionVar)
 				newNodeLink(nw, node, filterNode, false)
 				removeFromList(nodeSet, node)
 				nodeSet.PushBack(filterNode)
@@ -380,7 +380,7 @@ func (nw *reteNetworkImpl) createJoinNodeFromSome(rule model.Rule, nodesOfRule *
 func (nw *reteNetworkImpl) createClassFilterNode(rule model.Rule, nodesOfRule *list.List, classNodeLinksOfRule *list.List, identifierVar model.TupleTypeAlias, conditionVar model.Condition, nodeSet *list.List) filterNode {
 	identifiers := []model.TupleTypeAlias{identifierVar}
 	classNodeVar := getClassNode(nw, identifierVar)
-	filterNodeVar := newFilterNode(nw, identifiers, conditionVar)
+	filterNodeVar := newFilterNode(nw, rule, identifiers, conditionVar)
 	classNodeLink := newClassNodeLink(nw, classNodeVar, filterNodeVar, rule, identifierVar)
 	classNodeVar.addClassNodeLink(classNodeLink)
 	nodesOfRule.PushBack(classNodeVar)
@@ -395,7 +395,7 @@ func (nw *reteNetworkImpl) createJoinNode(rule model.Rule, nodesOfRule *list.Lis
 
 	//TODO handle equivJoins later..
 
-	joinNode := newJoinNode(nw, leftNode.getIdentifiers(), rightNode.getIdentifiers(), joinCondition)
+	joinNode := newJoinNode(nw, rule, leftNode.getIdentifiers(), rightNode.getIdentifiers(), joinCondition)
 
 	newNodeLink(nw, leftNode, joinNode, false)
 	newNodeLink(nw, rightNode, joinNode, true)
@@ -527,7 +527,7 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 		defer nw.crudLock.Unlock()
 		nw.assertInternal(newCtx, tuple, changedProps)
 	} else {
-		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple))
+		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple, changedProps))
 	}
 
 	reteCtxVar.getConflictResolver().resolveConflict(newCtx)
@@ -549,11 +549,11 @@ func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.StreamTuple) {
 	reteHandle, found:= nw.allHandles[tuple]
 	if found && reteHandle != nil {
 		delete(nw.allHandles, tuple)
-		reteHandle.removeJoinTableRowRefs()
+		reteHandle.removeJoinTableRowRefs(nil)
 	}
 }
 
-func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.StreamTuple) {
+func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool) {
 
 	if ctx == nil {
 		ctx = context.Background()
@@ -566,7 +566,7 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.StreamTuple)
 	}
 	reteHandle := nw.allHandles[tuple]
 	if reteHandle != nil {
-		reteHandle.removeJoinTableRowRefs()
+		reteHandle.removeJoinTableRowRefs(changedProps)
 	}
 
 }
@@ -576,9 +576,7 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Strea
 	listItem := nw.allClassNodes[string(dataSource)]
 	if listItem != nil {
 		classNodeVar := listItem.(classNode)
-		classNodeVar.assert(ctx, tuple)
-	} else {
-		fmt.Println("No rule exists for data stream: " + dataSource)
+		classNodeVar.assert(ctx, tuple, changedProps)
 	}
 }
 

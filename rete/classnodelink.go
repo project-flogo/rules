@@ -7,6 +7,7 @@ type classNodeLink interface {
 	nodeLink
 	GetIdentifier() model.TupleTypeAlias
 	getClassNode() classNode
+	getRule() model.Rule
 }
 
 type classNodeLinkImpl struct {
@@ -41,4 +42,8 @@ func (cnl *classNodeLinkImpl) String() string {
 	str := cnl.nodeLinkImpl.String()
 	return str
 	//TODO: tableids, loadstop, mask, etc
+}
+
+func (cnl *classNodeLinkImpl) getRule() model.Rule {
+	return cnl.rule
 }

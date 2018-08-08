@@ -22,20 +22,21 @@ type nodeImpl struct {
 	identifiers []model.TupleTypeAlias
 	nodeLinkVar nodeLink
 	id          int
+	rule 		model.Rule
 }
-
 //NewNode ... returns a new node
-func newNode(nw Network, identifiers []model.TupleTypeAlias) node {
+func newNode(nw Network, rule model.Rule, identifiers []model.TupleTypeAlias) node {
 	n := nodeImpl{}
-	n.initNodeImpl(nw, identifiers)
+	n.initNodeImpl(nw, rule, identifiers)
 	return &n
 }
 
-func (n *nodeImpl) initNodeImpl(nw Network, identifiers []model.TupleTypeAlias) {
+func (n *nodeImpl) initNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleTypeAlias) {
 
 	n.id = nw.incrementAndGetId()
 
 	n.identifiers = identifiers
+	n.rule = rule
 }
 
 func (n *nodeImpl) getIdentifiers() []model.TupleTypeAlias {
