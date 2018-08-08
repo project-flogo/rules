@@ -10,15 +10,15 @@ type tupleImpl struct {
 	tuples    map[string]interface{}
 }
 
-func NewTuple(dataSource TupleType) MutableStreamTuple {
+func NewTuple(tuple TupleType) MutableStreamTuple {
 	st := tupleImpl{}
-	st.initStreamTuple(dataSource)
+	st.initStreamTuple(tuple)
 	return &st
 }
 
-func (st *tupleImpl) initStreamTuple(dataSource TupleType) {
+func (st *tupleImpl) initStreamTuple(tupleType TupleType) {
 	st.tuples = make(map[string]interface{})
-	st.tupleType = dataSource
+	st.tupleType = tupleType
 }
 
 func (st *tupleImpl) GetTypeAlias() TupleType {

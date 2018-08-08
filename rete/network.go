@@ -572,8 +572,8 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, chang
 }
 
 func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool) {
-	dataSource := tuple.GetTypeAlias()
-	listItem := nw.allClassNodes[string(dataSource)]
+	tupleType := tuple.GetTypeAlias()
+	listItem := nw.allClassNodes[string(tupleType)]
 	if listItem != nil {
 		classNodeVar := listItem.(classNode)
 		classNodeVar.assert(ctx, tuple, changedProps)
