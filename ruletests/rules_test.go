@@ -32,12 +32,12 @@ func TestOne(t *testing.T) {
 
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
-	streamTuple1 := model.NewTuple("n1")
-	streamTuple1.SetString(nil, ruleSession, "name", "Bob")
-	ruleSession.Assert(nil, streamTuple1)
+	tuple1 := model.NewTuple("n1")
+	tuple1.SetString(nil, ruleSession, "name", "Bob")
+	ruleSession.Assert(nil, tuple1)
 
 	//Retract them
-	ruleSession.Retract(nil, streamTuple1)
+	ruleSession.Retract(nil, tuple1)
 
 	//You may delete the rule
 	ruleSession.DeleteRule(rule.GetName())
@@ -46,76 +46,76 @@ func TestOne(t *testing.T) {
 
 func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	//This conditions filters on name="Bob"
-	streamTuple := tuples["n1"]
-	if streamTuple == nil {
+	tuple := tuples["n1"]
+	if tuple == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
 		return false
 	}
-	name := streamTuple.GetString("name")
+	name := tuple.GetString("name")
 	return name == "Bob"
 }
 
 func checkForTom(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	//This conditions filters on name="Bob"
-	streamTuple := tuples["n1"]
-	if streamTuple == nil {
+	tuple := tuples["n1"]
+	if tuple == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
 		return false
 	}
-	name := streamTuple.GetString("name")
+	name := tuple.GetString("name")
 	return name == "Tom"
 }
 
 func checkSameNames(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	// fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
-	streamTuple1 := tuples["n1"]
-	streamTuple2 := tuples["n2"]
-	if streamTuple1 == nil || streamTuple2 == nil {
+	tuple1 := tuples["n1"]
+	tuple2 := tuples["n2"]
+	if tuple1 == nil || tuple2 == nil {
 		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
 		return false
 	}
-	name1 := streamTuple1.GetString("name")
-	name2 := streamTuple2.GetString("name")
+	name1 := tuple1.GetString("name")
+	name2 := tuple2.GetString("name")
 	return name1 == name2
 }
 
 func myActionFn(ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Rule [%s] fired\n", ruleName)
-	streamTuple1 := tuples["n1"]
-	streamTuple2 := tuples["n2"]
-	if streamTuple1 == nil || streamTuple2 == nil {
+	tuple1 := tuples["n1"]
+	tuple2 := tuples["n2"]
+	if tuple1 == nil || tuple2 == nil {
 		fmt.Println("Should not get nil tuples here in Action! This is an error")
 	}
-	name1 := streamTuple1.GetString("name")
-	name2 := streamTuple2.GetString("name")
+	name1 := tuple1.GetString("name")
+	name2 := tuple2.GetString("name")
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
 }
 
 func bobRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Rule [%s] fired\n", ruleName)
-	streamTuple1 := tuples["n1"].(model.MutableStreamTuple)
-	if streamTuple1 == nil {
+	tuple1 := tuples["n1"].(model.MutableTuple)
+	if tuple1 == nil {
 		fmt.Println("Should not get nil tuples here in Action! This is an error")
 	}
-	name1 := streamTuple1.GetString("name")
+	name1 := tuple1.GetString("name")
 	fmt.Printf("n1.name = [%s]\n", name1)
 	// assertTom(ctx, rs)
-	//streamTuple1.SetInt(ctx, "age", 36)
+	//tuple1.SetInt(ctx, "age", 36)
 }
 
 func tomRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Tom Rule fired: [%s]\n", ruleName)
-	streamTuple1 := tuples["n1"]
+	tuple1 := tuples["n1"]
 
-	name1 := streamTuple1.GetString("name")
+	name1 := tuple1.GetString("name")
 	fmt.Printf("n1.name = [%s]\n", name1)
 }
 
 func checkForTomAction2(ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Rule fired: [%s]\n", ruleName)
-	streamTuple1 := tuples["n1"]
+	tuple1 := tuples["n1"]
 
-	name1 := streamTuple1.GetString("name")
+	name1 := tuple1.GetString("name")
 	fmt.Printf("n1.name = [%s]\n", name1)
 
 	return
@@ -124,7 +124,7 @@ func checkForTomAction2(ruleName string, tuples map[model.TupleType]model.Tuple)
 
 func assertTom(ctx context.Context, rs model.RuleSession) {
 	fmt.Println("Asserting n1 tuple with name=Tom")
-	streamTuple5 := model.NewTuple("n1")
-	streamTuple5.SetString(ctx, rs, "name", "Tom")
-	rs.Assert(ctx, streamTuple5)
+	tuple1 := model.NewTuple("n1")
+	tuple1.SetString(ctx, rs, "name", "Tom")
+	rs.Assert(ctx, tuple1)
 }

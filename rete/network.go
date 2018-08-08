@@ -512,7 +512,7 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 
 	if !nw.validateTuple(tuple) {
 		//TODO: Panic. For now, simply return
-		fmt.Printf("Stream tuple not compatible with its type\n")
+		fmt.Printf("Tuple not compatible with its type\n")
 		return
 	}
 

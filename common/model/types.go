@@ -14,7 +14,7 @@ type RuleSession interface {
 	Unregister() //remove itself from the package map
 	GetName() string
 	RegisterTupleDescriptors (jsonRegistry string) //a json describing types
-	//NewTuple(tupleType TupleType) MutableStreamTuple
+	//NewTuple(tupleType TupleType) MutableTuple
 	ValidateUpdate(alias TupleType, name string, value interface{}) bool
 
 	DelayedAssert(ctx context.Context, delayInMillis uint64, key interface{}, tuple Tuple)
@@ -49,10 +49,10 @@ type Condition interface {
 	String() string
 }
 
-//TupleType An internal representation of a 'DataSource'
+//TupleType Each tuple is of a certain type, described by TypeDescriptor
 type TupleType string
 
-//Tuple is a runtime representation of a stream of data
+//Tuple is a runtime representation of a data tuple
 type Tuple interface {
 	GetTypeAlias() TupleType
 	GetString(name string) string
@@ -63,8 +63,8 @@ type Tuple interface {
 }
 
 
-//MutableStreamTuple mutable part of the stream tuple
-type MutableStreamTuple interface {
+//MutableTuple mutable part of the tuple
+type MutableTuple interface {
 	Tuple
 	SetString(ctx context.Context, rs RuleSession, name string, value string)
 	SetInt(ctx context.Context, rs RuleSession, name string, value int)

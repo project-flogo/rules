@@ -37,14 +37,14 @@ func TestTwo(t *testing.T) {
 
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
-	streamTuple1 := model.NewTuple("n1")
-	streamTuple1.SetString(nil, ruleSession, "name", "Bob")
-	streamTuple1.SetInt(nil, ruleSession,"age", 35)
+	tuple1 := model.NewTuple("n1")
+	tuple1.SetString(nil, ruleSession, "name", "Bob")
+	tuple1.SetInt(nil, ruleSession,"age", 35)
 
-	ruleSession.Assert(nil, streamTuple1)
+	ruleSession.Assert(nil, tuple1)
 
 	//Retract them
-	ruleSession.Retract(nil, streamTuple1)
+	ruleSession.Retract(nil, tuple1)
 
 	//You may delete the rule
 	ruleSession.DeleteRule(rule.GetName())
@@ -53,22 +53,22 @@ func TestTwo(t *testing.T) {
 
 func checkForBobAge(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	//This conditions filters on name="Bob"
-	streamTuple := tuples["n1"]
-	if streamTuple == nil {
+	tuple := tuples["n1"]
+	if tuple == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
 		return false
 	}
-	age := streamTuple.GetInt("age")
+	age := tuple.GetInt("age")
 	return age == 35
 }
 
 func bobAgeRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Rule [%s] fired\n", ruleName)
-	streamTuple1 := tuples["n1"]
-	if streamTuple1 == nil {
+	tuple1 := tuples["n1"]
+	if tuple1 == nil {
 		fmt.Println("Should not get nil tuples here in Action! This is an error")
 	}
-	name1 := streamTuple1.GetString("name")
+	name1 := tuple1.GetString("name")
 	fmt.Printf("n1.name = [%s]\n", name1)
 	// assertTom(ctx, rs)
 }

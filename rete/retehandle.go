@@ -7,9 +7,9 @@ import (
 	"github.com/TIBCOSoftware/bego/common/model"
 )
 
-//Holds a stream tuple reference and related state
+//Holds a tuple reference and related state
 type reteHandle interface {
-	setTuple(streamTuple model.Tuple)
+	setTuple(tuple model.Tuple)
 	getTuple() model.Tuple
 	addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable)
 	removeJoinTableRowRefs(changedProps map[string]bool)

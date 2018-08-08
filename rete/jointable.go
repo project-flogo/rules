@@ -3,7 +3,7 @@ package rete
 import "github.com/TIBCOSoftware/bego/common/model"
 
 type joinTable interface {
-	addRow(row joinTableRow) //list of StreamTuples
+	addRow(row joinTableRow) //list of Tuples
 	getID() int
 	len() int
 	getMap() map[joinTableRow]joinTableRow

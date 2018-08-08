@@ -213,7 +213,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 //	scanevent := tuples["scanevent"]
 //
-//	pkg := tuples["package"].(model.MutableStreamTuple)
+//	pkg := tuples["package"].(model.MutableTuple)
 //	pkgid := pkg.GetString("packageid")
 //
 //	scurr := scanevent.GetString("curr")
@@ -261,7 +261,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //
 //func scantimeoutAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 //
-//	pkg := tuples["package"].(model.MutableStreamTuple)
+//	pkg := tuples["package"].(model.MutableTuple)
 //
 //	pkgid := pkg.GetString("packageid")
 //	pcurr :=  pkg.GetString("curr")
@@ -280,7 +280,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //}
 //
 //func packageAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
-//	pkg := tuples["package"].(model.MutableStreamTuple)
+//	pkg := tuples["package"].(model.MutableTuple)
 //	pkgid := pkg.GetString("packageid")
 //
 //	pcurr := pkg.GetString("curr")
@@ -296,7 +296,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //}
 //
 //func packagedelayedAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
-//	pkg := tuples["package"].(model.MutableStreamTuple)
+//	pkg := tuples["package"].(model.MutableTuple)
 //	pkgid := pkg.GetString("packageid")
 //
 //	fmt.Printf ("Package is now delayed id[%s]\n", pkgid)

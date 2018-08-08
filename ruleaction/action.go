@@ -97,26 +97,26 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 	if !_ok {
 		return nil, nil
 	}
-	//fmt.Printf("Received event from stream source [%s]", h.Name)
+	//fmt.Printf("Received event from tuple source [%s]", h.Name)
 
-	streamSrc := model.TupleType(h.Name)
+	tupleType := model.TupleType(h.Name)
 
-	streamTuple := model.NewTuple(streamSrc) //n1 -> will be replaced by contextual information coming in the data
+	tuple := model.NewTuple(tupleType) //n1 -> will be replaced by contextual information coming in the data
 
 	queryParams := inputs["queryParams"].Value().(map[string]string)
 
-	//map input data into stream tuples, only string. ignore the rest for now
+	//map input data into tuples, only string. ignore the rest for now
 	for key, value := range queryParams {
 		//fmt.Printf("[%s]\n", "a")
 		if key == "balance" {
 			f, _ := strconv.ParseFloat(value, 64)
-			streamTuple.SetFloat(ctx, a.rs, key, f)
+			tuple.SetFloat(ctx, a.rs, key, f)
 		} else {
-			streamTuple.SetString(ctx, a.rs, key, value)
+			tuple.SetString(ctx, a.rs, key, value)
 		}
 	}
 
-	a.rs.Assert(ctx, streamTuple)
+	a.rs.Assert(ctx, tuple)
 	//fmt.Printf("[%s]\n", "b")
 	return nil, nil
 }
@@ -206,21 +206,21 @@ func truecondition(ruleName string, condName string, tuples map[model.TupleType]
 	return true
 }
 func customerAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
-	streamTuple := tuples["customerevent"]
-	if streamTuple == nil {
+	tuple := tuples["customerevent"]
+	if tuple == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
 	} else {
-		name := streamTuple.GetString("name")
+		name := tuple.GetString("name")
 		fmt.Printf("Received a customer event with customer name [%s]\n", name)
 	}
 }
 func debitEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
-	streamTuple := tuples["debitevent"]
-	if streamTuple == nil {
+	tuple := tuples["debitevent"]
+	if tuple == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
 	} else {
-		name := streamTuple.GetString("name")
-		amount := streamTuple.GetString("debit")
+		name := tuple.GetString("name")
+		amount := tuple.GetString("debit")
 
 		fmt.Printf("Received a debit event for customer [%s], amount [%s]\n", name, amount)
 	}
@@ -244,7 +244,7 @@ func customerdebitjoincondition(ruleName string, condName string, tuples map[mod
 
 func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	//fmt.Printf("Rule fired: [%s]\n", ruleName)
-	customerTuple := tuples["customerevent"].(model.MutableStreamTuple)
+	customerTuple := tuples["customerevent"].(model.MutableTuple)
 	debitTuple := tuples["debitevent"]
 	dbt := debitTuple.GetString("debit")
 	debitAmt, _ := strconv.ParseFloat(dbt, 64)
@@ -270,7 +270,7 @@ func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tup
 //
 //func balanceAlert(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 //	//fmt.Printf("Rule fired: [%s]\n", ruleName)
-//	customerTuple := tuples["customerevent"].(model.MutableStreamTuple)
+//	customerTuple := tuples["customerevent"].(model.MutableTuple)
 //	fmt.Printf("**** Account Suspended *** Customer balance is 0 or negative ! [%s], Balance [%f]\n", customerTuple.GetString("name"), customerTuple.GetFloat("balance"))
 //	customerTuple.SetString(ctx,rs,"status", "suspended")
 //}
@@ -449,7 +449,7 @@ func scaneventCondition(ruleName string, condName string, tuples map[model.Tuple
 func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	scanevent := tuples["scanevent"]
 
-	pkg := tuples["package"].(model.MutableStreamTuple)
+	pkg := tuples["package"].(model.MutableTuple)
 	pkgid := pkg.GetString("packageid")
 
 	scurr := scanevent.GetString("curr")
@@ -496,7 +496,7 @@ func scantimeoutCondition(ruleName string, condName string, tuples map[model.Tup
 
 func scantimeoutAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 
-	pkg := tuples["package"].(model.MutableStreamTuple)
+	pkg := tuples["package"].(model.MutableTuple)
 
 	pkgid := pkg.GetString("packageid")
 	pcurr := pkg.GetString("curr")
@@ -514,7 +514,7 @@ func packageCondition(ruleName string, condName string, tuples map[model.TupleTy
 }
 
 func packageAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
-	pkg := tuples["package"].(model.MutableStreamTuple)
+	pkg := tuples["package"].(model.MutableTuple)
 	pkgid := pkg.GetString("packageid")
 
 	pcurr := pkg.GetString("curr")
@@ -530,7 +530,7 @@ func packageDelayedCheck(ruleName string, condName string, tuples map[model.Tupl
 }
 
 func packagedelayedAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
-	pkg := tuples["package"].(model.MutableStreamTuple)
+	pkg := tuples["package"].(model.MutableTuple)
 	pkgid := pkg.GetString("packageid")
 
 	fmt.Printf("Package is now delayed id[%s]\n", pkgid)

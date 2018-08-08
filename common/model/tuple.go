@@ -10,13 +10,13 @@ type tupleImpl struct {
 	tuples    map[string]interface{}
 }
 
-func NewTuple(tuple TupleType) MutableStreamTuple {
+func NewTuple(tuple TupleType) MutableTuple {
 	st := tupleImpl{}
-	st.initStreamTuple(tuple)
+	st.initTuple(tuple)
 	return &st
 }
 
-func (st *tupleImpl) initStreamTuple(tupleType TupleType) {
+func (st *tupleImpl) initTuple(tupleType TupleType) {
 	st.tuples = make(map[string]interface{})
 	st.tupleType = tupleType
 }
