@@ -8,9 +8,9 @@ import (
 )
 
 type conflictRes interface {
-	addAgendaItem(rule model.Rule, tupleMap map[model.TupleTypeAlias]model.StreamTuple)
+	addAgendaItem(rule model.Rule, tupleMap map[model.TupleType]model.Tuple)
 	resolveConflict(ctx context.Context)
-	deleteAgendaFor(ctx context.Context, tuple model.StreamTuple)
+	deleteAgendaFor(ctx context.Context, tuple model.Tuple)
 }
 
 type conflictResImpl struct {
@@ -27,7 +27,7 @@ func (cr *conflictResImpl) initCR() {
 	cr.agendaList = list.List{}
 }
 
-func (cr *conflictResImpl) addAgendaItem(rule model.Rule, tupleMap map[model.TupleTypeAlias]model.StreamTuple) {
+func (cr *conflictResImpl) addAgendaItem(rule model.Rule, tupleMap map[model.TupleType]model.Tuple) {
 	item := newAgendaItem(rule, tupleMap)
 	v := rule.GetPriority()
 	found := false
@@ -67,7 +67,7 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 			reteCtxV.getOpsList().PushBack(newModifyEntry(mTuple, props))
 		}
 		//clear the map for the next run
-		reteCtxV.modifyMap = make(map[model.StreamTuple]map[string]bool)
+		reteCtxV.modifyMap = make(map[model.Tuple]map[string]bool)
 
 
 		if reteCtxV != nil {
@@ -84,7 +84,7 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 	}
 }
 
-func (cr *conflictResImpl) deleteAgendaFor(ctx context.Context, modifiedTuple model.StreamTuple) {
+func (cr *conflictResImpl) deleteAgendaFor(ctx context.Context, modifiedTuple model.Tuple) {
 
 	hdlModified := getOrCreateHandle(ctx, modifiedTuple)
 

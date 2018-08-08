@@ -16,13 +16,13 @@ func TestOne(t *testing.T) {
 	//Create Rule, define conditiond and set action callback
 	rule := ruleapi.NewRule("* Ensure n1.name is Bob*")
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
-	rule.AddCondition("c1", []model.TupleTypeAlias{"n1"}, checkForBob) // check for name "Bob" in n1
+	rule.AddCondition("c1", []model.TupleType{"n1"}, checkForBob) // check for name "Bob" in n1
 	rule.SetAction(bobRuleFired)
 
 	//Create Rule, define conditiond and set action callback
 	rule2 := ruleapi.NewRule("* name == Tom *")
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
-	rule2.AddCondition("c1", []model.TupleTypeAlias{"n1"}, checkForTom) // check for name "Bob" in n1
+	rule2.AddCondition("c1", []model.TupleType{"n1"}, checkForTom) // check for name "Bob" in n1
 	rule2.SetAction(tomRuleFired)
 
 	//Create a RuleSession and add the above Rule
@@ -32,7 +32,7 @@ func TestOne(t *testing.T) {
 
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
-	streamTuple1 := model.NewStreamTuple("n1")
+	streamTuple1 := model.NewTuple("n1")
 	streamTuple1.SetString(nil, ruleSession, "name", "Bob")
 	ruleSession.Assert(nil, streamTuple1)
 
@@ -44,7 +44,7 @@ func TestOne(t *testing.T) {
 
 }
 
-func checkForBob(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	//This conditions filters on name="Bob"
 	streamTuple := tuples["n1"]
 	if streamTuple == nil {
@@ -55,7 +55,7 @@ func checkForBob(ruleName string, condName string, tuples map[model.TupleTypeAli
 	return name == "Bob"
 }
 
-func checkForTom(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func checkForTom(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	//This conditions filters on name="Bob"
 	streamTuple := tuples["n1"]
 	if streamTuple == nil {
@@ -66,7 +66,7 @@ func checkForTom(ruleName string, condName string, tuples map[model.TupleTypeAli
 	return name == "Tom"
 }
 
-func checkSameNames(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func checkSameNames(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	// fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
 	streamTuple1 := tuples["n1"]
 	streamTuple2 := tuples["n2"]
@@ -79,7 +79,7 @@ func checkSameNames(ruleName string, condName string, tuples map[model.TupleType
 	return name1 == name2
 }
 
-func myActionFn(ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func myActionFn(ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Rule [%s] fired\n", ruleName)
 	streamTuple1 := tuples["n1"]
 	streamTuple2 := tuples["n2"]
@@ -91,7 +91,7 @@ func myActionFn(ruleName string, tuples map[model.TupleTypeAlias]model.StreamTup
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
 }
 
-func bobRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func bobRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Rule [%s] fired\n", ruleName)
 	streamTuple1 := tuples["n1"].(model.MutableStreamTuple)
 	if streamTuple1 == nil {
@@ -103,7 +103,7 @@ func bobRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tu
 	//streamTuple1.SetInt(ctx, "age", 36)
 }
 
-func tomRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func tomRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Tom Rule fired: [%s]\n", ruleName)
 	streamTuple1 := tuples["n1"]
 
@@ -111,7 +111,7 @@ func tomRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tu
 	fmt.Printf("n1.name = [%s]\n", name1)
 }
 
-func checkForTomAction2(ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func checkForTomAction2(ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Rule fired: [%s]\n", ruleName)
 	streamTuple1 := tuples["n1"]
 
@@ -124,7 +124,7 @@ func checkForTomAction2(ruleName string, tuples map[model.TupleTypeAlias]model.S
 
 func assertTom(ctx context.Context, rs model.RuleSession) {
 	fmt.Println("Asserting n1 tuple with name=Tom")
-	streamTuple5 := model.NewStreamTuple("n1")
+	streamTuple5 := model.NewTuple("n1")
 	streamTuple5.SetString(ctx, rs, "name", "Tom")
 	rs.Assert(ctx, streamTuple5)
 }

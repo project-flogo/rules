@@ -12,7 +12,7 @@ import (
 //
 //	//loadPkgRules(rs)
 //
-//	pkgEvt := model.NewStreamTuple(model.TupleTypeAlias("packageevent"))
+//	pkgEvt := model.NewTuple(model.TupleType("packageevent"))
 //	//ctx := context.TODO()
 //	pkgEvt.SetString(nil, rs, "packageid", "1")
 //	pkgEvt.SetString(nil, rs, "next", "sfo")
@@ -20,7 +20,7 @@ import (
 //	pkgEvt.SetString(nil, rs, "isnew", "true")
 //
 //	rs.Assert(nil, pkgEvt)
-//	scanEv := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+//	scanEv := model.NewTuple(model.TupleType("scanevent"))
 //	scanEv.SetString(nil, rs, "packageid", "1")
 //	scanEv.SetString(nil, rs, "curr", "sfo")
 //	scanEv.SetString(nil, rs, "next", "ny")
@@ -38,7 +38,7 @@ import (
 //
 //	//loadPkgRules(rs)
 //
-//	pkgEvt := model.NewStreamTuple(model.TupleTypeAlias("packageevent"))
+//	pkgEvt := model.NewTuple(model.TupleType("packageevent"))
 //	//ctx := context.TODO()
 //	pkgEvt.SetString(nil, rs, "packageid", "1")
 //	pkgEvt.SetString(nil, rs, "next", "sfo")
@@ -47,7 +47,7 @@ import (
 //
 //	rs.Assert(nil, pkgEvt)
 //	time.Sleep(time.Second*20)
-//	scanEv := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+//	scanEv := model.NewTuple(model.TupleType("scanevent"))
 //	scanEv.SetString(nil, rs, "packageid", "1")
 //	scanEv.SetString(nil, rs, "curr", "sfo")
 //	scanEv.SetString(nil, rs, "next", "ny")
@@ -55,7 +55,7 @@ import (
 //
 //	rs.Assert(nil, scanEv)
 //
-//	scanEv1 := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+//	scanEv1 := model.NewTuple(model.TupleType("scanevent"))
 //	scanEv1.SetString(nil, rs, "packageid", "1")
 //	scanEv1.SetString(nil, rs, "curr", "ny")
 //	scanEv1.SetString(nil, rs, "next", "done")
@@ -72,7 +72,7 @@ func TestPkgFlowNormalWithDeps (t *testing.T) {
 
 	loadPkgRulesWithDeps(rs)
 
-	pkgEvt := model.NewStreamTuple(model.TupleTypeAlias("packageevent"))
+	pkgEvt := model.NewTuple(model.TupleType("packageevent"))
 	//ctx := context.TODO()
 	pkgEvt.SetString(nil, rs, "packageid", "1")
 	pkgEvt.SetString(nil, rs, "next", "sfo")
@@ -81,7 +81,7 @@ func TestPkgFlowNormalWithDeps (t *testing.T) {
 
 	rs.Assert(nil, pkgEvt)
 	//time.Sleep(time.Second*20)
-	scanEv := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+	scanEv := model.NewTuple(model.TupleType("scanevent"))
 	scanEv.SetString(nil, rs, "packageid", "1")
 	scanEv.SetString(nil, rs, "curr", "sfo")
 	scanEv.SetString(nil, rs, "next", "ny")
@@ -89,7 +89,7 @@ func TestPkgFlowNormalWithDeps (t *testing.T) {
 
 	rs.Assert(nil, scanEv)
 
-	scanEv1 := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+	scanEv1 := model.NewTuple(model.TupleType("scanevent"))
 	scanEv1.SetString(nil, rs, "packageid", "1")
 	scanEv1.SetString(nil, rs, "curr", "ny")
 	scanEv1.SetString(nil, rs, "next", "done")
@@ -106,7 +106,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 
 	loadPkgRulesWithDeps(rs)
 
-	pkgEvt := model.NewStreamTuple(model.TupleTypeAlias("packageevent"))
+	pkgEvt := model.NewTuple(model.TupleType("packageevent"))
 	//ctx := context.TODO()
 	pkgEvt.SetString(nil, rs, "packageid", "1")
 	pkgEvt.SetString(nil, rs, "next", "sfo")
@@ -115,7 +115,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 
 	rs.Assert(nil, pkgEvt)
 	//time.Sleep(time.Second*20)
-	scanEv := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+	scanEv := model.NewTuple(model.TupleType("scanevent"))
 	scanEv.SetString(nil, rs, "packageid", "1")
 	scanEv.SetString(nil, rs, "curr", "sfo")
 	scanEv.SetString(nil, rs, "next", "ny")
@@ -123,7 +123,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 
 	rs.Assert(nil, scanEv)
 
-	//scanEv1 := model.NewStreamTuple(model.TupleTypeAlias("scanevent"))
+	//scanEv1 := model.NewTuple(model.TupleType("scanevent"))
 	//scanEv1.SetString(nil, rs, "packageid", "1")
 	//scanEv1.SetString(nil, rs, "curr", "ny")
 	//scanEv1.SetString(nil, rs, "next", "done")
@@ -139,7 +139,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //
 //	//handle a package event, create a package in the packageAction
 //	rule := ruleapi.NewRule("packageevent")
-//	rule.AddCondition("packageevent", []model.TupleTypeAlias{"packageevent"}, truecondition)
+//	rule.AddCondition("packageevent", []model.TupleType{"packageevent"}, truecondition)
 //	rule.SetAction(packageeventAction)
 //	rule.SetPriority(1)
 //	rs.AddRule(rule)
@@ -147,7 +147,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //
 //	//handle a package, print package details in the packageAction
 //	rule1:= ruleapi.NewRule("package")
-//	rule1.AddCondition("packageevent1", []model.TupleTypeAlias{"package"}, packageCondition)
+//	rule1.AddCondition("packageevent1", []model.TupleType{"package"}, packageCondition)
 //	rule1.SetAction(packageAction)
 //	rule1.SetPriority(2)
 //	rs.AddRule(rule1)
@@ -156,7 +156,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //	//handle a scan event, see if there is matching package if so, do necessary things such as set off a timer
 //	//for the next destination, etc in the scaneventAction
 //	rule2 := ruleapi.NewRule("scanevent")
-//	rule2.AddCondition("scanevent", []model.TupleTypeAlias{"package", "scanevent"}, scaneventCondition)
+//	rule2.AddCondition("scanevent", []model.TupleType{"package", "scanevent"}, scaneventCondition)
 //	rule2.SetAction(scaneventAction)
 //	rule2.SetPriority(2)
 //	rs.AddRule(rule2)
@@ -164,7 +164,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //
 //	//handle a timeout event, triggered by scaneventAction, mark the package as delayed in scantimeoutAction
 //	rule3 := ruleapi.NewRule("scantimeout")
-//	rule3.AddCondition("packageevent", []model.TupleTypeAlias{"package", "scantimeout"}, scantimeoutCondition)
+//	rule3.AddCondition("packageevent", []model.TupleType{"package", "scantimeout"}, scantimeoutCondition)
 //	rule3.SetAction(scantimeoutAction)
 //	rule3.SetPriority(1)
 //	rs.AddRule(rule3)
@@ -172,21 +172,21 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //
 //	//notify when a package is marked as delayed, print as such in the packagedelayedAction
 //	rule4 := ruleapi.NewRule("packagedelayed")
-//	rule4.AddCondition("packageevent", []model.TupleTypeAlias{"package"}, packageDelayedCheck)
+//	rule4.AddCondition("packageevent", []model.TupleType{"package"}, packageDelayedCheck)
 //	rule4.SetAction(packagedelayedAction)
 //	rule4.SetPriority(1)
 //	rs.AddRule(rule4)
 //	fmt.Printf("Rule added: [%s]\n", rule4.GetName())
 //}
 //
-//func packageeventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+//func packageeventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 //
 //	pkgEvent := tuples["packageevent"]
 //	pkgid := pkgEvent.GetString("packageid")
 //	fmt.Printf ("Received a new package asserting package id[%s]\n", pkgid)
 //
 //	//assert a package
-//	pkg := model.NewStreamTuple(model.TupleTypeAlias("package"))
+//	pkg := model.NewTuple(model.TupleType("package"))
 //	pkg.SetString(ctx, rs, "packageid", pkgEvent.GetString("packageid"))
 //	pkg.SetString(ctx, rs, "curr", "start")
 //	pkg.SetString(ctx, rs, "next", pkgEvent.GetString("next"))
@@ -196,7 +196,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //	rs.Assert(ctx, pkg)
 //}
 //
-//func scaneventCondition(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+//func scaneventCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 //	scanevent := tuples["scanevent"]
 //	pkg := tuples["package"]
 //
@@ -210,7 +210,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //
 //
 //
-//func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+//func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 //	scanevent := tuples["scanevent"]
 //
 //	pkg := tuples["package"].(model.MutableStreamTuple)
@@ -229,7 +229,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //	etaS := scanevent.GetString("eta")
 //	eta, _ := strconv.Atoi(etaS)
 //
-//	scantmout := model.NewStreamTuple(model.TupleTypeAlias("scantimeout"))
+//	scantmout := model.NewTuple(model.TupleType("scantimeout"))
 //	scantmout.SetString(ctx, rs, "packageid", pkgid)
 //	scantmout.SetString(ctx, rs, "next", snext)
 //
@@ -247,7 +247,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //
 //}
 //
-//func scantimeoutCondition(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+//func scantimeoutCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 //	scantimeout := tuples["scantimeout"]
 //	pkg := tuples["package"]
 //
@@ -259,7 +259,7 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //		scantimeout.GetString("next") == pkg.GetString("next") && pkg.GetString("status") == "normal"
 //}
 //
-//func scantimeoutAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+//func scantimeoutAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 //
 //	pkg := tuples["package"].(model.MutableStreamTuple)
 //
@@ -273,13 +273,13 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //}
 //
 //
-//func packageCondition(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+//func packageCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 //	pkg := tuples["package"]
 //	isnew := pkg.GetString("isnew")
 //	return isnew == "true"
 //}
 //
-//func packageAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+//func packageAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 //	pkg := tuples["package"].(model.MutableStreamTuple)
 //	pkgid := pkg.GetString("packageid")
 //
@@ -289,13 +289,13 @@ func TestPkgFlowNormalWithDepsWithTimeout (t *testing.T) {
 //	pkg.SetString(ctx, rs, "isnew", "false")
 //}
 //
-//func packageDelayedCheck(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+//func packageDelayedCheck(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 //	pkg := tuples["package"]
 //	status := pkg.GetString("status")
 //	return status == "delayed"
 //}
 //
-//func packagedelayedAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+//func packagedelayedAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 //	pkg := tuples["package"].(model.MutableStreamTuple)
 //	pkgid := pkg.GetString("packageid")
 //

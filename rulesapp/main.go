@@ -28,7 +28,7 @@ func main() {
 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")
-	rule.AddCondition("c1", []model.TupleTypeAlias{"n1"}, checkForBob)
+	rule.AddCondition("c1", []model.TupleType{"n1"}, checkForBob)
 	rule.SetAction(checkForBobAction)
 	rs.AddRule(rule)
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
@@ -36,8 +36,8 @@ func main() {
 	// check for name "Bob" in n1, match the "name" field in n2,
 	// in effect, fire the rule when name field in both tuples in "Bob"
 	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
-	rule2.AddCondition("c1", []model.TupleTypeAlias{"n1"}, checkForBob)
-	rule2.AddCondition("c2", []model.TupleTypeAlias{"n1", "n2"}, checkSameNamesCondition)
+	rule2.AddCondition("c1", []model.TupleType{"n1"}, checkForBob)
+	rule2.AddCondition("c2", []model.TupleType{"n1", "n2"}, checkSameNamesCondition)
 	rule2.SetAction(checkSameNamesAction)
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
@@ -46,19 +46,19 @@ func main() {
 
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Tom")
-	t1 := model.NewStreamTuple("n1")
+	t1 := model.NewTuple("n1")
 	t1.SetString(nil, rs,"name", "Tom")
 	rs.Assert(nil, t1)
 
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
-	t2 := model.NewStreamTuple("n1")
+	t2 := model.NewTuple("n1")
 	t2.SetString(nil, rs,"name", "Bob")
 	rs.Assert(nil, t2)
 
 
 	fmt.Println("Asserting n2 tuple with name=Bob")
-	t3 := model.NewStreamTuple("n2")
+	t3 := model.NewTuple("n2")
 	t3.SetString(nil, rs,"name", "Bob")
 	rs.Assert(nil, t3)
 
@@ -76,7 +76,7 @@ func main() {
 
 }
 
-func checkForBob(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	//This conditions filters on name="Bob"
 	t1 := tuples["n1"]
 	if t1 == nil {
@@ -87,7 +87,7 @@ func checkForBob(ruleName string, condName string, tuples map[model.TupleTypeAli
 	return name == "Bob"
 }
 
-func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Rule fired: [%s]\n", ruleName)
 	t1 := tuples["n1"]
 	if t1 == nil {
@@ -97,7 +97,7 @@ func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName strin
 }
 
 
-func checkSameNamesCondition(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func checkSameNamesCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]
 	if t1 == nil || t2 == nil {
@@ -109,7 +109,7 @@ func checkSameNamesCondition(ruleName string, condName string, tuples map[model.
 	return name1 == name2
 }
 
-func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Rule fired: [%s]\n", ruleName)
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]

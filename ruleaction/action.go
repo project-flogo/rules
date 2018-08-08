@@ -99,9 +99,9 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 	}
 	//fmt.Printf("Received event from stream source [%s]", h.Name)
 
-	streamSrc := model.TupleTypeAlias(h.Name)
+	streamSrc := model.TupleType(h.Name)
 
-	streamTuple := model.NewStreamTuple(streamSrc) //n1 -> will be replaced by contextual information coming in the data
+	streamTuple := model.NewTuple(streamSrc) //n1 -> will be replaced by contextual information coming in the data
 
 	queryParams := inputs["queryParams"].Value().(map[string]string)
 
@@ -124,28 +124,28 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 //func loadRules(rs model.RuleSession) {
 //
 //	rule := ruleapi.NewRule("customer-event")
-//	rule.AddCondition("customer", []model.TupleTypeAlias{"customerevent"}, truecondition) // check for name "Bob" in n1
+//	rule.AddCondition("customer", []model.TupleType{"customerevent"}, truecondition) // check for name "Bob" in n1
 //	rule.SetAction(customerAction)
 //	rule.SetPriority(1)
 //	rs.AddRule(rule)
 //	fmt.Printf("Rule added: [%s]\n", rule.GetName())
 //
 //	rule2 := ruleapi.NewRule("debit-event")
-//	rule2.AddCondition("debitevent", []model.TupleTypeAlias{"debitevent"}, truecondition)
+//	rule2.AddCondition("debitevent", []model.TupleType{"debitevent"}, truecondition)
 //	rule2.SetAction(debitEvent)
 //	rule2.SetPriority(2)
 //	rs.AddRule(rule2)
 //	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 //
 //	rule3 := ruleapi.NewRule("customer-debit")
-//	rule3.AddCondition("customerdebit", []model.TupleTypeAlias{"debitevent", "customerevent"}, customerdebitjoincondition)
+//	rule3.AddCondition("customerdebit", []model.TupleType{"debitevent", "customerevent"}, customerdebitjoincondition)
 //	rule3.SetAction(debitAction)
 //	rule3.SetPriority(3)
 //	rs.AddRule(rule3)
 //	fmt.Printf("Rule added: [%s]\n", rule3.GetName())
 //
 //	rule4 := ruleapi.NewRule("check-balance")
-//	rule4.AddCondition("customerdebit", []model.TupleTypeAlias{"customerevent"}, checkBalance) // check for name "Bob" in n1
+//	rule4.AddCondition("customerdebit", []model.TupleType{"customerevent"}, checkBalance) // check for name "Bob" in n1
 //	rule4.SetAction(balanceAlert)
 //	rule4.SetPriority(-1)
 //	rs.AddRule(rule4)
@@ -153,7 +153,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 //
 //
 //	//rule5 := ruleapi.NewRule("timeout-rule")
-//	//rule5.AddCondition("packagetimeout", []model.TupleTypeAlias{"packagetimeout"}, truecondition) // check for name "Bob" in n1
+//	//rule5.AddCondition("packagetimeout", []model.TupleType{"packagetimeout"}, truecondition) // check for name "Bob" in n1
 //	//rule5.SetAction(packageTimeout)
 //	//rule5.SetPriority(-1)
 //	//rs.AddRule(rule5)
@@ -193,7 +193,7 @@ func loadRulesWithDeps(rs model.RuleSession) {
 	//fmt.Printf("Rule added: [%s]\n", rule4.GetName())
 
 	//rule5 := ruleapi.NewRule("timeout-rule")
-	//rule5.AddCondition("packagetimeout", []model.TupleTypeAlias{"packagetimeout"}, truecondition) // check for name "Bob" in n1
+	//rule5.AddCondition("packagetimeout", []model.TupleType{"packagetimeout"}, truecondition) // check for name "Bob" in n1
 	//rule5.SetAction(packageTimeout)
 	//rule5.SetPriority(-1)
 	//rs.AddRule(rule5)
@@ -202,10 +202,10 @@ func loadRulesWithDeps(rs model.RuleSession) {
 
 }
 
-func truecondition(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func truecondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	return true
 }
-func customerAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func customerAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	streamTuple := tuples["customerevent"]
 	if streamTuple == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
@@ -214,7 +214,7 @@ func customerAction(ctx context.Context, rs model.RuleSession, ruleName string, 
 		fmt.Printf("Received a customer event with customer name [%s]\n", name)
 	}
 }
-func debitEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func debitEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	streamTuple := tuples["debitevent"]
 	if streamTuple == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
@@ -226,7 +226,7 @@ func debitEvent(ctx context.Context, rs model.RuleSession, ruleName string, tupl
 	}
 }
 
-func customerdebitjoincondition(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func customerdebitjoincondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 
 	customerTuple := tuples["customerevent"]
 	debitTuple := tuples["debitevent"]
@@ -242,7 +242,7 @@ func customerdebitjoincondition(ruleName string, condName string, tuples map[mod
 
 }
 
-func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	//fmt.Printf("Rule fired: [%s]\n", ruleName)
 	customerTuple := tuples["customerevent"].(model.MutableStreamTuple)
 	debitTuple := tuples["debitevent"]
@@ -255,7 +255,7 @@ func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tup
 	fmt.Printf("Customer [%s], Balance [%f], Debit [%f], NewBalance [%f]\n", customerTuple.GetString("name"), currBal, debitAmt, customerTuple.GetFloat("balance"))
 }
 
-//func checkBalance(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+//func checkBalance(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 //	customerTuple := tuples["customerevent"]
 //	if customerTuple == nil {
 //		fmt.Println("Should not get a nil tuple here! This is an error")
@@ -268,14 +268,14 @@ func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tup
 //}
 //
 //
-//func balanceAlert(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+//func balanceAlert(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 //	//fmt.Printf("Rule fired: [%s]\n", ruleName)
 //	customerTuple := tuples["customerevent"].(model.MutableStreamTuple)
 //	fmt.Printf("**** Account Suspended *** Customer balance is 0 or negative ! [%s], Balance [%f]\n", customerTuple.GetString("name"), customerTuple.GetFloat("balance"))
 //	customerTuple.SetString(ctx,rs,"status", "suspended")
 //}
 //
-//func packageTimeout(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+//func packageTimeout(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 //	packageTimeout := tuples["packagetimeout"]
 //	if packageTimeout == nil {
 //		fmt.Println("Should not get a nil tuple here! This is an error")
@@ -333,7 +333,7 @@ func getAbsPathForResource(resourcepath string) string {
 //
 //	//handle a package event, create a package in the packageAction
 //	rule := ruleapi.NewRule("packageevent")
-//	rule.AddCondition("packageevent", []model.TupleTypeAlias{"packageevent"}, truecondition)
+//	rule.AddCondition("packageevent", []model.TupleType{"packageevent"}, truecondition)
 //	rule.SetAction(packageeventAction)
 //	rule.SetPriority(1)
 //	rs.AddRule(rule)
@@ -341,7 +341,7 @@ func getAbsPathForResource(resourcepath string) string {
 //
 //	//handle a package, print package details in the packageAction
 //	rule1:= ruleapi.NewRule("package")
-//	rule1.AddCondition("packageevent1", []model.TupleTypeAlias{"package"}, packageCondition)
+//	rule1.AddCondition("packageevent1", []model.TupleType{"package"}, packageCondition)
 //	rule1.SetAction(packageAction)
 //	rule1.SetPriority(2)
 //	rs.AddRule(rule1)
@@ -350,7 +350,7 @@ func getAbsPathForResource(resourcepath string) string {
 //	//handle a scan event, see if there is matching package if so, do necessary things such as set off a timer
 //	//for the next destination, etc in the scaneventAction
 //	rule2 := ruleapi.NewRule("scanevent")
-//	rule2.AddCondition("scanevent", []model.TupleTypeAlias{"package", "scanevent"}, scaneventCondition)
+//	rule2.AddCondition("scanevent", []model.TupleType{"package", "scanevent"}, scaneventCondition)
 //	rule2.SetAction(scaneventAction)
 //	rule2.SetPriority(2)
 //	rs.AddRule(rule2)
@@ -358,7 +358,7 @@ func getAbsPathForResource(resourcepath string) string {
 //
 //	//handle a timeout event, triggered by scaneventAction, mark the package as delayed in scantimeoutAction
 //	rule3 := ruleapi.NewRule("scantimeout")
-//	rule3.AddCondition("packageevent", []model.TupleTypeAlias{"package", "scantimeout"}, scantimeoutCondition)
+//	rule3.AddCondition("packageevent", []model.TupleType{"package", "scantimeout"}, scantimeoutCondition)
 //	rule3.SetAction(scantimeoutAction)
 //	rule3.SetPriority(1)
 //	rs.AddRule(rule3)
@@ -366,7 +366,7 @@ func getAbsPathForResource(resourcepath string) string {
 //
 //	//notify when a package is marked as delayed, print as such in the packagedelayedAction
 //	rule4 := ruleapi.NewRule("packagedelayed")
-//	rule4.AddCondition("packageevent", []model.TupleTypeAlias{"package"}, packageDelayedCheck)
+//	rule4.AddCondition("packageevent", []model.TupleType{"package"}, packageDelayedCheck)
 //	rule4.SetAction(packagedelayedAction)
 //	rule4.SetPriority(1)
 //	rs.AddRule(rule4)
@@ -417,14 +417,14 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 	fmt.Printf("Rule added: [%s]\n", rule4.GetName())
 }
 
-func packageeventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func packageeventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 
 	pkgEvent := tuples["packageevent"]
 	pkgid := pkgEvent.GetString("packageid")
 	fmt.Printf("Received a new package asserting package id[%s]\n", pkgid)
 
 	//assert a package
-	pkg := model.NewStreamTuple(model.TupleTypeAlias("package"))
+	pkg := model.NewTuple(model.TupleType("package"))
 	pkg.SetString(ctx, rs, "packageid", pkgEvent.GetString("packageid"))
 	pkg.SetString(ctx, rs, "curr", "start")
 	pkg.SetString(ctx, rs, "next", pkgEvent.GetString("next"))
@@ -434,7 +434,7 @@ func packageeventAction(ctx context.Context, rs model.RuleSession, ruleName stri
 	rs.Assert(ctx, pkg)
 }
 
-func scaneventCondition(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func scaneventCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	scanevent := tuples["scanevent"]
 	pkg := tuples["package"]
 
@@ -446,7 +446,7 @@ func scaneventCondition(ruleName string, condName string, tuples map[model.Tuple
 		scanevent.GetString("curr") == pkg.GetString("next")
 }
 
-func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	scanevent := tuples["scanevent"]
 
 	pkg := tuples["package"].(model.MutableStreamTuple)
@@ -464,7 +464,7 @@ func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string,
 	etaS := scanevent.GetString("eta")
 	eta, _ := strconv.Atoi(etaS)
 
-	scantmout := model.NewStreamTuple(model.TupleTypeAlias("scantimeout"))
+	scantmout := model.NewTuple(model.TupleType("scantimeout"))
 	scantmout.SetString(ctx, rs, "packageid", pkgid)
 	scantmout.SetString(ctx, rs, "next", snext)
 
@@ -482,7 +482,7 @@ func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string,
 
 }
 
-func scantimeoutCondition(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func scantimeoutCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	scantimeout := tuples["scantimeout"]
 	pkg := tuples["package"]
 
@@ -494,7 +494,7 @@ func scantimeoutCondition(ruleName string, condName string, tuples map[model.Tup
 		scantimeout.GetString("next") == pkg.GetString("next")
 }
 
-func scantimeoutAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func scantimeoutAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 
 	pkg := tuples["package"].(model.MutableStreamTuple)
 
@@ -507,13 +507,13 @@ func scantimeoutAction(ctx context.Context, rs model.RuleSession, ruleName strin
 	pkg.SetString(ctx, rs, "status", "delayed")
 }
 
-func packageCondition(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func packageCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	pkg := tuples["package"]
 	isnew := pkg.GetString("isnew")
 	return isnew == "true"
 }
 
-func packageAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func packageAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	pkg := tuples["package"].(model.MutableStreamTuple)
 	pkgid := pkg.GetString("packageid")
 
@@ -523,13 +523,13 @@ func packageAction(ctx context.Context, rs model.RuleSession, ruleName string, t
 	pkg.SetString(ctx, rs, "isnew", "false")
 }
 
-func packageDelayedCheck(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func packageDelayedCheck(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	pkg := tuples["package"]
 	status := pkg.GetString("status")
 	return status == "delayed"
 }
 
-func packagedelayedAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func packagedelayedAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	pkg := tuples["package"].(model.MutableStreamTuple)
 	pkgid := pkg.GetString("packageid")
 

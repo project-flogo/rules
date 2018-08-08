@@ -9,19 +9,19 @@ import (
 
 //Holds a stream tuple reference and related state
 type reteHandle interface {
-	setTuple(streamTuple model.StreamTuple)
-	getTuple() model.StreamTuple
+	setTuple(streamTuple model.Tuple)
+	getTuple() model.Tuple
 	addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable)
 	removeJoinTableRowRefs(changedProps map[string]bool)
 	removeJoinTable(joinTableVar joinTable)
 }
 
 type handleImpl struct {
-	tuple         model.StreamTuple
+	tuple         model.Tuple
 	tablesAndRows map[joinTable]*list.List
 }
 
-func (hdl *handleImpl) setTuple(tuple model.StreamTuple) {
+func (hdl *handleImpl) setTuple(tuple model.Tuple) {
 	hdl.tuple = tuple
 }
 
@@ -29,11 +29,11 @@ func (hdl *handleImpl) initHandleImpl() {
 	hdl.tablesAndRows = make(map[joinTable]*list.List)
 }
 
-func (hdl *handleImpl) getTuple() model.StreamTuple {
+func (hdl *handleImpl) getTuple() model.Tuple {
 	return hdl.tuple
 }
 
-func getOrCreateHandle(ctx context.Context, tuple model.StreamTuple) reteHandle {
+func getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
 	reteCtxVar := getReteCtx(ctx)
 	return reteCtxVar.getNetwork().getOrCreateHandle(tuple)
 }

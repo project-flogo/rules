@@ -4,17 +4,17 @@ package rete
 
 import "github.com/TIBCOSoftware/bego/common/model"
 
-func copyIntoTupleArray(handles []reteHandle) []model.StreamTuple {
-	tuples := make([]model.StreamTuple, len(handles))
+func copyIntoTupleArray(handles []reteHandle) []model.Tuple {
+	tuples := make([]model.Tuple, len(handles))
 	for i := 0; i < len(handles); i++ {
 		tuples[i] = handles[i].getTuple()
 	}
 	return tuples
 }
 
-func copyIntoTupleMap(handles []reteHandle) map[model.TupleTypeAlias]model.StreamTuple {
-	tupleMap := map[model.TupleTypeAlias]model.StreamTuple{}
-	tuples := make([]model.StreamTuple, len(handles))
+func copyIntoTupleMap(handles []reteHandle) map[model.TupleType]model.Tuple {
+	tupleMap := map[model.TupleType]model.Tuple{}
+	tuples := make([]model.Tuple, len(handles))
 	for i := 0; i < len(handles); i++ {
 		tuples[i] = handles[i].getTuple()
 		tupleMap[tuples[i].GetTypeAlias()] = tuples[i] //assuming no self-joins! need to correct this!
@@ -22,8 +22,8 @@ func copyIntoTupleMap(handles []reteHandle) map[model.TupleTypeAlias]model.Strea
 	return tupleMap
 }
 
-func convertToTupleMap(tuples []model.StreamTuple) map[model.TupleTypeAlias]model.StreamTuple {
-	tupleMap := map[model.TupleTypeAlias]model.StreamTuple{}
+func convertToTupleMap(tuples []model.Tuple) map[model.TupleType]model.Tuple {
+	tupleMap := map[model.TupleType]model.Tuple{}
 	for i := 0; i < len(tuples); i++ {
 		tupleMap[tuples[i].GetTypeAlias()] = tuples[i]
 	}

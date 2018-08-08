@@ -9,9 +9,9 @@ import (
 
 func TestIdentifier(t *testing.T) {
 
-	i1 := model.TupleTypeAlias("1")
+	i1 := model.TupleType("1")
 
-	i2 := model.TupleTypeAlias("1")
+	i2 := model.TupleType("1")
 
 	if i1 == i2 {
 		fmt.Printf("yes they are equal!")
@@ -19,7 +19,7 @@ func TestIdentifier(t *testing.T) {
 		fmt.Printf("yes they are NOT equal!")
 	}
 
-	ids := []model.TupleTypeAlias{i1, i2}
+	ids := []model.TupleType{i1, i2}
 
 	node := newNode(ids)
 

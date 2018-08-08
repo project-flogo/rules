@@ -11,7 +11,7 @@ type opsEntry interface {
 }
 
 type opsEntryImpl struct {
-	tuple model.StreamTuple
+	tuple model.Tuple
 	changeProps map[string]bool
 }
 
@@ -26,7 +26,7 @@ type assertEntryImpl struct {
 
 }
 
-func newAssertEntry(tuple model.StreamTuple, changeProps map[string]bool) assertEntry {
+func newAssertEntry(tuple model.Tuple, changeProps map[string]bool) assertEntry {
 	aEntry := assertEntryImpl{}
 	aEntry.tuple = tuple
 	aEntry.changeProps = changeProps
@@ -48,7 +48,7 @@ type modifyEntryImpl struct {
 	opsEntryImpl
 }
 
-func newModifyEntry(tuple model.StreamTuple, changeProps map[string]bool) modifyEntry {
+func newModifyEntry(tuple model.Tuple, changeProps map[string]bool) modifyEntry {
 	mEntry := modifyEntryImpl{}
 	mEntry.tuple = tuple
 	mEntry.changeProps = changeProps
@@ -72,7 +72,7 @@ type deleteEntryImpl struct {
 	opsEntryImpl
 }
 
-func newDeleteEntry(tuple model.StreamTuple) deleteEntry {
+func newDeleteEntry(tuple model.Tuple) deleteEntry {
 	dEntry := deleteEntryImpl{}
 	dEntry.tuple = tuple
 	return &dEntry

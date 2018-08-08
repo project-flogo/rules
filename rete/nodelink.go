@@ -23,10 +23,10 @@ type nodeLinkImpl struct {
 	numIdentifiers int
 
 	parent    node
-	parentIds []model.TupleTypeAlias
+	parentIds []model.TupleType
 
 	child    node
-	childIds []model.TupleTypeAlias
+	childIds []model.TupleType
 
 	isRight bool
 	id      int

@@ -12,26 +12,26 @@ import (
 //node a building block of the rete network
 type node interface {
 	abstractNode
-	getIdentifiers() []model.TupleTypeAlias
+	getIdentifiers() []model.TupleType
 	getID() int
 	addNodeLink(nodeLink)
 	assertObjects(ctx context.Context, handles []reteHandle, isRight bool)
 }
 
 type nodeImpl struct {
-	identifiers []model.TupleTypeAlias
+	identifiers []model.TupleType
 	nodeLinkVar nodeLink
 	id          int
 	rule 		model.Rule
 }
 //NewNode ... returns a new node
-func newNode(nw Network, rule model.Rule, identifiers []model.TupleTypeAlias) node {
+func newNode(nw Network, rule model.Rule, identifiers []model.TupleType) node {
 	n := nodeImpl{}
 	n.initNodeImpl(nw, rule, identifiers)
 	return &n
 }
 
-func (n *nodeImpl) initNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleTypeAlias) {
+func (n *nodeImpl) initNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleType) {
 
 	n.id = nw.incrementAndGetId()
 
@@ -39,7 +39,7 @@ func (n *nodeImpl) initNodeImpl(nw Network, rule model.Rule, identifiers []model
 	n.rule = rule
 }
 
-func (n *nodeImpl) getIdentifiers() []model.TupleTypeAlias {
+func (n *nodeImpl) getIdentifiers() []model.TupleType {
 	return n.identifiers
 }
 

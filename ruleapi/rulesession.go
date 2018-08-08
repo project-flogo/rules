@@ -53,14 +53,14 @@ func (rs *rulesessionImpl) DeleteRule(ruleName string) {
 	rs.reteNetwork.RemoveRule(ruleName)
 }
 
-func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.StreamTuple) {
+func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) {
 	if ctx == nil {
 		ctx = context.Context(context.Background())
 	}
 	rs.reteNetwork.Assert(ctx, rs, tuple, nil)
 }
 
-func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.StreamTuple) {
+func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.Tuple) {
 	rs.reteNetwork.Retract(ctx, tuple, nil)
 }
 
@@ -85,7 +85,7 @@ func (rs *rulesessionImpl) RegisterTupleDescriptors (jsonRegistry string) {
 	rs.reteNetwork.RegisterTupleDescriptors(tds)
 }
 
-func (rs *rulesessionImpl) ValidateUpdate(alias model.TupleTypeAlias, name string, value interface{}) bool {
+func (rs *rulesessionImpl) ValidateUpdate(alias model.TupleType, name string, value interface{}) bool {
 
 	td := rs.reteNetwork.GetTupleDescriptor(alias)
 	//TODO: type not registered, meaning no validation
@@ -103,7 +103,7 @@ func (rs *rulesessionImpl) ValidateUpdate(alias model.TupleTypeAlias, name strin
 }
 
 
-func (rs *rulesessionImpl) DelayedAssert (ctx context.Context, delayInMillis uint64, key interface{}, tuple model.StreamTuple) {
+func (rs *rulesessionImpl) DelayedAssert (ctx context.Context, delayInMillis uint64, key interface{}, tuple model.Tuple) {
 
 	timer := time.AfterFunc(time.Millisecond * time.Duration(delayInMillis), func() {
 		ctxNew := context.TODO()

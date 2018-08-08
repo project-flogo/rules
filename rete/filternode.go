@@ -18,13 +18,13 @@ type filterNodeImpl struct {
 	convert      []int
 }
 
-func newFilterNode(nw Network, rule model.Rule, identifiers []model.TupleTypeAlias, conditionVar model.Condition) filterNode {
+func newFilterNode(nw Network, rule model.Rule, identifiers []model.TupleType, conditionVar model.Condition) filterNode {
 	fn := filterNodeImpl{}
 	fn.initFilterNodeImpl(nw, rule, identifiers, conditionVar)
 	return &fn
 }
 
-func (fn *filterNodeImpl) initFilterNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleTypeAlias, conditionVar model.Condition) {
+func (fn *filterNodeImpl) initFilterNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleType, conditionVar model.Condition) {
 	fn.nodeImpl.initNodeImpl(nw, rule, identifiers)
 	fn.conditionVar = conditionVar
 	fn.setConvert()
@@ -81,12 +81,12 @@ func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []reteHandl
 		fn.nodeLinkVar.propagateObjects(ctx, handles)
 	} else {
 		//TODO: rete listeners...
-		var tuples []model.StreamTuple
-		// tupleMap := map[model.TupleTypeAlias]model.StreamTuple{}
+		var tuples []model.Tuple
+		// tupleMap := map[model.TupleType]model.Tuple{}
 		if fn.convert == nil {
 			tuples = copyIntoTupleArray(handles)
 		} else {
-			tuples = make([]model.StreamTuple, len(fn.convert))
+			tuples = make([]model.Tuple, len(fn.convert))
 			for i := 0; i < len(fn.convert); i++ {
 				tuples[i] = handles[fn.convert[i]].getTuple()
 				// tupleMap[tuples[i].GetTypeAlias()] = tuples[i]

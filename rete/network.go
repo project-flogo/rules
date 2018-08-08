@@ -18,16 +18,16 @@ type Network interface {
 	String() string
 	RemoveRule(string) model.Rule
 	//changedProps are the properties that changed in a previous action
-	Assert(ctx context.Context, rs model.RuleSession, tuple model.StreamTuple, changedProps map[string]bool)
-	Retract(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool)
+	Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool)
+	Retract(ctx context.Context, tuple model.Tuple, changedProps map[string]bool)
 	
-	assertInternal(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool)
-	getOrCreateHandle(tuple model.StreamTuple) reteHandle
-	getHandle(tuple model.StreamTuple) reteHandle
+	assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool)
+	getOrCreateHandle(tuple model.Tuple) reteHandle
+	getHandle(tuple model.Tuple) reteHandle
 
 	incrementAndGetId() int
 	RegisterTupleDescriptors (tds[] model.TupleDescriptor)
-	GetTupleDescriptor (typeAlias model.TupleTypeAlias) *model.TupleDescriptor
+	GetTupleDescriptor (typeAlias model.TupleType) *model.TupleDescriptor
 }
 
 type reteNetworkImpl struct {
@@ -43,14 +43,14 @@ type reteNetworkImpl struct {
 	//Holds the Rule name as key and a pointer to a slice of NodeLinks as value
 	ruleNameClassNodeLinksOfRule map[string]*list.List //*list.List of ClassNodeLink
 
-	allHandles map[model.StreamTuple]reteHandle
+	allHandles map[model.Tuple]reteHandle
 
 	currentId int
 
 	assertLock sync.Mutex
 	crudLock sync.Mutex
 
-	tds map[model.TupleTypeAlias]model.TupleDescriptor
+	tds map[model.TupleType]model.TupleDescriptor
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -65,8 +65,8 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 	nw.allClassNodes = make(map[string]classNode)
 	nw.ruleNameNodesOfRule = make(map[string]*list.List)
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
-	nw.allHandles = make(map[model.StreamTuple]reteHandle)
-	nw.tds = make(map[model.TupleTypeAlias]model.TupleDescriptor)
+	nw.allHandles = make(map[model.Tuple]reteHandle)
+	nw.tds = make(map[model.TupleType]model.TupleDescriptor)
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) int {
@@ -215,8 +215,8 @@ func removeFromList(listVar *list.List, val interface{}) {
 	}
 }
 
-func contains(nodeSet *list.List, identifierVar model.TupleTypeAlias) bool {
-	identifiers := []model.TupleTypeAlias{identifierVar}
+func contains(nodeSet *list.List, identifierVar model.TupleType) bool {
+	identifiers := []model.TupleType{identifierVar}
 	for e := nodeSet.Front(); e != nil; e = e.Next() {
 		node := e.Value.(node)
 		if ContainedByFirst(node.getIdentifiers(), identifiers) {
@@ -377,8 +377,8 @@ func (nw *reteNetworkImpl) createJoinNodeFromSome(rule model.Rule, nodesOfRule *
 	return true
 }
 
-func (nw *reteNetworkImpl) createClassFilterNode(rule model.Rule, nodesOfRule *list.List, classNodeLinksOfRule *list.List, identifierVar model.TupleTypeAlias, conditionVar model.Condition, nodeSet *list.List) filterNode {
-	identifiers := []model.TupleTypeAlias{identifierVar}
+func (nw *reteNetworkImpl) createClassFilterNode(rule model.Rule, nodesOfRule *list.List, classNodeLinksOfRule *list.List, identifierVar model.TupleType, conditionVar model.Condition, nodeSet *list.List) filterNode {
+	identifiers := []model.TupleType{identifierVar}
 	classNodeVar := getClassNode(nw, identifierVar)
 	filterNodeVar := newFilterNode(nw, rule, identifiers, conditionVar)
 	classNodeLink := newClassNodeLink(nw, classNodeVar, filterNodeVar, rule, identifierVar)
@@ -408,7 +408,7 @@ func (nw *reteNetworkImpl) createJoinNode(rule model.Rule, nodesOfRule *list.Lis
 	}
 }
 
-func findBestNode(nodeSet *list.List, matchIdentifiers []model.TupleTypeAlias, notThis node) node {
+func findBestNode(nodeSet *list.List, matchIdentifiers []model.TupleType, notThis node) node {
 	var foundNode node
 	foundNode = nil
 	foundIdr := 0
@@ -444,7 +444,7 @@ func (nw *reteNetworkImpl) findConditionWithLeastIdentifiers(conditionSet *list.
 	return leastIdentifiers
 }
 
-func getClassNode(nw *reteNetworkImpl, name model.TupleTypeAlias) classNode {
+func getClassNode(nw *reteNetworkImpl, name model.TupleType) classNode {
 	classNodeVar := nw.allClassNodes[string(name)]
 	if classNodeVar == nil {
 		classNodeVar = newClassNode(string(name))
@@ -469,7 +469,7 @@ func (nw *reteNetworkImpl) String() string {
 	return str
 }
 
-func pickIdentifier(idrs []model.TupleTypeAlias) model.TupleTypeAlias {
+func pickIdentifier(idrs []model.TupleType) model.TupleType {
 	return idrs[0]
 }
 
@@ -508,7 +508,7 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 	return "\t[ClassNode Class(" + classNodeImpl.getName() + ")" + links + "]\n"
 }
 
-func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.StreamTuple, changedProps map[string]bool) {
+func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool) {
 
 	if !nw.validateTuple(tuple) {
 		//TODO: Panic. For now, simply return
@@ -545,7 +545,7 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	}
 }
 
-func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.StreamTuple) {
+func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
 	reteHandle, found:= nw.allHandles[tuple]
 	if found && reteHandle != nil {
 		delete(nw.allHandles, tuple)
@@ -553,7 +553,7 @@ func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.StreamTuple) {
 	}
 }
 
-func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool) {
+func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, changedProps map[string]bool) {
 
 	if ctx == nil {
 		ctx = context.Background()
@@ -571,7 +571,7 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.StreamTuple,
 
 }
 
-func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool) {
+func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool) {
 	dataSource := tuple.GetTypeAlias()
 	listItem := nw.allClassNodes[string(dataSource)]
 	if listItem != nil {
@@ -580,7 +580,7 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Strea
 	}
 }
 
-func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.StreamTuple) (reteHandle) {
+func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.Tuple) (reteHandle) {
 	h := nw.allHandles[tuple]
 	if h == nil {
 		h1 := handleImpl{}
@@ -592,7 +592,7 @@ func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.StreamTuple) (reteHandl
 	return h
 }
 
-func (nw *reteNetworkImpl) getHandle(tuple model.StreamTuple) (reteHandle) {
+func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) (reteHandle) {
 	h := nw.allHandles[tuple]
 
 	return h
@@ -605,16 +605,16 @@ func (nw *reteNetworkImpl) incrementAndGetId() int {
 
 func (nw *reteNetworkImpl) RegisterTupleDescriptors (tds []model.TupleDescriptor) {
 	for _, key := range tds {
-		nw.tds[model.TupleTypeAlias(key.Name)] = key
+		nw.tds[model.TupleType(key.Name)] = key
 	}
 }
 
-func (nw *reteNetworkImpl)  GetTupleDescriptor (typeAlias model.TupleTypeAlias) *model.TupleDescriptor {
+func (nw *reteNetworkImpl)  GetTupleDescriptor (typeAlias model.TupleType) *model.TupleDescriptor {
 	ts := nw.tds[typeAlias]
 	return &ts
 }
 
-func (nw *reteNetworkImpl) validateTuple (tuple model.StreamTuple) bool {
+func (nw *reteNetworkImpl) validateTuple (tuple model.Tuple) bool {
 
 	td := nw.GetTupleDescriptor(tuple.GetTypeAlias())
 	if (td != nil) {

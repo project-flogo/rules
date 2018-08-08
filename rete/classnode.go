@@ -15,7 +15,7 @@ type classNode interface {
 	addClassNodeLink(classNodeLink)
 	removeClassNodeLink(classNodeLink)
 	getClassNodeLinks() *list.List
-	assert(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool)
+	assert(ctx context.Context, tuple model.Tuple, changedProps map[string]bool)
 }
 
 type classNodeImpl struct {
@@ -75,7 +75,7 @@ func (cn *classNodeImpl) String() string {
 	return ret
 }
 
-func (cn *classNodeImpl) assert(ctx context.Context, tuple model.StreamTuple, changedProps map[string]bool) {
+func (cn *classNodeImpl) assert(ctx context.Context, tuple model.Tuple, changedProps map[string]bool) {
 	handle := getOrCreateHandle(ctx, tuple)
 
 	handles := make([]reteHandle, 1)
@@ -84,7 +84,7 @@ func (cn *classNodeImpl) assert(ctx context.Context, tuple model.StreamTuple, ch
 	for e := cn.getClassNodeLinks().Front(); e != nil; e = e.Next() {
 		classNodeLinkVar := e.Value.(classNodeLink)
 		if changedProps != nil {
-			depProps, found := classNodeLinkVar.getRule().GetDeps()[model.TupleTypeAlias(cn.name)]
+			depProps, found := classNodeLinkVar.getRule().GetDeps()[model.TupleType(cn.name)]
 			if found { // rule depends on this type
 				for changedProp, _ := range changedProps {
 					_, foundProp := depProps[changedProp]

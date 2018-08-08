@@ -8,11 +8,11 @@ import (
 type ruleImpl struct {
 	id          int
 	name        string
-	identifiers []model.TupleTypeAlias
+	identifiers []model.TupleType
 	conditions  []model.Condition
 	actionFn    model.ActionFunction
 	priority    int
-	deps 		map[model.TupleTypeAlias]map[string]bool
+	deps 		map[model.TupleType]map[string]bool
 }
 
 //NewRule ... Create a new rule
@@ -24,7 +24,7 @@ func NewRule(nw Network, name string) model.MutableRule {
 func (rule *ruleImpl) initRuleImpl(nw Network, name string) {
 	rule.id = nw.incrementAndGetId()
 	rule.name = name
-	rule.deps = make (map[model.TupleTypeAlias]map[string]bool)
+	rule.deps = make (map[model.TupleType]map[string]bool)
 }
 
 func (rule *ruleImpl) GetName() string {
@@ -40,11 +40,11 @@ func (rule *ruleImpl) GetConditions() []model.Condition {
 	return rule.conditions
 }
 
-func (rule *ruleImpl) GetIdentifiers() []model.TupleTypeAlias {
+func (rule *ruleImpl) GetIdentifiers() []model.TupleType {
 	return rule.identifiers
 }
 
-func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleTypeAlias, cfn model.ConditionEvaluator) {
+func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType, cfn model.ConditionEvaluator) {
 	//strIds := make([]string, len(idrs))
 	//for i := 0; i < len(idrs); i++ {
 	//	strIds[i] = idrs[i].GetName()
@@ -57,9 +57,9 @@ func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleTypeA
 	}
 }
 
-func (rule *ruleImpl) addIdentifier(identifierName model.TupleTypeAlias) model.TupleTypeAlias {
+func (rule *ruleImpl) addIdentifier(identifierName model.TupleType) model.TupleType {
 
-	//idrNew := model.TupleTypeAlias(identifierName)
+	//idrNew := model.TupleType(identifierName)
 	//TODO: Optimize this, perhaps using a map (need it to be ordered)
 	//search for the idr. if exists, skip, else add it
 
@@ -108,12 +108,12 @@ func (rule *ruleImpl) String() string {
 }
 
 func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []string, cFn model.ConditionEvaluator) {
-	typeDepMap := map[model.TupleTypeAlias]bool{}
+	typeDepMap := map[model.TupleType]bool{}
 
 	for _, idr := range idrs {
 		aliasProp := strings.Split(idr, ".")
 
-		alias := model.TupleTypeAlias(aliasProp[0])
+		alias := model.TupleType(aliasProp[0])
 		typeDepMap[alias] = true
 		prop := aliasProp[1]
 
@@ -124,7 +124,7 @@ func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []st
 		}
 		propMap[prop] = true
 	}
-	typeDeps := []model.TupleTypeAlias{}
+	typeDeps := []model.TupleType{}
 
 	for key, _ := range typeDepMap {
 		typeDeps = append(typeDeps, key)
@@ -135,6 +135,6 @@ func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []st
 
 }
 
-func (rule *ruleImpl) GetDeps() map[model.TupleTypeAlias]map[string]bool {
+func (rule *ruleImpl) GetDeps() map[model.TupleType]map[string]bool {
 	return rule.deps
 }

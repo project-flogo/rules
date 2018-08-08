@@ -5,7 +5,7 @@ import "github.com/TIBCOSoftware/bego/common/model"
 //classNodeLink links the classNode to the rest of the model.Rule's network
 type classNodeLink interface {
 	nodeLink
-	GetIdentifier() model.TupleTypeAlias
+	GetIdentifier() model.TupleType
 	getClassNode() classNode
 	getRule() model.Rule
 }
@@ -13,24 +13,24 @@ type classNodeLink interface {
 type classNodeLinkImpl struct {
 	nodeLinkImpl
 	rule          model.Rule
-	identifierVar model.TupleTypeAlias
+	identifierVar model.TupleType
 	classNodeVar  classNode
 }
 
-func newClassNodeLink(nw Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleTypeAlias) classNodeLink {
+func newClassNodeLink(nw Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleType) classNodeLink {
 	cnl := classNodeLinkImpl{}
 	cnl.initClassNodeLinkImpl(nw, classNodeVar, child, rule, identifierVar)
 	return &cnl
 }
 
-func (cnl *classNodeLinkImpl) initClassNodeLinkImpl(nw Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleTypeAlias) {
+func (cnl *classNodeLinkImpl) initClassNodeLinkImpl(nw Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleType) {
 	initClassNodeLink(nw, &cnl.nodeLinkImpl, child)
 	cnl.classNodeVar = classNodeVar
 	cnl.rule = rule
 	cnl.identifierVar = identifierVar
 }
 
-func (cnl *classNodeLinkImpl) GetIdentifier() model.TupleTypeAlias {
+func (cnl *classNodeLinkImpl) GetIdentifier() model.TupleType {
 	return cnl.identifierVar
 }
 

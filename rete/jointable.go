@@ -14,17 +14,17 @@ type joinTable interface {
 type joinTableImpl struct {
 	id    int
 	table map[joinTableRow]joinTableRow
-	idr   []model.TupleTypeAlias
+	idr   []model.TupleType
 	rule  model.Rule
 }
 
-func newJoinTable(nw Network, rule model.Rule, identifiers []model.TupleTypeAlias) joinTable {
+func newJoinTable(nw Network, rule model.Rule, identifiers []model.TupleType) joinTable {
 	jT := joinTableImpl{}
 	jT.initJoinTableImpl(nw, rule, identifiers)
 	return &jT
 }
 
-func (jt *joinTableImpl) initJoinTableImpl(nw Network, rule model.Rule, identifiers []model.TupleTypeAlias) {
+func (jt *joinTableImpl) initJoinTableImpl(nw Network, rule model.Rule, identifiers []model.TupleType) {
 	jt.id = nw.incrementAndGetId()
 	jt.idr = identifiers
 	jt.table = map[joinTableRow]joinTableRow{}

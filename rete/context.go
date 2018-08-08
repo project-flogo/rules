@@ -14,7 +14,7 @@ type reteCtx interface {
 	getOpsList() *list.List
 	getNetwork() Network
 	getRuleSession() model.RuleSession
-	OnValueChange(tuple model.StreamTuple, prop string)
+	OnValueChange(tuple model.Tuple, prop string)
 }
 
 //store any context, may not know all keys upfront
@@ -27,17 +27,17 @@ type reteCtxImpl struct {
 	//in each action, this map is updated with new ones
 	//key is the added tuple, value is true
 	// (we simply want the unique set of newly added tuples)
-	addMap map[model.StreamTuple]bool
+	addMap map[model.Tuple]bool
 
 	//in each action, this map is updated with modifications
 	//key is the added tuple, value is a map of the changed property to true
 	// (we simply want unique modified tuples and unique props in each that changed)
-	modifyMap map[model.StreamTuple]map[string]bool
+	modifyMap map[model.Tuple]map[string]bool
 
 	//in each action, this map is updated with deletions
 	//key is the deleted tuple value is always true
 	// (we simply want a unique set of deleted tuples)
-	deleteMap map[model.StreamTuple]bool
+	deleteMap map[model.Tuple]bool
 }
 
 func (rctx *reteCtxImpl) getConflictResolver() conflictRes {
@@ -56,7 +56,7 @@ func (rctx *reteCtxImpl) getRuleSession() model.RuleSession {
 	return rctx.rs
 }
 
-func (rctx *reteCtxImpl) OnValueChange(tuple model.StreamTuple, prop string) {
+func (rctx *reteCtxImpl) OnValueChange(tuple model.Tuple, prop string) {
 
 	//if handle does not exist means its new
 	if nil != rctx.network.getHandle(tuple) {
@@ -78,9 +78,9 @@ func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
 	reteCtxVal.opsList = list.New()
 	reteCtxVal.network = network
 	reteCtxVal.rs = rs
-	reteCtxVal.addMap = make (map[model.StreamTuple]bool)
-	reteCtxVal.modifyMap = make(map[model.StreamTuple]map[string]bool)
-	reteCtxVal.deleteMap = make (map[model.StreamTuple]bool)
+	reteCtxVal.addMap = make (map[model.Tuple]bool)
+	reteCtxVal.modifyMap = make(map[model.Tuple]map[string]bool)
+	reteCtxVal.deleteMap = make (map[model.Tuple]bool)
 	return &reteCtxVal
 }
 

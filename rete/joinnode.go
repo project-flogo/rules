@@ -16,8 +16,8 @@ type joinNodeImpl struct {
 	nodeImpl
 	conditionVar model.Condition
 
-	leftIdrs  []model.TupleTypeAlias
-	rightIdrs []model.TupleTypeAlias
+	leftIdrs  []model.TupleType
+	rightIdrs []model.TupleType
 
 	leftIdrLen  int
 	rightIdrLen int
@@ -30,13 +30,13 @@ type joinNodeImpl struct {
 	rightTable joinTable
 }
 
-func newJoinNode(nw Network, rule model.Rule, leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) joinNode {
+func newJoinNode(nw Network, rule model.Rule, leftIdrs []model.TupleType, rightIdrs []model.TupleType, conditionVar model.Condition) joinNode {
 	jn := joinNodeImpl{}
 	jn.initjoinNodeImplVar(nw, rule, leftIdrs, rightIdrs, conditionVar)
 	return &jn
 }
 
-func (jn *joinNodeImpl) initjoinNodeImplVar(nw Network, rule model.Rule, leftIdrs []model.TupleTypeAlias, rightIdrs []model.TupleTypeAlias, conditionVar model.Condition) {
+func (jn *joinNodeImpl) initjoinNodeImplVar(nw Network, rule model.Rule, leftIdrs []model.TupleType, rightIdrs []model.TupleType, conditionVar model.Condition) {
 	jn.initNodeImpl(nw, rule,nil)
 	jn.leftIdrs = leftIdrs
 	jn.rightIdrs = rightIdrs
@@ -46,11 +46,11 @@ func (jn *joinNodeImpl) initjoinNodeImplVar(nw Network, rule model.Rule, leftIdr
 	jn.setJoinIdentifiers()
 }
 
-func (jn *joinNodeImpl) GetLeftIdentifiers() []model.TupleTypeAlias {
+func (jn *joinNodeImpl) GetLeftIdentifiers() []model.TupleType {
 	return jn.leftIdrs
 }
 
-func (jn *joinNodeImpl) GetRightIdentifiers() []model.TupleTypeAlias {
+func (jn *joinNodeImpl) GetRightIdentifiers() []model.TupleType {
 	return jn.rightIdrs
 }
 
@@ -59,7 +59,7 @@ func (jn *joinNodeImpl) setJoinIdentifiers() {
 	jn.rightIdrLen = len(jn.rightIdrs)
 	jn.totalIdrLen = jn.leftIdrLen + jn.rightIdrLen
 
-	jn.identifiers = make([]model.TupleTypeAlias, jn.totalIdrLen)
+	jn.identifiers = make([]model.TupleType, jn.totalIdrLen)
 
 	jn.joinIndexForLeft = make([]int, jn.leftIdrLen)
 	jn.joinIndexForRight = make([]int, jn.rightIdrLen)
@@ -143,10 +143,10 @@ func (jn *joinNodeImpl) String() string {
 		joinConditionIdrsStr = model.IdentifiersToString(jn.conditionVar.GetIdentifiers())
 	}
 	return "\t[JoinNode(" + jn.nodeImpl.String() + ") link(" + linkTo + ")\n" +
-		"\t\tLeft model.TupleTypeAlias      = " + model.IdentifiersToString(jn.leftIdrs) + ";\n" +
-		"\t\tRight model.TupleTypeAlias     = " + model.IdentifiersToString(jn.rightIdrs) + ";\n" +
-		"\t\tOut model.TupleTypeAlias       = " + model.IdentifiersToString(jn.identifiers) + ";\n" +
-		"\t\tCondition model.TupleTypeAlias = " + joinConditionIdrsStr + ";\n" +
+		"\t\tLeft model.TupleType      = " + model.IdentifiersToString(jn.leftIdrs) + ";\n" +
+		"\t\tRight model.TupleType     = " + model.IdentifiersToString(jn.rightIdrs) + ";\n" +
+		"\t\tOut model.TupleType       = " + model.IdentifiersToString(jn.identifiers) + ";\n" +
+		"\t\tCondition model.TupleType = " + joinConditionIdrsStr + ";\n" +
 		"\t\tJoin Left Index      = " + joinIdsForLeftStr + ";\n" +
 		"\t\tJoin Right Index     = " + joinIdsForRightStr + ";\n" +
 		"\t\tCondition            = " + joinConditionStr + "]\n"

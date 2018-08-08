@@ -15,8 +15,8 @@ func TestIdentifierUtils(t *testing.T) {
 
 }
 func first(t *testing.T) {
-	first := []model.TupleTypeAlias{model.TupleTypeAlias("1"), model.TupleTypeAlias("2")}
-	second := []model.TupleTypeAlias{model.TupleTypeAlias("1"), model.TupleTypeAlias("2")}
+	first := []model.TupleType{model.TupleType("1"), model.TupleType("2")}
+	second := []model.TupleType{model.TupleType("1"), model.TupleType("2")}
 	if len(UnionIdentifiers(first, second)) != 2 {
 		t.Error("Failed")
 	}
@@ -30,17 +30,17 @@ func first(t *testing.T) {
 		t.Error("Failed")
 	}
 
-	if GetIndex(first, model.TupleTypeAlias("1")) != 0 {
+	if GetIndex(first, model.TupleType("1")) != 0 {
 		t.Error("Failed")
 	}
-	if GetIndex(first, model.TupleTypeAlias("2")) != 1 {
+	if GetIndex(first, model.TupleType("2")) != 1 {
 		t.Error("Failed")
 	}
 }
 
 func second(t *testing.T) {
-	first := []model.TupleTypeAlias{model.TupleTypeAlias("1")}
-	second := []model.TupleTypeAlias{model.TupleTypeAlias("1"), model.TupleTypeAlias("2")}
+	first := []model.TupleType{model.TupleType("1")}
+	second := []model.TupleType{model.TupleType("1"), model.TupleType("2")}
 	if len(UnionIdentifiers(first, second)) != 2 {
 		t.Error("Failed")
 	}
@@ -56,8 +56,8 @@ func second(t *testing.T) {
 }
 
 func third(t *testing.T) {
-	first := []model.TupleTypeAlias{model.TupleTypeAlias("1"), model.TupleTypeAlias("2")}
-	second := []model.TupleTypeAlias{model.TupleTypeAlias("1")}
+	first := []model.TupleType{model.TupleType("1"), model.TupleType("2")}
+	second := []model.TupleType{model.TupleType("1")}
 	if len(UnionIdentifiers(first, second)) != 2 {
 		t.Error("Failed")
 	}
@@ -73,10 +73,10 @@ func third(t *testing.T) {
 }
 
 func fourth(t *testing.T) {
-	first := []model.TupleTypeAlias{model.TupleTypeAlias("1"), model.TupleTypeAlias("2")}
-	second := []model.TupleTypeAlias{model.TupleTypeAlias("1"), model.TupleTypeAlias("2")}
-	third := []model.TupleTypeAlias{model.TupleTypeAlias("1"), model.TupleTypeAlias("2"),
-		model.TupleTypeAlias("3")}
+	first := []model.TupleType{model.TupleType("1"), model.TupleType("2")}
+	second := []model.TupleType{model.TupleType("1"), model.TupleType("2")}
+	third := []model.TupleType{model.TupleType("1"), model.TupleType("2"),
+		model.TupleType("3")}
 
 	if OtherTwoAreContainedByFirst(first, second, third) {
 		t.Error("Failed")

@@ -16,14 +16,14 @@ func TestTwo(t *testing.T) {
 	//Create Rule, define conditiond and set action callback
 	rule := ruleapi.NewRule("Name is Bob")
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
-	rule.AddCondition("c1", []model.TupleTypeAlias{"n1"}, checkForBob) // check for name "Bob" in n1
+	rule.AddCondition("c1", []model.TupleType{"n1"}, checkForBob) // check for name "Bob" in n1
 	rule.SetAction(bobRuleFired)
 	rule.SetPriority(1)
 
 	//Create Rule, define conditiond and set action callback
 	rule2 := ruleapi.NewRule("Bobs age is 35")
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
-	rule2.AddCondition("c1", []model.TupleTypeAlias{"n1"}, checkForBobAge) // check for name "Bob" in n1
+	rule2.AddCondition("c1", []model.TupleType{"n1"}, checkForBobAge) // check for name "Bob" in n1
 	rule2.SetAction(bobAgeRuleFired)
 	rule2.SetPriority(2)
 
@@ -37,7 +37,7 @@ func TestTwo(t *testing.T) {
 
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
-	streamTuple1 := model.NewStreamTuple("n1")
+	streamTuple1 := model.NewTuple("n1")
 	streamTuple1.SetString(nil, ruleSession, "name", "Bob")
 	streamTuple1.SetInt(nil, ruleSession,"age", 35)
 
@@ -51,7 +51,7 @@ func TestTwo(t *testing.T) {
 
 }
 
-func checkForBobAge(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
+func checkForBobAge(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	//This conditions filters on name="Bob"
 	streamTuple := tuples["n1"]
 	if streamTuple == nil {
@@ -62,7 +62,7 @@ func checkForBobAge(ruleName string, condName string, tuples map[model.TupleType
 	return age == 35
 }
 
-func bobAgeRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
+func bobAgeRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("Rule [%s] fired\n", ruleName)
 	streamTuple1 := tuples["n1"]
 	if streamTuple1 == nil {
