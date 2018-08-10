@@ -78,9 +78,9 @@ func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
 	reteCtxVal.opsList = list.New()
 	reteCtxVal.network = network
 	reteCtxVal.rs = rs
-	reteCtxVal.addMap = make (map[model.Tuple]bool)
+	reteCtxVal.addMap = make(map[model.Tuple]bool)
 	reteCtxVal.modifyMap = make(map[model.Tuple]map[string]bool)
-	reteCtxVal.deleteMap = make (map[model.Tuple]bool)
+	reteCtxVal.deleteMap = make(map[model.Tuple]bool)
 	return &reteCtxVal
 }
 

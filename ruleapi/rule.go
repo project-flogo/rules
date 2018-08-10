@@ -11,7 +11,7 @@ type ruleImpl struct {
 	conditions  []model.Condition
 	actionFn    model.ActionFunction
 	priority    int
-	deps 		map[model.TupleType]map[string]bool
+	deps        map[model.TupleType]map[string]bool
 }
 
 //NewRule ... Create a new rule
@@ -23,9 +23,9 @@ func NewRule(name string) model.MutableRule {
 
 func (rule *ruleImpl) initRuleImpl(name string) {
 	rule.name = name
-	rule.identifiers =  []model.TupleType{}
+	rule.identifiers = []model.TupleType{}
 	rule.conditions = []model.Condition{}
-	rule.deps = make (map[model.TupleType]map[string]bool)
+	rule.deps = make(map[model.TupleType]map[string]bool)
 }
 
 func (rule *ruleImpl) GetName() string {
@@ -53,7 +53,7 @@ func (rule *ruleImpl) addCond(conditionName string, idrs []model.TupleType, cfn 
 	rule.conditions = append(rule.conditions, condition)
 
 	for _, cidr := range idrs {
-		if len (rule.identifiers) == 0 {
+		if len(rule.identifiers) == 0 {
 			rule.identifiers = append(rule.identifiers, cidr)
 		} else {
 			for _, ridr := range rule.identifiers {
@@ -74,12 +74,6 @@ func (rule *ruleImpl) GetPriority() int {
 func (rule *ruleImpl) SetPriority(priority int) {
 	rule.priority = priority
 }
-
-//func (rule *ruleImpl) String() string {
-//	str := ""
-//	str += "[Rule: (" + rule.name + "\n"
-//	return str
-//}
 
 func (rule *ruleImpl) String() string {
 	str := ""
@@ -116,7 +110,6 @@ func (rule *ruleImpl) SetAction(actionFn model.ActionFunction) {
 //	return str
 //}
 
-
 func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []string, cFn model.ConditionEvaluator) {
 	typeDepMap := map[model.TupleType]bool{}
 	//cwd := model.ConditionAndDep{"n1", []string{"p1", "p2", "p3"}}
@@ -127,7 +120,7 @@ func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []st
 		typeDepMap[alias] = true
 		prop := aliasProp[1]
 
-		propMap, found := rule.deps [alias]
+		propMap, found := rule.deps[alias]
 		if !found {
 			propMap = map[string]bool{}
 			rule.deps[alias] = propMap
@@ -141,7 +134,6 @@ func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []st
 	}
 
 	rule.addCond(conditionName, typeDeps, cFn, true)
-
 
 }
 

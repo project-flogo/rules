@@ -20,14 +20,12 @@ type Network interface {
 	//changedProps are the properties that changed in a previous action
 	Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool)
 	Retract(ctx context.Context, tuple model.Tuple, changedProps map[string]bool)
-	
+
 	assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool)
 	getOrCreateHandle(tuple model.Tuple) reteHandle
 	getHandle(tuple model.Tuple) reteHandle
 
 	incrementAndGetId() int
-	RegisterTupleDescriptors (tds[] model.TupleDescriptor)
-	GetTupleDescriptor (typeAlias model.TupleType) *model.TupleDescriptor
 }
 
 type reteNetworkImpl struct {
@@ -48,9 +46,7 @@ type reteNetworkImpl struct {
 	currentId int
 
 	assertLock sync.Mutex
-	crudLock sync.Mutex
-
-	tds map[model.TupleType]model.TupleDescriptor
+	crudLock   sync.Mutex
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -66,7 +62,6 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 	nw.ruleNameNodesOfRule = make(map[string]*list.List)
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
 	nw.allHandles = make(map[model.Tuple]reteHandle)
-	nw.tds = make(map[model.TupleType]model.TupleDescriptor)
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) int {
@@ -510,12 +505,6 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 
 func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool) {
 
-	if !nw.validateTuple(tuple) {
-		//TODO: Panic. For now, simply return
-		fmt.Printf("Tuple not compatible with its type\n")
-		return
-	}
-
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -533,7 +522,7 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	reteCtxVar.getConflictResolver().resolveConflict(newCtx)
 
 	//if Timeout is 0, remove it from rete
-	td := nw.GetTupleDescriptor(tuple.GetTypeAlias())
+	td := model.GetTupleDescriptor(tuple.GetTypeAlias())
 	if td != nil {
 		if td.TTLInSeconds == 0 { //remove immediately.
 			nw.removeTupleFromRete(tuple)
@@ -546,7 +535,7 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 }
 
 func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
-	reteHandle, found:= nw.allHandles[tuple]
+	reteHandle, found := nw.allHandles[tuple]
 	if found && reteHandle != nil {
 		delete(nw.allHandles, tuple)
 		reteHandle.removeJoinTableRowRefs(nil)
@@ -558,7 +547,7 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, chang
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	_, isRecursive, _:= getOrSetReteCtx(ctx, nw, nil)
+	_, isRecursive, _ := getOrSetReteCtx(ctx, nw, nil)
 
 	if !isRecursive {
 		nw.crudLock.Lock()
@@ -580,7 +569,7 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 	}
 }
 
-func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.Tuple) (reteHandle) {
+func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.Tuple) reteHandle {
 	h := nw.allHandles[tuple]
 	if h == nil {
 		h1 := handleImpl{}
@@ -592,7 +581,7 @@ func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.Tuple) (reteHandle) {
 	return h
 }
 
-func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) (reteHandle) {
+func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) reteHandle {
 	h := nw.allHandles[tuple]
 
 	return h
@@ -601,35 +590,4 @@ func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) (reteHandle) {
 func (nw *reteNetworkImpl) incrementAndGetId() int {
 	nw.currentId++
 	return nw.currentId
-}
-
-func (nw *reteNetworkImpl) RegisterTupleDescriptors (tds []model.TupleDescriptor) {
-	for _, key := range tds {
-		nw.tds[model.TupleType(key.Name)] = key
-	}
-}
-
-func (nw *reteNetworkImpl)  GetTupleDescriptor (typeAlias model.TupleType) *model.TupleDescriptor {
-	ts := nw.tds[typeAlias]
-	return &ts
-}
-
-func (nw *reteNetworkImpl) validateTuple (tuple model.Tuple) bool {
-
-	td := nw.GetTupleDescriptor(tuple.GetTypeAlias())
-	if (td != nil) {
-
-		for _, key := range tuple.GetProperties() {
-			//tde := model.TuplePropertyDescriptor{}
-			_, ok := td.GetProperty(key)
-			if  !ok {
-				return false
-			}
-			//TODO: data type validation
-		}
-
-		return true
-	}
-	//TODO: if a descriptor isnt found, thats ok, no validation
-	return true
 }

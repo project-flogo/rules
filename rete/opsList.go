@@ -11,7 +11,7 @@ type opsEntry interface {
 }
 
 type opsEntryImpl struct {
-	tuple model.Tuple
+	tuple       model.Tuple
 	changeProps map[string]bool
 }
 
@@ -23,7 +23,6 @@ type assertEntry interface {
 
 type assertEntryImpl struct {
 	opsEntryImpl
-
 }
 
 func newAssertEntry(tuple model.Tuple, changeProps map[string]bool) assertEntry {

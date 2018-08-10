@@ -22,8 +22,9 @@ type nodeImpl struct {
 	identifiers []model.TupleType
 	nodeLinkVar nodeLink
 	id          int
-	rule 		model.Rule
+	rule        model.Rule
 }
+
 //NewNode ... returns a new node
 func newNode(nw Network, rule model.Rule, identifiers []model.TupleType) node {
 	n := nodeImpl{}

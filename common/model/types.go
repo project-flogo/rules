@@ -2,25 +2,15 @@ package model
 
 import (
 	"context"
-	"time"
 )
 
-type RuleSession interface {
-	AddRule(rule Rule) (int, bool)
-	DeleteRule(ruleName string)
+//TupleType Each tuple is of a certain type, described by TypeDescriptor
+type TupleType string
 
-	Assert(ctx context.Context, tuple Tuple)
-	Retract(ctx context.Context, tuple Tuple)
-	Unregister() //remove itself from the package map
-	GetName() string
-	RegisterTupleDescriptors (jsonRegistry string) //a json describing types
-	//NewTuple(tupleType TupleType) MutableTuple
-	ValidateUpdate(alias TupleType, name string, value interface{}) bool
-
-	DelayedAssert(ctx context.Context, delayInMillis uint64, key interface{}, tuple Tuple)
-	CancelDelayedAssert (ctx context.Context, key interface{})
+type TupleKey interface {
+	String() string
+	GetTupleDescriptor() TupleDescriptor
 }
-
 //Rule ... a Rule interface
 type Rule interface {
 	GetName() string
@@ -49,27 +39,19 @@ type Condition interface {
 	String() string
 }
 
-//TupleType Each tuple is of a certain type, described by TypeDescriptor
-type TupleType string
+type RuleSession interface {
+	GetName() string
 
-//Tuple is a runtime representation of a data tuple
-type Tuple interface {
-	GetTypeAlias() TupleType
-	GetString(name string) string
-	GetInt(name string) int
-	GetFloat(name string) float64
-	GetDateTime(name string) time.Time
-	GetProperties() []string
-}
+	AddRule(rule Rule) (int, bool)
+	DeleteRule(ruleName string)
 
+	Assert(ctx context.Context, tuple Tuple)
+	Retract(ctx context.Context, tuple Tuple)
 
-//MutableTuple mutable part of the tuple
-type MutableTuple interface {
-	Tuple
-	SetString(ctx context.Context, rs RuleSession, name string, value string)
-	SetInt(ctx context.Context, rs RuleSession, name string, value int)
-	SetFloat(ctx context.Context, rs RuleSession, name string, value float64)
-	SetDatetime(ctx context.Context, rs RuleSession, name string, value time.Time)
+	ScheduleAssert(ctx context.Context, delayInMillis uint64, key interface{}, tuple Tuple)
+	CancelScheduledAssert(ctx context.Context, key interface{})
+
+	Unregister()
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side
@@ -80,6 +62,6 @@ type ConditionEvaluator func(string, string, map[TupleType]Tuple) bool
 //i.e part of the server side API
 type ActionFunction func(context.Context, RuleSession, string, map[TupleType]Tuple)
 
-type ValueChangeHandler interface {
+type ValueChangeListener interface {
 	OnValueChange(tuple Tuple, prop string)
 }

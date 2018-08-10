@@ -37,7 +37,7 @@ func newJoinNode(nw Network, rule model.Rule, leftIdrs []model.TupleType, rightI
 }
 
 func (jn *joinNodeImpl) initjoinNodeImplVar(nw Network, rule model.Rule, leftIdrs []model.TupleType, rightIdrs []model.TupleType, conditionVar model.Condition) {
-	jn.initNodeImpl(nw, rule,nil)
+	jn.initNodeImpl(nw, rule, nil)
 	jn.leftIdrs = leftIdrs
 	jn.rightIdrs = rightIdrs
 	jn.conditionVar = conditionVar

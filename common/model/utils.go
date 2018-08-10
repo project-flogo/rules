@@ -7,5 +7,4 @@ func IdentifiersToString(identifiers []TupleType) string {
 		str += string(idr) + ", "
 	}
 	return str
-
 }

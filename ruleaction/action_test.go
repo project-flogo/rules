@@ -1,119 +1,115 @@
 package ruleaction
 
 import (
-	"testing"
+	"fmt"
 	"github.com/TIBCOSoftware/bego/common/model"
 	"strconv"
-	"fmt"
+	"testing"
 	"time"
 )
 
-
-func TestAction (t *testing.T) {
+func TestAction(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
-	for i := 1; i < 2  ; i++ {
+	for i := 1; i < 2; i++ {
 		debit := model.NewTuple(model.TupleType("debitevent"))
-		debit.SetString(nil, rs,"name", "Bob")
+		debit.SetString(nil, "name", "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
-		debit.SetString(nil, rs,"debit", fs)
+		debit.SetString(nil, "debit", fs)
 		rs.Assert(nil, debit)
 	}
 
 	st1 := model.NewTuple(model.TupleType("customerevent"))
-	st1.SetString (nil, rs,"name", "Bob")
-	st1.SetString (nil, rs,"status", "active")
-	st1.SetFloat (nil, rs,"balance", 1000)
+	st1.SetString(nil, "name", "Bob")
+	st1.SetString(nil, "status", "active")
+	st1.SetFloat(nil, "balance", 1000)
 	rs.Assert(nil, st1)
 }
 
-func TestActionTwo (t *testing.T) {
+func TestActionTwo(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
 	st1 := model.NewTuple(model.TupleType("customerevent"))
-	st1.SetString(nil, rs, "name", "Bob")
-	st1.SetString(nil, rs, "status", "active")
-	st1.SetFloat(nil, rs, "balance", 1000)
+	st1.SetString(nil, "name", "Bob")
+	st1.SetString(nil, "status", "active")
+	st1.SetFloat(nil, "balance", 1000)
 	rs.Assert(nil, st1)
 
 	for i := 1; i < 2; i++ {
 		debit := model.NewTuple(model.TupleType("debitevent"))
-		debit.SetString(nil, rs, "name", "Bob")
+		debit.SetString(nil, "name", "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
-		debit.SetString(nil, rs, "debit", fs)
+		debit.SetString(nil, "debit", fs)
 		rs.Assert(nil, debit)
 	}
 
 }
 
-func TestActionTwoWithDep (t *testing.T) {
+func TestActionTwoWithDep(t *testing.T) {
 	rs := createRuleSessionAndRulesWD()
 
 	st1 := model.NewTuple(model.TupleType("customerevent"))
-	st1.SetString(nil, rs, "name", "Bob")
-	st1.SetString(nil, rs, "status", "active")
-	st1.SetFloat(nil, rs, "balance", 1000)
+	st1.SetString(nil, "name", "Bob")
+	st1.SetString(nil, "status", "active")
+	st1.SetFloat(nil, "balance", 1000)
 	rs.Assert(nil, st1)
 
 	for i := 1; i < 3; i++ {
 		debit := model.NewTuple(model.TupleType("debitevent"))
-		debit.SetString(nil, rs, "name", "Bob")
+		debit.SetString(nil, "name", "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
-		debit.SetString(nil, rs, "debit", fs)
+		debit.SetString(nil, "debit", fs)
 		rs.Assert(nil, debit)
 	}
 
 }
 
-func TestTupleTTL (t *testing.T) {
+func TestTupleTTL(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
 	st1 := model.NewTuple(model.TupleType("customerevent"))
-	st1.SetString(nil, rs, "name", "Bob")
-	st1.SetString(nil, rs, "status", "active")
-	st1.SetFloat(nil, rs, "balance", 1000)
+	st1.SetString(nil, "name", "Bob")
+	st1.SetString(nil, "status", "active")
+	st1.SetFloat(nil, "balance", 1000)
 	rs.Assert(nil, st1)
 
 	time.Sleep(time.Second * 6)
 
 	for i := 1; i < 3; i++ {
 		debit := model.NewTuple(model.TupleType("debitevent"))
-		debit.SetString(nil, rs, "name", "Bob")
+		debit.SetString(nil, "name", "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
-		debit.SetString(nil, rs, "debit", fs)
+		debit.SetString(nil, "debit", fs)
 		rs.Assert(nil, debit)
 	}
 
 }
 
-
-
-func TestActionTimeout (t *testing.T) {
+func TestActionTimeout(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
 	pt := model.NewTuple(model.TupleType("packagetimeout"))
-	pt.SetString(nil, rs, "packageid", "pkg1")
-	rs.DelayedAssert(nil, 5000,"myid", pt)
+	pt.SetString(nil, "packageid", "pkg1")
+	rs.ScheduleAssert(nil, 5000, "myid", pt)
 
 	time.Sleep(time.Minute)
 
 }
 
-func TestActionTimeoutCancel (t *testing.T) {
+func TestActionTimeoutCancel(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
 	pt := model.NewTuple(model.TupleType("packagetimeout"))
-	pt.SetString(nil, rs, "packageid", "pkg1")
-	rs.DelayedAssert(nil, 1000,"myid", pt)
+	pt.SetString(nil, "packageid", "pkg1")
+	rs.ScheduleAssert(nil, 1000, "myid", pt)
 
-	rs.CancelDelayedAssert(nil, "myid")
+	rs.CancelScheduledAssert(nil, "myid")
 
 	time.Sleep(time.Minute)
 
 }
 
-
-func TestActionBasicTimer (t *testing.T) {
+func TestActionBasicTimer(t *testing.T) {
 
 	e := &EventTimer{151}
 
@@ -131,14 +127,12 @@ type EventTimer struct {
 }
 
 func (e *EventTimer) performOps() {
-	fmt.Printf ("The task is to print myself [%d]\n", e.x)
+	fmt.Printf("The task is to print myself [%d]\n", e.x)
 }
 
-func scheduleTask (period int, t Task) *time.Timer {
-
-	tmr := time.AfterFunc(time.Second * time.Duration(period), func() {
+func scheduleTask(period int, t Task) *time.Timer {
+	tmr := time.AfterFunc(time.Second*time.Duration(period), func() {
 		t.performOps()
 	})
-
 	return tmr
 }

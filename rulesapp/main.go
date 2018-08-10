@@ -6,9 +6,9 @@ import (
 
 	"github.com/TIBCOSoftware/bego/common/model"
 	"github.com/TIBCOSoftware/bego/ruleapi"
-	"os"
 	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -24,7 +24,7 @@ func main() {
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//Create a RuleSession and register the type descriptors.
 	rs := ruleapi.GetOrCreateRuleSession("asession")
-	rs.RegisterTupleDescriptors(tupleDescriptor)
+	model.RegisterTupleDescriptors(tupleDescriptor)
 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")
@@ -42,26 +42,22 @@ func main() {
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
-
-
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Tom")
 	t1 := model.NewTuple("n1")
-	t1.SetString(nil, rs,"name", "Tom")
+	t1.SetString(nil, "name", "Tom")
 	rs.Assert(nil, t1)
 
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	t2 := model.NewTuple("n1")
-	t2.SetString(nil, rs,"name", "Bob")
+	t2.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t2)
-
 
 	fmt.Println("Asserting n2 tuple with name=Bob")
 	t3 := model.NewTuple("n2")
-	t3.SetString(nil, rs,"name", "Bob")
+	t3.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t3)
-
 
 	//Retract them
 	rs.Retract(nil, t1)
@@ -96,7 +92,6 @@ func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName strin
 	}
 }
 
-
 func checkSameNamesCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]
@@ -121,8 +116,7 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
 }
 
-
-func getAbsPathForResource (resourcepath string) string {
+func getAbsPathForResource(resourcepath string) string {
 	GOPATH := os.Getenv("GOPATH")
 	regex, err := regexp.Compile(":|;")
 	if err != nil {
@@ -133,7 +127,7 @@ func getAbsPathForResource (resourcepath string) string {
 		//windows
 		resourcepath = strings.Replace(resourcepath, "/", string(os.PathSeparator), -1)
 	}
-	for _, path:= range paths {
+	for _, path := range paths {
 		absPath := path + string(os.PathSeparator) + resourcepath
 		_, err := os.Stat(absPath)
 		if err == nil {
@@ -143,7 +137,7 @@ func getAbsPathForResource (resourcepath string) string {
 	return ""
 }
 
-func fileToString(fileName string)string {
+func fileToString(fileName string) string {
 	dat, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		log.Fatal(err)

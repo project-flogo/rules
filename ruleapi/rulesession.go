@@ -1,27 +1,23 @@
 package ruleapi
 
 import (
-	"github.com/TIBCOSoftware/bego/rete"
-	"github.com/TIBCOSoftware/bego/common/model"
 	"fmt"
+	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/TIBCOSoftware/bego/rete"
 )
-
-
 
 import (
 	"context"
 	"sync"
-	"encoding/json"
 	"time"
 )
+
 var (
 	sessionMap sync.Map
 )
-func init() {
 
-}
 type rulesessionImpl struct {
-	name string
+	name        string
 	reteNetwork rete.Network
 
 	timers map[interface{}]*time.Timer
@@ -31,14 +27,14 @@ func GetOrCreateRuleSession(name string) model.RuleSession {
 
 	rs := rulesessionImpl{}
 	rs.initRuleSession(name)
-	rs1, _ :=  sessionMap.LoadOrStore(name, &rs)
+	rs1, _ := sessionMap.LoadOrStore(name, &rs)
 	return rs1.(*rulesessionImpl)
 }
 
 func (rs *rulesessionImpl) initRuleSession(name string) {
 	rs.reteNetwork = rete.NewReteNetwork()
 	rs.name = name
-	rs.timers = make (map[interface{}]*time.Timer)
+	rs.timers = make(map[interface{}]*time.Timer)
 }
 
 func (rs *rulesessionImpl) AddRule(rule model.Rule) (int, bool) {
@@ -76,36 +72,9 @@ func (rs *rulesessionImpl) Unregister() {
 	sessionMap.Delete(rs.name)
 }
 
-func (rs *rulesessionImpl) RegisterTupleDescriptors (jsonRegistry string) {
+func (rs *rulesessionImpl) ScheduleAssert(ctx context.Context, delayInMillis uint64, key interface{}, tuple model.Tuple) {
 
-	tds := []model.TupleDescriptor{}
-
-	json.Unmarshal([]byte(jsonRegistry),&tds)
-
-	rs.reteNetwork.RegisterTupleDescriptors(tds)
-}
-
-func (rs *rulesessionImpl) ValidateUpdate(alias model.TupleType, name string, value interface{}) bool {
-
-	td := rs.reteNetwork.GetTupleDescriptor(alias)
-	//TODO: type not registered, meaning no validation
-	if  td == nil {
-		return true
-	}
-
-	//TODO: Check property's type and value's type compatibility
-	_, _ok := td.GetProperty(name)
-	if !_ok {
-		return false
-	}
-
-	return true
-}
-
-
-func (rs *rulesessionImpl) DelayedAssert (ctx context.Context, delayInMillis uint64, key interface{}, tuple model.Tuple) {
-
-	timer := time.AfterFunc(time.Millisecond * time.Duration(delayInMillis), func() {
+	timer := time.AfterFunc(time.Millisecond*time.Duration(delayInMillis), func() {
 		ctxNew := context.TODO()
 		delete(rs.timers, key)
 		rs.Assert(ctxNew, tuple)
@@ -114,7 +83,7 @@ func (rs *rulesessionImpl) DelayedAssert (ctx context.Context, delayInMillis uin
 	rs.timers[key] = timer
 }
 
-func (rs *rulesessionImpl) CancelDelayedAssert (ctx context.Context, key interface{}) {
+func (rs *rulesessionImpl) CancelScheduledAssert(ctx context.Context, key interface{}) {
 	timer, ok := rs.timers[key]
 	if ok {
 		fmt.Printf("Cancelling timer attached to key [%v]\n", key)

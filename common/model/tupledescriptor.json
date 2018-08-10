@@ -5,19 +5,23 @@
     "Props": {
       "name": {
         "Name": "name",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : 0
       },
       "status": {
         "Name": "status",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       },
       "balance": {
         "Name": "balance",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       },
       "addr": {
         "Name": "addr",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       }
     }
   },
@@ -31,7 +35,8 @@
       },
       "debit": {
         "Name": "debit",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       }
     }
   },
@@ -45,15 +50,18 @@
       },
       "next": {
         "Name": "next",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       },
       "status": {
         "Name": "status",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       },
       "isnew": {
         "Name": "isnew",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       }
     }
   },
@@ -67,19 +75,23 @@
       },
       "curr": {
         "Name": "curr",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       },
       "next": {
         "Name": "next",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       },
       "status": {
         "Name": "status",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       },
       "isnew": {
         "Name": "isnew",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       }
     }
   },
@@ -93,15 +105,18 @@
       },
       "curr": {
         "Name": "curr",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       },
       "next": {
         "Name": "next",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       },
       "eta": {
         "Name": "eta",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       }
     }
   },
@@ -115,7 +130,8 @@
       },
       "next": {
         "Name": "next",
-        "PropType": "string"
+        "PropType": "string",
+        "KeyIndex" : -1
       }
     }
   }

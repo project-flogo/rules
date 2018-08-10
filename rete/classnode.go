@@ -1,10 +1,8 @@
 package rete
 
 import (
-	"context"
-
 	"container/list"
-
+	"context"
 	"github.com/TIBCOSoftware/bego/common/model"
 )
 

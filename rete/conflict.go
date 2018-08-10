@@ -69,7 +69,6 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 		//clear the map for the next run
 		reteCtxV.modifyMap = make(map[model.Tuple]map[string]bool)
 
-
 		if reteCtxV != nil {
 			opsFront := reteCtxV.getOpsList().Front()
 			for opsFront != nil {
