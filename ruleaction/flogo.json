@@ -56,7 +56,7 @@
       {
          "id":"ruleaction",
          "name":"Rule action",
-         "ref":"github.com/TIBCOSoftware/bego/ruleaction",
+         "ref":"github.com/tibmatt/bego/ruleaction",
          "data":{
             "Tds":[
                {

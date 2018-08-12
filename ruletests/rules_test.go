@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/ruleapi"
+	"github.com/tibmatt/bego/common/model"
+	"github.com/tibmatt/bego/ruleapi"
 )
 
 func TestOne(t *testing.T) {

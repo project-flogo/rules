@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/tibmatt/bego/common/model"
 )
 
 //joinNode holds the join tables for unmatched entries
@@ -181,7 +181,7 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []reteHandl
 		} else {
 			tupleMap := copyIntoTupleMap(joinedHandles)
 			cv := jn.conditionVar
-			toPropagate = cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap)
+			toPropagate = cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
 		}
 		if toPropagate {
 			jn.nodeLinkVar.propagateObjects(ctx, joinedHandles)
@@ -229,7 +229,7 @@ func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []reteHandle
 		} else {
 			tupleMap := copyIntoTupleMap(joinedHandles)
 			cv := jn.conditionVar
-			toPropagate = cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap)
+			toPropagate = cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
 		}
 		if toPropagate {
 			jn.nodeLinkVar.propagateObjects(ctx, joinedHandles)

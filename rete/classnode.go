@@ -3,7 +3,7 @@ package rete
 import (
 	"container/list"
 	"context"
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/tibmatt/bego/common/model"
 )
 
 //classNode holds links to filter and join nodes eventually leading upto the rule node

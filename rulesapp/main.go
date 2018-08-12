@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/ruleapi"
+	"github.com/tibmatt/bego/common/model"
+	"github.com/tibmatt/bego/ruleapi"
 	"io/ioutil"
 	"log"
 	"os"
@@ -18,7 +18,7 @@ func main() {
 	fmt.Println("** Welcome to BEGo **")
 
 	//Load the tuple descriptor file (relative to GOPATH)
-	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/rulesapp/rulesapp.json")
+	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/tibmatt/bego/rulesapp/rulesapp.json")
 	tupleDescriptor := fileToString(tupleDescAbsFileNm)
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
@@ -28,7 +28,7 @@ func main() {
 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")
-	rule.AddCondition("c1", []model.TupleType{"n1"}, checkForBob)
+	rule.AddCondition("c1", []model.TupleType{"n1"}, checkForBob, nil)
 	rule.SetAction(checkForBobAction)
 	rs.AddRule(rule)
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
@@ -36,8 +36,8 @@ func main() {
 	// check for name "Bob" in n1, match the "name" field in n2,
 	// in effect, fire the rule when name field in both tuples in "Bob"
 	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
-	rule2.AddCondition("c1", []model.TupleType{"n1"}, checkForBob)
-	rule2.AddCondition("c2", []model.TupleType{"n1", "n2"}, checkSameNamesCondition)
+	rule2.AddCondition("c1", []model.TupleType{"n1"}, checkForBob, nil)
+	rule2.AddCondition("c2", []model.TupleType{"n1", "n2"}, checkSameNamesCondition, nil)
 	rule2.SetAction(checkSameNamesAction)
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
@@ -72,7 +72,7 @@ func main() {
 
 }
 
-func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
 	//This conditions filters on name="Bob"
 	t1 := tuples["n1"]
 	if t1 == nil {
@@ -92,7 +92,7 @@ func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName strin
 	}
 }
 
-func checkSameNamesCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func checkSameNamesCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]
 	if t1 == nil || t2 == nil {

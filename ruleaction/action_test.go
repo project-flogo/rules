@@ -2,7 +2,7 @@ package ruleaction
 
 import (
 	"fmt"
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/tibmatt/bego/common/model"
 	"strconv"
 	"testing"
 	"time"
