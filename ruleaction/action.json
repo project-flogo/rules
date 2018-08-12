@@ -1,10 +1,10 @@
 {
   "name": "rulesaction",
   "type": "flogo:action",
-  "ref": "github.com/TIBCOSoftware/bego/ruleaction",
+  "ref": "github.com/tibmatt/bego/ruleaction",
   "version": "0.0.1",
   "title": "Rules Action",
   "description": "Simple Rules Action",
-  "homepage": "https://github.com/TIBCOSoftware/bego/ruleaction",
+  "homepage": "https://github.com/tibmatt/bego/ruleaction",
   "async": false
 }

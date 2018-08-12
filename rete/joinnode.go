@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/tibmatt/bego/common/model"
 )
 
 //joinNode holds the join tables for unmatched entries

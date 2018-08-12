@@ -3,7 +3,7 @@ package rete
 import (
 	"context"
 
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/tibmatt/bego/common/model"
 )
 
 type opsEntry interface {

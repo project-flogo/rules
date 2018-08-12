@@ -6,21 +6,21 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/ruleapi"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"strconv"
+	"github.com/tibmatt/bego/common/model"
+	"github.com/tibmatt/bego/ruleapi"
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
 const (
-	ACTION_REF = "github.com/TIBCOSoftware/bego/ruleaction"
+	ACTION_REF = "github.com/tibmatt/bego/ruleaction"
 )
 
 type RuleAction struct {
@@ -197,7 +197,7 @@ func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tup
 func createRuleSessionAndRules() model.RuleSession {
 	rs := ruleapi.GetOrCreateRuleSession("asession")
 
-	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
+	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/tibmatt/bego/common/model/tupledescriptor.json")
 
 	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
 	if err != nil {
@@ -211,7 +211,7 @@ func createRuleSessionAndRules() model.RuleSession {
 func createRuleSessionAndRulesWD() model.RuleSession {
 	rs := ruleapi.GetOrCreateRuleSession("asession")
 
-	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
+	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/tibmatt/bego/common/model/tupledescriptor.json")
 
 	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
 	if err != nil {

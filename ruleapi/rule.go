@@ -1,7 +1,7 @@
 package ruleapi
 
 import (
-	"bego/common/model"
+	"github.com/tibmatt/bego/common/model"
 	"strings"
 )
 

@@ -1,7 +1,7 @@
 package ruleaction
 
 import (
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/tibmatt/bego/common/model"
 	"testing"
 	"time"
 )
