@@ -60,7 +60,7 @@ type RuleSession interface {
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side
 //i.e, part of the server side API
-type ConditionEvaluator func(string, string, map[TupleType]Tuple) bool
+type ConditionEvaluator func(string, string, map[TupleType]Tuple, ConditionContext) bool
 
 //ActionFunction is a function pointer for handling action callbacks on the server side
 //i.e part of the server side API
