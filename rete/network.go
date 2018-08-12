@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/tibmatt/bego/common/model"
+	"github.com/TIBCOSoftware/bego/common/model"
 
 	"container/list"
 	"sync"

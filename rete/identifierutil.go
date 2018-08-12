@@ -1,6 +1,6 @@
 package rete
 
-import "github.com/tibmatt/bego/common/model"
+import "github.com/TIBCOSoftware/bego/common/model"
 
 //These set operations are used in building the rete network. See Network.buildNetwork
 

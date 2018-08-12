@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/tibmatt/bego/common/model"
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //node a building block of the rete network

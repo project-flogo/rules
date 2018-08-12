@@ -10,7 +10,7 @@ import (
 
 func TestOne(t *testing.T) {
 
-	dat, err := ioutil.ReadFile("/home/bala/go/src/github.com/tibmatt/bego/common/model/tupledescriptor.json")
+	dat, err := ioutil.ReadFile("/home/bala/go/src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
 	if err != nil {
 		log.Fatal(err)
 	}

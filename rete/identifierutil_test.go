@@ -3,7 +3,7 @@ package rete
 import (
 	"testing"
 
-	"github.com/tibmatt/bego/common/model"
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 func TestIdentifierUtils(t *testing.T) {

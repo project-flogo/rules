@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/tibmatt/bego/common/model"
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //ruleNode the leaf node of the rule network for a Rule

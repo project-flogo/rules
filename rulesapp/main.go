@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tibmatt/bego/common/model"
-	"github.com/tibmatt/bego/ruleapi"
+	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/TIBCOSoftware/bego/ruleapi"
 	"io/ioutil"
 	"log"
 	"os"
@@ -18,7 +18,7 @@ func main() {
 	fmt.Println("** Welcome to BEGo **")
 
 	//Load the tuple descriptor file (relative to GOPATH)
-	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/tibmatt/bego/rulesapp/rulesapp.json")
+	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/rulesapp/rulesapp.json")
 	tupleDescriptor := fileToString(tupleDescAbsFileNm)
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)

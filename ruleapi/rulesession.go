@@ -2,8 +2,8 @@ package ruleapi
 
 import (
 	"fmt"
-	"github.com/tibmatt/bego/common/model"
-	"github.com/tibmatt/bego/rete"
+	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/TIBCOSoftware/bego/rete"
 )
 
 import (

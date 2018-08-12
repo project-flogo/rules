@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"context"
 
-	"github.com/tibmatt/bego/common/model"
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //Holds a tuple reference and related state

@@ -1,6 +1,6 @@
 package rete
 
-import "github.com/tibmatt/bego/common/model"
+import "github.com/TIBCOSoftware/bego/common/model"
 
 type joinTable interface {
 	addRow(row joinTableRow) //list of Tuples

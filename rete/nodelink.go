@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/tibmatt/bego/common/model"
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 //nodelink connects 2 nodes, a rete building block
