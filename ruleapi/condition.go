@@ -9,17 +9,17 @@ type conditionImpl struct {
 	rule        model.Rule
 	identifiers []model.TupleType
 	cfn         model.ConditionEvaluator
-	ctx         model.ConditionContext
+	ctx         model.RuleContext
 }
 
 //NewCondition ... a new Condition
-func newCondition(name string, rule model.Rule, identifiers []model.TupleType, cfn model.ConditionEvaluator, ctx model.ConditionContext) model.Condition {
+func newCondition(name string, rule model.Rule, identifiers []model.TupleType, cfn model.ConditionEvaluator, ctx model.RuleContext) model.Condition {
 	c := conditionImpl{}
 	c.initConditionImpl(name, rule, identifiers, cfn, ctx)
 	return &c
 }
 
-func (cnd *conditionImpl) initConditionImpl(name string, rule model.Rule, identifiers []model.TupleType, cfn model.ConditionEvaluator, ctx model.ConditionContext) {
+func (cnd *conditionImpl) initConditionImpl(name string, rule model.Rule, identifiers []model.TupleType, cfn model.ConditionEvaluator, ctx model.RuleContext) {
 	cnd.name = name
 	cnd.rule = rule
 	cnd.identifiers = append(cnd.identifiers, identifiers...)
@@ -30,7 +30,7 @@ func (cnd *conditionImpl) initConditionImpl(name string, rule model.Rule, identi
 func (cnd *conditionImpl) GetIdentifiers() []model.TupleType {
 	return cnd.identifiers
 }
-func (cnd *conditionImpl) GetContext() model.ConditionContext {
+func (cnd *conditionImpl) GetContext() model.RuleContext {
 	return cnd.ctx
 }
 

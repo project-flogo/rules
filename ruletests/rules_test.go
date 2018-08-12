@@ -16,13 +16,13 @@ func TestOne(t *testing.T) {
 	//Create Rule, define conditiond and set action callback
 	rule := ruleapi.NewRule("* Ensure n1.name is Bob*")
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
-	rule.AddCondition("c1", []model.TupleType{"n1"}, checkForBob) // check for name "Bob" in n1
+	rule.AddCondition("c1", []model.TupleType{"n1"}, checkForBob, nil) // check for name "Bob" in n1
 	rule.SetAction(bobRuleFired)
 
 	//Create Rule, define conditiond and set action callback
 	rule2 := ruleapi.NewRule("* name == Tom *")
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
-	rule2.AddCondition("c1", []model.TupleType{"n1"}, checkForTom) // check for name "Bob" in n1
+	rule2.AddCondition("c1", []model.TupleType{"n1"}, checkForTom, nil) // check for name "Bob" in n1
 	rule2.SetAction(tomRuleFired)
 
 	//Create a RuleSession and add the above Rule
@@ -44,7 +44,7 @@ func TestOne(t *testing.T) {
 
 }
 
-func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	//This conditions filters on name="Bob"
 	tuple := tuples["n1"]
 	if tuple == nil {
@@ -55,7 +55,7 @@ func checkForBob(ruleName string, condName string, tuples map[model.TupleType]mo
 	return name == "Bob"
 }
 
-func checkForTom(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func checkForTom(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	//This conditions filters on name="Bob"
 	tuple := tuples["n1"]
 	if tuple == nil {
@@ -66,7 +66,7 @@ func checkForTom(ruleName string, condName string, tuples map[model.TupleType]mo
 	return name == "Tom"
 }
 
-func checkSameNames(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func checkSameNames(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	// fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
 	tuple1 := tuples["n1"]
 	tuple2 := tuples["n2"]
@@ -91,7 +91,7 @@ func myActionFn(ruleName string, tuples map[model.TupleType]model.Tuple) {
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
 }
 
-func bobRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
+func bobRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Printf("Rule [%s] fired\n", ruleName)
 	tuple1 := tuples["n1"].(model.MutableTuple)
 	if tuple1 == nil {
@@ -103,7 +103,7 @@ func bobRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tu
 	//tuple1.SetInt(ctx, "age", 36)
 }
 
-func tomRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
+func tomRuleFired(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Printf("Tom Rule fired: [%s]\n", ruleName)
 	tuple1 := tuples["n1"]
 

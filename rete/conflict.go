@@ -56,7 +56,7 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 			actionFn := item.getRule().GetActionFn()
 			if actionFn != nil {
 				reteCtxV := getReteCtx(ctx)
-				actionFn(ctx, reteCtxV.getRuleSession(), item.getRule().GetName(), actionTuples)
+				actionFn(ctx, reteCtxV.getRuleSession(), item.getRule().GetName(), actionTuples, item.getRule().GetContext())
 			}
 		}
 

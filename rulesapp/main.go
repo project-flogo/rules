@@ -30,6 +30,7 @@ func main() {
 	rule := ruleapi.NewRule("n1.name == Bob")
 	rule.AddCondition("c1", []model.TupleType{"n1"}, checkForBob, nil)
 	rule.SetAction(checkForBobAction)
+	rule.SetContext("This is a test of context")
 	rs.AddRule(rule)
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
 
@@ -72,7 +73,7 @@ func main() {
 
 }
 
-func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
+func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	//This conditions filters on name="Bob"
 	t1 := tuples["n1"]
 	if t1 == nil {
@@ -83,8 +84,9 @@ func checkForBob(ruleName string, condName string, tuples map[model.TupleType]mo
 	return name == "Bob"
 }
 
-func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
+func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Printf("Rule fired: [%s]\n", ruleName)
+	fmt.Printf("Context is [%s]", ruleCtx)
 	t1 := tuples["n1"]
 	if t1 == nil {
 		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
@@ -92,7 +94,7 @@ func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName strin
 	}
 }
 
-func checkSameNamesCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
+func checkSameNamesCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]
 	if t1 == nil || t2 == nil {
@@ -104,7 +106,7 @@ func checkSameNamesCondition(ruleName string, condName string, tuples map[model.
 	return name1 == name2
 }
 
-func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
+func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Printf("Rule fired: [%s]\n", ruleName)
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]

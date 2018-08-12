@@ -12,6 +12,15 @@ type ruleImpl struct {
 	actionFn    model.ActionFunction
 	priority    int
 	deps        map[model.TupleType]map[string]bool
+	ctx         model.RuleContext
+}
+
+func (rule *ruleImpl) GetContext() model.RuleContext {
+	return rule.ctx
+}
+
+func (rule *ruleImpl) SetContext(ctx model.RuleContext) {
+	rule.ctx = ctx
 }
 
 //NewRule ... Create a new rule
@@ -44,11 +53,11 @@ func (rule *ruleImpl) SetActionFn(actionFn model.ActionFunction) {
 	rule.actionFn = actionFn
 }
 
-func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType, cfn model.ConditionEvaluator, ctx model.ConditionContext) {
+func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType, cfn model.ConditionEvaluator, ctx model.RuleContext) {
 	rule.addCond(conditionName, idrs, cfn, ctx, false)
 }
 
-func (rule *ruleImpl) addCond(conditionName string, idrs []model.TupleType, cfn model.ConditionEvaluator, ctx model.ConditionContext, setIdr bool) {
+func (rule *ruleImpl) addCond(conditionName string, idrs []model.TupleType, cfn model.ConditionEvaluator, ctx model.RuleContext, setIdr bool) {
 	condition := newCondition(conditionName, rule, idrs, cfn, ctx)
 	rule.conditions = append(rule.conditions, condition)
 
@@ -110,7 +119,7 @@ func (rule *ruleImpl) SetAction(actionFn model.ActionFunction) {
 //	return str
 //}
 
-func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []string, cFn model.ConditionEvaluator, ctx model.ConditionContext) {
+func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []string, cFn model.ConditionEvaluator, ctx model.RuleContext) {
 	typeDepMap := map[model.TupleType]bool{}
 	//cwd := model.ConditionAndDep{"n1", []string{"p1", "p2", "p3"}}
 	for _, idr := range idrs {
