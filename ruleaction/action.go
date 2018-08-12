@@ -120,21 +120,21 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 func loadRulesWithDeps(rs model.RuleSession) {
 
 	rule := ruleapi.NewRule("customer-event")
-	rule.AddConditionWithDependency("customer", []string{"customerevent.none"}, truecondition) // check for name "Bob" in n1
+	rule.AddConditionWithDependency("customer", []string{"customerevent.none"}, truecondition, nil) // check for name "Bob" in n1
 	rule.SetAction(customerAction)
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
 
 	rule2 := ruleapi.NewRule("debit-event")
-	rule2.AddConditionWithDependency("debitevent", []string{"debitevent.none"}, truecondition)
+	rule2.AddConditionWithDependency("debitevent", []string{"debitevent.none"}, truecondition, nil)
 	rule2.SetAction(debitEvent)
 	rule2.SetPriority(2)
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
 	rule3 := ruleapi.NewRule("customer-debit")
-	rule3.AddConditionWithDependency("customerdebit", []string{"debitevent.name", "customerevent.name"}, customerdebitjoincondition)
+	rule3.AddConditionWithDependency("customerdebit", []string{"debitevent.name", "customerevent.name"}, customerdebitjoincondition, nil)
 	rule3.SetAction(debitAction)
 	rule3.SetPriority(3)
 	rs.AddRule(rule3)
@@ -242,7 +242,7 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 
 	//handle a package event, create a package in the packageAction
 	rule := ruleapi.NewRule("packageevent")
-	rule.AddConditionWithDependency("truecondition", []string{"packageevent.none"}, truecondition)
+	rule.AddConditionWithDependency("truecondition", []string{"packageevent.none"}, truecondition, nil)
 	rule.SetAction(packageeventAction)
 	rule.SetPriority(1)
 	rs.AddRule(rule)
@@ -250,7 +250,7 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 
 	//handle a package, print package details in the packageAction
 	rule1 := ruleapi.NewRule("package")
-	rule1.AddConditionWithDependency("packageCondition", []string{"package.none"}, packageCondition)
+	rule1.AddConditionWithDependency("packageCondition", []string{"package.none"}, packageCondition, nil)
 	rule1.SetAction(packageAction)
 	rule1.SetPriority(2)
 	rs.AddRule(rule1)
@@ -259,7 +259,7 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 	//handle a scan event, see if there is matching package if so, do necessary things such as set off a timer
 	//for the next destination, etc in the scaneventAction
 	rule2 := ruleapi.NewRule("scanevent")
-	rule2.AddConditionWithDependency("scaneventCondition", []string{"package.packageid", "scanevent.packageid", "package.curr", "package.next"}, scaneventCondition)
+	rule2.AddConditionWithDependency("scaneventCondition", []string{"package.packageid", "scanevent.packageid", "package.curr", "package.next"}, scaneventCondition, nil)
 	rule2.SetAction(scaneventAction)
 	rule2.SetPriority(2)
 	rs.AddRule(rule2)
@@ -267,7 +267,7 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 
 	//handle a timeout event, triggered by scaneventAction, mark the package as delayed in scantimeoutAction
 	rule3 := ruleapi.NewRule("scantimeout")
-	rule3.AddConditionWithDependency("scantimeoutCondition", []string{"package.packageid", "scantimeout.packageid"}, scantimeoutCondition)
+	rule3.AddConditionWithDependency("scantimeoutCondition", []string{"package.packageid", "scantimeout.packageid"}, scantimeoutCondition, nil)
 	rule3.SetAction(scantimeoutAction)
 	rule3.SetPriority(1)
 	rs.AddRule(rule3)
@@ -275,7 +275,7 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 
 	//notify when a package is marked as delayed, print as such in the packagedelayedAction
 	rule4 := ruleapi.NewRule("packagedelayed")
-	rule4.AddConditionWithDependency("packageDelayedCheck", []string{"package.status"}, packageDelayedCheck)
+	rule4.AddConditionWithDependency("packageDelayedCheck", []string{"package.status"}, packageDelayedCheck, nil)
 	rule4.SetAction(packagedelayedAction)
 	rule4.SetPriority(1)
 	rs.AddRule(rule4)
