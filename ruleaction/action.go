@@ -141,7 +141,7 @@ func loadRulesWithDeps(rs model.RuleSession) {
 	fmt.Printf("Rule added: [%s]\n", rule3.GetName())
 }
 
-func truecondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func truecondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
 	return true
 }
 func customerAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple) {
@@ -165,7 +165,7 @@ func debitEvent(ctx context.Context, rs model.RuleSession, ruleName string, tupl
 	}
 }
 
-func customerdebitjoincondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func customerdebitjoincondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
 
 	customerTuple := tuples["customerevent"]
 	debitTuple := tuples["debitevent"]
@@ -299,7 +299,7 @@ func packageeventAction(ctx context.Context, rs model.RuleSession, ruleName stri
 	rs.Assert(ctx, pkg)
 }
 
-func scaneventCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func scaneventCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
 	scanevent := tuples["scanevent"]
 	pkg := tuples["package"]
 
@@ -347,7 +347,7 @@ func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string,
 
 }
 
-func scantimeoutCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func scantimeoutCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
 	scantimeout := tuples["scantimeout"]
 	pkg := tuples["package"]
 
@@ -372,7 +372,7 @@ func scantimeoutAction(ctx context.Context, rs model.RuleSession, ruleName strin
 	pkg.SetString(ctx, "status", "delayed")
 }
 
-func packageCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func packageCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
 	pkg := tuples["package"]
 	isnew := pkg.GetString("isnew")
 	return isnew == "true"
@@ -388,7 +388,7 @@ func packageAction(ctx context.Context, rs model.RuleSession, ruleName string, t
 	pkg.SetString(ctx, "isnew", "false")
 }
 
-func packageDelayedCheck(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func packageDelayedCheck(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
 	pkg := tuples["package"]
 	status := pkg.GetString("status")
 	return status == "delayed"
