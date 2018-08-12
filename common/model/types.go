@@ -11,6 +11,9 @@ type TupleKey interface {
 	String() string
 	GetTupleDescriptor() TupleDescriptor
 }
+
+type ConditionContext interface{}
+
 //Rule ... a Rule interface
 type Rule interface {
 	GetName() string
@@ -25,8 +28,8 @@ type Rule interface {
 //MutableRule interface has methods to add conditions and actions
 type MutableRule interface {
 	Rule
-	AddCondition(conditionName string, idrs []TupleType, cFn ConditionEvaluator)
-	AddConditionWithDependency(conditionName string, idrs []string, cFn ConditionEvaluator)
+	AddCondition(conditionName string, idrs []TupleType, cFn ConditionEvaluator, ctx ConditionContext)
+	AddConditionWithDependency(conditionName string, idrs []string, cFn ConditionEvaluator, ctx ConditionContext)
 	SetAction(actionFn ActionFunction)
 	SetPriority(priority int)
 }

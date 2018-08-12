@@ -1,7 +1,7 @@
 package ruleapi
 
 import (
-	"github.com/TIBCOSoftware/bego/common/model"
+	"../common/model"
 	"strings"
 )
 
@@ -44,12 +44,12 @@ func (rule *ruleImpl) SetActionFn(actionFn model.ActionFunction) {
 	rule.actionFn = actionFn
 }
 
-func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType, cfn model.ConditionEvaluator) {
-	rule.addCond(conditionName, idrs, cfn, false)
+func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType, cfn model.ConditionEvaluator, ctx model.ConditionContext) {
+	rule.addCond(conditionName, idrs, cfn, ctx, false)
 }
 
-func (rule *ruleImpl) addCond(conditionName string, idrs []model.TupleType, cfn model.ConditionEvaluator, setIdr bool) {
-	condition := newCondition(conditionName, rule, idrs, cfn)
+func (rule *ruleImpl) addCond(conditionName string, idrs []model.TupleType, cfn model.ConditionEvaluator, ctx model.ConditionContext, setIdr bool) {
+	condition := newCondition(conditionName, rule, idrs, cfn, ctx)
 	rule.conditions = append(rule.conditions, condition)
 
 	for _, cidr := range idrs {
@@ -110,7 +110,7 @@ func (rule *ruleImpl) SetAction(actionFn model.ActionFunction) {
 //	return str
 //}
 
-func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []string, cFn model.ConditionEvaluator) {
+func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []string, cFn model.ConditionEvaluator, ctx model.ConditionContext) {
 	typeDepMap := map[model.TupleType]bool{}
 	//cwd := model.ConditionAndDep{"n1", []string{"p1", "p2", "p3"}}
 	for _, idr := range idrs {
@@ -133,7 +133,7 @@ func (rule *ruleImpl) AddConditionWithDependency(conditionName string, idrs []st
 		typeDeps = append(typeDeps, key)
 	}
 
-	rule.addCond(conditionName, typeDeps, cFn, true)
+	rule.addCond(conditionName, typeDeps, cFn, ctx, true)
 
 }
 

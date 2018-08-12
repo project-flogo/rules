@@ -1,26 +1,30 @@
 package ruleapi
 
-import "github.com/TIBCOSoftware/bego/common/model"
+import (
+	"../common/model"
+)
 
 type conditionImpl struct {
 	name        string
 	rule        model.Rule
 	identifiers []model.TupleType
 	cfn         model.ConditionEvaluator
+	ctx         model.ConditionContext
 }
 
 //NewCondition ... a new Condition
-func newCondition(name string, rule model.Rule, identifiers []model.TupleType, cfn model.ConditionEvaluator) model.Condition {
+func newCondition(name string, rule model.Rule, identifiers []model.TupleType, cfn model.ConditionEvaluator, ctx model.ConditionContext) model.Condition {
 	c := conditionImpl{}
-	c.initConditionImpl(name, rule, identifiers, cfn)
+	c.initConditionImpl(name, rule, identifiers, cfn, ctx)
 	return &c
 }
 
-func (cnd *conditionImpl) initConditionImpl(name string, rule model.Rule, identifiers []model.TupleType, cfn model.ConditionEvaluator) {
+func (cnd *conditionImpl) initConditionImpl(name string, rule model.Rule, identifiers []model.TupleType, cfn model.ConditionEvaluator, ctx model.ConditionContext) {
 	cnd.name = name
 	cnd.rule = rule
 	cnd.identifiers = append(cnd.identifiers, identifiers...)
 	cnd.cfn = cfn
+	cnd.ctx = ctx
 }
 
 func (cnd *conditionImpl) GetIdentifiers() []model.TupleType {
