@@ -39,6 +39,7 @@ type Condition interface {
 	GetEvaluator() ConditionEvaluator
 	GetRule() Rule
 	GetIdentifiers() []TupleType
+	GetContext() ConditionContext
 	String() string
 }
 

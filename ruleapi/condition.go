@@ -30,6 +30,9 @@ func (cnd *conditionImpl) initConditionImpl(name string, rule model.Rule, identi
 func (cnd *conditionImpl) GetIdentifiers() []model.TupleType {
 	return cnd.identifiers
 }
+func (cnd *conditionImpl) GetContext() model.ConditionContext {
+	return cnd.ctx
+}
 
 func (cnd *conditionImpl) GetEvaluator() model.ConditionEvaluator {
 	return cnd.cfn
