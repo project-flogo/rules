@@ -72,7 +72,7 @@ func main() {
 
 }
 
-func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
 	//This conditions filters on name="Bob"
 	t1 := tuples["n1"]
 	if t1 == nil {
@@ -92,7 +92,7 @@ func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName strin
 	}
 }
 
-func checkSameNamesCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple) bool {
+func checkSameNamesCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.ConditionContext) bool {
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]
 	if t1 == nil || t2 == nil {
