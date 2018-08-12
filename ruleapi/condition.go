@@ -1,7 +1,7 @@
 package ruleapi
 
 import (
-	"../common/model"
+	"bego/common/model"
 )
 
 type conditionImpl struct {
