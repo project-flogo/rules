@@ -1,6 +1,6 @@
 # BE*Go*
 
-BE*Go* is a lightweight rules library written in Golang to simplify the building of Event Drive Reactive Applications. Supports Declaritive Rules, Contextual reasoning across time and space
+BE*Go* is a lightweight rules library written in Golang to simplify the building of Event Driven Reactive Applications. Supports Declaritive Rules, Contextual reasoning across time and space
 
 ## Definitions
 A `TupleTypeAlias` represents a streaming data source a.k.a Channel
