@@ -44,18 +44,18 @@ func main() {
 
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Tom")
-	t1 := model.NewTuple("n1")
+	t1, _ := model.NewTuple("n1")
 	t1.SetString(nil, "name", "Tom")
 	rs.Assert(nil, t1)
 
 	//Now assert a few facts and see if the Rule Action callback fires.
 	fmt.Println("Asserting n1 tuple with name=Bob")
-	t2 := model.NewTuple("n1")
+	t2, _ := model.NewTuple("n1")
 	t2.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t2)
 
 	fmt.Println("Asserting n2 tuple with name=Bob")
-	t3 := model.NewTuple("n2")
+	t3, _ := model.NewTuple("n2")
 	t3.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t3)
 
@@ -79,7 +79,7 @@ func checkForBob(ruleName string, condName string, tuples map[model.TupleType]mo
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
 		return false
 	}
-	name := t1.GetString("name")
+	name, _ := t1.GetString("name")
 	return name == "Bob"
 }
 
@@ -99,8 +99,8 @@ func checkSameNamesCondition(ruleName string, condName string, tuples map[model.
 		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
 		return false
 	}
-	name1 := t1.GetString("name")
-	name2 := t2.GetString("name")
+	name1, _ := t1.GetString("name")
+	name2, _ := t2.GetString("name")
 	return name1 == name2
 }
 
@@ -111,8 +111,8 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 	if t1 == nil || t2 == nil {
 		fmt.Println("Should not get nil tuples here in Action! This is an error")
 	}
-	name1 := t1.GetString("name")
-	name2 := t2.GetString("name")
+	name1, _ := t1.GetString("name")
+	name2, _ := t2.GetString("name")
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
 }
 

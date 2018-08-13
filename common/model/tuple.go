@@ -2,6 +2,9 @@ package model
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"time"
 )
 
@@ -9,22 +12,32 @@ var reteCTXKEY = RetecontextKeyType{}
 
 //Tuple is a runtime representation of a data tuple
 type Tuple interface {
-	GetTypeAlias() TupleType
-	GetString(name string) string
-	GetInt(name string) int
-	GetFloat(name string) float64
-	GetDateTime(name string) time.Time
-	GetProperties() []string
+	GetTupleType() TupleType
 	GetTupleDescriptor() *TupleDescriptor
+
+	GetProperties() []string
+	GetString(name string) (val string, err error)
+	GetInt(name string) (val int, err error)
+	GetLong(name string) (val int64, err error)
+	GetDouble(name string) (val float64, err error)
+	GetBool(name string) (val bool, err error)
+	//GetDateTime(name string) time.Time
+
 }
 
 //MutableTuple mutable part of the tuple
 type MutableTuple interface {
 	Tuple
-	SetString(ctx context.Context, name string, value string)
-	SetInt(ctx context.Context, name string, value int)
-	SetFloat(ctx context.Context, name string, value float64)
-	SetDatetime(ctx context.Context, name string, value time.Time)
+	SetString(ctx context.Context, name string, value string) (err error)
+	SetInt(ctx context.Context, name string, value int) (err error)
+	SetLong(ctx context.Context, name string, value int64) (err error)
+	SetDouble(ctx context.Context, name string, value float64) (err error)
+	SetBool(ctx context.Context, name string, value bool) (err error)
+	//SetDatetime(ctx context.Context, name string, value time.Time) (err error)
+
+	//will try to coerce value to the named property's type
+	SetValue(ctx context.Context, name string, value interface{}) (err error)
+	//SetValues(ctx context.Context, values map[string]interface{}) (err error)
 }
 
 type tupleImpl struct {
@@ -34,84 +47,216 @@ type tupleImpl struct {
 	td        *TupleDescriptor
 }
 
-func NewTuple(tupleType TupleType) MutableTuple {
+func NewTuple(tupleType TupleType) (mtuple MutableTuple, err error) {
 	td := GetTupleDescriptor(tupleType)
 	if td == nil {
+		return nil, errors.New(fmt.Sprintf("Tuple descriptor not found [%s]", string(tupleType)))
+	}
+	t := tupleImpl{}
+	t.initTuple(td)
+	t.key = newTupleKey(TupleType(td.Name))
+	return &t, nil
+}
+
+func NewTupleFromMap(tupleType TupleType, values map[string]interface{}) (mtuple MutableTuple, err error) {
+	td := GetTupleDescriptor(tupleType)
+	if td == nil {
+		return nil, errors.New(fmt.Sprintf("Tuple descriptor not found [%s]", string(tupleType)))
+	}
+	t := tupleImpl{}
+	err = t.initTupleWithValues(td, values)
+	t.key = newTupleKey(TupleType(td.Name))
+	return &t, err
+}
+
+func NewTupleFromStringMap(tupleType TupleType, values map[string]string) (mtuple MutableTuple, err error) {
+	td := GetTupleDescriptor(tupleType)
+	if td == nil {
+		return nil, errors.New(fmt.Sprintf("Tuple descriptor not found [%s]", string(tupleType)))
+	}
+	t := tupleImpl{}
+	err = t.initTupleWithStringValues(td, values)
+	t.key = newTupleKey(TupleType(td.Name))
+	return &t, err
+}
+
+func (t *tupleImpl) GetTupleType() TupleType {
+	return t.tupleType
+}
+
+func (t *tupleImpl) GetTupleDescriptor() *TupleDescriptor {
+	return t.td
+}
+
+func (t *tupleImpl) GetProperties() []string {
+	keys := []string{}
+	for k := range t.tuples {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+func (t *tupleImpl) GetString(name string) (val string, err error) {
+	err = t.chkProp(name)
+	if err != nil {
+		return "", err
+	}
+	//try to coerce the tuple value to a string
+	v, err := data.CoerceToString(t.tuples[name])
+
+	return v, err
+}
+
+func (t *tupleImpl) GetInt(name string) (val int, err error) {
+	err = t.chkProp(name)
+	if err != nil {
+		return 0, err
+	}
+	//try to coerce the tuple value to an integer
+	v, err := data.CoerceToInteger(t.tuples[name])
+
+	return v, err
+}
+
+func (t *tupleImpl) GetLong(name string) (val int64, err error) {
+	err = t.chkProp(name)
+	if err != nil {
+		return 0, err
+	}
+	//try to coerce the tuple value to a long
+	v, err := data.CoerceToLong(t.tuples[name])
+
+	return v, err
+}
+
+func (t *tupleImpl) GetDouble(name string) (val float64, err error) {
+	err = t.chkProp(name)
+	if err != nil {
+		return 0, err
+	}
+	//try to coerce the tuple value to a double
+	v, err := data.CoerceToDouble(t.tuples[name])
+
+	return v, err
+}
+
+func (t *tupleImpl) GetBool(name string) (val bool, err error) {
+	err = t.chkProp(name)
+	if err != nil {
+		return false, err
+	}
+	//try to coerce tuple value to a boolean
+	v, err := data.CoerceToBoolean(t.tuples[name])
+
+	return v, err
+}
+func (t *tupleImpl) SetString(ctx context.Context, name string, value string) (err error) {
+	return t.validateAndCallListener(ctx, name, value)
+}
+func (t *tupleImpl) SetInt(ctx context.Context, name string, value int) (err error) {
+	return t.validateAndCallListener(ctx, name, value)
+}
+func (t *tupleImpl) SetLong(ctx context.Context, name string, value int64) (err error) {
+	return t.validateAndCallListener(ctx, name, value)
+}
+func (t *tupleImpl) SetDouble(ctx context.Context, name string, value float64) (err error) {
+	return t.validateAndCallListener(ctx, name, value)
+}
+func (t *tupleImpl) SetBool(ctx context.Context, name string, value bool) (err error) {
+	return t.validateAndCallListener(ctx, name, value)
+}
+
+func (t *tupleImpl) SetDatetime(ctx context.Context, name string, value time.Time) (err error) {
+	return t.validateAndCallListener(ctx, name, value)
+}
+
+func (t *tupleImpl) SetValue(ctx context.Context, name string, value interface{}) (err error) {
+	return t.validateAndCallListener(ctx, name, value)
+}
+func (t *tupleImpl) GetKey() TupleKey {
+	keyImpl := t.key.(tupleKeyImpl)
+	if keyImpl.keys != nil {
+		return keyImpl
+	} else {
+		keyImpl.keys = make(map[string]interface{})
+		for _, keyProp := range t.GetTupleDescriptor().GetKeyProps() {
+			keyImpl.keys[keyProp] = t.tuples[keyProp]
+		}
+	}
+	return keyImpl
+}
+
+func (t *tupleImpl) initTuple(td *TupleDescriptor) {
+	t.tuples = make(map[string]interface{})
+	t.tupleType = TupleType(td.Name)
+	t.td = td
+}
+
+func (t *tupleImpl) initTupleWithValues(td *TupleDescriptor, values map[string]interface{}) (err error) {
+	t.tuples = make(map[string]interface{})
+	t.tupleType = TupleType(td.Name)
+
+	err = t.populateValues(td, values)
+	t.td = td
+	return err
+}
+func (t *tupleImpl) initTupleWithStringValues(td *TupleDescriptor, values map[string]string) (err error) {
+	t.tuples = make(map[string]interface{})
+	t.tupleType = TupleType(td.Name)
+
+	err = t.populateWithStringValues(td, values)
+	t.td = td
+	return err
+}
+
+func (t *tupleImpl) populateValues(td *TupleDescriptor, values map[string]interface{}) (err error) {
+	for propNm, tdp := range td.Props {
+		val, found := values[propNm]
+		if found {
+			coerced, err := data.CoerceToValue(val, tdp.PropType)
+			if err != nil {
+				t.tuples[propNm] = coerced
+			} else {
+				return err
+			}
+		}
+	}
+	return nil
+}
+func (t *tupleImpl) populateWithStringValues(td *TupleDescriptor, values map[string]string) (err error) {
+	for propNm, tdp := range td.Props {
+		val, found := values[propNm]
+		if found {
+			coerced, err := data.CoerceToValue(val, tdp.PropType)
+			if err == nil {
+				t.tuples[propNm] = coerced
+			} else {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (t *tupleImpl) validateAndCallListener(ctx context.Context, name string, value interface{}) (err error) {
+	err = t.validateNameValue(name, value)
+	if err != nil {
+		return err
+	}
+	if t.tuples[name] != value {
+		t.tuples[name] = value
+		callChangeListener(ctx, t, name)
+	}
+	return nil
+}
+
+func (t *tupleImpl) chkProp(name string) (err error) {
+	//TODO: Check property's type and value's type compatibility
+	_, ok := t.td.GetProperty(name)
+	if ok {
 		return nil
 	}
-	st := tupleImpl{}
-	st.initTuple(td)
-	st.key = newTupleKey(TupleType(td.Name))
-	return &st
-}
-
-func (st *tupleImpl) initTuple(td *TupleDescriptor) {
-	st.tuples = make(map[string]interface{})
-	st.tupleType = TupleType(td.Name)
-	st.td = td
-}
-
-func (st *tupleImpl) GetTypeAlias() TupleType {
-	return st.tupleType
-}
-
-func (st *tupleImpl) GetString(name string) string {
-	v := st.tuples[name]
-	return v.(string)
-}
-func (st *tupleImpl) GetInt(name string) int {
-	v := st.tuples[name]
-	return v.(int)
-}
-func (st *tupleImpl) GetFloat(name string) float64 {
-	v := st.tuples[name]
-	return v.(float64)
-}
-func (st *tupleImpl) GetDateTime(name string) time.Time {
-	v := st.tuples[name]
-	return v.(time.Time)
-}
-
-func (st *tupleImpl) SetString(ctx context.Context, name string, value string) {
-	if !st.validateUpdate(name, value) {
-		return
-	}
-	if st.tuples[name] != value {
-		st.tuples[name] = value
-		callChangeListener(ctx, st, name)
-	}
-}
-
-func (st *tupleImpl) SetInt(ctx context.Context, name string, value int) {
-	if !st.validateUpdate(name, value) {
-		return
-	}
-	if st.tuples[name] != value {
-		st.tuples[name] = value
-		callChangeListener(ctx, st, name)
-	}
-}
-func (st *tupleImpl) SetFloat(ctx context.Context, name string, value float64) {
-	if !st.validateUpdate(name, value) {
-		return
-	}
-	if st.tuples[name] != value {
-		st.tuples[name] = value
-		callChangeListener(ctx, st, name)
-	}
-}
-func (st *tupleImpl) SetDatetime(ctx context.Context, name string, value time.Time) {
-	if !st.validateUpdate(name, value) {
-		return
-	}
-	if st.tuples[name] != value {
-		st.tuples[name] = value
-		callChangeListener(ctx, st, name)
-	}
-}
-
-func (st *tupleImpl) GetTupleDescriptor() *TupleDescriptor {
-	return st.td
+	return errors.New(fmt.Sprintf("Property [%s] undefined for type [%s]", name, t.td.Name))
 }
 
 func callChangeListener(ctx context.Context, tuple Tuple, prop string) {
@@ -124,29 +269,18 @@ func callChangeListener(ctx context.Context, tuple Tuple, prop string) {
 	}
 }
 
-func (st *tupleImpl) GetProperties() []string {
-	keys := []string{}
-	for k := range st.tuples {
-		keys = append(keys, k)
-	}
-	return keys
-}
+func (t *tupleImpl) validateNameValue(name string, value interface{}) (err error) {
+	//TODO: Check property's type and value's type compatibility
+	p, ok := t.td.GetProperty(name)
 
-func (st *tupleImpl) GetKey() TupleKey {
-	keyImpl := st.key.(tupleKeyImpl)
-	if keyImpl.keys != nil {
-		return keyImpl
-	} else {
-		keyImpl.keys = make(map[string]interface{})
-		for _, keyProp := range st.GetTupleDescriptor().GetKeyProps() {
-			keyImpl.keys[keyProp] = st.tuples[keyProp]
+	if ok {
+		_, err := data.CoerceToValue(value, p.PropType)
+		if err != nil {
+			return err
+		} else {
+			return nil
 		}
 	}
-	return keyImpl
-}
 
-func (st *tupleImpl) validateUpdate(name string, value interface{}) bool {
-	//TODO: Check property's type and value's type compatibility
-	_, ok := st.td.GetProperty(name)
-	return ok
+	return errors.New(fmt.Sprintf("Property [%s] undefined for type [%s]", name, t.td.Name))
 }

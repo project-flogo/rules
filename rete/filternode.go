@@ -89,7 +89,7 @@ func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []reteHandl
 			tuples = make([]model.Tuple, len(fn.convert))
 			for i := 0; i < len(fn.convert); i++ {
 				tuples[i] = handles[fn.convert[i]].getTuple()
-				// tupleMap[tuples[i].GetTypeAlias()] = tuples[i]
+				// tupleMap[tuples[i].GetTupleType()] = tuples[i]
 			}
 		}
 		tupleMap := convertToTupleMap(tuples)

@@ -1,137 +1,101 @@
 [
   {
-    "Name": "customerevent",
-    "TTLInSeconds": -1,
-    "Props": {
-      "name": {
-        "Name": "name",
-        "PropType": "string",
-        "KeyIndex" : 0
+    "name":"customerevent",
+    "props":{
+      "name":{
+        "type":"string",
+        "pk-index":0
       },
-      "status": {
-        "Name": "status",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "status":{
+        "type":"string"
       },
-      "balance": {
-        "Name": "balance",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "balance":{
+        "type":"double"
       },
-      "addr": {
-        "Name": "addr",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "addr":{
+        "type":"string"
       }
     }
   },
   {
-    "Name": "debitevent",
-    "TTLInSeconds": 0,
-    "Props": {
-      "name": {
-        "Name": "name",
-        "PropType": "string"
+    "name":"debitevent",
+    "ttl":0,
+    "props":{
+      "name":{
+        "type":"string",
+        "pk-index":0
       },
-      "debit": {
-        "Name": "debit",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "debit":{
+        "type":"string"
       }
     }
   },
   {
-    "Name": "packageevent",
-    "TTLInSeconds": 0,
-    "Props": {
-      "packageid": {
-        "Name": "packageid",
-        "PropType": "string"
+    "name":"packageevent",
+    "ttl":0,
+    "props":{
+      "packageid":{
+        "type":"string",
+        "pk-index":0
       },
-      "next": {
-        "Name": "next",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "next":{
+        "type":"string"
       },
-      "status": {
-        "Name": "status",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "status":{
+        "type":"string"
       },
-      "isnew": {
-        "Name": "isnew",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "isnew":{
+        "type":"string"
       }
     }
   },
   {
-    "Name": "package",
-    "TTLInSeconds": -1,
-    "Props": {
-      "packageid": {
-        "Name": "packageid",
-        "PropType": "string"
+    "name":"package",
+    "props":{
+      "packageid":{
+        "type":"string",
+        "pk-index":0
       },
-      "curr": {
-        "Name": "curr",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "curr":{
+        "type":"string"
       },
-      "next": {
-        "Name": "next",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "next":{
+        "type":"string"
       },
-      "status": {
-        "Name": "status",
-        "PropType": "string",
-        "KeyIndex" : -1
-      },
-      "isnew": {
-        "Name": "isnew",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "status":{
+        "type":"string"
       }
     }
   },
   {
-    "Name": "scanevent",
-    "TTLInSeconds": 0,
-    "Props": {
-      "packageid": {
-        "Name": "packageid",
-        "PropType": "string"
+    "name":"scanevent",
+    "ttl":0,
+    "props":{
+      "packageid":{
+        "type":"string",
+        "pk-index":0
       },
-      "curr": {
-        "Name": "curr",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "curr":{
+        "type":"string"
       },
-      "next": {
-        "Name": "next",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "next":{
+        "type":"string"
       },
-      "eta": {
-        "Name": "eta",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "eta":{
+        "type":"integer"
       }
     }
   },
   {
-    "Name": "scantimeout",
-    "TTLInSeconds": 0,
-    "Props": {
-      "packageid": {
-        "Name": "packageid",
-        "PropType": "string"
+    "name":"scantimeout",
+    "ttl":0,
+    "props":{
+      "packageid":{
+        "type":"string",
+        "pk-index":0
       },
-      "next": {
-        "Name": "next",
-        "PropType": "string",
-        "KeyIndex" : -1
+      "next":{
+        "type":"string"
       }
     }
   }

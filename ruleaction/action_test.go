@@ -12,31 +12,31 @@ func TestAction(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
 	for i := 1; i < 2; i++ {
-		debit := model.NewTuple(model.TupleType("debitevent"))
+		debit, _ := model.NewTuple(model.TupleType("debitevent"))
 		debit.SetString(nil, "name", "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
 		debit.SetString(nil, "debit", fs)
 		rs.Assert(nil, debit)
 	}
 
-	st1 := model.NewTuple(model.TupleType("customerevent"))
+	st1, _ := model.NewTuple(model.TupleType("customerevent"))
 	st1.SetString(nil, "name", "Bob")
 	st1.SetString(nil, "status", "active")
-	st1.SetFloat(nil, "balance", 1000)
+	st1.SetDouble(nil, "balance", 1000)
 	rs.Assert(nil, st1)
 }
 
 func TestActionTwo(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
-	st1 := model.NewTuple(model.TupleType("customerevent"))
+	st1, _ := model.NewTuple(model.TupleType("customerevent"))
 	st1.SetString(nil, "name", "Bob")
 	st1.SetString(nil, "status", "active")
-	st1.SetFloat(nil, "balance", 1000)
+	st1.SetDouble(nil, "balance", 1000)
 	rs.Assert(nil, st1)
 
 	for i := 1; i < 2; i++ {
-		debit := model.NewTuple(model.TupleType("debitevent"))
+		debit, _ := model.NewTuple(model.TupleType("debitevent"))
 		debit.SetString(nil, "name", "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
 		debit.SetString(nil, "debit", fs)
@@ -48,14 +48,14 @@ func TestActionTwo(t *testing.T) {
 func TestActionTwoWithDep(t *testing.T) {
 	rs := createRuleSessionAndRulesWD()
 
-	st1 := model.NewTuple(model.TupleType("customerevent"))
+	st1, _ := model.NewTuple(model.TupleType("customerevent"))
 	st1.SetString(nil, "name", "Bob")
 	st1.SetString(nil, "status", "active")
-	st1.SetFloat(nil, "balance", 1000)
+	st1.SetDouble(nil, "balance", 1000)
 	rs.Assert(nil, st1)
 
 	for i := 1; i < 3; i++ {
-		debit := model.NewTuple(model.TupleType("debitevent"))
+		debit, _ := model.NewTuple(model.TupleType("debitevent"))
 		debit.SetString(nil, "name", "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
 		debit.SetString(nil, "debit", fs)
@@ -67,16 +67,16 @@ func TestActionTwoWithDep(t *testing.T) {
 func TestTupleTTL(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
-	st1 := model.NewTuple(model.TupleType("customerevent"))
+	st1, _ := model.NewTuple(model.TupleType("customerevent"))
 	st1.SetString(nil, "name", "Bob")
 	st1.SetString(nil, "status", "active")
-	st1.SetFloat(nil, "balance", 1000)
+	st1.SetDouble(nil, "balance", 1000)
 	rs.Assert(nil, st1)
 
 	time.Sleep(time.Second * 6)
 
 	for i := 1; i < 3; i++ {
-		debit := model.NewTuple(model.TupleType("debitevent"))
+		debit, _ := model.NewTuple(model.TupleType("debitevent"))
 		debit.SetString(nil, "name", "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
 		debit.SetString(nil, "debit", fs)
@@ -88,7 +88,7 @@ func TestTupleTTL(t *testing.T) {
 func TestActionTimeout(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
-	pt := model.NewTuple(model.TupleType("packagetimeout"))
+	pt, _ := model.NewTuple(model.TupleType("packagetimeout"))
 	pt.SetString(nil, "packageid", "pkg1")
 	rs.ScheduleAssert(nil, 5000, "myid", pt)
 
@@ -99,7 +99,7 @@ func TestActionTimeout(t *testing.T) {
 func TestActionTimeoutCancel(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
-	pt := model.NewTuple(model.TupleType("packagetimeout"))
+	pt, _:= model.NewTuple(model.TupleType("packagetimeout"))
 	pt.SetString(nil, "packageid", "pkg1")
 	rs.ScheduleAssert(nil, 1000, "myid", pt)
 

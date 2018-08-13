@@ -3,30 +3,38 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"testing"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 func TestOne(t *testing.T) {
 
-	dat, err := ioutil.ReadFile("/home/bala/go/src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
-	if err != nil {
-		log.Fatal(err)
-	}
+	td1 := TupleDescriptor{}
+	td1.Name = "a"
+	td1.TTLInSeconds = 10
+	td1p1 := TuplePropertyDescriptor{}
+	td1p1.Name = "p1"
+	td1p1.KeyIndex = 3
+	td1p1.PropType = data.TypeDouble
+	td1p2 := TuplePropertyDescriptor{}
+	td1p2.Name = "p2"
+	td1p2.KeyIndex = 31
+	td1p2.PropType = data.TypeString
 
-	tds := []TupleDescriptor{}
-	json.Unmarshal([]byte(string(dat)), &tds)
+	td1.Props = make (map[string]TuplePropertyDescriptor)
+	td1.Props[td1p1.Name] = td1p1
+	td1.Props[td1p2.Name] = td1p2
 
-	str, _ok := json.Marshal(&tds)
-	if _ok == nil {
-		fmt.Printf("succes %s\n", str)
-	} else {
-		fmt.Printf("err:  %s\n", "error")
-	}
 
-	for _, td := range tds {
-		fmt.Printf("Type [%s], KeyProps [%s]\n", td.Name, td.GetKeyProps())
-	}
+	str, _ := json.Marshal(&td1)
+	fmt.Printf("succes %s\n", str)
+
+
+	tpdx := TupleDescriptor{}
+	tpdx.TTLInSeconds = -1
+	json.Unmarshal([]byte(str), &tpdx)
+
+	str1, _ := json.Marshal(&tpdx)
+	fmt.Printf("succes %s\n", str1)
 
 }

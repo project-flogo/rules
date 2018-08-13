@@ -1,21 +1,17 @@
 [
   {
-    "Name": "n1",
-    "TTLInSeconds": -1,
-    "Props": {
+    "name": "n1",
+    "props": {
       "name": {
-        "Name": "name",
-        "PropType": "string"
+        "type": "string"
       }
     }
   },
   {
-    "Name": "n2",
-    "TTLInSeconds": -1,
-    "Props": {
+    "name": "n2",
+    "props": {
       "name": {
-        "Name": "name",
-        "PropType": "string"
+        "type": "string"
       }
     }
   }

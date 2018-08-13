@@ -522,7 +522,7 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	reteCtxVar.getConflictResolver().resolveConflict(newCtx)
 
 	//if Timeout is 0, remove it from rete
-	td := model.GetTupleDescriptor(tuple.GetTypeAlias())
+	td := model.GetTupleDescriptor(tuple.GetTupleType())
 	if td != nil {
 		if td.TTLInSeconds == 0 { //remove immediately.
 			nw.removeTupleFromRete(tuple)
@@ -561,7 +561,7 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, chang
 }
 
 func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool) {
-	tupleType := tuple.GetTypeAlias()
+	tupleType := tuple.GetTupleType()
 	listItem := nw.allClassNodes[string(tupleType)]
 	if listItem != nil {
 		classNodeVar := listItem.(classNode)

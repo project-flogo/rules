@@ -2,7 +2,7 @@ package model
 
 import (
 	"sort"
-	"strconv"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 type tupleKeyImpl struct {
@@ -23,15 +23,8 @@ func (tk tupleKeyImpl) String() string {
 		ky := s[i]
 		k = k + ky + ":"
 		val := tk.keys[ky]
-
-		switch v := val.(type) {
-		case int:
-			k += strconv.Itoa(v)
-		case string:
-			k += v
-		case uint64:
-			k += strconv.FormatUint(v, 10)
-		}
+		strval, _ := data.CoerceToString(val)
+		k += strval
 		if i < len(s)-1 {
 			k += ","
 		}

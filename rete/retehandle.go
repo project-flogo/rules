@@ -52,7 +52,7 @@ func (hdl *handleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTabl
 func (hdl *handleImpl) removeJoinTableRowRefs(changedProps map[string]bool) {
 
 	tuple := hdl.tuple
-	alias := tuple.GetTypeAlias()
+	alias := tuple.GetTupleType()
 
 	emptyJoinTables := list.New()
 

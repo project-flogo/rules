@@ -17,7 +17,7 @@ func copyIntoTupleMap(handles []reteHandle) map[model.TupleType]model.Tuple {
 	tuples := make([]model.Tuple, len(handles))
 	for i := 0; i < len(handles); i++ {
 		tuples[i] = handles[i].getTuple()
-		tupleMap[tuples[i].GetTypeAlias()] = tuples[i] //assuming no self-joins! need to correct this!
+		tupleMap[tuples[i].GetTupleType()] = tuples[i] //assuming no self-joins! need to correct this!
 	}
 	return tupleMap
 }
@@ -25,7 +25,7 @@ func copyIntoTupleMap(handles []reteHandle) map[model.TupleType]model.Tuple {
 func convertToTupleMap(tuples []model.Tuple) map[model.TupleType]model.Tuple {
 	tupleMap := map[model.TupleType]model.Tuple{}
 	for i := 0; i < len(tuples); i++ {
-		tupleMap[tuples[i].GetTypeAlias()] = tuples[i]
+		tupleMap[tuples[i].GetTupleType()] = tuples[i]
 	}
 	return tupleMap
 }
