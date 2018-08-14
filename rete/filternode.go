@@ -94,7 +94,7 @@ func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []reteHandl
 		}
 		tupleMap := convertToTupleMap(tuples)
 		cv := fn.conditionVar
-		toPropagate := cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap)
+		toPropagate := cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
 		if toPropagate {
 			fn.nodeLinkVar.propagateObjects(ctx, handles)
 		}
