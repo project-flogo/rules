@@ -56,7 +56,7 @@ func (ff *ActionFactory) New(config *action.Config) (action.Action, error) {
 
 	ruleAction := &RuleAction{}
 
-	ruleAction.rs = ruleapi.GetOrCreateRuleSession("flogosession")
+	ruleAction.rs, _ = ruleapi.GetOrCreateRuleSession("flogosession")
 
 	actionData := ActionData{}
 	actionData.Tds = []model.TupleDescriptor{}
@@ -207,7 +207,7 @@ func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tup
 }
 
 func createRuleSessionAndRules() model.RuleSession {
-	rs := ruleapi.GetOrCreateRuleSession("asession")
+	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
 	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
 
@@ -220,7 +220,7 @@ func createRuleSessionAndRules() model.RuleSession {
 }
 
 func createRuleSessionAndRulesWD() model.RuleSession {
-	rs := ruleapi.GetOrCreateRuleSession("asession")
+	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
 	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
 

@@ -1,15 +1,14 @@
 package ruleapi
 
 import (
-	"fmt"
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/rete"
-)
-
-import (
 	"context"
+	"errors"
+	"fmt"
 	"sync"
 	"time"
+
+	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/TIBCOSoftware/bego/rete"
 )
 
 var (
@@ -23,12 +22,14 @@ type rulesessionImpl struct {
 	timers map[interface{}]*time.Timer
 }
 
-func GetOrCreateRuleSession(name string) model.RuleSession {
-
+func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
+	if name == "" {
+		return nil, errors.New("RuleSession name cannot be empty")
+	}
 	rs := rulesessionImpl{}
 	rs.initRuleSession(name)
 	rs1, _ := sessionMap.LoadOrStore(name, &rs)
-	return rs1.(*rulesessionImpl)
+	return rs1.(*rulesessionImpl), nil
 }
 
 func (rs *rulesessionImpl) initRuleSession(name string) {

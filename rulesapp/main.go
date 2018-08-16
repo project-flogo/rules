@@ -24,7 +24,7 @@ func main() {
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//Create a RuleSession and register the type descriptors.
-	rs := ruleapi.GetOrCreateRuleSession("asession")
+	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 	model.RegisterTupleDescriptors(tupleDescriptor)
 
 	//// check for name "Bob" in n1
