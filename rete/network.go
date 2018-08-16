@@ -81,20 +81,21 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) int {
 	nodesOfRule := list.New()
 	classNodeLinksOfRule := list.New()
 
-	if len(rule.GetConditions()) == 0 {
+	conditions := rule.GetConditions()
+	if len(conditions) == 0 {
 		identifierVar := pickIdentifier(rule.GetIdentifiers())
 		nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, identifierVar, nil, nodeSet)
 	} else {
-		for i := 0; i < len(rule.GetConditions()); i++ {
-			if rule.GetConditions()[i].GetIdentifiers() == nil || len(rule.GetConditions()[i].GetIdentifiers()) == 0 {
+		for i := 0; i < len(conditions); i++ {
+			if conditions[i].GetIdentifiers() == nil || len(conditions[i].GetIdentifiers()) == 0 {
 				//TODO: condition with no identifiers
-				conditionSetNoIdr.PushBack(rule.GetConditions()[i])
-			} else if len(rule.GetConditions()[i].GetIdentifiers()) == 1 &&
-				!contains(nodeSet, rule.GetConditions()[i].GetIdentifiers()[0]) {
-				cond := rule.GetConditions()[i]
+				conditionSetNoIdr.PushBack(conditions[i])
+			} else if len(conditions[i].GetIdentifiers()) == 1 &&
+				!contains(nodeSet, conditions[i].GetIdentifiers()[0]) {
+				cond := conditions[i]
 				nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, cond.GetIdentifiers()[0], cond, nodeSet)
 			} else {
-				conditionSet.PushBack(rule.GetConditions()[i])
+				conditionSet.PushBack(conditions[i])
 			}
 		}
 	}
