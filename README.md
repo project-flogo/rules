@@ -5,7 +5,7 @@
 ## Definitions
 A `Tuple` represents an event or a business object and provides runtime data to the rules. It is always of a certain type.
 
-A `TupleTypeDescriptor` defines the type or structure of a `Tuple`. It defines a tuples properties and their data types and primary keys of the tuple. It also defines the time to live for the tuple
+A `TupleTypeDescriptor` defines the type or structure of a `Tuple`. It defines a tuple's properties and data types, and primary keys. It also defines the time to live for the tuple
 
 A `TupleType` is a name or an alias for a `TupleTypeDescriptor` 
 
@@ -18,7 +18,7 @@ A `RuleSession` is the handle through which to interact with the rules API. You 
  
 Each rule creates its own evaluation plan or a network. Multiple rules collectively form the rule network
 
-Tuples can be created using `NewTuple` and then setting its properties. The tuple is then `Assert`-ed into the `RuleSession` and this triggers rule evaluations.
+Tuples can be created using `NewTuple` and then setting its properties. The tuple is then `Assert`-ed into the rule session and this triggers rule evaluations.
 A tuple can be `Retract`ed from the rule session to take it out of play for rules evaluations.
 
 ## Usage
