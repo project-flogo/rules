@@ -27,7 +27,7 @@ func main() {
 	model.RegisterTupleDescriptors(tupleDescriptor)
 
 	//Create a RuleSession
-	rs, _:= ruleapi.GetOrCreateRuleSession("asession")
+	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")

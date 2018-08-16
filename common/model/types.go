@@ -7,11 +7,13 @@ import (
 //TupleType Each tuple is of a certain type, described by TypeDescriptor
 type TupleType string
 
+// TupleKey for each TupleDescriptor
 type TupleKey interface {
 	String() string
 	GetTupleDescriptor() TupleDescriptor
 }
 
+// RuleContext associated with every rule
 type RuleContext interface{}
 
 //Rule ... a Rule interface
@@ -30,12 +32,12 @@ type Rule interface {
 type MutableRule interface {
 	Rule
 	AddCondition(conditionName string, idrs []TupleType, cFn ConditionEvaluator, ctx RuleContext)
-	AddConditionWithDependency(conditionName string, idrs []string, cFn ConditionEvaluator, ctx RuleContext)
 	SetAction(actionFn ActionFunction)
 	SetPriority(priority int)
 	SetContext(ctx RuleContext)
 }
 
+//Condition interface to maintain/get various condition properties
 type Condition interface {
 	GetName() string
 	GetEvaluator() ConditionEvaluator
@@ -45,6 +47,7 @@ type Condition interface {
 	String() string
 }
 
+// RuleSession to maintain rules and assert tuples against those rules
 type RuleSession interface {
 	GetName() string
 
@@ -68,6 +71,7 @@ type ConditionEvaluator func(string, string, map[TupleType]Tuple, RuleContext) b
 //i.e part of the server side API
 type ActionFunction func(context.Context, RuleSession, string, map[TupleType]Tuple, RuleContext)
 
+// ValueChangeListener to pickup and process tuple value changes
 type ValueChangeListener interface {
 	OnValueChange(tuple Tuple, prop string)
 }
