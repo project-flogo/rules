@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/ruleapi"
 	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/TIBCOSoftware/bego/ruleapi"
 )
 
 func main() {
@@ -86,7 +87,7 @@ func checkForBob(ruleName string, condName string, tuples map[model.TupleType]mo
 
 func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Printf("Rule fired: [%s]\n", ruleName)
-	fmt.Printf("Context is [%s]", ruleCtx)
+	fmt.Printf("Context is [%s]\n", ruleCtx)
 	t1 := tuples["n1"]
 	if t1 == nil {
 		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
@@ -112,6 +113,7 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 	t2 := tuples["n2"]
 	if t1 == nil || t2 == nil {
 		fmt.Println("Should not get nil tuples here in Action! This is an error")
+		return
 	}
 	name1, _ := t1.GetString("name")
 	name2, _ := t2.GetString("name")

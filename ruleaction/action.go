@@ -6,44 +6,52 @@ import (
 	"fmt"
 	"runtime/debug"
 
+	"io/ioutil"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/TIBCOSoftware/bego/common/model"
 	"github.com/TIBCOSoftware/bego/ruleapi"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"io/ioutil"
-	"log"
-	"os"
-	"strconv"
-	"strings"
 )
 
+// Action ref to register the action factory
 const (
-	ACTION_REF = "github.com/TIBCOSoftware/bego/ruleaction"
+	ActionRef = "github.com/TIBCOSoftware/bego/ruleaction"
 )
 
+// RuleAction wraps RuleSession
 type RuleAction struct {
 	rs model.RuleSession
 }
+
+// ActionFactory wrapper to register with the action
 type ActionFactory struct {
 }
 
 //todo fix this
-var metadata = &action.Metadata{ID: ACTION_REF, Async: false}
+var metadata = &action.Metadata{ID: ActionRef, Async: false}
 
 func init() {
-	action.RegisterFactory(ACTION_REF, &ActionFactory{})
+	action.RegisterFactory(ActionRef, &ActionFactory{})
 }
 
+// Init implements action.Factory.Init
 func (ff *ActionFactory) Init() error {
 	return nil
 }
 
+// ActionData maintains Tuple descriptor details
 type ActionData struct {
 	Tds []model.TupleDescriptor
 }
 
+// New implements action.Factory.New
 func (ff *ActionFactory) New(config *action.Config) (action.Action, error) {
 
 	ruleAction := &RuleAction{}
@@ -77,6 +85,7 @@ func (a *RuleAction) IOMetadata() *data.IOMetadata {
 	return nil
 }
 
+// Run implements action.Action.Run
 func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute) (map[string]*data.Attribute, error) {
 
 	defer func() {
@@ -99,7 +108,6 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 	queryParams := inputs["queryParams"].Value().(map[string]string)
 
 	tuple, _ := model.NewTupleFromStringMap(tupleType, queryParams) //n1 -> will be replaced by contextual information coming in the data
-
 
 	//map input data into tuples, only string. ignore the rest for now
 	//for key, value := range queryParams {
@@ -150,7 +158,7 @@ func customerAction(ctx context.Context, rs model.RuleSession, ruleName string, 
 	if tuple == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
 	} else {
-		name, _:= tuple.GetString("name")
+		name, _ := tuple.GetString("name")
 		fmt.Printf("Received a customer event with customer name [%s]\n", name)
 	}
 }
@@ -190,10 +198,10 @@ func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tup
 	debitAmt, _ := strconv.ParseFloat(dbt, 64)
 	currBal, _ := customerTuple.GetDouble("balance")
 	st, _ := customerTuple.GetString("status")
-	if  st == "active" {
-		customerTuple.SetDouble(ctx, "balance", currBal - debitAmt)
+	if st == "active" {
+		customerTuple.SetDouble(ctx, "balance", currBal-debitAmt)
 	}
-	nm, _:= customerTuple.GetString("name")
+	nm, _ := customerTuple.GetString("name")
 	newBal, _ := customerTuple.GetDouble("balance")
 	fmt.Printf("Customer [%s], Balance [%f], Debit [%f], NewBalance [%f]\n", nm, currBal, debitAmt, newBal)
 }
@@ -207,7 +215,6 @@ func createRuleSessionAndRules() model.RuleSession {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//fmt.Printf("Tuple descriptors: [%s]\n", string(dat))
 	model.RegisterTupleDescriptors(string(dat))
 	return rs
 }
@@ -221,7 +228,6 @@ func createRuleSessionAndRulesWD() model.RuleSession {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//fmt.Printf("Tuple descriptors: [%s]\n", string(dat))
 	model.RegisterTupleDescriptors(string(dat))
 	loadRulesWithDeps(rs)
 	return rs
@@ -294,9 +300,9 @@ func packageeventAction(ctx context.Context, rs model.RuleSession, ruleName stri
 
 	//assert a package
 	pkg, _ := model.NewTuple(model.TupleType("package"))
-	pkgId, _ := pkgEvent.GetString("packageid")
+	pkgID, _ := pkgEvent.GetString("packageid")
 	nxt, _ := pkgEvent.GetString("next")
-	pkg.SetString(ctx, "packageid", pkgId)
+	pkg.SetString(ctx, "packageid", pkgID)
 	pkg.SetString(ctx, "curr", "start")
 	pkg.SetString(ctx, "next", nxt)
 	pkg.SetString(ctx, "status", "normal")
@@ -312,11 +318,11 @@ func scaneventCondition(ruleName string, condName string, tuples map[model.Tuple
 		fmt.Println("Should not get a nil tuple here! This is an error")
 		return false
 	}
-	pkgId, _ := scanevent.GetString("packageid")
-	pkgId2, _ := pkg.GetString("packageid")
+	pkgID, _ := scanevent.GetString("packageid")
+	pkgID2, _ := pkg.GetString("packageid")
 	curr, _ := scanevent.GetString("curr")
 	nxt, _ := pkg.GetString("next")
-	return  pkgId == pkgId2 &&	curr == nxt
+	return pkgID == pkgID2 && curr == nxt
 }
 
 func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
@@ -363,12 +369,12 @@ func scantimeoutCondition(ruleName string, condName string, tuples map[model.Tup
 		fmt.Println("Should not get a nil tuple here! This is an error")
 		return false
 	}
-	pkgId, _ := scantimeout.GetString("packageid")
-	pkgId2, _ := pkg.GetString("packageid")
+	pkgID, _ := scantimeout.GetString("packageid")
+	pkgID2, _ := pkg.GetString("packageid")
 	nxt, _ := scantimeout.GetString("next")
 	nxt2, _ := pkg.GetString("next")
-	return  pkgId == pkgId2 &&
-		 nxt == nxt2
+	return pkgID == pkgID2 &&
+		nxt == nxt2
 }
 
 func scantimeoutAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {

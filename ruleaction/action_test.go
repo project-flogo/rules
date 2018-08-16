@@ -2,10 +2,11 @@ package ruleaction
 
 import (
 	"fmt"
-	"github.com/TIBCOSoftware/bego/common/model"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 func TestAction(t *testing.T) {
@@ -42,7 +43,6 @@ func TestActionTwo(t *testing.T) {
 		debit.SetString(nil, "debit", fs)
 		rs.Assert(nil, debit)
 	}
-
 }
 
 func TestActionTwoWithDep(t *testing.T) {
@@ -82,7 +82,6 @@ func TestTupleTTL(t *testing.T) {
 		debit.SetString(nil, "debit", fs)
 		rs.Assert(nil, debit)
 	}
-
 }
 
 func TestActionTimeout(t *testing.T) {
@@ -93,20 +92,18 @@ func TestActionTimeout(t *testing.T) {
 	rs.ScheduleAssert(nil, 5000, "myid", pt)
 
 	time.Sleep(time.Minute)
-
 }
 
 func TestActionTimeoutCancel(t *testing.T) {
 	rs := createRuleSessionAndRules()
 
-	pt, _:= model.NewTuple(model.TupleType("packagetimeout"))
+	pt, _ := model.NewTuple(model.TupleType("packagetimeout"))
 	pt.SetString(nil, "packageid", "pkg1")
 	rs.ScheduleAssert(nil, 1000, "myid", pt)
 
 	rs.CancelScheduledAssert(nil, "myid")
 
 	time.Sleep(time.Minute)
-
 }
 
 func TestActionBasicTimer(t *testing.T) {
