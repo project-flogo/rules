@@ -1,122 +1,94 @@
-# BE*Go*
+# Flogo Rules
 
-BE*Go* is a lightweight rules library written in Golang to simplify the building of Event Driven Reactive Applications. Supports Declaritive Rules, Contextual reasoning across time and space
+**Flogo Rules** is a lightweight rules library written in Golang to simplify the building of Event Driven Reactive Applications. Supports Declaritive Rules, Contextual reasoning across time and space
 
 ## Definitions
-A `TupleTypeAlias` represents a streaming data source a.k.a Channel
+A `Tuple` represents an event or a business object and provides runtime data to the rules. It is always of a certain type.
 
-A `StreamTuple` is an instance of a certain type of `TupleTypeAlias`
+A `TupleTypeDescriptor` defines the type or structure of a `Tuple`. It defines a tuples properties and their data types and primary keys of the tuple. It also defines the time to live for the tuple
+
+A `TupleType` is a name or an alias for a `TupleTypeDescriptor` 
 
 A `Rule` constitutes of multiple Conditions and the rule triggers when all its conditions pass
 
-A `Condition` is an expression comprising of data tuples from one or more TupleTypeAliass. When the expression evaluates to true, the condition passes. Thus a Condition is characterized by the number and types of TupleTypeAlias involved in its evaluation. In order to optimize a Rule's evaluation, the Rule network needs to know of the number and type of stream sources in each of its Conditions. Thus the Condition can either be defined upfront with the number of and type of TupleTypeAliass or this can be inferred (for a start, we choose the former)
+A `Condition` is an expression involving one or more tuple types. When the expression evaluates to true, the condition passes. In order to optimize a Rule's evaluation, the Rule network needs to know of the TupleTypes and the properties of the TupleType which participate in the `Condition` evaluation. These are provided when constructing the condition and adding it to the rule.
+The rule's `Action` is a function that is invoked each time that a matching combination of tuples is found that result in a true evaluation of all its conditions. Those matching tuples are supplied to the action
 
-The rule's `Action` is a function that is invoked once each time that a matching combination of tuples is found that result in a true evaluation of all its conditions. Thus the `Action` function takes as an argument, the matching tuples.
+A `RuleSession` is the handle through which to interact with the rules API. You can create and register multiple rule sessions. Rule sessions are silos for the data that they hold, they are like namespaces and sharing objects / state across rule sessions is not supported.
+ 
+Each rule creates its own evaluation plan or a network. Multiple rules collectively form the rule network
 
-Each Rule creates its own evaluation plan or a network. When there are multiple such rules, all of them collectively form the Rule Network
+Tuples can be created using `NewTuple` and then setting its properties. The tuple is then `Assert`-ed into the `RuleSession` and this triggers rule evaluations.
+A tuple can be `Retract`ed from the rule session to take it out of play for rules evaluations.
 
-When streaming data arrives, a StreamTuple is formed, and is `Assert`-ed into this network to see which rules would fire.
-Similarly, removing a StreamTuple from the network is called `Retract`-ing it from the network. You may retract when for example, the TTL of a StreamTuple expires based on a certain expiration policy
-
-## Server API
-With this background, let us see how it translates to API/code. *This is a draft Server-side API*
+## Usage
+The following code snippet demonstrates usage of the Rules API
 
 
-	//Create Rule, define conditions and set action callback
-	rule := ruleapi.NewRule("* Ensure n1.name is Bob and n2.name matches n1.name ie Bob in this case *")
-	fmt.Printf("Rule added: [%s]\n", rule.GetName())
-	rule.AddCondition("c1", []model.TupleTypeAlias{"n1"}, checkForBob)          // check for name "Bob" in n1
-	rule.AddCondition("c2", []model.TupleTypeAlias{"n1", "n2"}, checkSameNames) // match the "name" field in both tuples
-	//in effect, fire the rule when name field in both tuples is "Bob"
-	rule.SetActionFn(myActionFn)
-
-	//Create a RuleSession and add the above Rule
-	ruleSession := ruleapi.NewRuleSession()
-	ruleSession.AddRule(rule)
-
-	//Now assert a few facts and see if the Rule Action callback fires.
-	fmt.Println("Asserting n1 tuple with name=Bob")
-	streamTuple1 := model.NewStreamTuple("n1")
-	streamTuple1.SetString("name", "Bob")
-	ruleSession.Assert(streamTuple1)
-
-	fmt.Println("Asserting n1 tuple with name=Fred")
-	streamTuple2 := model.NewStreamTuple("n1")
-	streamTuple2.SetString("name", "Fred")
-	ruleSession.Assert(streamTuple2)
-
-	fmt.Println("Asserting n2 tuple with name=Fred")
-	streamTuple3 := model.NewStreamTuple("n2")
-	streamTuple3.SetString("name", "Fred")
-	ruleSession.Assert(streamTuple3)
-
-	fmt.Println("Asserting n2 tuple with name=Bob")
-	streamTuple4 := model.NewStreamTuple("n2")
-	streamTuple4.SetString("name", "Bob")
-	ruleSession.Assert(streamTuple4)
-
-    //Retract them
-    ruleSession.Retract (streamTuple1)
-    ruleSession.Retract (streamTuple2)
-    ruleSession.Retract (streamTuple3)
-    ruleSession.Retract (streamTuple4)
-
-    //You may delete the rule
-    ruleSession.DeleteRule (rule.getName())
-
-    func checkForBob(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
-        //This conditions filters on name="Bob"
-        streamTuple := tuples["n1"]
-        if streamTuple == nil {
-            fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
-            return false
-        }
-        name := streamTuple.GetString("name")
-        return name == "Bob"
-    }
+		fmt.Println("** Example usage of this module **")
     
-    func checkSameNames(ruleName string, condName string, tuples map[model.TupleTypeAlias]model.StreamTuple) bool {
-        // fmt.Printf("Condition [%s] of Rule [%s] has [%d] tuples\n", condName, ruleName, len(tuples))
-        streamTuple1 := tuples["n1"]
-        streamTuple2 := tuples["n2"]
-        if streamTuple1 == nil || streamTuple2 == nil {
-            fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
-            return false
-        }
-        name1 := streamTuple1.GetString("name")
-        name2 := streamTuple2.GetString("name")
-        return name1 == name2
-    }
+    	//Load the tuple descriptor file (relative to GOPATH)
+    	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/rulesapp/rulesapp.json")
+    	tupleDescriptor := fileToString(tupleDescAbsFileNm)
     
-    func myActionFn(ruleName string, tuples map[model.TupleTypeAlias]model.StreamTuple) {
-        fmt.Printf("Rule fired: [%s]\n", ruleName)
-        streamTuple1 := tuples["n1"]
-        streamTuple2 := tuples["n2"]
-        if streamTuple1 == nil || streamTuple2 == nil {
-            fmt.Println("Should not get nil tuples here in Action! This is an error")
-        }
-        name1 := streamTuple1.GetString("name")
-        name2 := streamTuple2.GetString("name")
-        fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
-    }
+    	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
+    	//First register the tuple descriptors
+    	model.RegisterTupleDescriptors(tupleDescriptor)
+    
+    	//Create a RuleSession
+    	rs := ruleapi.GetOrCreateRuleSession("asession")
+    
+    	// check for name "Bob" in n1
+    	rule := ruleapi.NewRule("n1.name == Bob")
+    	rule.AddCondition("c1", []model.TupleType{"n1"}, checkForBob, nil)
+    	rule.SetAction(checkForBobAction)
+    	rule.SetContext("This is a test of context")
+    	rs.AddRule(rule)
+    	fmt.Printf("Rule added: [%s]\n", rule.GetName())
+    
+    	// check for name "Bob" in n1, match the "name" field in n2,
+    	// in effect, fire the rule when name field in both tuples is "Bob"
+    	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
+    	rule2.AddCondition("c1", []model.TupleType{"n1"}, checkForBob, nil)
+    	rule2.AddCondition("c2", []model.TupleType{"n1", "n2"}, checkSameNamesCondition, nil)
+    	rule2.SetAction(checkSameNamesAction)
+    	rs.AddRule(rule2)
+    	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
+    
+    	//Now assert a "n1" tuple
+    	fmt.Println("Asserting n1 tuple with name=Tom")
+    	t1, _ := model.NewTuple("n1")
+    	t1.SetString(nil, "name", "Tom")
+    	rs.Assert(nil, t1)
+    
+    	//Now assert a "n1" tuple
+    	fmt.Println("Asserting n1 tuple with name=Bob")
+    	t2, _ := model.NewTuple("n1")
+    	t2.SetString(nil, "name", "Bob")
+    	rs.Assert(nil, t2)
+    
+       	//Now assert a "n2" tuple
+    	fmt.Println("Asserting n2 tuple with name=Bob")
+    	t3, _ := model.NewTuple("n2")
+    	t3.SetString(nil, "name", "Bob")
+    	rs.Assert(nil, t3)
+    
+    	//Retract tuples
+    	rs.Retract(nil, t1)
+    	rs.Retract(nil, t2)
+    	rs.Retract(nil, t3)
+    
+    	//delete the rule
+    	rs.DeleteRule(rule.GetName())
+    
+    	//unregister the session, i.e; cleanup
+    	rs.Unregister()
 
-## Try it out
-* Checkout the repo at say `/home/yourname/go` and set environment variable `$GOPATH` to it
-* Goto `github.com/TIBCOSoftware/bego` such that your path looks like this
-* `/home/yourname/go/src/github.com/TIBCOSoftware/bego`
-* Go to the folder above and 
-* `go install ./...`
-* This will create the example executable at `/home/yourname/go/bin/rulesapp`
-* `cd /home/yourname/go/bin`
-* `./rulesapp`
 
+## Try out this example
+* Create a directory say `/home/rulesexample` and set `GOPATH=/home/rulesexample`
+* from `/home/rulesexample` run `go get github.com/TIBCOSoftware/bego/rulesapp`
+* This will create the example executable at `/home/rulesexample/bin/rulesapp`
+* Run the example `/home/rulesexample/bin/rulesapp`
 
-## Todo
-* Lots of stuff, including multi-threading support
-* Review and refine the API
-* Client API (if required)
-* Transports/Channels (as required)
-* Forward-chaining/Conflict Resolution/Post-RTC etc (TDB: if required)
-* Timers and expiry
-* Storage 
 

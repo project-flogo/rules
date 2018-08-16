@@ -16,16 +16,18 @@ import (
 
 func main() {
 
-	fmt.Println("** Welcome to BEGo **")
+	fmt.Println("** rulesapp: Example usage of the Rules module/API **")
 
 	//Load the tuple descriptor file (relative to GOPATH)
 	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/rulesapp/rulesapp.json")
 	tupleDescriptor := fileToString(tupleDescAbsFileNm)
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
-	//Create a RuleSession and register the type descriptors.
-	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
+	//First register the tuple descriptors
 	model.RegisterTupleDescriptors(tupleDescriptor)
+
+	//Create a RuleSession
+	rs, _:= ruleapi.GetOrCreateRuleSession("asession")
 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")
@@ -36,7 +38,7 @@ func main() {
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
 
 	// check for name "Bob" in n1, match the "name" field in n2,
-	// in effect, fire the rule when name field in both tuples in "Bob"
+	// in effect, fire the rule when name field in both tuples is "Bob"
 	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
 	rule2.AddCondition("c1", []model.TupleType{"n1"}, checkForBob, nil)
 	rule2.AddCondition("c2", []model.TupleType{"n1", "n2"}, checkSameNamesCondition, nil)
@@ -44,24 +46,25 @@ func main() {
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
-	//Now assert a few facts and see if the Rule Action callback fires.
+	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Tom")
 	t1, _ := model.NewTuple("n1")
 	t1.SetString(nil, "name", "Tom")
 	rs.Assert(nil, t1)
 
-	//Now assert a few facts and see if the Rule Action callback fires.
+	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	t2, _ := model.NewTuple("n1")
 	t2.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t2)
 
+	//Now assert a "n2" tuple
 	fmt.Println("Asserting n2 tuple with name=Bob")
 	t3, _ := model.NewTuple("n2")
 	t3.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t3)
 
-	//Retract them
+	//Retract tuples
 	rs.Retract(nil, t1)
 	rs.Retract(nil, t2)
 	rs.Retract(nil, t3)
@@ -69,9 +72,8 @@ func main() {
 	//delete the rule
 	rs.DeleteRule(rule.GetName())
 
-	//unregister the session, meaning, cleanup/remove all data associated with this session
+	//unregister the session, i.e; cleanup
 	rs.Unregister()
-
 }
 
 func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
