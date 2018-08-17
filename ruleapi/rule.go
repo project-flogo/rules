@@ -3,8 +3,9 @@ package ruleapi
 import (
 	"strings"
 
-	"github.com/TIBCOSoftware/bego/common/model"
 	"errors"
+
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 type ruleImpl struct {
@@ -104,7 +105,7 @@ func (rule *ruleImpl) SetAction(actionFn model.ActionFunction) {
 }
 
 func (rule *ruleImpl) AddCondition(conditionName string, idrs []string, cFn model.ConditionEvaluator, ctx model.RuleContext) (err error) {
-	typeDepMap := map[model.TupleType]bool{}
+	typeDeps := []model.TupleType{}
 	for _, idr := range idrs {
 		aliasProp := strings.Split(string(idr), ".")
 		alias := model.TupleType(aliasProp[0])
@@ -113,8 +114,8 @@ func (rule *ruleImpl) AddCondition(conditionName string, idrs []string, cFn mode
 			return errors.New("Tuple type not found " + string(alias))
 		}
 
-		typeDepMap[alias] = true
-		if len (aliasProp) == 2 { //specifically 2, else do not consider
+		typeDeps = append(typeDeps, alias)
+		if len(aliasProp) == 2 { //specifically 2, else do not consider
 			prop := aliasProp[1]
 
 			td := model.GetTupleDescriptor(model.TupleType(alias))
@@ -129,11 +130,6 @@ func (rule *ruleImpl) AddCondition(conditionName string, idrs []string, cFn mode
 			}
 			propMap[prop] = true
 		}
-	}
-	typeDeps := []model.TupleType{}
-
-	for key, _ := range typeDepMap {
-		typeDeps = append(typeDeps, key)
 	}
 
 	rule.addCond(conditionName, typeDeps, cFn, ctx, true)
