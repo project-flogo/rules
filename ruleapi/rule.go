@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/TIBCOSoftware/bego/common/model"
+	"errors"
 )
 
 type ruleImpl struct {
@@ -90,13 +91,8 @@ func (rule *ruleImpl) String() string {
 	for _, cond := range rule.conditions {
 		str += "\t\t" + cond.String() + "\n"
 	}
-	// idrs := ""
-	// for i := 0; i < len(rule.identifiers); i++ {
-	// 	idrs += rule.identifiers[i].String() + ", "
-	// }
 	str += "\t[Idrs:" + model.IdentifiersToString(rule.identifiers) + "]\n"
 	return str
-	// return str + idrs + "]\n"
 }
 
 func (rule *ruleImpl) GetIdentifiers() []model.TupleType {
@@ -107,46 +103,32 @@ func (rule *ruleImpl) SetAction(actionFn model.ActionFunction) {
 	rule.actionFn = actionFn
 }
 
-//func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType, cFn model.ConditionEvaluator, ctx model.RuleContext) {
-//	typeDeps := []model.TupleType{}
-//	for _, idr := range idrs {
-//		aliasProp := strings.Split(string(idr), ".")
-//
-//		alias := model.TupleType(aliasProp[0])
-//		typeDeps = append(typeDeps, alias)
-//
-//		if len(aliasProp) > 1 {
-//			prop := aliasProp[1]
-//
-//			propMap, found := rule.deps[alias]
-//			if !found {
-//				propMap = map[string]bool{}
-//				rule.deps[alias] = propMap
-//			}
-//			propMap[prop] = true
-//		}
-//	}
-//
-//	rule.addCond(conditionName, typeDeps, cFn, ctx, true)
-//}
-
-
-func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType, cFn model.ConditionEvaluator, ctx model.RuleContext) {
+func (rule *ruleImpl) AddCondition(conditionName string, idrs []string, cFn model.ConditionEvaluator, ctx model.RuleContext) (err error) {
 	typeDepMap := map[model.TupleType]bool{}
-	//cwd := model.ConditionAndDep{"n1", []string{"p1", "p2", "p3"}}
 	for _, idr := range idrs {
 		aliasProp := strings.Split(string(idr), ".")
-
 		alias := model.TupleType(aliasProp[0])
-		typeDepMap[alias] = true
-		prop := aliasProp[1]
 
-		propMap, found := rule.deps[alias]
-		if !found {
-			propMap = map[string]bool{}
-			rule.deps[alias] = propMap
+		if model.GetTupleDescriptor(model.TupleType(alias)) == nil {
+			return errors.New("Tuple type not found " + string(alias))
 		}
-		propMap[prop] = true
+
+		typeDepMap[alias] = true
+		if len (aliasProp) == 2 { //specifically 2, else do not consider
+			prop := aliasProp[1]
+
+			td := model.GetTupleDescriptor(model.TupleType(alias))
+			if prop != "none" && td.GetProperty(prop) == nil { //"none" is a special case
+				return errors.New("TupleType property not found " + prop)
+			}
+
+			propMap, found := rule.deps[alias]
+			if !found {
+				propMap = map[string]bool{}
+				rule.deps[alias] = propMap
+			}
+			propMap[prop] = true
+		}
 	}
 	typeDeps := []model.TupleType{}
 
@@ -155,7 +137,7 @@ func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType,
 	}
 
 	rule.addCond(conditionName, typeDeps, cFn, ctx, true)
-
+	return err
 }
 
 func (rule *ruleImpl) GetDeps() map[model.TupleType]map[string]bool {
