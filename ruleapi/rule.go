@@ -107,27 +107,55 @@ func (rule *ruleImpl) SetAction(actionFn model.ActionFunction) {
 	rule.actionFn = actionFn
 }
 
+//func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType, cFn model.ConditionEvaluator, ctx model.RuleContext) {
+//	typeDeps := []model.TupleType{}
+//	for _, idr := range idrs {
+//		aliasProp := strings.Split(string(idr), ".")
+//
+//		alias := model.TupleType(aliasProp[0])
+//		typeDeps = append(typeDeps, alias)
+//
+//		if len(aliasProp) > 1 {
+//			prop := aliasProp[1]
+//
+//			propMap, found := rule.deps[alias]
+//			if !found {
+//				propMap = map[string]bool{}
+//				rule.deps[alias] = propMap
+//			}
+//			propMap[prop] = true
+//		}
+//	}
+//
+//	rule.addCond(conditionName, typeDeps, cFn, ctx, true)
+//}
+
+
 func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType, cFn model.ConditionEvaluator, ctx model.RuleContext) {
-	typeDeps := []model.TupleType{}
+	typeDepMap := map[model.TupleType]bool{}
+	//cwd := model.ConditionAndDep{"n1", []string{"p1", "p2", "p3"}}
 	for _, idr := range idrs {
 		aliasProp := strings.Split(string(idr), ".")
 
 		alias := model.TupleType(aliasProp[0])
-		typeDeps = append(typeDeps, alias)
+		typeDepMap[alias] = true
+		prop := aliasProp[1]
 
-		if len(aliasProp) > 1 {
-			prop := aliasProp[1]
-
-			propMap, found := rule.deps[alias]
-			if !found {
-				propMap = map[string]bool{}
-				rule.deps[alias] = propMap
-			}
-			propMap[prop] = true
+		propMap, found := rule.deps[alias]
+		if !found {
+			propMap = map[string]bool{}
+			rule.deps[alias] = propMap
 		}
+		propMap[prop] = true
+	}
+	typeDeps := []model.TupleType{}
+
+	for key, _ := range typeDepMap {
+		typeDeps = append(typeDeps, key)
 	}
 
 	rule.addCond(conditionName, typeDeps, cFn, ctx, true)
+
 }
 
 func (rule *ruleImpl) GetDeps() map[model.TupleType]map[string]bool {
