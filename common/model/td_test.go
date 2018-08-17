@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
@@ -21,14 +22,10 @@ func TestOne(t *testing.T) {
 	td1p2.KeyIndex = 31
 	td1p2.PropType = data.TypeString
 
-	td1.Props = make (map[string]TuplePropertyDescriptor)
-	td1.Props[td1p1.Name] = td1p1
-	td1.Props[td1p2.Name] = td1p2
-
+	td1.Props = []TuplePropertyDescriptor{td1p1, td1p2}
 
 	str, _ := json.Marshal(&td1)
 	fmt.Printf("succes %s\n", str)
-
 
 	tpdx := TupleDescriptor{}
 	tpdx.TTLInSeconds = -1

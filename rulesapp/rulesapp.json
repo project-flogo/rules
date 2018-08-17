@@ -1,18 +1,20 @@
 [
   {
     "name": "n1",
-    "props": {
-      "name": {
+    "properties": [
+       {
+        "name": "name",
         "type": "string"
       }
-    }
+    ]
   },
   {
     "name": "n2",
-    "props": {
-      "name": {
-        "type": "string"
-      }
-    }
+    "properties": [
+      {
+       "name": "name",
+       "type": "string"
+     }
+    ]
   }
 ]

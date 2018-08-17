@@ -1,102 +1,122 @@
 [
   {
     "name":"customerevent",
-    "props":{
-      "name":{
+    "properties":[
+      {
+        "name":"name",
         "type":"string",
         "pk-index":0
       },
-      "status":{
+      {
+        "name":"status",
         "type":"string"
       },
-      "balance":{
+      {
+        "name":"balance",
         "type":"double"
       },
-      "addr":{
+      {
+        "name":"addr",
         "type":"string"
       }
-    }
+    ]
   },
   {
     "name":"debitevent",
     "ttl":0,
-    "props":{
-      "name":{
+    "properties":[
+      {
+        "name":"name",
         "type":"string",
         "pk-index":0
       },
-      "debit":{
+      {
+        "name":"debit",
         "type":"string"
       }
-    }
+    ]
   },
   {
     "name":"packageevent",
     "ttl":0,
-    "props":{
-      "packageid":{
+    "properties":[
+      {
+        "name":"packageid",
         "type":"string",
         "pk-index":0
       },
-      "next":{
+      {
+        "name":"next",
         "type":"string"
       },
-      "status":{
+      {
+        "name":"status",
         "type":"string"
       },
-      "isnew":{
+      {
+        "name":"isnew",
         "type":"string"
       }
-    }
+    ]
   },
   {
     "name":"package",
-    "props":{
-      "packageid":{
+    "properties":[
+      {
+        "name":"packageid",
         "type":"string",
         "pk-index":0
       },
-      "curr":{
+      {
+        "name":"curr",
         "type":"string"
       },
-      "next":{
+      {
+        "name":"next",
         "type":"string"
       },
-      "status":{
+      {
+        "name":"status",
         "type":"string"
       }
-    }
+    ]
   },
   {
     "name":"scanevent",
     "ttl":0,
-    "props":{
-      "packageid":{
+    "properties":[
+      {
+        "name":"packageid",
         "type":"string",
         "pk-index":0
       },
-      "curr":{
+      {
+        "name":"curr",
         "type":"string"
       },
-      "next":{
+      {
+        "name":"next",
         "type":"string"
       },
-      "eta":{
+      {
+        "name":"eta",
         "type":"integer"
       }
-    }
+    ]
   },
   {
     "name":"scantimeout",
     "ttl":0,
-    "props":{
-      "packageid":{
+    "properties":[
+      {
+        "name":"packageid",
         "type":"string",
         "pk-index":0
       },
-      "next":{
+      {
+        "name":"next",
         "type":"string"
       }
-    }
+    ]
   }
 ]

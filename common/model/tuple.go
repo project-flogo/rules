@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"time"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 var reteCTXKEY = RetecontextKeyType{}
@@ -210,12 +211,13 @@ func (t *tupleImpl) initTupleWithStringValues(td *TupleDescriptor, values map[st
 }
 
 func (t *tupleImpl) populateValues(td *TupleDescriptor, values map[string]interface{}) (err error) {
-	for propNm, tdp := range td.Props {
-		val, found := values[propNm]
+	for idx := range td.Props {
+		p := td.Props[idx]
+		val, found := values[p.Name]
 		if found {
-			coerced, err := data.CoerceToValue(val, tdp.PropType)
+			coerced, err := data.CoerceToValue(val, p.PropType)
 			if err != nil {
-				t.tuples[propNm] = coerced
+				t.tuples[p.Name] = coerced
 			} else {
 				return err
 			}
@@ -224,12 +226,13 @@ func (t *tupleImpl) populateValues(td *TupleDescriptor, values map[string]interf
 	return nil
 }
 func (t *tupleImpl) populateWithStringValues(td *TupleDescriptor, values map[string]string) (err error) {
-	for propNm, tdp := range td.Props {
-		val, found := values[propNm]
+	for idx := range td.Props {
+		p := td.Props[idx]
+		val, found := values[p.Name]
 		if found {
-			coerced, err := data.CoerceToValue(val, tdp.PropType)
+			coerced, err := data.CoerceToValue(val, p.PropType)
 			if err == nil {
-				t.tuples[propNm] = coerced
+				t.tuples[p.Name] = coerced
 			} else {
 				return err
 			}
@@ -252,8 +255,8 @@ func (t *tupleImpl) validateAndCallListener(ctx context.Context, name string, va
 
 func (t *tupleImpl) chkProp(name string) (err error) {
 	//TODO: Check property's type and value's type compatibility
-	_, ok := t.td.GetProperty(name)
-	if ok {
+	prop := t.td.GetProperty(name)
+	if prop != nil {
 		return nil
 	}
 	return errors.New(fmt.Sprintf("Property [%s] undefined for type [%s]", name, t.td.Name))
@@ -271,9 +274,9 @@ func callChangeListener(ctx context.Context, tuple Tuple, prop string) {
 
 func (t *tupleImpl) validateNameValue(name string, value interface{}) (err error) {
 	//TODO: Check property's type and value's type compatibility
-	p, ok := t.td.GetProperty(name)
+	p := t.td.GetProperty(name)
 
-	if ok {
+	if p != nil {
 		_, err := data.CoerceToValue(value, p.PropType)
 		if err != nil {
 			return err
