@@ -63,7 +63,7 @@ func (tpd TuplePropertyDescriptor) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON allows to hook & customize JSON to TupleDescriptor conversion
-func (td *TupleDescriptor) UnmarshalJSON(data []byte) error {
+func (td *TupleDescriptor) UnmarshalJSON1(data []byte) error {
 	type alias TupleDescriptor
 	ata := &alias{}
 	ata.TTLInSeconds = -1
@@ -71,6 +71,49 @@ func (td *TupleDescriptor) UnmarshalJSON(data []byte) error {
 	_ = json.Unmarshal(data, ata)
 
 	*td = TupleDescriptor(*ata)
+	return nil
+}
+func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
+
+	val := map[string]interface{}{}
+
+	json.Unmarshal(b, &val)
+
+
+	nm := val["name"]
+	//fmt.Printf("%s", nm)
+
+	td.Name = nm.(string)
+	td.TTLInSeconds = -1
+
+	ttl, ok := val["ttl"]
+	if ok {
+		td.TTLInSeconds = int(ttl.(float64))
+	}
+
+	pm1 := val["properties"].([]interface{})
+	//pm := pm1.(map[string]string)
+	//fmt.Printf("%v",  pm1)
+
+	for _, v:= range pm1 {
+		//fmt.Printf("k=%v\n",  v)
+		tdp := TuplePropertyDescriptor{}
+		tdp.KeyIndex = -1
+		pm := v.(map[string]interface{})
+		for pn, pv := range pm {
+			//fmt.Printf("k=%v, v=%v\n", pn, pv)
+			if pn == "name" {
+				tdp.Name = pv.(string)
+			} else if pn == "type" {
+				tdp.PropType, _ = data.ToTypeEnum(pv.(string))
+			} else if pn == "pk-index" {
+				tdp.KeyIndex = int(pv.(float64))
+			}
+		}
+		td.Props = append (td.Props, tdp)
+	}
+
+
 	return nil
 }
 
