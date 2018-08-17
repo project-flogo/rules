@@ -177,11 +177,10 @@ func (t *tupleImpl) GetKey() TupleKey {
 	keyImpl := t.key.(tupleKeyImpl)
 	if keyImpl.keys != nil {
 		return keyImpl
-	} else {
-		keyImpl.keys = make(map[string]interface{})
-		for _, keyProp := range t.GetTupleDescriptor().GetKeyProps() {
-			keyImpl.keys[keyProp] = t.tuples[keyProp]
-		}
+	}
+	keyImpl.keys = make(map[string]interface{})
+	for _, keyProp := range t.GetTupleDescriptor().GetKeyProps() {
+		keyImpl.keys[keyProp] = t.tuples[keyProp]
 	}
 	return keyImpl
 }
@@ -278,9 +277,8 @@ func (t *tupleImpl) validateNameValue(name string, value interface{}) (err error
 		_, err := data.CoerceToValue(value, p.PropType)
 		if err != nil {
 			return err
-		} else {
-			return nil
 		}
+		return nil
 	}
 
 	return fmt.Errorf("Property [%s] undefined for type [%s]", name, t.td.Name)

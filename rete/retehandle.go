@@ -63,7 +63,7 @@ func (hdl *handleImpl) removeJoinTableRowRefs(changedProps map[string]bool) {
 			rule := joinTable.getRule()
 			depProps, found := rule.GetDeps()[alias]
 			if found { // rule depends on this type
-				for changedProp, _ := range changedProps {
+				for changedProp := range changedProps {
 					_, foundProp := depProps[changedProp]
 					if foundProp {
 						toDelete = true
