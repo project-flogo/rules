@@ -6,6 +6,11 @@ import (
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"os"
+	"regexp"
+	"strings"
+	"io/ioutil"
+	"log"
 )
 
 func TestOne(t *testing.T) {
@@ -34,4 +39,46 @@ func TestOne(t *testing.T) {
 	str1, _ := json.Marshal(&tpdx)
 	fmt.Printf("succes %s\n", str1)
 
+}
+
+func TestTwo(t *testing.T) {
+	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/rulesapp/rulesapp.json")
+	tupleDescriptor := fileToString(tupleDescAbsFileNm)
+
+	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
+	//First register the tuple descriptors
+	RegisterTupleDescriptors(tupleDescriptor)
+
+
+
+}
+
+func getAbsPathForResource(resourcepath string) string {
+	GOPATH := os.Getenv("GOPATH")
+	regex, err := regexp.Compile(":|;")
+	if err != nil {
+		return ""
+	}
+	paths := regex.Split(GOPATH, -1)
+	if os.PathListSeparator == ';' {
+		//windows
+		resourcepath = strings.Replace(resourcepath, "/", string(os.PathSeparator), -1)
+	}
+	for _, path := range paths {
+		absPath := path + string(os.PathSeparator) + resourcepath
+		_, err := os.Stat(absPath)
+		if err == nil {
+			return absPath
+		}
+	}
+	return ""
+}
+
+func fileToString(fileName string) string {
+	dat, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Fatal(err)
+		return ""
+	}
+	return string(dat)
 }
