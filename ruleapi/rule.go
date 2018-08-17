@@ -1,9 +1,8 @@
 package ruleapi
 
 import (
+	"fmt"
 	"strings"
-
-	"errors"
 
 	"github.com/TIBCOSoftware/bego/common/model"
 )
@@ -111,7 +110,7 @@ func (rule *ruleImpl) AddCondition(conditionName string, idrs []string, cFn mode
 		alias := model.TupleType(aliasProp[0])
 
 		if model.GetTupleDescriptor(model.TupleType(alias)) == nil {
-			return errors.New("Tuple type not found " + string(alias))
+			return fmt.Errorf("Tuple type not found [%s]", string(alias))
 		}
 
 		typeDeps = append(typeDeps, alias)
@@ -120,7 +119,7 @@ func (rule *ruleImpl) AddCondition(conditionName string, idrs []string, cFn mode
 
 			td := model.GetTupleDescriptor(model.TupleType(alias))
 			if prop != "none" && td.GetProperty(prop) == nil { //"none" is a special case
-				return errors.New("TupleType property not found " + prop)
+				return fmt.Errorf("TupleType property not found [%s]", prop)
 			}
 
 			propMap, found := rule.deps[alias]
