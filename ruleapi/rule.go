@@ -113,7 +113,10 @@ func (rule *ruleImpl) AddCondition(conditionName string, idrs []string, cFn mode
 			return fmt.Errorf("Tuple type not found [%s]", string(alias))
 		}
 
-		typeDeps = append(typeDeps, alias)
+		exists, _ := model.Contains(typeDeps, alias)
+		if !exists {
+			typeDeps = append(typeDeps, alias)
+		}
 		if len(aliasProp) == 2 { //specifically 2, else do not consider
 			prop := aliasProp[1]
 
