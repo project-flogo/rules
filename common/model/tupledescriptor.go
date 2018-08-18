@@ -52,6 +52,9 @@ func GetTupleDescriptor(tupleType TupleType) *TupleDescriptor {
 // MarshalJSON allows to hook & customize TupleDescriptor to JSON conversion
 func (tpd TuplePropertyDescriptor) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString("{")
+	buffer.WriteString("\"" + "name" + "\"" + ":")
+	namestr := "\"" + tpd.Name + "\""
+	buffer.WriteString(namestr + ",")
 	buffer.WriteString("\"" + "type" + "\"" + ":")
 	typestr := "\"" + tpd.PropType.String() + "\""
 	buffer.WriteString(typestr + ",")
