@@ -88,10 +88,12 @@ func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
 	//fmt.Printf("%v",  pm1)
 
 	for _, v:= range pm1 {
+		//fmt.Printf("k=%v\n",  v)
 		tdp := TuplePropertyDescriptor{}
 		tdp.KeyIndex = -1
 		pm := v.(map[string]interface{})
 		for pn, pv := range pm {
+			//fmt.Printf("k=%v, v=%v\n", pn, pv)
 			if pn == "name" {
 				tdp.Name = pv.(string)
 			} else if pn == "type" {
@@ -102,6 +104,8 @@ func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
 		}
 		td.Props = append (td.Props, tdp)
 	}
+
+
 	return nil
 }
 
