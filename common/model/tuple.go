@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -51,7 +50,7 @@ type tupleImpl struct {
 func NewTuple(tupleType TupleType) (mtuple MutableTuple, err error) {
 	td := GetTupleDescriptor(tupleType)
 	if td == nil {
-		return nil, errors.New(fmt.Sprintf("Tuple descriptor not found [%s]", string(tupleType)))
+		return nil, fmt.Errorf("Tuple descriptor not found [%s]", string(tupleType))
 	}
 	t := tupleImpl{}
 	t.initTuple(td)
@@ -62,7 +61,7 @@ func NewTuple(tupleType TupleType) (mtuple MutableTuple, err error) {
 func NewTupleFromMap(tupleType TupleType, values map[string]interface{}) (mtuple MutableTuple, err error) {
 	td := GetTupleDescriptor(tupleType)
 	if td == nil {
-		return nil, errors.New(fmt.Sprintf("Tuple descriptor not found [%s]", string(tupleType)))
+		return nil, fmt.Errorf("Tuple descriptor not found [%s]", string(tupleType))
 	}
 	t := tupleImpl{}
 	err = t.initTupleWithValues(td, values)
@@ -73,7 +72,7 @@ func NewTupleFromMap(tupleType TupleType, values map[string]interface{}) (mtuple
 func NewTupleFromStringMap(tupleType TupleType, values map[string]string) (mtuple MutableTuple, err error) {
 	td := GetTupleDescriptor(tupleType)
 	if td == nil {
-		return nil, errors.New(fmt.Sprintf("Tuple descriptor not found [%s]", string(tupleType)))
+		return nil, fmt.Errorf("Tuple descriptor not found [%s]", string(tupleType))
 	}
 	t := tupleImpl{}
 	err = t.initTupleWithStringValues(td, values)
@@ -178,11 +177,10 @@ func (t *tupleImpl) GetKey() TupleKey {
 	keyImpl := t.key.(tupleKeyImpl)
 	if keyImpl.keys != nil {
 		return keyImpl
-	} else {
-		keyImpl.keys = make(map[string]interface{})
-		for _, keyProp := range t.GetTupleDescriptor().GetKeyProps() {
-			keyImpl.keys[keyProp] = t.tuples[keyProp]
-		}
+	}
+	keyImpl.keys = make(map[string]interface{})
+	for _, keyProp := range t.GetTupleDescriptor().GetKeyProps() {
+		keyImpl.keys[keyProp] = t.tuples[keyProp]
 	}
 	return keyImpl
 }
@@ -259,7 +257,7 @@ func (t *tupleImpl) chkProp(name string) (err error) {
 	if prop != nil {
 		return nil
 	}
-	return errors.New(fmt.Sprintf("Property [%s] undefined for type [%s]", name, t.td.Name))
+	return fmt.Errorf("Property [%s] undefined for type [%s]", name, t.td.Name)
 }
 
 func callChangeListener(ctx context.Context, tuple Tuple, prop string) {
@@ -273,17 +271,15 @@ func callChangeListener(ctx context.Context, tuple Tuple, prop string) {
 }
 
 func (t *tupleImpl) validateNameValue(name string, value interface{}) (err error) {
-	//TODO: Check property's type and value's type compatibility
 	p := t.td.GetProperty(name)
 
 	if p != nil {
 		_, err := data.CoerceToValue(value, p.PropType)
 		if err != nil {
 			return err
-		} else {
-			return nil
 		}
+		return nil
 	}
 
-	return errors.New(fmt.Sprintf("Property [%s] undefined for type [%s]", name, t.td.Name))
+	return fmt.Errorf("Property [%s] undefined for type [%s]", name, t.td.Name)
 }

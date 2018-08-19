@@ -40,7 +40,7 @@ The following code snippet demonstrates usage of the Rules API
     
     	// check for name "Bob" in n1
     	rule := ruleapi.NewRule("n1.name == Bob")
-    	rule.AddCondition("c1", []model.TupleType{"n1"}, checkForBob, nil)
+    	rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
     	rule.SetAction(checkForBobAction)
     	rule.SetContext("This is a test of context")
     	rs.AddRule(rule)
@@ -49,8 +49,8 @@ The following code snippet demonstrates usage of the Rules API
     	// check for name "Bob" in n1, match the "name" field in n2,
     	// in effect, fire the rule when name field in both tuples is "Bob"
     	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
-    	rule2.AddCondition("c1", []model.TupleType{"n1"}, checkForBob, nil)
-    	rule2.AddCondition("c2", []model.TupleType{"n1", "n2"}, checkSameNamesCondition, nil)
+    	rule2.AddCondition("c1", []string{"n1"}, checkForBob, nil)
+    	rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, nil)
     	rule2.SetAction(checkSameNamesAction)
     	rs.AddRule(rule2)
     	fmt.Printf("Rule added: [%s]\n", rule2.GetName())

@@ -31,7 +31,7 @@ type Rule interface {
 //MutableRule interface has methods to add conditions and actions
 type MutableRule interface {
 	Rule
-	AddCondition(conditionName string, idrs []TupleType, cFn ConditionEvaluator, ctx RuleContext)
+	AddCondition(conditionName string, idrs []string, cFn ConditionEvaluator, ctx RuleContext) (err error)
 	SetAction(actionFn ActionFunction)
 	SetPriority(priority int)
 	SetContext(ctx RuleContext)

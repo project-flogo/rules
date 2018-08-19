@@ -21,7 +21,7 @@ func TestIdentifier(t *testing.T) {
 
 	ids := []model.TupleType{i1, i2}
 
-	node := newNode(ids)
+	node := newNode(nil, nil, ids)
 
 	ids2 := node.getIdentifiers()
 

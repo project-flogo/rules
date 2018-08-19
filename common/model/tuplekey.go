@@ -2,6 +2,7 @@ package model
 
 import (
 	"sort"
+
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
@@ -13,7 +14,7 @@ type tupleKeyImpl struct {
 func (tk tupleKeyImpl) String() string {
 
 	s := []string{}
-	for k, _ := range tk.keys {
+	for k := range tk.keys {
 		s = append(s, k)
 	}
 	sort.Strings(s)

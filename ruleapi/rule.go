@@ -1,6 +1,7 @@
 package ruleapi
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/TIBCOSoftware/bego/common/model"
@@ -90,13 +91,8 @@ func (rule *ruleImpl) String() string {
 	for _, cond := range rule.conditions {
 		str += "\t\t" + cond.String() + "\n"
 	}
-	// idrs := ""
-	// for i := 0; i < len(rule.identifiers); i++ {
-	// 	idrs += rule.identifiers[i].String() + ", "
-	// }
 	str += "\t[Idrs:" + model.IdentifiersToString(rule.identifiers) + "]\n"
 	return str
-	// return str + idrs + "]\n"
 }
 
 func (rule *ruleImpl) GetIdentifiers() []model.TupleType {
@@ -107,16 +103,27 @@ func (rule *ruleImpl) SetAction(actionFn model.ActionFunction) {
 	rule.actionFn = actionFn
 }
 
-func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType, cFn model.ConditionEvaluator, ctx model.RuleContext) {
+func (rule *ruleImpl) AddCondition(conditionName string, idrs []string, cFn model.ConditionEvaluator, ctx model.RuleContext) (err error) {
 	typeDeps := []model.TupleType{}
 	for _, idr := range idrs {
 		aliasProp := strings.Split(string(idr), ".")
-
 		alias := model.TupleType(aliasProp[0])
-		typeDeps = append(typeDeps, alias)
 
-		if len(aliasProp) > 1 {
+		if model.GetTupleDescriptor(model.TupleType(alias)) == nil {
+			return fmt.Errorf("Tuple type not found [%s]", string(alias))
+		}
+
+		exists, _ := model.Contains(typeDeps, alias)
+		if !exists {
+			typeDeps = append(typeDeps, alias)
+		}
+		if len(aliasProp) == 2 { //specifically 2, else do not consider
 			prop := aliasProp[1]
+
+			td := model.GetTupleDescriptor(model.TupleType(alias))
+			if prop != "none" && td.GetProperty(prop) == nil { //"none" is a special case
+				return fmt.Errorf("TupleType property not found [%s]", prop)
+			}
 
 			propMap, found := rule.deps[alias]
 			if !found {
@@ -128,6 +135,7 @@ func (rule *ruleImpl) AddCondition(conditionName string, idrs []model.TupleType,
 	}
 
 	rule.addCond(conditionName, typeDeps, cFn, ctx, true)
+	return err
 }
 
 func (rule *ruleImpl) GetDeps() map[model.TupleType]map[string]bool {
