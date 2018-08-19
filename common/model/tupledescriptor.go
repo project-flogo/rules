@@ -65,17 +65,6 @@ func (tpd TuplePropertyDescriptor) MarshalJSON() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// UnmarshalJSON allows to hook & customize JSON to TupleDescriptor conversion
-func (td *TupleDescriptor) UnmarshalJSON1(data []byte) error {
-	type alias TupleDescriptor
-	ata := &alias{}
-	ata.TTLInSeconds = -1
-
-	_ = json.Unmarshal(data, ata)
-
-	*td = TupleDescriptor(*ata)
-	return nil
-}
 func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
 
 	val := map[string]interface{}{}
@@ -119,17 +108,6 @@ func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
 
 	return nil
 }
-
-//func (tpd *TuplePropertyDescriptor) UnmarshalJSON(b []byte) error {
-//	type alias TuplePropertyDescriptor
-//	ata := &alias{}
-//	ata.KeyIndex = -1
-//
-//	_ = json.Unmarshal(b, ata)
-//
-//	*tpd = TuplePropertyDescriptor(*ata)
-//	return nil
-//}
 
 // UnmarshalJSON allows to hook & customize JSON to TuplePropertyDescriptor conversion
 func (tpd *TuplePropertyDescriptor) UnmarshalJSON(b []byte) error {
