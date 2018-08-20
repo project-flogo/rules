@@ -1,47 +1,41 @@
 package model
 
 import (
-	"sort"
-
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
+
+// TupleKey primary key of a tuple
+type TupleKey interface {
+	String() string
+	GetTupleDescriptor() TupleDescriptor
+}
+
 
 type tupleKeyImpl struct {
 	td   TupleDescriptor
 	keys map[string]interface{}
+	keyAsStr string
 }
 
-func (tk tupleKeyImpl) String() string {
+func (tk *tupleKeyImpl) String() string {
 
-	s := []string{}
-	for k := range tk.keys {
-		s = append(s, k)
-	}
-	sort.Strings(s)
-	k := ""
-	i := 0
-	for i = 0; i < len(s); i++ {
-		ky := s[i]
-		k = k + ky + ":"
-		val := tk.keys[ky]
-		strval, _ := data.CoerceToString(val)
-		k += strval
-		if i < len(s)-1 {
-			k += ","
+	if tk.keyAsStr == "" {
+		i := 0
+		keysLen := len(tk.td.GetKeyProps())
+		for i = 0; i < keysLen; i++ {
+			ky := tk.td.GetKeyProps()[i]
+			tk.keyAsStr = tk.keyAsStr + ky + ":"
+			val := tk.keys[ky]
+			strval, _ := data.CoerceToString(val)
+			tk.keyAsStr += strval
+			if i < keysLen-1 {
+				tk.keyAsStr += ","
+			}
 		}
 	}
-	return k
+	return tk.keyAsStr
 }
 
-func (tk tupleKeyImpl) GetTupleDescriptor() TupleDescriptor {
+func (tk *tupleKeyImpl) GetTupleDescriptor() TupleDescriptor {
 	return tk.td
-}
-
-func newTupleKey(tupleType TupleType) TupleKey {
-	td := GetTupleDescriptor(tupleType)
-	if td == nil {
-		return nil
-	}
-	key := tupleKeyImpl{}
-	return &key
 }

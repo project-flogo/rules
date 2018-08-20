@@ -10,17 +10,21 @@ import (
 )
 
 func TestAction(t *testing.T) {
-	rs := createRuleSessionAndRules()
 
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
 	for i := 1; i < 2; i++ {
-		debit, _ := model.NewTuple(model.TupleType("debitevent"))
+		debit, _ := model.NewTupleWithKeyValues(model.TupleType("debitevent"), "Bob")
 		debit.SetString(nil, "name", "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
 		debit.SetString(nil, "debit", fs)
 		rs.Assert(nil, debit)
 	}
 
-	st1, _ := model.NewTuple(model.TupleType("customerevent"))
+	st1, _ := model.NewTupleWithKeyValues(model.TupleType("customerevent"), "Bob")
 	st1.SetString(nil, "name", "Bob")
 	st1.SetString(nil, "status", "active")
 	st1.SetDouble(nil, "balance", 1000)
@@ -28,35 +32,37 @@ func TestAction(t *testing.T) {
 }
 
 func TestActionTwo(t *testing.T) {
-	rs := createRuleSessionAndRules()
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
 
-	st1, _ := model.NewTuple(model.TupleType("customerevent"))
-	st1.SetString(nil, "name", "Bob")
+	st1, _ := model.NewTupleWithKeyValues(model.TupleType("customerevent"), "Bob")
 	st1.SetString(nil, "status", "active")
 	st1.SetDouble(nil, "balance", 1000)
 	rs.Assert(nil, st1)
 
 	for i := 1; i < 2; i++ {
-		debit, _ := model.NewTuple(model.TupleType("debitevent"))
-		debit.SetString(nil, "name", "Bob")
-		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
-		debit.SetString(nil, "debit", fs)
+		debit, _ := model.NewTupleWithKeyValues(model.TupleType("debitevent"), "Bob")
+		debit.SetDouble(nil, "debit", float64(i*100))
 		rs.Assert(nil, debit)
 	}
 }
 
 func TestActionTwoWithDep(t *testing.T) {
-	rs := createRuleSessionAndRulesWD()
-
-	st1, _ := model.NewTuple(model.TupleType("customerevent"))
-	st1.SetString(nil, "name", "Bob")
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
+	st1, _ := model.NewTupleWithKeyValues(model.TupleType("customerevent"), "Bob")
 	st1.SetString(nil, "status", "active")
 	st1.SetDouble(nil, "balance", 1000)
 	rs.Assert(nil, st1)
 
 	for i := 1; i < 3; i++ {
-		debit, _ := model.NewTuple(model.TupleType("debitevent"))
-		debit.SetString(nil, "name", "Bob")
+		debit, _ := model.NewTupleWithKeyValues(model.TupleType("debitevent"), "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
 		debit.SetString(nil, "debit", fs)
 		rs.Assert(nil, debit)
@@ -65,10 +71,12 @@ func TestActionTwoWithDep(t *testing.T) {
 }
 
 func TestTupleTTL(t *testing.T) {
-	rs := createRuleSessionAndRules()
-
-	st1, _ := model.NewTuple(model.TupleType("customerevent"))
-	st1.SetString(nil, "name", "Bob")
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
+	st1, _ := model.NewTupleWithKeyValues(model.TupleType("customerevent"), "Bob")
 	st1.SetString(nil, "status", "active")
 	st1.SetDouble(nil, "balance", 1000)
 	rs.Assert(nil, st1)
@@ -76,8 +84,7 @@ func TestTupleTTL(t *testing.T) {
 	time.Sleep(time.Second * 6)
 
 	for i := 1; i < 3; i++ {
-		debit, _ := model.NewTuple(model.TupleType("debitevent"))
-		debit.SetString(nil, "name", "Bob")
+		debit, _ := model.NewTupleWithKeyValues(model.TupleType("debitevent"), "Bob")
 		fs := strconv.FormatFloat(float64(i*100), 'E', -1, 32)
 		debit.SetString(nil, "debit", fs)
 		rs.Assert(nil, debit)
@@ -85,20 +92,25 @@ func TestTupleTTL(t *testing.T) {
 }
 
 func TestActionTimeout(t *testing.T) {
-	rs := createRuleSessionAndRules()
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
 
-	pt, _ := model.NewTuple(model.TupleType("packagetimeout"))
-	pt.SetString(nil, "packageid", "pkg1")
+	pt, _ := model.NewTupleWithKeyValues(model.TupleType("packagetimeout"), "pkg1")
 	rs.ScheduleAssert(nil, 5000, "myid", pt)
 
 	time.Sleep(time.Minute)
 }
 
 func TestActionTimeoutCancel(t *testing.T) {
-	rs := createRuleSessionAndRules()
-
-	pt, _ := model.NewTuple(model.TupleType("packagetimeout"))
-	pt.SetString(nil, "packageid", "pkg1")
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
+	pt, _ := model.NewTupleWithKeyValues(model.TupleType("packagetimeout"), "pkg1")
 	rs.ScheduleAssert(nil, 1000, "myid", pt)
 
 	rs.CancelScheduledAssert(nil, "myid")

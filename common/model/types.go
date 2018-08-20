@@ -4,15 +4,6 @@ import (
 	"context"
 )
 
-//TupleType Each tuple is of a certain type, described by TypeDescriptor
-type TupleType string
-
-// TupleKey for each TupleDescriptor
-type TupleKey interface {
-	String() string
-	GetTupleDescriptor() TupleDescriptor
-}
-
 // RuleContext associated with every rule
 type RuleContext interface{}
 

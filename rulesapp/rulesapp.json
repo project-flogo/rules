@@ -5,17 +5,17 @@
        {
         "name": "name",
         "type": "string",
-         "pk-index": 0
+        "pk-index": 0
       }
     ]
   },
   {
     "name": "n2",
-    "ttl" : 5,
     "properties": [
       {
        "name": "name",
-       "type": "string"
+       "type": "string",
+       "pk-index": 0
      }
     ]
   }

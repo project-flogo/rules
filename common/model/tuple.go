@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"reflect"
 )
 
 var reteCTXKEY = RetecontextKeyType{}
@@ -22,6 +23,7 @@ type Tuple interface {
 	GetDouble(name string) (val float64, err error)
 	GetBool(name string) (val bool, err error)
 	//GetDateTime(name string) time.Time
+	GetKey() TupleKey
 
 }
 
@@ -47,36 +49,30 @@ type tupleImpl struct {
 	td        *TupleDescriptor
 }
 
-func NewTuple(tupleType TupleType) (mtuple MutableTuple, err error) {
+func NewTuple(tupleType TupleType, values map[string]interface{}) (mtuple MutableTuple, err error) {
 	td := GetTupleDescriptor(tupleType)
 	if td == nil {
 		return nil, fmt.Errorf("Tuple descriptor not found [%s]", string(tupleType))
 	}
 	t := tupleImpl{}
-	t.initTuple(td)
-	t.key = newTupleKey(TupleType(td.Name))
-	return &t, nil
-}
-
-func NewTupleFromMap(tupleType TupleType, values map[string]interface{}) (mtuple MutableTuple, err error) {
-	td := GetTupleDescriptor(tupleType)
-	if td == nil {
-		return nil, fmt.Errorf("Tuple descriptor not found [%s]", string(tupleType))
+	err = t.initTuple(td, values)
+	if err != nil {
+		return nil, err
 	}
-	t := tupleImpl{}
-	err = t.initTupleWithValues(td, values)
-	t.key = newTupleKey(TupleType(td.Name))
 	return &t, err
 }
 
-func NewTupleFromStringMap(tupleType TupleType, values map[string]string) (mtuple MutableTuple, err error) {
+func NewTupleWithKeyValues(tupleType TupleType, values ...interface{}) (mtuple MutableTuple, err error) {
+
 	td := GetTupleDescriptor(tupleType)
 	if td == nil {
 		return nil, fmt.Errorf("Tuple descriptor not found [%s]", string(tupleType))
 	}
 	t := tupleImpl{}
-	err = t.initTupleWithStringValues(td, values)
-	t.key = newTupleKey(TupleType(td.Name))
+	err = t.initTupleWithKeyValues(td, values...)
+	if err != nil {
+		return nil, err
+	}
 	return &t, err
 }
 
@@ -174,72 +170,73 @@ func (t *tupleImpl) SetValue(ctx context.Context, name string, value interface{}
 	return t.validateAndCallListener(ctx, name, value)
 }
 func (t *tupleImpl) GetKey() TupleKey {
-	keyImpl := t.key.(tupleKeyImpl)
-	if keyImpl.keys != nil {
-		return keyImpl
-	}
-	keyImpl.keys = make(map[string]interface{})
-	for _, keyProp := range t.GetTupleDescriptor().GetKeyProps() {
-		keyImpl.keys[keyProp] = t.tuples[keyProp]
-	}
-	return keyImpl
+	return t.key
 }
 
-func (t *tupleImpl) initTuple(td *TupleDescriptor) {
+func (t *tupleImpl) initTuple(td *TupleDescriptor, values map[string]interface{}) (err error) {
 	t.tuples = make(map[string]interface{})
 	t.tupleType = TupleType(td.Name)
 	t.td = td
-}
-
-func (t *tupleImpl) initTupleWithValues(td *TupleDescriptor, values map[string]interface{}) (err error) {
-	t.tuples = make(map[string]interface{})
-	t.tupleType = TupleType(td.Name)
-
-	err = t.populateValues(td, values)
-	t.td = td
-	return err
-}
-func (t *tupleImpl) initTupleWithStringValues(td *TupleDescriptor, values map[string]string) (err error) {
-	t.tuples = make(map[string]interface{})
-	t.tupleType = TupleType(td.Name)
-
-	err = t.populateWithStringValues(td, values)
-	t.td = td
-	return err
-}
-
-func (t *tupleImpl) populateValues(td *TupleDescriptor, values map[string]interface{}) (err error) {
-	for idx := range td.Props {
-		p := td.Props[idx]
-		val, found := values[p.Name]
+	tk := tupleKeyImpl{}
+	tk.keys = make(map[string]interface{})
+	tk.td = *t.td
+	t.key = &tk
+	for _, tdp := range td.Props {
+		val, found := values[tdp.Name]
 		if found {
-			coerced, err := data.CoerceToValue(val, p.PropType)
-			if err != nil {
-				t.tuples[p.Name] = coerced
-			} else {
-				return err
-			}
-		}
-	}
-	return nil
-}
-func (t *tupleImpl) populateWithStringValues(td *TupleDescriptor, values map[string]string) (err error) {
-	for idx := range td.Props {
-		p := td.Props[idx]
-		val, found := values[p.Name]
-		if found {
-			coerced, err := data.CoerceToValue(val, p.PropType)
+			coerced, err := data.CoerceToValue(val, tdp.PropType)
 			if err == nil {
-				t.tuples[p.Name] = coerced
+				t.tuples[tdp.Name] = coerced
 			} else {
 				return err
 			}
+		} else if tdp.KeyIndex != -1 { //key prop
+			return fmt.Errorf("Key property [%s] not found", tdp.Name)
 		}
 	}
-	return nil
+
+	for _, keyProp := range td.GetKeyProps() {
+		tk.keys[keyProp] = t.tuples[keyProp]
+	}
+	return err
+}
+
+func (t *tupleImpl) initTupleWithKeyValues(td *TupleDescriptor, values ...interface{}) (err error) {
+	t.tuples = make(map[string]interface{})
+	t.tupleType = TupleType(td.Name)
+	t.td = td
+	tk := tupleKeyImpl{}
+	tk.keys = make(map[string]interface{})
+	tk.td = *t.td
+	t.key = &tk
+	if len(values) != len(t.td.GetKeyProps()) {
+		return fmt.Errorf("Wrong number of key values in type [%s]. Expecting [%d], got [%d]",
+			td.Name, len(t.td.GetKeyProps()), len(values))
+	}
+
+	i := 0
+	for _, keyProp := range td.GetKeyProps() {
+		tdp := td.GetProperty(keyProp)
+		val := values[i]
+		coerced, err := data.CoerceToValue(val, tdp.PropType)
+		if err == nil {
+			t.tuples[keyProp] = coerced
+			tk.keys[keyProp] = coerced
+		} else {
+			return fmt.Errorf("Type mismatch for field [%s] in type [%s] Expecting [%s], got [%v]",
+				keyProp, td.Name, tdp.PropType.String(), reflect.TypeOf(val))
+		}
+		i++
+	}
+	return err
 }
 
 func (t *tupleImpl) validateAndCallListener(ctx context.Context, name string, value interface{}) (err error) {
+
+	if t.isKeyProp(name) {
+		return fmt.Errorf("Cannot change a key property [%s] for type [%d]", name, t.td.Name)
+	}
+
 	err = t.validateNameValue(name, value)
 	if err != nil {
 		return err
@@ -282,4 +279,13 @@ func (t *tupleImpl) validateNameValue(name string, value interface{}) (err error
 	}
 
 	return fmt.Errorf("Property [%s] undefined for type [%s]", name, t.td.Name)
+}
+
+func (t *tupleImpl) isKeyProp (propName string) bool {
+	found := false
+	switch tki:=t.key.(type) {
+	case *tupleKeyImpl:
+		_, found = tki.keys[propName]
+	}
+	return found
 }

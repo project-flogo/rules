@@ -105,108 +105,95 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 	//fmt.Printf("Received event from tuple source [%s]", h.Name)
 
 	tupleType := model.TupleType(h.Name)
-	queryParams := inputs["queryParams"].Value().(map[string]string)
+	queryParams := inputs["queryParams"].Value().(map[string]interface{})
 
-	tuple, _ := model.NewTupleFromStringMap(tupleType, queryParams) //n1 -> will be replaced by contextual information coming in the data
-
-	//map input data into tuples, only string. ignore the rest for now
-	//for key, value := range queryParams {
-	//	//fmt.Printf("[%s]\n", "a")
-	//	if key == "balance" {
-	//		f, _ := strconv.ParseFloat(value, 64)
-	//		tuple.SetDouble(ctx, key, f)
-	//	} else {
-	//		tuple.SetString(ctx, key, value)
-	//	}
-	//}
-	//tuple.SetValue(ctx, queryParams)
-
+	tuple, _ := model.NewTuple(tupleType, queryParams) //n1 -> will be replaced by contextual information coming in the data
 	a.rs.Assert(ctx, tuple)
 	//fmt.Printf("[%s]\n", "b")
 	return nil, nil
 }
 
-func loadRulesWithDeps(rs model.RuleSession) {
-
-	rule := ruleapi.NewRule("customer-event")
-	rule.AddCondition("customer", []string{"customerevent.none"}, truecondition, nil) // check for name "Bob" in n1
-	rule.SetAction(customerAction)
-	rule.SetPriority(1)
-	rs.AddRule(rule)
-	fmt.Printf("Rule added: [%s]\n", rule.GetName())
-
-	rule2 := ruleapi.NewRule("debit-event")
-	rule2.AddCondition("debitevent", []string{"debitevent.none"}, truecondition, nil)
-	rule2.SetAction(debitEvent)
-	rule2.SetPriority(2)
-	rs.AddRule(rule2)
-	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
-
-	rule3 := ruleapi.NewRule("customer-debit")
-	rule3.AddCondition("customerdebit", []string{"debitevent.name", "customerevent.name"}, customerdebitjoincondition, nil)
-	rule3.SetAction(debitAction)
-	rule3.SetPriority(3)
-	rs.AddRule(rule3)
-	fmt.Printf("Rule added: [%s]\n", rule3.GetName())
-}
+//func loadRulesWithDeps(rs model.RuleSession) {
+//
+//	rule := ruleapi.NewRule("customer-event")
+//	rule.AddCondition("customer", []string{"customerevent.none"}, truecondition, nil) // check for name "Bob" in n1
+//	rule.SetAction(customerAction)
+//	rule.SetPriority(1)
+//	rs.AddRule(rule)
+//	fmt.Printf("Rule added: [%s]\n", rule.GetName())
+//
+//	rule2 := ruleapi.NewRule("debit-event")
+//	rule2.AddCondition("debitevent", []string{"debitevent.none"}, truecondition, nil)
+//	rule2.SetAction(debitEvent)
+//	rule2.SetPriority(2)
+//	rs.AddRule(rule2)
+//	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
+//
+//	rule3 := ruleapi.NewRule("customer-debit")
+//	rule3.AddCondition("customerdebit", []string{"debitevent.name", "customerevent.name"}, customerdebitjoincondition, nil)
+//	rule3.SetAction(debitAction)
+//	rule3.SetPriority(3)
+//	rs.AddRule(rule3)
+//	fmt.Printf("Rule added: [%s]\n", rule3.GetName())
+//}
 
 func truecondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	return true
 }
-func customerAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	tuple := tuples["customerevent"]
-	if tuple == nil {
-		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
-	} else {
-		name, _ := tuple.GetString("name")
-		fmt.Printf("Received a customer event with customer name [%s]\n", name)
-	}
-}
-func debitEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	tuple := tuples["debitevent"]
-	if tuple == nil {
-		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
-	} else {
-		name, _ := tuple.GetString("name")
-		amount, _ := tuple.GetString("debit")
+//func customerAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+//	tuple := tuples["customerevent"]
+//	if tuple == nil {
+//		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
+//	} else {
+//		name, _ := tuple.GetString("name")
+//		fmt.Printf("Received a customer event with customer name [%s]\n", name)
+//	}
+//}
+//func debitEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+//	tuple := tuples["debitevent"]
+//	if tuple == nil {
+//		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
+//	} else {
+//		name, _ := tuple.GetString("name")
+//		amount, _ := tuple.GetString("debit")
+//
+//		fmt.Printf("Received a debit event for customer [%s], amount [%s]\n", name, amount)
+//	}
+//}
+//
+//func customerdebitjoincondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+//
+//	customerTuple := tuples["customerevent"]
+//	debitTuple := tuples["debitevent"]
+//
+//	if customerTuple == nil || debitTuple == nil {
+//		fmt.Println("Should not get a nil tuple here! This is an error")
+//		return false
+//	}
+//	custName, _ := customerTuple.GetString("name")
+//	acctName, _ := debitTuple.GetString("name")
+//
+//	return custName == acctName
+//
+//}
+//
+//func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+//	//fmt.Printf("Rule fired: [%s]\n", ruleName)
+//	customerTuple := tuples["customerevent"].(model.MutableTuple)
+//	debitTuple := tuples["debitevent"]
+//	dbt, _ := debitTuple.GetString("debit")
+//	debitAmt, _ := strconv.ParseFloat(dbt, 64)
+//	currBal, _ := customerTuple.GetDouble("balance")
+//	st, _ := customerTuple.GetString("status")
+//	if st == "active" {
+//		customerTuple.SetDouble(ctx, "balance", currBal-debitAmt)
+//	}
+//	nm, _ := customerTuple.GetString("name")
+//	newBal, _ := customerTuple.GetDouble("balance")
+//	fmt.Printf("Customer [%s], Balance [%f], Debit [%f], NewBalance [%f]\n", nm, currBal, debitAmt, newBal)
+//}
 
-		fmt.Printf("Received a debit event for customer [%s], amount [%s]\n", name, amount)
-	}
-}
-
-func customerdebitjoincondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-
-	customerTuple := tuples["customerevent"]
-	debitTuple := tuples["debitevent"]
-
-	if customerTuple == nil || debitTuple == nil {
-		fmt.Println("Should not get a nil tuple here! This is an error")
-		return false
-	}
-	custName, _ := customerTuple.GetString("name")
-	acctName, _ := debitTuple.GetString("name")
-
-	return custName == acctName
-
-}
-
-func debitAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	//fmt.Printf("Rule fired: [%s]\n", ruleName)
-	customerTuple := tuples["customerevent"].(model.MutableTuple)
-	debitTuple := tuples["debitevent"]
-	dbt, _ := debitTuple.GetString("debit")
-	debitAmt, _ := strconv.ParseFloat(dbt, 64)
-	currBal, _ := customerTuple.GetDouble("balance")
-	st, _ := customerTuple.GetString("status")
-	if st == "active" {
-		customerTuple.SetDouble(ctx, "balance", currBal-debitAmt)
-	}
-	nm, _ := customerTuple.GetString("name")
-	newBal, _ := customerTuple.GetDouble("balance")
-	fmt.Printf("Customer [%s], Balance [%f], Debit [%f], NewBalance [%f]\n", nm, currBal, debitAmt, newBal)
-}
-
-func createRuleSessionAndRules() model.RuleSession {
+func createRuleSessionAndRules() (model.RuleSession, error) {
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
 	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
@@ -215,22 +202,11 @@ func createRuleSessionAndRules() model.RuleSession {
 	if err != nil {
 		log.Fatal(err)
 	}
-	model.RegisterTupleDescriptors(string(dat))
-	return rs
-}
-
-func createRuleSessionAndRulesWD() model.RuleSession {
-	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
-
-	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
-
-	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
+	err = model.RegisterTupleDescriptors(string(dat))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	model.RegisterTupleDescriptors(string(dat))
-	loadRulesWithDeps(rs)
-	return rs
+	return rs, nil
 }
 
 func getAbsPathForResource(resourcepath string) string {
@@ -299,7 +275,7 @@ func packageeventAction(ctx context.Context, rs model.RuleSession, ruleName stri
 	fmt.Printf("Received a new package asserting package id[%s]\n", pkgid)
 
 	//assert a package
-	pkg, _ := model.NewTuple(model.TupleType("package"))
+	pkg, _ := model.NewTupleWithKeyValues(model.TupleType("package"), pkgid)
 	pkgID, _ := pkgEvent.GetString("packageid")
 	nxt, _ := pkgEvent.GetString("next")
 	pkg.SetString(ctx, "packageid", pkgID)
@@ -343,8 +319,7 @@ func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string,
 	etaS, _ := scanevent.GetString("eta")
 	eta, _ := strconv.Atoi(etaS)
 
-	scantmout, _ := model.NewTuple(model.TupleType("scantimeout"))
-	scantmout.SetString(ctx, "packageid", pkgid)
+	scantmout, _ := model.NewTupleWithKeyValues(model.TupleType("scantimeout"), pkgid)
 	scantmout.SetString(ctx, "next", snext)
 
 	//cancel a previous timeout if set, since we got a scan event for the package's next destination

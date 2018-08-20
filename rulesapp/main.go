@@ -24,7 +24,11 @@ func main() {
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//First register the tuple descriptors
-	model.RegisterTupleDescriptors(tupleDescriptor)
+	err := model.RegisterTupleDescriptors(tupleDescriptor)
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
 
 	//Create a RuleSession
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
@@ -48,19 +52,21 @@ func main() {
 
 	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Tom")
-	t1, _ := model.NewTuple("n1")
+	keys := make(map[string]interface{})
+	keys["name"] = "Tom"
+	t1, _ := model.NewTupleWithKeyValues("n1", "Tom")
 	t1.SetString(nil, "name", "Tom")
 	rs.Assert(nil, t1)
 
 	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Bob")
-	t2, _ := model.NewTuple("n1")
+	t2, _ := model.NewTupleWithKeyValues("n1", "Bob")
 	t2.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t2)
 
 	//Now assert a "n2" tuple
 	fmt.Println("Asserting n2 tuple with name=Bob")
-	t3, _ := model.NewTuple("n2")
+	t3, _ := model.NewTupleWithKeyValues("n2", "Bob")
 	t3.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t3)
 

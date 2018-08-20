@@ -8,11 +8,16 @@ import (
 	"sync"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"fmt"
 )
 
 var (
 	typeRegistry sync.Map
 )
+
+//TupleType Each tuple is of a certain type, described by TypeDescriptor
+type TupleType string
+
 
 // TupleDescriptor defines the type of the structure, its properties, types
 type TupleDescriptor struct {
@@ -30,12 +35,16 @@ type TuplePropertyDescriptor struct {
 }
 
 // RegisterTupleDescriptors registers the TupleDescriptors
-func RegisterTupleDescriptors(jsonRegistry string) {
+func RegisterTupleDescriptors(jsonRegistry string) (err error){
 	tds := []TupleDescriptor{}
-	json.Unmarshal([]byte(jsonRegistry), &tds)
+	err = json.Unmarshal([]byte(jsonRegistry), &tds)
+	if err != nil {
+		return err
+	}
 	for _, key := range tds {
 		typeRegistry.LoadOrStore(TupleType(key.Name), key)
 	}
+	return nil
 }
 
 // GetTupleDescriptor gets the TupleDescriptor based on the TupleType
@@ -68,9 +77,7 @@ func (tpd TuplePropertyDescriptor) MarshalJSON() ([]byte, error) {
 func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
 
 	val := map[string]interface{}{}
-
 	json.Unmarshal(b, &val)
-
 
 	nm := val["name"]
 	//fmt.Printf("%s", nm)
@@ -83,46 +90,53 @@ func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
 		td.TTLInSeconds = int(ttl.(float64))
 	}
 
-	pm1 := val["properties"].([]interface{})
-	//pm := pm1.(map[string]string)
-	//fmt.Printf("%v",  pm1)
+	jsonProps := val["properties"].([]interface{})
 
-	for _, v:= range pm1 {
-		//fmt.Printf("k=%v\n",  v)
+	idxProp := make(map[int]string)
+	for _, v:= range jsonProps {
 		tdp := TuplePropertyDescriptor{}
 		tdp.KeyIndex = -1
 		pm := v.(map[string]interface{})
+
+		//ensure you get the name first
 		for pn, pv := range pm {
-			//fmt.Printf("k=%v, v=%v\n", pn, pv)
 			if pn == "name" {
 				tdp.Name = pv.(string)
-			} else if pn == "type" {
+				break
+			}
+		}
+		//duplicate pk-index validation
+		for pn, pv := range pm {
+			if pn == "type" {
 				tdp.PropType, _ = data.ToTypeEnum(pv.(string))
 			} else if pn == "pk-index" {
-				tdp.KeyIndex = int(pv.(float64))
+				idx := int(pv.(float64))
+				if idx != -1 {
+					prop, exists := idxProp[idx]
+					if exists {
+						return fmt.Errorf("Property [%s] already defined as key at index [%d] for type [%s]",
+							prop, idx, nm)
+					}
+					idxProp[idx] = tdp.Name
+				}
+				tdp.KeyIndex = idx
 			}
 		}
 		td.Props = append (td.Props, tdp)
 	}
 
-
-	return nil
-}
-
-// UnmarshalJSON allows to hook & customize JSON to TuplePropertyDescriptor conversion
-func (tpd *TuplePropertyDescriptor) UnmarshalJSON(b []byte) error {
-	var v map[string]interface{}
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
+	//index validation
+	idsx := make([]int, 0)
+	for k, _ := range idxProp {
+		idsx = append (idsx, k)
 	}
-	tpd.Name = v["name"].(string)
-	tpd.PropType, _ = data.ToTypeEnum(v["type"].(string))
-	kidx, found := v["pk-index"]
-	if !found {
-		tpd.KeyIndex = -1
-	} else {
-		tpd.KeyIndex = int(kidx.(float64))
+	sort.Ints(idsx)
+	for i:=0; i<len(idsx); i++ {
+		if idsx[i] != i {
+			return fmt.Errorf("Missing key at index [%d]", i)
+		}
 	}
+
 	return nil
 }
 

@@ -9,32 +9,32 @@ import (
 
 func TestPkgFlowNormalWithDeps(t *testing.T) {
 
-	rs := createRuleSessionAndRules()
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
 
 	loadPkgRulesWithDeps(rs)
 
-	pkgEvt, _ := model.NewTuple(model.TupleType("packageevent"))
-	//ctx := context.TODO()
-	pkgEvt.SetString(nil, "packageid", "1")
+	pkgEvt, _ := model.NewTupleWithKeyValues("packageevent", "1")
 	pkgEvt.SetString(nil, "next", "sfo")
 	pkgEvt.SetString(nil, "status", "normal")
 	pkgEvt.SetString(nil, "isnew", "true")
 
 	rs.Assert(nil, pkgEvt)
 	//time.Sleep(time.Second*20)
-	scanEv, _ := model.NewTuple(model.TupleType("scanevent"))
-	scanEv.SetString(nil, "packageid", "1")
+	scanEv, _ := model.NewTupleWithKeyValues("scanevent", "1")
 	scanEv.SetString(nil, "curr", "sfo")
 	scanEv.SetString(nil, "next", "ny")
-	err := scanEv.SetValue(nil, "eta", "10")
+	err = scanEv.SetValue(nil, "eta", 10)
 	if err != nil {
 		fmt.Printf("[%s]\n", err)
 	}
 
 	rs.Assert(nil, scanEv)
 
-	scanEv1, _ := model.NewTuple(model.TupleType("scanevent"))
-	scanEv1.SetString(nil, "packageid", "1")
+	scanEv1, _ := model.NewTupleWithKeyValues("scanevent",  "1")
 	scanEv1.SetString(nil, "curr", "ny")
 	scanEv1.SetString(nil, "next", "done")
 	scanEv.SetString(nil, "next", "ny")
@@ -45,24 +45,25 @@ func TestPkgFlowNormalWithDeps(t *testing.T) {
 
 func TestPkgFlowNormalWithDepsWithTimeout(t *testing.T) {
 
-	rs := createRuleSessionAndRules()
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
 
 	loadPkgRulesWithDeps(rs)
 
-	pkgEvt, _ := model.NewTuple(model.TupleType("packageevent"))
-	//ctx := context.TODO()
-	pkgEvt.SetString(nil, "packageid", "1")
+	pkgEvt, _ := model.NewTupleWithKeyValues("packageevent", "1")
 	pkgEvt.SetString(nil, "next", "sfo")
 	pkgEvt.SetString(nil, "status", "normal")
 	pkgEvt.SetString(nil, "isnew", "true")
 
 	rs.Assert(nil, pkgEvt)
 	//time.Sleep(time.Second*20)
-	scanEv, _ := model.NewTuple(model.TupleType("scanevent"))
-	scanEv.SetString(nil, "packageid", "1")
+	scanEv, _ := model.NewTupleWithKeyValues("scanevent", "1")
 	scanEv.SetString(nil, "curr", "sfo")
 	scanEv.SetString(nil, "next", "ny")
-	err := scanEv.SetValue(nil, "eta", "3")
+	err = scanEv.SetValue(nil, "eta", 3)
 	if err != nil {
 		fmt.Printf("[%s]\n", err)
 	}
@@ -75,27 +76,44 @@ func TestPkgFlowNormalWithDepsWithTimeout(t *testing.T) {
 
 func TestPkgFlowNormalWithDepsMapValues(t *testing.T) {
 
-	rs := createRuleSessionAndRules()
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
 
 	loadPkgRulesWithDeps(rs)
 
-	pkgEvt, _:= model.NewTuple(model.TupleType("packageevent"))
-	pkgEvt.SetString(nil, "packageid", "1")
+	pkgEvt, err := model.NewTupleWithKeyValues("packageevent", "1")
+	if err != nil {
+		fmt.Printf("error: [%s]\n", err)
+		return
+	}
 	pkgEvt.SetString(nil, "next", "sfo")
 	pkgEvt.SetString(nil, "status", "normal")
 	pkgEvt.SetString(nil, "isnew", "true")
+	fmt.Printf("Asserting package with key [%s]\n", pkgEvt.GetKey().String())
 
 	rs.Assert(nil, pkgEvt)
 
-	values := make (map[string]string)
+	values := make (map[string]interface{})
 	values["packageid"] = "1"
 	values["curr"] = "sfo"
 	values["next"] = "ny"
-	values["eta"] = "5"
+	values["eta"] = 5
 
-	scanEv, _ := model.NewTupleFromStringMap("scanevent", values)
+	scanEv, _ := model.NewTuple("scanevent", values)
 
 	rs.Assert(nil, scanEv)
+
+	values = make (map[string]interface{})
+	values["packageid"] = "1"
+	values["curr"] = "ny"
+	values["next"] = "done"
+	values["eta"] = 5
+
+	scanEv2, _ := model.NewTuple("scanevent", values)
+	rs.Assert(nil, scanEv2)
 
 	time.Sleep(time.Second * time.Duration(20))
 }

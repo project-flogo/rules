@@ -25,64 +25,65 @@ A tuple can be `Retract`ed from the rule session to take it out of play for rule
 The following code snippet demonstrates usage of the Rules API
 
 
-		fmt.Println("** Example usage of this module **")
-    
-    	//Load the tuple descriptor file (relative to GOPATH)
-    	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/rulesapp/rulesapp.json")
-    	tupleDescriptor := fileToString(tupleDescAbsFileNm)
-    
-    	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
-    	//First register the tuple descriptors
-    	model.RegisterTupleDescriptors(tupleDescriptor)
-    
-    	//Create a RuleSession
-    	rs := ruleapi.GetOrCreateRuleSession("asession")
-    
-    	// check for name "Bob" in n1
-    	rule := ruleapi.NewRule("n1.name == Bob")
-    	rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
-    	rule.SetAction(checkForBobAction)
-    	rule.SetContext("This is a test of context")
-    	rs.AddRule(rule)
-    	fmt.Printf("Rule added: [%s]\n", rule.GetName())
-    
-    	// check for name "Bob" in n1, match the "name" field in n2,
-    	// in effect, fire the rule when name field in both tuples is "Bob"
-    	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
-    	rule2.AddCondition("c1", []string{"n1"}, checkForBob, nil)
-    	rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, nil)
-    	rule2.SetAction(checkSameNamesAction)
-    	rs.AddRule(rule2)
-    	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
-    
-    	//Now assert a "n1" tuple
-    	fmt.Println("Asserting n1 tuple with name=Tom")
-    	t1, _ := model.NewTuple("n1")
-    	t1.SetString(nil, "name", "Tom")
-    	rs.Assert(nil, t1)
-    
-    	//Now assert a "n1" tuple
-    	fmt.Println("Asserting n1 tuple with name=Bob")
-    	t2, _ := model.NewTuple("n1")
-    	t2.SetString(nil, "name", "Bob")
-    	rs.Assert(nil, t2)
-    
-       	//Now assert a "n2" tuple
-    	fmt.Println("Asserting n2 tuple with name=Bob")
-    	t3, _ := model.NewTuple("n2")
-    	t3.SetString(nil, "name", "Bob")
-    	rs.Assert(nil, t3)
-    
-    	//Retract tuples
-    	rs.Retract(nil, t1)
-    	rs.Retract(nil, t2)
-    	rs.Retract(nil, t3)
-    
-    	//delete the rule
-    	rs.DeleteRule(rule.GetName())
-    
-    	//unregister the session, i.e; cleanup
-    	rs.Unregister()
+	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
+	//First register the tuple descriptors
+	err := model.RegisterTupleDescriptors(tupleDescriptor)
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
+
+	//Create a RuleSession
+	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
+
+	//// check for name "Bob" in n1
+	rule := ruleapi.NewRule("n1.name == Bob")
+	rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
+	rule.SetAction(checkForBobAction)
+	rule.SetContext("This is a test of context")
+	rs.AddRule(rule)
+	fmt.Printf("Rule added: [%s]\n", rule.GetName())
+
+	// check for name "Bob" in n1, match the "name" field in n2,
+	// in effect, fire the rule when name field in both tuples is "Bob"
+	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
+	rule2.AddCondition("c1", []string{"n1"}, checkForBob, nil)
+	rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, nil)
+	rule2.SetAction(checkSameNamesAction)
+	rs.AddRule(rule2)
+	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
+
+	//Now assert a "n1" tuple
+	fmt.Println("Asserting n1 tuple with name=Tom")
+	keys := make(map[string]interface{})
+	keys["name"] = "Tom"
+	t1, _ := model.NewTupleWithKeyValues("n1", "Tom")
+	t1.SetString(nil, "name", "Tom")
+	rs.Assert(nil, t1)
+
+	//Now assert a "n1" tuple
+	fmt.Println("Asserting n1 tuple with name=Bob")
+	t2, _ := model.NewTupleWithKeyValues("n1", "Bob")
+	t2.SetString(nil, "name", "Bob")
+	rs.Assert(nil, t2)
+
+	//Now assert a "n2" tuple
+	fmt.Println("Asserting n2 tuple with name=Bob")
+	t3, _ := model.NewTupleWithKeyValues("n2", "Bob")
+	t3.SetString(nil, "name", "Bob")
+	rs.Assert(nil, t3)
+
+	//Retract tuples
+	rs.Retract(nil, t1)
+	rs.Retract(nil, t2)
+	rs.Retract(nil, t3)
+
+	//delete the rule
+	rs.DeleteRule(rule.GetName())
+
+	//unregister the session, i.e; cleanup
+	rs.Unregister()
+
 
 
 ## Try out this example
