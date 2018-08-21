@@ -6,5 +6,23 @@
   "title": "Rules Action",
   "description": "Simple Rules Action",
   "homepage": "https://github.com/TIBCOSoftware/bego/ruleaction",
-  "async": false
+  "async": false,
+
+  "settings": [
+    {
+      "name": "ruleSessionURI",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "tupleDescriptorFile",
+      "type": "string"
+    }
+  ],
+  "input":  [
+    {
+      "name": "data",
+      "type": "object"
+    }
+  ]
 }
