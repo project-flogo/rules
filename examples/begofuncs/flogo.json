@@ -17,14 +17,31 @@
           "name":"n1",
           "settings": {
             "method": "GET",
-            "path": "/test/:name"
+            "path": "/test/n1"
           },
           "action": {
             "id": "simple_rule",
             "mappings": {
               "input": [
                 {
-                  "mapTo": "values", "type": "assign", "value": "$.pathParams"
+                  "mapTo": "values", "type": "assign", "value": "$.queryParams"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name":"n2",
+          "settings": {
+            "method": "GET",
+            "path": "/test/n2"
+          },
+          "action": {
+            "id": "simple_rule",
+            "mappings": {
+              "input": [
+                {
+                  "mapTo": "values", "type": "assign", "value": "$.queryParams"
                 }
               ]
             }
