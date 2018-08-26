@@ -17,6 +17,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/TIBCOSoftware/bego/common"
 )
 
 // Action ref to register the action factory
@@ -156,8 +157,6 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 		return nil, nil
 	}
 
-	//fmt.Printf("Received event from tuple source [%s]", h.Name)
-
 	tupleType := model.TupleType(h.Name)
 	valAttr, exists := inputs[ivValues]
 	if !exists {
@@ -168,7 +167,29 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 
 	values := valAttr.Value().(map[string]interface{})
 
-	tuple, _ := model.NewTuple(tupleType, values) //n1 -> will be replaced by contextual information coming in the data
+	td := model.GetTupleDescriptor(tupleType)
+	if td == nil {
+		logger.Warnf("Tuple descriptor for type [%s] not found\n", string(tupleType))
+		return nil, nil
+	}
+
+	for _, keyProp := range td.GetKeyProps() {
+		_, found := values[keyProp]
+		if !found {
+			//set unique ids to string key properties, if not present in the payload
+			if td.GetProperty(keyProp).PropType == data.TypeString {
+				uid, err := common.GetUniqueId()
+				if err != nil {
+					values[keyProp] = uid
+				} else {
+					logger.Warnf("Failed to generate a unique id, discarding event [%s]\n", string(tupleType))
+					return nil, nil
+				}
+			}
+		}
+	}
+
+	tuple, _ := model.NewTuple(tupleType, values)
 	a.rs.Assert(ctx, tuple)
 	// does this return anything?
 

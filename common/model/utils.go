@@ -9,7 +9,7 @@ func IdentifiersToString(identifiers []TupleType) string {
 	return str
 }
 
-// Contains returns if an identifier exists in the identifier array
+// Contains returns true if an identifier exists in the identifier array
 func Contains(identifiers []TupleType, toCheck TupleType) (bool, int) {
 	for idx, id := range identifiers {
 		if id == toCheck {
