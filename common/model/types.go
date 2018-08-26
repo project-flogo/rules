@@ -52,6 +52,12 @@ type RuleSession interface {
 	CancelScheduledAssert(ctx context.Context, key interface{})
 
 	Unregister()
+
+	//Optional, called before asserting a tuple but after adding all rules
+	SetStartupFunction (startupFn StartupRSFunction)
+
+	GetStartupFunction() (startupFn StartupRSFunction)
+
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side
@@ -61,6 +67,9 @@ type ConditionEvaluator func(string, string, map[TupleType]Tuple, RuleContext) b
 //ActionFunction is a function pointer for handling action callbacks on the server side
 //i.e part of the server side API
 type ActionFunction func(context.Context, RuleSession, string, map[TupleType]Tuple, RuleContext)
+
+//Called once after creation of a RuleSession
+type StartupRSFunction func(ctx context.Context, rs RuleSession, sessionCtx map[string]interface{})
 
 // ValueChangeListener to pickup and process tuple value changes
 type ValueChangeListener interface {

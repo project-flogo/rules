@@ -83,5 +83,7 @@ func GetOrCreateRuleSessionFromConfig(name string, config *RuleSession) (model.R
 		rs.AddRule(rule)
 	}
 
+	rs.SetStartupFunction(GetStartupRSFunction(name))
+
 	return rs, nil
 }

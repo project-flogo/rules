@@ -15,6 +15,7 @@ func init() {
 
 	config.RegisterConditionEvaluator("checkForBob", checkForBob)
 	config.RegisterConditionEvaluator("checkSameNamesCondition", checkSameNamesCondition)
+	config.RegisterStartupRSFunction("simple", StartupRSFunction)
 }
 
 func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
@@ -61,4 +62,12 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 	name1, _ := t1.GetString("name")
 	name2, _ := t2.GetString("name")
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
+}
+
+func StartupRSFunction (ctx context.Context, rs model.RuleSession, startupCtx map[string]interface{}) {
+
+	fmt.Printf("In startup rule function..\n")
+	t3, _ := model.NewTupleWithKeyValues("n2", "Bob")
+	t3.SetString(nil, "name", "Bob")
+	rs.Assert(nil, t3)
 }

@@ -20,6 +20,7 @@ type rulesessionImpl struct {
 	reteNetwork rete.Network
 
 	timers map[interface{}]*time.Timer
+	startupFn model.StartupRSFunction
 }
 
 func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
@@ -91,4 +92,12 @@ func (rs *rulesessionImpl) CancelScheduledAssert(ctx context.Context, key interf
 		delete(rs.timers, key)
 		timer.Stop()
 	}
+}
+
+func (rs *rulesessionImpl) SetStartupFunction (startupFn model.StartupRSFunction) {
+	rs.startupFn = startupFn
+}
+
+func (rs *rulesessionImpl) GetStartupFunction() (startupFn model.StartupRSFunction) {
+	return rs.startupFn
 }

@@ -8,6 +8,7 @@ import (
 var (
 	actionFunctions   = make(map[string]model.ActionFunction)
 	conditionEvaluators   = make(map[string]model.ConditionEvaluator)
+	startupFunctions = make(map[string]model.StartupRSFunction)
 )
 
 // Register registers the specified ActionFunction
@@ -50,4 +51,24 @@ func RegisterConditionEvaluator(id string, conditionEvaluator model.ConditionEva
 // Get gets specified ConditionEvaluator
 func GetConditionEvaluator(id string) model.ConditionEvaluator {
 	return conditionEvaluators[id]
+}
+
+// Register registers the specified StartupRSFunction
+func RegisterStartupRSFunction(rsName string, startupFn model.StartupRSFunction) error {
+
+	if startupFn == nil {
+		return errors.New("cannot register 'nil' StartupRSFunction")
+	}
+
+	if _, dup := startupFunctions[rsName]; dup {
+		return errors.New("StartupRSFunction already registered: " + rsName)
+	}
+
+	startupFunctions[rsName] = startupFn
+
+	return nil
+}
+
+func GetStartupRSFunction (rsName string) (startupFn model.StartupRSFunction) {
+	return startupFunctions[rsName]
 }

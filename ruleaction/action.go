@@ -126,6 +126,11 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	ruleAction := &RuleAction{}
 	ruleAction.rs, _ = config.GetOrCreateRuleSessionFromConfig(settings.RuleSessionURI, rsCfg)
 
+	startupRSFunction := ruleAction.rs.GetStartupFunction()
+	if startupRSFunction != nil {
+		startupRSFunction (context.TODO(), ruleAction.rs, nil)
+	}
+
 	return ruleAction, nil
 }
 
