@@ -82,7 +82,7 @@ func (cn *classNodeImpl) assert(ctx context.Context, tuple model.Tuple, changedP
 	propagate := false
 	for e := cn.getClassNodeLinks().Front(); e != nil; e = e.Next() {
 		classNodeLinkVar := e.Value.(classNodeLink)
-		if changedProps != nil && len(classNodeLinkVar.getRule().GetDeps()) > 0 {
+		if changedProps != nil {
 			depProps, found := classNodeLinkVar.getRule().GetDeps()[model.TupleType(cn.name)]
 			if found { // rule depends on this type
 				for changedProp := range changedProps {

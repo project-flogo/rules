@@ -64,10 +64,11 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
 }
 
-func StartupRSFunction (ctx context.Context, rs model.RuleSession, startupCtx map[string]interface{}) {
+func StartupRSFunction (ctx context.Context, rs model.RuleSession, startupCtx map[string]interface{}) (err error) {
 
 	fmt.Printf("In startup rule function..\n")
-	t3, _ := model.NewTupleWithKeyValues("n2", "Bob")
+	t3, _ := model.NewTupleWithKeyValues("n1", "Bob")
 	t3.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t3)
+	return nil
 }

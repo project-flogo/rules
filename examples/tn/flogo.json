@@ -1,5 +1,5 @@
 {
-  "name": "begotn1",
+  "name": "bego4tn",
   "type": "flogo:app",
   "version": "0.0.1",
   "appModel": "1.0.0",
@@ -144,7 +144,7 @@
               {
                 "name": "cJoinMoveEventAndPackage",
                 "identifiers": [
-                  "moveevent", "pacakge"
+                  "moveevent", "package"
                 ],
                 "evaluator": "cJoinMoveEventAndPackage"
               }

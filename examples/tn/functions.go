@@ -1,4 +1,4 @@
-package main
+package tn
 
 import (
 	"context"
@@ -17,6 +17,10 @@ var (
 
 //add this sample file to your flogo project
 func init() {
+
+	
+	config.RegisterStartupRSFunction("res://rulesession:simple", AssertThisPackage)
+
 	//rule printPackage
 	config.RegisterConditionEvaluator("cPackageEvent", cTruecondition)
 	config.RegisterActionFunction("aPrintPackage", aPrintPackage)
@@ -44,7 +48,6 @@ func init() {
 	config.RegisterActionFunction("aPackageInSitting", aPackageInSitting)
 
 
-	config.RegisterStartupRSFunction("simple", AssertThisPackage)
 
 	lastEventType = "none"
 	currentEventType = "none"
@@ -64,7 +67,8 @@ func cTruecondition(ruleName string, condName string, tuples map[model.TupleType
 
 func aPrintPackage(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	pkg := tuples["package"]
-	fmt.Printf("Received package [%s]\n", pkg.GetString("id"))
+	pkgid, _ := pkg.GetString("id")
+	fmt.Printf("Received package [%s]\n", pkgid)
 }
 
 func aPrintMoveEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
@@ -88,7 +92,7 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 	pkg := tuples["package"]
 	pkgid, _ := pkg.GetString("id")
 
-	fmt.Printf("Joining a move event with package-id [%s] to package [%s], sitting [%d], moving [%d], dropped [%d]\n",
+	fmt.Printf("Joining a move event with package-id [%s] to package [%s], sitting [%f], moving [%f], dropped [%f]\n",
 		meid,pkgid,s,m,d)
 
 	if s > 0.5 {

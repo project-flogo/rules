@@ -111,13 +111,13 @@ func (rs *rulesessionImpl) GetStartupFunction() (startupFn model.StartupRSFuncti
 func (rs *rulesessionImpl) Start(startupCtx map[string]interface{}) error {
 
 	if !rs.started {
+		rs.started = true
 		if rs.startupFn != nil {
 			err := rs.startupFn (context.TODO(), rs, startupCtx)
 			if err != nil {
 				return err
 			}
 		}
-		rs.started = true
 	} else {
 		return fmt.Errorf("Rulesession [%s] already started", rs.name)
 	}
