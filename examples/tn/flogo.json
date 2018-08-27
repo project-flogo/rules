@@ -68,6 +68,10 @@
                   "pk-index": 0
                 },
                 {
+                  "name": "packageid",
+                  "type": "string"
+                },
+                {
                   "name": "sitting",
                   "type": "double"
                 },
