@@ -21,6 +21,7 @@ type rulesessionImpl struct {
 
 	timers map[interface{}]*time.Timer
 	startupFn model.StartupRSFunction
+	started bool
 }
 
 func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
@@ -37,6 +38,7 @@ func (rs *rulesessionImpl) initRuleSession(name string) {
 	rs.reteNetwork = rete.NewReteNetwork()
 	rs.name = name
 	rs.timers = make(map[interface{}]*time.Timer)
+	rs.started = false
 }
 
 func (rs *rulesessionImpl) AddRule(rule model.Rule) (int, bool) {
@@ -51,11 +53,15 @@ func (rs *rulesessionImpl) DeleteRule(ruleName string) {
 	rs.reteNetwork.RemoveRule(ruleName)
 }
 
-func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) {
+func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err error) {
+	if !rs.started {
+		return fmt.Errorf("Cannot assert tuple. Rulesession [%s] not started", rs.name)
+	}
 	if ctx == nil {
 		ctx = context.Context(context.Background())
 	}
 	rs.reteNetwork.Assert(ctx, rs, tuple, nil)
+	return nil
 }
 
 func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.Tuple) {
@@ -100,4 +106,20 @@ func (rs *rulesessionImpl) SetStartupFunction (startupFn model.StartupRSFunction
 
 func (rs *rulesessionImpl) GetStartupFunction() (startupFn model.StartupRSFunction) {
 	return rs.startupFn
+}
+
+func (rs *rulesessionImpl) Start(startupCtx map[string]interface{}) error {
+
+	if !rs.started {
+		if rs.startupFn != nil {
+			err := rs.startupFn (context.TODO(), rs, startupCtx)
+			if err != nil {
+				return err
+			}
+		}
+		rs.started = true
+	} else {
+		return fmt.Errorf("Rulesession [%s] already started", rs.name)
+	}
+	return nil
 }

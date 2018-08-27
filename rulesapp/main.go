@@ -50,6 +50,9 @@ func main() {
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
+	//Start the rule session
+	rs.Start(nil)
+
 	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Tom")
 	keys := make(map[string]interface{})

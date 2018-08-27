@@ -16,13 +16,18 @@ func TestPkgFlowNormalWithDeps(t *testing.T) {
 	}
 
 	loadPkgRulesWithDeps(rs)
+	rs.Start(nil)
 
 	pkgEvt, _ := model.NewTupleWithKeyValues("packageevent", "1")
 	pkgEvt.SetString(nil, "next", "sfo")
 	pkgEvt.SetString(nil, "status", "normal")
 	pkgEvt.SetString(nil, "isnew", "true")
 
-	rs.Assert(nil, pkgEvt)
+	err = rs.Assert(nil, pkgEvt)
+	if err != nil {
+		fmt.Printf("Error...[%s]\n", err)
+		return
+	}
 	//time.Sleep(time.Second*20)
 	scanEv, _ := model.NewTupleWithKeyValues("scanevent", "1")
 	scanEv.SetString(nil, "curr", "sfo")
@@ -52,11 +57,13 @@ func TestPkgFlowNormalWithDepsWithTimeout(t *testing.T) {
 	}
 
 	loadPkgRulesWithDeps(rs)
+	rs.Start(nil)
 
 	pkgEvt, _ := model.NewTupleWithKeyValues("packageevent", "1")
 	pkgEvt.SetString(nil, "next", "sfo")
 	pkgEvt.SetString(nil, "status", "normal")
 	pkgEvt.SetString(nil, "isnew", "true")
+
 
 	rs.Assert(nil, pkgEvt)
 	//time.Sleep(time.Second*20)
@@ -83,6 +90,7 @@ func TestPkgFlowNormalWithDepsMapValues(t *testing.T) {
 	}
 
 	loadPkgRulesWithDeps(rs)
+	rs.Start(nil)
 
 	pkgEvt, err := model.NewTupleWithKeyValues("packageevent", "1")
 	if err != nil {

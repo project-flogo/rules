@@ -45,7 +45,7 @@ type RuleSession interface {
 	AddRule(rule Rule) (int, bool)
 	DeleteRule(ruleName string)
 
-	Assert(ctx context.Context, tuple Tuple)
+	Assert(ctx context.Context, tuple Tuple) (err error)
 	Retract(ctx context.Context, tuple Tuple)
 
 	ScheduleAssert(ctx context.Context, delayInMillis uint64, key interface{}, tuple Tuple)
@@ -58,6 +58,10 @@ type RuleSession interface {
 
 	GetStartupFunction() (startupFn StartupRSFunction)
 
+	//To be called when the rule session is ready to start accepting tuples
+	//This will invoke the StartupFunction
+	Start(startupCtx map[string]interface{}) (err error)
+
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side
@@ -69,7 +73,7 @@ type ConditionEvaluator func(string, string, map[TupleType]Tuple, RuleContext) b
 type ActionFunction func(context.Context, RuleSession, string, map[TupleType]Tuple, RuleContext)
 
 //Called once after creation of a RuleSession
-type StartupRSFunction func(ctx context.Context, rs RuleSession, sessionCtx map[string]interface{})
+type StartupRSFunction func(ctx context.Context, rs RuleSession, sessionCtx map[string]interface{}) (err error)
 
 // ValueChangeListener to pickup and process tuple value changes
 type ValueChangeListener interface {

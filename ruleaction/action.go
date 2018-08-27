@@ -126,12 +126,10 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	ruleAction := &RuleAction{}
 	ruleAction.rs, _ = config.GetOrCreateRuleSessionFromConfig(settings.RuleSessionURI, rsCfg)
 
-	startupRSFunction := ruleAction.rs.GetStartupFunction()
-	if startupRSFunction != nil {
-		startupRSFunction (context.TODO(), ruleAction.rs, nil)
-	}
+	//start the rule session here, calls the startup rule function
+	err = ruleAction.rs.Start(nil)
 
-	return ruleAction, nil
+	return ruleAction, err
 }
 
 // Metadata get the Action's metadata
