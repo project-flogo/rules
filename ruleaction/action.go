@@ -182,7 +182,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 			//set unique ids to string key properties, if not present in the payload
 			if td.GetProperty(keyProp).PropType == data.TypeString {
 				uid, err := common.GetUniqueId()
-				if err != nil {
+				if err == nil {
 					values[keyProp] = uid
 				} else {
 					logger.Warnf("Failed to generate a unique id, discarding event [%s]\n", string(tupleType))
