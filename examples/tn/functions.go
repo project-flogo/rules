@@ -78,13 +78,13 @@ func aPrintMoveEvent(ctx context.Context, rs model.RuleSession, ruleName string,
 	m, _ := me.GetDouble("moving")
 	d, _ := me.GetDouble("dropped")
 
-	fmt.Printf("Received a move event [%s] sitting [%d], moving [%d], dropped [%d]\n",
+	fmt.Printf("Received a 'moveevent' [%s] sitting [%d], moving [%d], dropped [%d]\n",
 		meid,s,m,d)
 }
 
 func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	me := tuples["moveevent"]
-	meid, _ := me.GetString("id")
+	mepkgid, _ := me.GetString("packageid")
 	s, _ := me.GetDouble("sitting")
 	m, _ := me.GetDouble("moving")
 	d, _ := me.GetDouble("dropped")
@@ -92,8 +92,8 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 	pkg := tuples["package"]
 	pkgid, _ := pkg.GetString("id")
 
-	fmt.Printf("Joining a move event with package-id [%s] to package [%s], sitting [%f], moving [%f], dropped [%f]\n",
-		meid,pkgid,s,m,d)
+	fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], sitting [%f], moving [%f], dropped [%f]\n",
+		mepkgid,pkgid,s,m,d)
 
 	if s > 0.5 {
 		currentEventType = "sitting"
@@ -125,7 +125,7 @@ func aMoveTimeoutEvent(ctx context.Context, rs model.RuleSession, ruleName strin
 	tomillis, _ := t1.GetInt("timeoutinmillis")
 
 	if t1 != nil {
-		fmt.Printf("Timeout event id [%s], packageid [%s], timeoutinmillis [%d]\n",
+		fmt.Printf("'movetimeoutevent' id [%s], packageid [%s], timeoutinmillis [%d]\n",
 			id, pkgid, tomillis)
 	}
 }
@@ -140,7 +140,7 @@ func aJoinMoveTimeoutEventAndPackage(ctx context.Context, rs model.RuleSession, 
 	pkg := tuples["package"].(model.MutableTuple)
 	pkgid, _ := pkg.GetString("id")
 
-	fmt.Printf("Joining a move event timeout event [%s] to package [%s], timeout [%d]\n",
+	fmt.Printf("Joining a 'movetimeoutevent' [%s] to package [%s], timeout [%d]\n",
 		epkgid,pkgid,toms)
 
 	//change the package's state to "sitting"
