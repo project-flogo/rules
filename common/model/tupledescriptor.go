@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"fmt"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 var (
@@ -17,7 +18,6 @@ var (
 
 //TupleType Each tuple is of a certain type, described by TypeDescriptor
 type TupleType string
-
 
 // TupleDescriptor defines the type of the structure, its properties, types
 type TupleDescriptor struct {
@@ -35,7 +35,7 @@ type TuplePropertyDescriptor struct {
 }
 
 // RegisterTupleDescriptors registers the TupleDescriptors
-func RegisterTupleDescriptors(jsonRegistry string) (err error){
+func RegisterTupleDescriptors(jsonRegistry string) (err error) {
 	tds := []TupleDescriptor{}
 	err = json.Unmarshal([]byte(jsonRegistry), &tds)
 	if err != nil {
@@ -93,7 +93,7 @@ func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
 	jsonProps := val["properties"].([]interface{})
 
 	idxProp := make(map[int]string)
-	for _, v:= range jsonProps {
+	for _, v := range jsonProps {
 		tdp := TuplePropertyDescriptor{}
 		tdp.KeyIndex = -1
 		pm := v.(map[string]interface{})
@@ -122,16 +122,16 @@ func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
 				tdp.KeyIndex = idx
 			}
 		}
-		td.Props = append (td.Props, tdp)
+		td.Props = append(td.Props, tdp)
 	}
 
 	//index validation
 	idsx := make([]int, 0)
-	for k, _ := range idxProp {
-		idsx = append (idsx, k)
+	for k := range idxProp {
+		idsx = append(idsx, k)
 	}
 	sort.Ints(idsx)
-	for i:=0; i<len(idsx); i++ {
+	for i := 0; i < len(idsx); i++ {
 		if idsx[i] != i {
 			return fmt.Errorf("Missing key at index [%d]", i)
 		}
