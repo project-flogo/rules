@@ -55,8 +55,6 @@ func main() {
 
 	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Tom")
-	keys := make(map[string]interface{})
-	keys["name"] = "Tom"
 	t1, _ := model.NewTupleWithKeyValues("n1", "Tom")
 	t1.SetString(nil, "name", "Tom")
 	rs.Assert(nil, t1)
