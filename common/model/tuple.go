@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"reflect"
+
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 var reteCTXKEY = RetecontextKeyType{}
@@ -24,7 +25,6 @@ type Tuple interface {
 	GetBool(name string) (val bool, err error)
 	//GetDateTime(name string) time.Time
 	GetKey() TupleKey
-
 }
 
 //MutableTuple mutable part of the tuple
@@ -234,7 +234,7 @@ func (t *tupleImpl) initTupleWithKeyValues(td *TupleDescriptor, values ...interf
 func (t *tupleImpl) validateAndCallListener(ctx context.Context, name string, value interface{}) (err error) {
 
 	if t.isKeyProp(name) {
-		return fmt.Errorf("Cannot change a key property [%s] for type [%d]", name, t.td.Name)
+		return fmt.Errorf("Cannot change a key property [%s] for type [%s]", name, t.td.Name)
 	}
 
 	err = t.validateNameValue(name, value)
@@ -281,9 +281,9 @@ func (t *tupleImpl) validateNameValue(name string, value interface{}) (err error
 	return fmt.Errorf("Property [%s] undefined for type [%s]", name, t.td.Name)
 }
 
-func (t *tupleImpl) isKeyProp (propName string) bool {
+func (t *tupleImpl) isKeyProp(propName string) bool {
 	found := false
-	switch tki:=t.key.(type) {
+	switch tki := t.key.(type) {
 	case *tupleKeyImpl:
 		_, found = tki.keys[propName]
 	}
