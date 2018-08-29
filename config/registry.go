@@ -1,14 +1,15 @@
 package config
 
 import (
-	"github.com/TIBCOSoftware/bego/common/model"
 	"errors"
+
+	"github.com/TIBCOSoftware/bego/common/model"
 )
 
 var (
-	actionFunctions   = make(map[string]model.ActionFunction)
-	conditionEvaluators   = make(map[string]model.ConditionEvaluator)
-	startupFunctions = make(map[string]model.StartupRSFunction)
+	actionFunctions     = make(map[string]model.ActionFunction)
+	conditionEvaluators = make(map[string]model.ConditionEvaluator)
+	startupFunctions    = make(map[string]model.StartupRSFunction)
 )
 
 // Register registers the specified ActionFunction
@@ -69,6 +70,6 @@ func RegisterStartupRSFunction(rsName string, startupFn model.StartupRSFunction)
 	return nil
 }
 
-func GetStartupRSFunction (rsName string) (startupFn model.StartupRSFunction) {
+func GetStartupRSFunction(rsName string) (startupFn model.StartupRSFunction) {
 	return startupFunctions[rsName]
 }

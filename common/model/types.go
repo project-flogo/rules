@@ -54,14 +54,13 @@ type RuleSession interface {
 	Unregister()
 
 	//Optional, called before asserting a tuple but after adding all rules
-	SetStartupFunction (startupFn StartupRSFunction)
+	SetStartupFunction(startupFn StartupRSFunction)
 
 	GetStartupFunction() (startupFn StartupRSFunction)
 
 	//To be called when the rule session is ready to start accepting tuples
 	//This will invoke the StartupFunction
 	Start(startupCtx map[string]interface{}) (err error)
-
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side
@@ -72,7 +71,7 @@ type ConditionEvaluator func(string, string, map[TupleType]Tuple, RuleContext) b
 //i.e part of the server side API
 type ActionFunction func(context.Context, RuleSession, string, map[TupleType]Tuple, RuleContext)
 
-//Called once after creation of a RuleSession
+//StartupRSFunction is called once after creation of a RuleSession
 type StartupRSFunction func(ctx context.Context, rs RuleSession, sessionCtx map[string]interface{}) (err error)
 
 // ValueChangeListener to pickup and process tuple value changes
