@@ -40,6 +40,8 @@ A tuple can be `Retract`ed from the rule session to take it out of play for rule
 ### Usage
 Now lets see some code in action. Below code snippet demonstrates usage of the Rules API,
 
+First we start off with loading the `TupleDescriptor`. It accepts a JSON string defining all the tuple descripters.
+
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//First register the tuple descriptors
 	err := model.RegisterTupleDescriptors(tupleDescriptor)
@@ -47,6 +49,8 @@ Now lets see some code in action. Below code snippet demonstrates usage of the R
 		fmt.Printf("Error [%s]\n", err)
 		return
 	}
+
+Next create a `RuleSession` and add all the `Rule's` with their `Condition's` and `Action's`.
 
 	//Create a RuleSession
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
@@ -68,6 +72,8 @@ Now lets see some code in action. Below code snippet demonstrates usage of the R
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
+Here we create and assert the actual `Tuple's` which will be evaluated against the `Rule's` defined above.
+
 	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Tom")
 	t1, _ := model.NewTupleWithKeyValues("n1", "Tom")
@@ -86,6 +92,8 @@ Now lets see some code in action. Below code snippet demonstrates usage of the R
 	t3.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t3)
 
+Finally, once all `Rule` `Condition's` are evaluated and `Action's` are executed, we can `Retract` all the `Tuple's` from the `RuleSession` and unregister the RuleSession.
+
 	//Retract tuples
 	rs.Retract(nil, t1)
 	rs.Retract(nil, t2)
@@ -96,7 +104,6 @@ Now lets see some code in action. Below code snippet demonstrates usage of the R
 
 	//unregister the session, i.e; cleanup
 	rs.Unregister()
-
 
 
 ## Try out this example
