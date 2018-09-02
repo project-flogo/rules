@@ -72,7 +72,7 @@ Next create a `RuleSession` and add all the `Rule's` with their `Condition's` an
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
-Here we create and assert the actual `Tuple's` which will be evaluated against the `Rule's` defined above.
+Here we create and assert the actual `Tuple's` which will be evaluated against the `Rule's` `Condition's` defined above.
 
 	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Tom")
@@ -105,11 +105,23 @@ Finally, once all `Rule` `Condition's` are evaluated and `Action's` are executed
 	//unregister the session, i.e; cleanup
 	rs.Unregister()
 
+### Try out this example
 
-## Try out this example
-* Create a directory say `/home/rulesexample` and set `GOPATH=/home/rulesexample`
-* from `/home/rulesexample` run `go get github.com/TIBCOSoftware/bego/rulesapp`
-* This will create the example executable at `/home/rulesexample/bin/rulesapp`
-* Run the example `/home/rulesexample/bin/rulesapp`
+```
+$ go get github.com/TIBCOSoftware/bego/rulesapp
+```
+Either manually run from source
+```
+$ cd $GOTPATH/src/github.com/TIBCOSoftware/bego/rulesapp
+$ go run main.go
+```
+or install and run
+
+```
+$ cd $GOTPATH/src/github.com/TIBCOSoftware/bego/rulesapp
+$ go install
+$ ./$GOTPATH/bin/rulesapp
+
+```
 
 
