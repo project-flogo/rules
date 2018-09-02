@@ -2,6 +2,20 @@
 
 **Flogo Rules** is a lightweight rules library written in Golang to simplify the building of Event Driven Reactive Applications. Supports Declaritive Rules, Contextual reasoning across time and space
 
+## Installation
+### Prerequisites
+To get started with the Flogo Rules you'll need to have a few things
+* The Go programming language version 1.8 or later should be [installed](https://golang.org/doc/install).
+* The **GOPATH** environment variable on your system must be set properly
+
+### Install
+```
+$ go get -u github.com/TIBCOSoftware/bego
+```
+_Note that the -u parameter automatically updates bego if it exists_
+
+## Getting Started
+
 ## Definitions
 A `Tuple` represents an event or a business object and provides runtime data to the rules. It is always of a certain type.
 
