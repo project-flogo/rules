@@ -15,8 +15,9 @@ $ go get -u github.com/TIBCOSoftware/bego
 _Note that the -u parameter automatically updates bego if it exists_
 
 ## Getting Started
+Getting started should be fairly easy. Lets start off with some definitions around various types used.
 
-## Definitions
+### Definitions
 A `Tuple` represents an event or a business object and provides runtime data to the rules. It is always of a certain type.
 
 A `TupleTypeDescriptor` defines the type or structure of a `Tuple`. It defines a tuple's properties and data types, and primary keys. It also defines the time to live for the tuple
@@ -26,18 +27,18 @@ A `TupleType` is a name or an alias for a `TupleTypeDescriptor`
 A `Rule` constitutes of multiple Conditions and the rule triggers when all its conditions pass
 
 A `Condition` is an expression involving one or more tuple types. When the expression evaluates to true, the condition passes. In order to optimize a Rule's evaluation, the Rule network needs to know of the TupleTypes and the properties of the TupleType which participate in the `Condition` evaluation. These are provided when constructing the condition and adding it to the rule.
-The rule's `Action` is a function that is invoked each time that a matching combination of tuples is found that result in a true evaluation of all its conditions. Those matching tuples are supplied to the action
 
-A `RuleSession` is the handle through which to interact with the rules API. You can create and register multiple rule sessions. Rule sessions are silos for the data that they hold, they are like namespaces and sharing objects / state across rule sessions is not supported.
+A `Action` is a function that is invoked each time that a matching combination of tuples are found that result in a `true` evaluation of all its conditions. Those matching tuples are passed to the action function.
+
+A `RuleSession` is a handle to interact with the rules API. You can create and register multiple rule sessions. Rule sessions are silos for the data that they hold, they are similar to namespaces. Sharing objects/state across rule sessions is not supported.
  
 Each rule creates its own evaluation plan or a network. Multiple rules collectively form the rule network
 
 Tuples can be created using `NewTuple` and then setting its properties. The tuple is then `Assert`-ed into the rule session and this triggers rule evaluations.
 A tuple can be `Retract`ed from the rule session to take it out of play for rules evaluations.
 
-## Usage
-The following code snippet demonstrates usage of the Rules API
-
+### Usage
+Now lets see some code in action. Below code snippet demonstrates usage of the Rules API,
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//First register the tuple descriptors
