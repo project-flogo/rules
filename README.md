@@ -124,4 +124,9 @@ $ ./$GOTPATH/bin/rulesapp
 
 ```
 
+## Connect with us
 
+If you have any questions, feel free to post an issue and tag it as a question, email flogo-oss@tibco.com or chat with the team and community:
+
+The project-flogo/Lobby Gitter channel should be used for general discussions, start here for all things Flogo/Flogo Rules,etc!
+The project-flogo/developers Gitter channel should be used for developer/contributor focused conversations.
