@@ -15,6 +15,7 @@ type Rule struct {
 	Name       string
 	Conditions []*Condition
 	ActionFunc model.ActionFunction
+	Priority   int
 }
 
 type Condition struct {
@@ -29,6 +30,7 @@ func (c *Rule) UnmarshalJSON(d []byte) error {
 		Name         string       `json:"name"`
 		Conditions   []*Condition `json:"conditions"`
 		ActionFuncId string       `json:"actionFunction"`
+		Priority     int		  `json:"priority"`
 	}{}
 
 	if err := json.Unmarshal(d, ser); err != nil {
@@ -38,6 +40,7 @@ func (c *Rule) UnmarshalJSON(d []byte) error {
 	c.Name = ser.Name
 	c.Conditions = ser.Conditions
 	c.ActionFunc = GetActionFunction(ser.ActionFuncId)
+	c.Priority = ser.Priority
 
 	return nil
 }
@@ -75,6 +78,7 @@ func GetOrCreateRuleSessionFromConfig(name string, config *RuleSession) (model.R
 		rule := ruleapi.NewRule(ruleCfg.Name)
 		rule.SetContext("This is a test of context")
 		rule.SetAction(ruleCfg.ActionFunc)
+		rule.SetPriority(ruleCfg.Priority)
 
 		for _, condCfg := range ruleCfg.Conditions {
 			rule.AddCondition(condCfg.Name, condCfg.Identifiers, condCfg.Evaluator, nil)

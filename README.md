@@ -71,6 +71,10 @@ Next create a `RuleSession` and add all the `Rule's` with their `Condition's` an
 	rule2.SetAction(checkSameNamesAction)
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
+	
+	//Finally, start the rule session before asserting tuples
+	//Your startup function, if registered will be invoked here
+	rs.Start(nil)
 
 Here we create and assert the actual `Tuple's` which will be evaluated against the `Rule's` `Condition's` defined above.
 
