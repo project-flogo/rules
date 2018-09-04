@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/project-flogo/rules/common/model"
 )
 
 func TestIdentifier(t *testing.T) {

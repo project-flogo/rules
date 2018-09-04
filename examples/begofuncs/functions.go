@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/config"
+	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/config"
 )
 
 //add this sample file to your flogo project
@@ -64,7 +64,7 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
 }
 
-func StartupRSFunction (ctx context.Context, rs model.RuleSession, startupCtx map[string]interface{}) (err error) {
+func StartupRSFunction(ctx context.Context, rs model.RuleSession, startupCtx map[string]interface{}) (err error) {
 
 	fmt.Printf("In startup rule function..\n")
 	t3, _ := model.NewTupleWithKeyValues("n1", "Bob")

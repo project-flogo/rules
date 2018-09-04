@@ -1,10 +1,11 @@
 package common
 
 import (
-	"github.com/oklog/ulid"
-	"time"
-	"io"
 	"crypto/rand"
+	"io"
+	"time"
+
+	"github.com/oklog/ulid"
 )
 
 //unique id (26 chars)

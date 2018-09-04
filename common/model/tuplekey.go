@@ -10,10 +10,9 @@ type TupleKey interface {
 	GetTupleDescriptor() TupleDescriptor
 }
 
-
 type tupleKeyImpl struct {
-	td   TupleDescriptor
-	keys map[string]interface{}
+	td       TupleDescriptor
+	keys     map[string]interface{}
 	keyAsStr string
 }
 

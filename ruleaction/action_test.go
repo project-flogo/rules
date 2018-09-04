@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/project-flogo/rules/common/model"
 )
 
 func TestAction(t *testing.T) {

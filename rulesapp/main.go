@@ -3,15 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-
 	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
 	"strings"
 
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/ruleapi"
+	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/ruleapi"
 )
 
 func main() {
@@ -19,7 +18,7 @@ func main() {
 	fmt.Println("** rulesapp: Example usage of the Rules module/API **")
 
 	//Load the tuple descriptor file (relative to GOPATH)
-	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/rulesapp/rulesapp.json")
+	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/project-flogo/rules/rulesapp/rulesapp.json")
 	tupleDescriptor := fileToString(tupleDescAbsFileNm)
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)

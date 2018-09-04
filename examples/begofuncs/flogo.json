@@ -54,7 +54,7 @@
   "actions": [
     {
       "id": "simple_rule",
-      "ref": "github.com/TIBCOSoftware/bego/ruleaction",
+      "ref": "github.com/project-flogo/rules/ruleaction",
       "settings": {
         "rulesession": "res://rulesession:simple"
       },

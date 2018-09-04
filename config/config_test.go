@@ -3,10 +3,10 @@ package config
 import (
 	"context"
 	"encoding/json"
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/project-flogo/rules/common/model"
 	"github.com/stretchr/testify/assert"
-	"testing"
 	"reflect"
+	"testing"
 )
 
 var testSessionJson = `{
@@ -122,5 +122,3 @@ func checkSameNamesCondition(ruleName string, condName string, tuples map[model.
 
 func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 }
-
-

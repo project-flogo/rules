@@ -1,10 +1,10 @@
 package ruleaction
 
 import (
-	"github.com/TIBCOSoftware/bego/common/model"
+	"fmt"
+	"github.com/project-flogo/rules/common/model"
 	"testing"
 	"time"
-	"fmt"
 )
 
 func TestPkgFlowNormalWithDeps(t *testing.T) {
@@ -39,7 +39,7 @@ func TestPkgFlowNormalWithDeps(t *testing.T) {
 
 	rs.Assert(nil, scanEv)
 
-	scanEv1, _ := model.NewTupleWithKeyValues("scanevent",  "1")
+	scanEv1, _ := model.NewTupleWithKeyValues("scanevent", "1")
 	scanEv1.SetString(nil, "curr", "ny")
 	scanEv1.SetString(nil, "next", "done")
 	scanEv.SetString(nil, "next", "ny")
@@ -63,7 +63,6 @@ func TestPkgFlowNormalWithDepsWithTimeout(t *testing.T) {
 	pkgEvt.SetString(nil, "next", "sfo")
 	pkgEvt.SetString(nil, "status", "normal")
 	pkgEvt.SetString(nil, "isnew", "true")
-
 
 	rs.Assert(nil, pkgEvt)
 	//time.Sleep(time.Second*20)
@@ -104,7 +103,7 @@ func TestPkgFlowNormalWithDepsMapValues(t *testing.T) {
 
 	rs.Assert(nil, pkgEvt)
 
-	values := make (map[string]interface{})
+	values := make(map[string]interface{})
 	values["packageid"] = "1"
 	values["curr"] = "sfo"
 	values["next"] = "ny"
@@ -114,7 +113,7 @@ func TestPkgFlowNormalWithDepsMapValues(t *testing.T) {
 
 	rs.Assert(nil, scanEv)
 
-	values = make (map[string]interface{})
+	values = make(map[string]interface{})
 	values["packageid"] = "1"
 	values["curr"] = "ny"
 	values["next"] = "done"
