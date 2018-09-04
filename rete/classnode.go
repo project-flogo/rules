@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"context"
 
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/project-flogo/rules/common/model"
 )
 
 //classNode holds links to filter and join nodes eventually leading upto the rule node

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/rete"
+	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete"
 )
 
 var (
@@ -19,9 +19,9 @@ type rulesessionImpl struct {
 	name        string
 	reteNetwork rete.Network
 
-	timers map[interface{}]*time.Timer
+	timers    map[interface{}]*time.Timer
 	startupFn model.StartupRSFunction
-	started bool
+	started   bool
 }
 
 func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
@@ -100,7 +100,7 @@ func (rs *rulesessionImpl) CancelScheduledAssert(ctx context.Context, key interf
 	}
 }
 
-func (rs *rulesessionImpl) SetStartupFunction (startupFn model.StartupRSFunction) {
+func (rs *rulesessionImpl) SetStartupFunction(startupFn model.StartupRSFunction) {
 	rs.startupFn = startupFn
 }
 
@@ -113,7 +113,7 @@ func (rs *rulesessionImpl) Start(startupCtx map[string]interface{}) error {
 	if !rs.started {
 		rs.started = true
 		if rs.startupFn != nil {
-			err := rs.startupFn (context.TODO(), rs, startupCtx)
+			err := rs.startupFn(context.TODO(), rs, startupCtx)
 			if err != nil {
 				return err
 			}

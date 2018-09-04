@@ -4,21 +4,20 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/config"
-	"github.com/TIBCOSoftware/bego/common"
+	"github.com/project-flogo/rules/common"
+	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/config"
 )
 
 var (
 	firstSittingEventRcvd bool
-	lastEventType string
-	currentEventType string
+	lastEventType         string
+	currentEventType      string
 )
 
 //add this sample file to your flogo project
 func init() {
 
-	
 	config.RegisterStartupRSFunction("res://rulesession:simple", AssertThisPackage)
 
 	//rule printPackage
@@ -37,23 +36,19 @@ func init() {
 	config.RegisterConditionEvaluator("cMoveTimeoutEvent", cTruecondition)
 	config.RegisterActionFunction("aMoveTimeoutEvent", aMoveTimeoutEvent)
 
-
 	//rule joinMoveTimeoutEventAndPackage
 	config.RegisterConditionEvaluator("cJoinMoveTimeoutEventAndPackage", cTruecondition)
 	config.RegisterActionFunction("aJoinMoveTimeoutEventAndPackage", aJoinMoveTimeoutEventAndPackage)
-
 
 	//rule packageInSitting
 	config.RegisterConditionEvaluator("cPackageInSitting", cPackageInSitting)
 	config.RegisterActionFunction("aPackageInSitting", aPackageInSitting)
 
-
-
 	lastEventType = "none"
 	currentEventType = "none"
 }
 
-func AssertThisPackage (ctx context.Context, rs model.RuleSession, startupCtx map[string]interface{}) (err error){
+func AssertThisPackage(ctx context.Context, rs model.RuleSession, startupCtx map[string]interface{}) (err error) {
 	fmt.Printf("In startup rule function..\n")
 	pkg, _ := model.NewTupleWithKeyValues("package", "PACKAGE1")
 	pkg.SetString(nil, "state", "normal")
@@ -79,7 +74,7 @@ func aPrintMoveEvent(ctx context.Context, rs model.RuleSession, ruleName string,
 	d, _ := me.GetDouble("dropped")
 
 	fmt.Printf("Received a 'moveevent' [%s] sitting [%d], moving [%d], dropped [%d]\n",
-		meid,s,m,d)
+		meid, s, m, d)
 }
 
 func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
@@ -93,7 +88,7 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 	pkgid, _ := pkg.GetString("id")
 
 	fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], sitting [%f], moving [%f], dropped [%f]\n",
-		mepkgid,pkgid,s,m,d)
+		mepkgid, pkgid, s, m, d)
 
 	if s > 0.5 {
 		currentEventType = "sitting"
@@ -117,7 +112,6 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 	lastEventType = currentEventType
 }
 
-
 func aMoveTimeoutEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	t1 := tuples["movetimeoutevent"]
 	id, _ := t1.GetString("id")
@@ -130,7 +124,6 @@ func aMoveTimeoutEvent(ctx context.Context, rs model.RuleSession, ruleName strin
 	}
 }
 
-
 func aJoinMoveTimeoutEventAndPackage(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	me := tuples["movetimeoutevent"]
 	//meid, _ := me.GetString("id")
@@ -141,10 +134,10 @@ func aJoinMoveTimeoutEventAndPackage(ctx context.Context, rs model.RuleSession, 
 	pkgid, _ := pkg.GetString("id")
 
 	fmt.Printf("Joining a 'movetimeoutevent' [%s] to package [%s], timeout [%d]\n",
-		epkgid,pkgid,toms)
+		epkgid, pkgid, toms)
 
 	//change the package's state to "sitting"
-	pkg.SetString (ctx, "state", "sitting")
+	pkg.SetString(ctx, "state", "sitting")
 }
 
 func cPackageInSitting(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {

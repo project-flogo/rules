@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"io/ioutil"
+	"log"
 	"os"
 	"regexp"
 	"strings"
-	"io/ioutil"
-	"log"
 )
 
 func TestOne(t *testing.T) {
@@ -42,14 +42,12 @@ func TestOne(t *testing.T) {
 }
 
 func TestTwo(t *testing.T) {
-	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/rulesapp/rulesapp.json")
+	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/project-flogo/rules/rulesapp/rulesapp.json")
 	tupleDescriptor := fileToString(tupleDescAbsFileNm)
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//First register the tuple descriptors
 	RegisterTupleDescriptors(tupleDescriptor)
-
-
 
 }
 

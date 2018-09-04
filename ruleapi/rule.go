@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/TIBCOSoftware/bego/common/model"
+	"github.com/project-flogo/rules/common/model"
 )
 
 type ruleImpl struct {

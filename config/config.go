@@ -3,8 +3,8 @@ package config
 import (
 	"encoding/json"
 
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/ruleapi"
+	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/ruleapi"
 )
 
 type RuleSession struct {
@@ -30,7 +30,7 @@ func (c *Rule) UnmarshalJSON(d []byte) error {
 		Name         string       `json:"name"`
 		Conditions   []*Condition `json:"conditions"`
 		ActionFuncId string       `json:"actionFunction"`
-		Priority     int		  `json:"priority"`
+		Priority     int          `json:"priority"`
 	}{}
 
 	if err := json.Unmarshal(d, ser); err != nil {

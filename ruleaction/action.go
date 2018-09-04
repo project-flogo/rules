@@ -10,19 +10,19 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/TIBCOSoftware/bego/common"
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/config"
 	"github.com/TIBCOSoftware/flogo-lib/app/resource"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/project-flogo/rules/common"
+	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/config"
 )
 
 // Action ref to register the action factory
 const (
-	ActionRef = "github.com/TIBCOSoftware/bego/ruleaction"
+	ActionRef = "github.com/project-flogo/rules/ruleaction"
 )
 
 var manager *config.ResourceManager

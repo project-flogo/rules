@@ -11,17 +11,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/TIBCOSoftware/bego/common/model"
-	"github.com/TIBCOSoftware/bego/ruleapi"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/ruleapi"
 )
 
 // Action ref to register the action factory
 const (
-	ActionRefOld = "github.com/TIBCOSoftware/bego/ruleaction_old"
+	ActionRefOld = "github.com/project-flogo/rules/ruleaction_old"
 )
 
 // RuleActionOld wraps RuleSession
@@ -196,7 +196,7 @@ func truecondition(ruleName string, condName string, tuples map[model.TupleType]
 func createRuleSessionAndRules() (model.RuleSession, error) {
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
-	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/TIBCOSoftware/bego/common/model/tupledescriptor.json")
+	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/project-flogo/rules/common/model/tupledescriptor.json")
 
 	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
 	if err != nil {

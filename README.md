@@ -10,7 +10,7 @@ To get started with the Flogo Rules you'll need to have a few things
 
 ### Install
 ```
-$ go get -u github.com/TIBCOSoftware/bego
+$ go get -u github.com/project-flogo/rules
 ```
 _Note that the -u parameter automatically updates bego if it exists_
 
@@ -112,17 +112,17 @@ Finally, once all `Rule` `Condition's` are evaluated and `Action's` are executed
 ### Try out this example
 
 ```
-$ go get github.com/TIBCOSoftware/bego/rulesapp
+$ go get github.com/project-flogo/rules/rulesapp
 ```
 Either manually run from source
 ```
-$ cd $GOTPATH/src/github.com/TIBCOSoftware/bego/rulesapp
+$ cd $GOTPATH/src/github.com/project-flogo/rules/rulesapp
 $ go run main.go
 ```
 or install and run
 
 ```
-$ cd $GOTPATH/src/github.com/TIBCOSoftware/bego/rulesapp
+$ cd $GOTPATH/src/github.com/project-flogo/rules/rulesapp
 $ go install
 $ ./$GOTPATH/bin/rulesapp
 

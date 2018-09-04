@@ -1,6 +1,6 @@
 package rete
 
-import "github.com/TIBCOSoftware/bego/common/model"
+import "github.com/project-flogo/rules/common/model"
 
 //classNodeLink links the classNode to the rest of the model.Rule's network
 type classNodeLink interface {
