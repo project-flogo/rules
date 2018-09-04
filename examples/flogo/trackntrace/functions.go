@@ -1,4 +1,4 @@
-package tn
+package trackntrace
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	firstSittingEventRcvd bool
 	lastEventType         string
 	currentEventType      string
 )
