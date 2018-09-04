@@ -1,14 +1,13 @@
 package ruleaction
 
-
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"runtime/debug"
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"strings"
 
@@ -30,7 +29,7 @@ type RuleActionOld struct {
 	rs model.RuleSession
 }
 
-// ActionFactory wrapper to register with the action
+// ActionFactoryOld wrapper to register with the action
 type ActionFactoryOld struct {
 }
 
@@ -46,7 +45,7 @@ func (ff *ActionFactoryOld) Init() error {
 	return nil
 }
 
-// ActionData maintains Tuple descriptor details
+// ActionDataOld maintains Tuple descriptor details
 type ActionDataOld struct {
 	Tds []model.TupleDescriptor
 }
@@ -140,6 +139,7 @@ func (a *RuleActionOld) Run(ctx context.Context, inputs map[string]*data.Attribu
 func truecondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	return true
 }
+
 //func customerAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 //	tuple := tuples["customerevent"]
 //	if tuple == nil {

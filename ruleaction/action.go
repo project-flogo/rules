@@ -10,6 +10,7 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"github.com/TIBCOSoftware/bego/common"
 	"github.com/TIBCOSoftware/bego/common/model"
 	"github.com/TIBCOSoftware/bego/config"
 	"github.com/TIBCOSoftware/flogo-lib/app/resource"
@@ -17,7 +18,6 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/TIBCOSoftware/bego/common"
 )
 
 // Action ref to register the action factory
@@ -34,6 +34,7 @@ const (
 	ivValues = "values"
 )
 
+// Settings to accept RuleSessionURI and Tuple Descriptor file
 type Settings struct {
 	RuleSessionURI string
 	TupleDescFile  string
@@ -91,10 +92,10 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 
 	if err != nil {
 		return nil, err
-	} else {
-		if rsCfg == nil {
-			return nil, fmt.Errorf("unable to resolve rulesession: %s", settings.RuleSessionURI)
-		}
+	}
+
+	if rsCfg == nil {
+		return nil, fmt.Errorf("unable to resolve rulesession: %s", settings.RuleSessionURI)
 	}
 
 	if settings.TupleDescFile != "" {
