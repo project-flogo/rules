@@ -40,7 +40,7 @@ A tuple can be `Retract`ed from the rule session to take it out of play for rule
 ### Usage
 Now lets see some code in action. Below code snippet demonstrates usage of the Rules API,
 
-First we start off with loading the `TupleDescriptor`. It accepts a JSON string defining all the tuple descripters.
+First we start off with loading the `TupleDescriptor`. It accepts a JSON string defining all the tuple descriptors.
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//First register the tuple descriptors
@@ -50,7 +50,7 @@ First we start off with loading the `TupleDescriptor`. It accepts a JSON string 
 		return
 	}
 
-Next create a `RuleSession` and add all the `Rule's` with their `Condition's` and `Action's`.
+Next create a `RuleSession` and add all the `Rule`s with their `Condition`s and `Actions`s.
 
 	//Create a RuleSession
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
