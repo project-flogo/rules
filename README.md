@@ -148,4 +148,4 @@ If you have any questions, feel free to post an issue and tag it as a question, 
 * The [project-flogo/developers](https://gitter.im/project-flogo/developers?utm_source=share-link&utm_medium=link&utm_campaign=share-link) Gitter channel should be used for developer/contributor focused conversations.
 
 ## License 
-Flogo source code in [this](https://github.com/TIBCOSoftware/flogo-rules) repository is under a BSD-style license, refer to [LICENSE](https://github.com/TIBCOSoftware/flogo-rules/LICENSE) 
+Flogo Rules source code in [this](https://github.com/TIBCOSoftware/flogo-rules) repository is under a BSD-style license, refer to [LICENSE](https://github.com/TIBCOSoftware/flogo-rules/LICENSE) 
