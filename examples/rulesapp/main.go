@@ -18,7 +18,7 @@ func main() {
 	fmt.Println("** rulesapp: Example usage of the Rules module/API **")
 
 	//Load the tuple descriptor file (relative to GOPATH)
-	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/project-flogo/rules/rulesapp/rulesapp.json")
+	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/project-flogo/rules/examples/rulesapp/rulesapp.json")
 	tupleDescriptor := fileToString(tupleDescAbsFileNm)
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
