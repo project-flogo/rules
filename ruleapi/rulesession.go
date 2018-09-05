@@ -41,16 +41,16 @@ func (rs *rulesessionImpl) initRuleSession(name string) {
 	rs.started = false
 }
 
-func (rs *rulesessionImpl) AddRule(rule model.Rule) (int, bool) {
-	ret := rs.reteNetwork.AddRule(rule)
-	if ret == 0 {
-		return 0, true
-	}
-	return ret, false
+func (rs *rulesessionImpl) AddRule(rule model.Rule) (err error) {
+	return rs.reteNetwork.AddRule(rule)
 }
 
 func (rs *rulesessionImpl) DeleteRule(ruleName string) {
 	rs.reteNetwork.RemoveRule(ruleName)
+}
+
+func (rs *rulesessionImpl) GetRules() []model.Rule {
+	return rs.reteNetwork.GetRules()
 }
 
 func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err error) {

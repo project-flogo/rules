@@ -42,8 +42,9 @@ type Condition interface {
 type RuleSession interface {
 	GetName() string
 
-	AddRule(rule Rule) (int, bool)
+	AddRule(rule Rule) (err error)
 	DeleteRule(ruleName string)
+	GetRules() []Rule
 
 	Assert(ctx context.Context, tuple Tuple) (err error)
 	Retract(ctx context.Context, tuple Tuple)

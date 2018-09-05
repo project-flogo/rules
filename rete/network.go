@@ -14,9 +14,10 @@ import (
 
 //Network ... the rete network
 type Network interface {
-	AddRule(model.Rule) int
+	AddRule(model.Rule) error
 	String() string
 	RemoveRule(string) model.Rule
+	GetRules() []model.Rule
 	//changedProps are the properties that changed in a previous action
 	Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool)
 	Retract(ctx context.Context, tuple model.Tuple, changedProps map[string]bool)
@@ -64,16 +65,14 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 	nw.allHandles = make(map[model.Tuple]reteHandle)
 }
 
-func (nw *reteNetworkImpl) AddRule(rule model.Rule) int {
+func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 
 	nw.crudLock.Lock()
 	defer nw.crudLock.Unlock()
 
 	if nw.allRules[rule.GetName()] != nil {
-		fmt.Println("Rule already exists.." + rule.GetName())
-		return 1
+		return fmt.Errorf("Rule already exists.." + rule.GetName())
 	}
-	//TODO: Worry about nonEqJoin warnings later.
 	conditionSet := list.New()
 	conditionSetNoIdr := list.New()
 	nodeSet := list.New()
@@ -121,7 +120,7 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) int {
 
 	//Add NodeLinks
 	nw.ruleNameClassNodeLinksOfRule[rule.GetName()] = classNodeLinksOfRule
-	return 0
+	return nil
 }
 
 func (nw *reteNetworkImpl) setClassNodeAndLinkJoinTables(nodesOfRule *list.List,
@@ -169,6 +168,15 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 	}
 
 	return rule
+}
+
+func (nw *reteNetworkImpl) GetRules() []model.Rule {
+	rules := make([]model.Rule, 0)
+
+	for _, rule := range nw.allRules {
+		rules = append (rules, rule)
+	}
+	return rules
 }
 
 func removeRefsFromReteHandles(joinTableVar joinTable) {
