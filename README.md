@@ -12,7 +12,7 @@ To get started with the Flogo Rules you'll need to have a few things
 ```
 $ go get -u github.com/project-flogo/rules
 ```
-_Note that the -u parameter automatically updates bego if it exists_
+_Note that the -u parameter automatically updates rules if it exists_
 
 ## Getting Started
 Getting started should be fairly easy. Lets start off with some definitions around various types used.
@@ -112,17 +112,17 @@ Finally, once all `Rule` `Condition's` are evaluated and `Action's` are executed
 ### Try out this example
 
 ```
-$ go get github.com/project-flogo/rules/rulesapp
+$ go get github.com/project-flogo/rules/examples/rulesapp
 ```
 Either manually run from source
 ```
-$ cd $GOTPATH/src/github.com/project-flogo/rules/rulesapp
+$ cd $GOTPATH/src/github.com/project-flogo/rules/examples/rulesapp
 $ go run main.go
 ```
 or install and run
 
 ```
-$ cd $GOTPATH/src/github.com/project-flogo/rules/rulesapp
+$ cd $GOTPATH/src/github.com/project-flogo/rules/examples/rulesapp
 $ go install
 $ ./$GOTPATH/bin/rulesapp
 

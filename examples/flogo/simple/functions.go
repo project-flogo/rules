@@ -1,4 +1,4 @@
-package begofuncs
+package simple
 
 import (
 	"context"
