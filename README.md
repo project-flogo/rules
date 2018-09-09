@@ -3,7 +3,7 @@
 </p>
 
 <p align="center" >
-  <b>Rules is a lightweight rules library written in Golang to simplify the building of Event Driven Reactive Applications. Supports Declaritive Rules, Contextual reasoning across time and space.</b>
+  <b>Rules is a lightweight library written in Golang to simplify the building of contextually aware, declaritive rules.</b>
 </p>
 
 <p align="center">
