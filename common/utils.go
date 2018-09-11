@@ -6,6 +6,11 @@ import (
 	"time"
 
 	"github.com/oklog/ulid"
+	"os"
+	"fmt"
+	"strings"
+	"io/ioutil"
+	"log"
 )
 
 //unique id (26 chars)
@@ -34,4 +39,28 @@ func generateRandomBytes(n int) (io.Reader, error) {
 	}
 
 	return rand.Reader, nil
+}
+
+func GetAbsPathForResource(resourcepath string) string {
+	GOPATH := os.Getenv("GOPATH")
+	fmt.Printf("path[%s]\n", GOPATH)
+	paths := strings.Split(GOPATH, ":")
+	for _, path := range paths {
+		fmt.Printf("path[%s]\n", path)
+		absPath := path + "/" + resourcepath
+		_, err := os.Stat(absPath)
+		if err == nil {
+			return absPath
+		}
+	}
+	return ""
+}
+
+func FileToString(fileName string) string {
+	dat, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Fatal(err)
+		return ""
+	}
+	return string(dat)
 }

@@ -10,6 +10,8 @@ import (
 type TupleKey interface {
 	String() string
 	GetTupleDescriptor() TupleDescriptor
+	GetProps() []string
+	GetValue(string) interface{}
 }
 
 type tupleKeyImpl struct {
@@ -19,22 +21,6 @@ type tupleKeyImpl struct {
 }
 
 func (tk *tupleKeyImpl) String() string {
-
-	if tk.keyAsStr == "" {
-		i := 0
-		keysLen := len(tk.td.GetKeyProps())
-		tk.keyAsStr += tk.td.Name + ":"
-		for i = 0; i < keysLen; i++ {
-			ky := tk.td.GetKeyProps()[i]
-			tk.keyAsStr = tk.keyAsStr + ky + ":"
-			val := tk.keys[ky]
-			strval, _ := data.CoerceToString(val)
-			tk.keyAsStr += strval
-			if i < keysLen-1 {
-				tk.keyAsStr += ","
-			}
-		}
-	}
 	return tk.keyAsStr
 }
 
@@ -47,32 +33,11 @@ func NewTupleKey(tupleType TupleType, values map[string]interface{}) (tupleKey T
 	if td == nil {
 		return nil, fmt.Errorf("Tuple descriptor not found [%s]", string(tupleType))
 	}
-	t := tupleKeyImpl{}
-	err = t.initTupleKey(td, values)
-	if err != nil {
-		return nil, err
-	}
-	return &t, err
-}
 
-func NewTupleKeyWithKeyValues(tupleType TupleType, values ...interface{}) (mtuple MutableTuple, err error) {
-
-	td := GetTupleDescriptor(tupleType)
-	if td == nil {
-		return nil, fmt.Errorf("Tuple descriptor not found [%s]", string(tupleType))
-	}
-	t := tupleImpl{}
-	err = t.initTupleWithKeyValues(td, values...)
-	if err != nil {
-		return nil, err
-	}
-	return &t, err
-}
-
-func (tk *tupleKeyImpl) initTupleKey(td *TupleDescriptor, values map[string]interface{}) (err error) {
-
-	tk.keys = make(map[string]interface{})
+	tk := tupleKeyImpl{}
 	tk.td = *td
+	tk.keys = make(map[string]interface{})
+
 	for _, tdp := range td.Props {
 		if tdp.KeyIndex != -1 {
 			val, found := values[tdp.Name]
@@ -81,22 +46,31 @@ func (tk *tupleKeyImpl) initTupleKey(td *TupleDescriptor, values map[string]inte
 				if err == nil {
 					tk.keys[tdp.Name] = coerced
 				} else {
-					return err
+					return nil, fmt.Errorf("Type mismatch for key field [%s] in type [%s] Expecting [%s], got [%v]",
+						tdp.Name, td.Name, tdp.PropType.String(), reflect.TypeOf(val))
 				}
 			} else if tdp.KeyIndex != -1 { //key prop
-				return fmt.Errorf("Key property [%s] not found", tdp.Name)
+				return nil, fmt.Errorf("Key property [%s] not found", tdp.Name)
 			}
 		}
 	}
-	return err
+	tk.keyAsStr = tk.keysAsString()
+	return &tk, err
 }
 
-func (tk *tupleKeyImpl) initTupleWithKeyValues(td *TupleDescriptor, values ...interface{}) (err error) {
+func NewTupleKeyWithKeyValues(tupleType TupleType, values ...interface{}) (tupleKey TupleKey, err error) {
 
-	tk.keys = make(map[string]interface{})
+	td := GetTupleDescriptor(tupleType)
+	if td == nil {
+		return nil, fmt.Errorf("Tuple descriptor not found [%s]", string(tupleType))
+	}
+
+	tk := tupleKeyImpl{}
 	tk.td = *td
+	tk.keys = make(map[string]interface{})
+
 	if len(values) != len(td.GetKeyProps()) {
-		return fmt.Errorf("Wrong number of key values in type [%s]. Expecting [%d], got [%d]",
+		return nil, fmt.Errorf("Wrong number of key values in type [%s]. Expecting [%d], got [%d]",
 			td.Name, len(td.GetKeyProps()), len(values))
 	}
 
@@ -108,10 +82,39 @@ func (tk *tupleKeyImpl) initTupleWithKeyValues(td *TupleDescriptor, values ...in
 		if err == nil {
 			tk.keys[keyProp] = coerced
 		} else {
-			return fmt.Errorf("Type mismatch for field [%s] in type [%s] Expecting [%s], got [%v]",
+			return nil, fmt.Errorf("Type mismatch for field [%s] in type [%s] Expecting [%s], got [%v]",
 				keyProp, td.Name, tdp.PropType.String(), reflect.TypeOf(val))
 		}
 		i++
 	}
-	return err
+	tk.keyAsStr = tk.keysAsString()
+	return &tk, err
+}
+
+func (tk *tupleKeyImpl) GetProps() []string {
+	td := tk.GetTupleDescriptor()
+	return td.GetKeyProps()
+}
+
+func (tk *tupleKeyImpl) GetValue(prop string) interface{} {
+	val, _ := tk.keys[prop]
+	return val
+}
+
+func (tk *tupleKeyImpl) keysAsString() string {
+	str := ""
+	i := 0
+	keysLen := len(tk.td.GetKeyProps())
+	str += tk.td.Name + ":"
+	for i = 0; i < keysLen; i++ {
+		ky := tk.td.GetKeyProps()[i]
+		str = str + ky + ":"
+		val := tk.keys[ky]
+		strval, _ := data.CoerceToString(val)
+		str += strval
+		if i < keysLen-1 {
+			str += ","
+		}
+	}
+	return str
 }

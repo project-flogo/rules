@@ -57,6 +57,13 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err e
 	if !rs.started {
 		return fmt.Errorf("Cannot assert tuple. Rulesession [%s] not started", rs.name)
 	}
+	assertedTuple := rs.GetAssertedTuple(tuple.GetKey())
+	if assertedTuple == tuple {
+		fmt.Printf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+		return
+	} else if assertedTuple != nil {
+		return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+	}
 	if ctx == nil {
 		ctx = context.Context(context.Background())
 	}
@@ -122,4 +129,8 @@ func (rs *rulesessionImpl) Start(startupCtx map[string]interface{}) error {
 		return fmt.Errorf("Rulesession [%s] already started", rs.name)
 	}
 	return nil
+}
+
+func (rs *rulesessionImpl) GetAssertedTuple (key model.TupleKey) model.Tuple {
+	return rs.reteNetwork.GetAssertedTuple(key)
 }

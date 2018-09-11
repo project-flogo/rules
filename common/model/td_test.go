@@ -6,11 +6,7 @@ import (
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"io/ioutil"
-	"log"
-	"os"
-	"regexp"
-	"strings"
+	"github.com/project-flogo/rules/common"
 )
 
 func TestOne(t *testing.T) {
@@ -42,41 +38,11 @@ func TestOne(t *testing.T) {
 }
 
 func TestTwo(t *testing.T) {
-	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/project-flogo/rules/rulesapp/rulesapp.json")
-	tupleDescriptor := fileToString(tupleDescAbsFileNm)
+	tupleDescAbsFileNm := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/rulesapp/rulesapp.json")
+	tupleDescriptor := common.FileToString(tupleDescAbsFileNm)
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//First register the tuple descriptors
 	RegisterTupleDescriptors(tupleDescriptor)
 
-}
-
-func getAbsPathForResource(resourcepath string) string {
-	GOPATH := os.Getenv("GOPATH")
-	regex, err := regexp.Compile(":|;")
-	if err != nil {
-		return ""
-	}
-	paths := regex.Split(GOPATH, -1)
-	if os.PathListSeparator == ';' {
-		//windows
-		resourcepath = strings.Replace(resourcepath, "/", string(os.PathSeparator), -1)
-	}
-	for _, path := range paths {
-		absPath := path + string(os.PathSeparator) + resourcepath
-		_, err := os.Stat(absPath)
-		if err == nil {
-			return absPath
-		}
-	}
-	return ""
-}
-
-func fileToString(fileName string) string {
-	dat, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		log.Fatal(err)
-		return ""
-	}
-	return string(dat)
 }

@@ -27,6 +27,7 @@ type Network interface {
 	getHandle(tuple model.Tuple) reteHandle
 
 	incrementAndGetId() int
+	GetAssertedTuple(key model.TupleKey) model.Tuple
 }
 
 type reteNetworkImpl struct {
@@ -42,7 +43,7 @@ type reteNetworkImpl struct {
 	//Holds the Rule name as key and a pointer to a slice of NodeLinks as value
 	ruleNameClassNodeLinksOfRule map[string]*list.List //*list.List of ClassNodeLink
 
-	allHandles map[model.Tuple]reteHandle
+	allHandles map[string]reteHandle
 
 	currentId int
 
@@ -62,7 +63,7 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 	nw.allClassNodes = make(map[string]classNode)
 	nw.ruleNameNodesOfRule = make(map[string]*list.List)
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
-	nw.allHandles = make(map[model.Tuple]reteHandle)
+	nw.allHandles = make(map[string]reteHandle)
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
@@ -544,9 +545,9 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 }
 
 func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
-	reteHandle, found := nw.allHandles[tuple]
+	reteHandle, found := nw.allHandles[tuple.GetKey().String()]
 	if found && reteHandle != nil {
-		delete(nw.allHandles, tuple)
+		delete(nw.allHandles, tuple.GetKey().String())
 		reteHandle.removeJoinTableRowRefs(nil)
 	}
 }
@@ -562,11 +563,19 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, chang
 		nw.crudLock.Lock()
 		defer nw.crudLock.Unlock()
 	}
-	reteHandle := nw.allHandles[tuple]
+	reteHandle := nw.allHandles[tuple.GetKey().String()]
 	if reteHandle != nil {
 		reteHandle.removeJoinTableRowRefs(changedProps)
 	}
 
+}
+
+func (nw *reteNetworkImpl) GetAssertedTuple (key model.TupleKey) model.Tuple {
+	reteHandle, found := nw.allHandles[key.String()]
+	if found {
+		return reteHandle.getTuple()
+	}
+	return nil
 }
 
 func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool) {
@@ -579,19 +588,19 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 }
 
 func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.Tuple) reteHandle {
-	h := nw.allHandles[tuple]
+	h := nw.allHandles[tuple.GetKey().String()]
 	if h == nil {
 		h1 := handleImpl{}
 		h1.initHandleImpl()
 		h1.setTuple(tuple)
 		h = &h1
-		nw.allHandles[tuple] = h
+		nw.allHandles[tuple.GetKey().String()] = h
 	}
 	return h
 }
 
 func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) reteHandle {
-	h := nw.allHandles[tuple]
+	h := nw.allHandles[tuple.GetKey().String()]
 
 	return h
 }

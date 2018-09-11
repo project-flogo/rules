@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"reflect"
-
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
@@ -177,10 +175,13 @@ func (t *tupleImpl) initTuple(td *TupleDescriptor, values map[string]interface{}
 	t.tuples = make(map[string]interface{})
 	t.tupleType = TupleType(td.Name)
 	t.td = td
-	tk := tupleKeyImpl{}
-	tk.keys = make(map[string]interface{})
-	tk.td = *t.td
-	t.key = &tk
+
+	tk, err := NewTupleKey(TupleType(td.Name), values)
+	if err != nil {
+		return err
+	}
+	t.key = tk
+
 	for _, tdp := range td.Props {
 		val, found := values[tdp.Name]
 		if found {
@@ -195,9 +196,6 @@ func (t *tupleImpl) initTuple(td *TupleDescriptor, values map[string]interface{}
 		}
 	}
 
-	for _, keyProp := range td.GetKeyProps() {
-		tk.keys[keyProp] = t.tuples[keyProp]
-	}
 	return err
 }
 
@@ -205,28 +203,14 @@ func (t *tupleImpl) initTupleWithKeyValues(td *TupleDescriptor, values ...interf
 	t.tuples = make(map[string]interface{})
 	t.tupleType = TupleType(td.Name)
 	t.td = td
-	tk := tupleKeyImpl{}
-	tk.keys = make(map[string]interface{})
-	tk.td = *t.td
-	t.key = &tk
-	if len(values) != len(t.td.GetKeyProps()) {
-		return fmt.Errorf("Wrong number of key values in type [%s]. Expecting [%d], got [%d]",
-			td.Name, len(t.td.GetKeyProps()), len(values))
+	tk, err := NewTupleKeyWithKeyValues(TupleType(td.Name), values...)
+	if err != nil {
+		return err
 	}
-
-	i := 0
+	t.key = tk
+	//populate the tuple key fields with the key values
 	for _, keyProp := range td.GetKeyProps() {
-		tdp := td.GetProperty(keyProp)
-		val := values[i]
-		coerced, err := data.CoerceToValue(val, tdp.PropType)
-		if err == nil {
-			t.tuples[keyProp] = coerced
-			tk.keys[keyProp] = coerced
-		} else {
-			return fmt.Errorf("Type mismatch for field [%s] in type [%s] Expecting [%s], got [%v]",
-				keyProp, td.Name, tdp.PropType.String(), reflect.TypeOf(val))
-		}
-		i++
+		t.tuples [keyProp] = tk.GetValue(keyProp)
 	}
 	return err
 }
