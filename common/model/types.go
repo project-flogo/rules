@@ -62,6 +62,10 @@ type RuleSession interface {
 	//To be called when the rule session is ready to start accepting tuples
 	//This will invoke the StartupFunction
 	Start(startupCtx map[string]interface{}) (err error)
+
+	//return the asserted tuple, nil if not found
+	GetAssertedTuple(key TupleKey) Tuple
+
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side

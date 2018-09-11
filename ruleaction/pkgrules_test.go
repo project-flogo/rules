@@ -124,3 +124,66 @@ func TestPkgFlowNormalWithDepsMapValues(t *testing.T) {
 
 	time.Sleep(time.Second * time.Duration(20))
 }
+
+func TestDuplicateAssert(t *testing.T) {
+
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
+
+	loadPkgRulesWithDeps(rs)
+	rs.Start(nil)
+
+	pkgEvt, _ := model.NewTupleWithKeyValues("package", "1")
+	pkgEvt.SetString(nil, "curr", "none")
+	pkgEvt.SetString(nil, "next", "sfo")
+	pkgEvt.SetString(nil, "status", "normal")
+
+	err = rs.Assert(nil, pkgEvt)
+	if err != nil {
+		fmt.Printf("Error...[%s]\n", err)
+		return
+	}
+
+	pkgEvt2, _ := model.NewTupleWithKeyValues("package", "1")
+	pkgEvt2.SetString(nil, "curr", "sfo")
+	pkgEvt2.SetString(nil, "next", "ny")
+	pkgEvt2.SetString(nil, "status", "normal")
+
+	err = rs.Assert(nil, pkgEvt2)
+	if err != nil {
+		fmt.Printf("Error...[%s]\n", err)
+		return
+	}
+}
+
+func TestSameTupleInstanceAssert(t *testing.T) {
+
+	rs, err := createRuleSessionAndRules()
+	if err != nil {
+		fmt.Printf("Error [%s]\n", err)
+		return
+	}
+
+	loadPkgRulesWithDeps(rs)
+	rs.Start(nil)
+
+	pkgEvt, _ := model.NewTupleWithKeyValues("package", "1")
+	pkgEvt.SetString(nil, "curr", "none")
+	pkgEvt.SetString(nil, "next", "sfo")
+	pkgEvt.SetString(nil, "status", "normal")
+
+	err = rs.Assert(nil, pkgEvt)
+	if err != nil {
+		fmt.Printf("Error...[%s]\n", err)
+		return
+	}
+
+	err = rs.Assert(nil, pkgEvt)
+	if err != nil {
+		fmt.Printf("Error...[%s]\n", err)
+		return
+	}
+}
