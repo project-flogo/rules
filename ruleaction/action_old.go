@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"runtime/debug"
 	"strconv"
-	"strings"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
 )
@@ -196,7 +195,7 @@ func truecondition(ruleName string, condName string, tuples map[model.TupleType]
 func createRuleSessionAndRules() (model.RuleSession, error) {
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
-	tupleDescFileAbsPath := getAbsPathForResource("src/github.com/project-flogo/rules/common/model/tupledescriptor.json")
+	tupleDescFileAbsPath := common.GetAbsPathForResource("src/github.com/project-flogo/rules/common/model/tupledescriptor.json")
 
 	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
 	if err != nil {
@@ -207,21 +206,6 @@ func createRuleSessionAndRules() (model.RuleSession, error) {
 		return nil, err
 	}
 	return rs, nil
-}
-
-func getAbsPathForResourceOld(resourcepath string) string {
-	GOPATH := os.Getenv("GOPATH")
-	fmt.Printf("path[%s]\n", GOPATH)
-	paths := strings.Split(GOPATH, ":")
-	for _, path := range paths {
-		fmt.Printf("path[%s]\n", path)
-		absPath := path + "/" + resourcepath
-		_, err := os.Stat(absPath)
-		if err == nil {
-			return absPath
-		}
-	}
-	return ""
 }
 
 func loadPkgRulesWithDeps(rs model.RuleSession) {

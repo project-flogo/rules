@@ -4,11 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 	"runtime/debug"
-	"strings"
 
 	"github.com/TIBCOSoftware/flogo-lib/app/resource"
 	"github.com/TIBCOSoftware/flogo-lib/core/action"
@@ -100,8 +96,8 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 
 	if settings.TupleDescFile != "" {
 		//Load the tuple descriptor file (relative to GOPATH)
-		tupleDescAbsFileNm := getAbsPathForResource(settings.TupleDescFile)
-		tupleDescriptor := fileToString(tupleDescAbsFileNm)
+		tupleDescAbsFileNm := common.GetAbsPathForResource(settings.TupleDescFile)
+		tupleDescriptor := common.FileToString(tupleDescAbsFileNm)
 
 		logger.Info("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 
@@ -226,31 +222,4 @@ func getSettings(config *action.Config) (*Settings, error) {
 	}
 
 	return settings, nil
-}
-
-//////////////
-// File Utils
-
-func getAbsPathForResource(resourcepath string) string {
-	GOPATH := os.Getenv("GOPATH")
-	fmt.Printf("path[%s]\n", GOPATH)
-	paths := strings.Split(GOPATH, ":")
-	for _, path := range paths {
-		fmt.Printf("path[%s]\n", path)
-		absPath := path + "/" + resourcepath
-		_, err := os.Stat(absPath)
-		if err == nil {
-			return absPath
-		}
-	}
-	return ""
-}
-
-func fileToString(fileName string) string {
-	dat, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		log.Fatal(err)
-		return ""
-	}
-	return string(dat)
 }

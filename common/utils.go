@@ -5,12 +5,13 @@ import (
 	"io"
 	"time"
 
-	"github.com/oklog/ulid"
-	"os"
 	"fmt"
-	"strings"
 	"io/ioutil"
 	"log"
+	"os"
+	"strings"
+
+	"github.com/oklog/ulid"
 )
 
 //unique id (26 chars)
@@ -41,12 +42,13 @@ func generateRandomBytes(n int) (io.Reader, error) {
 	return rand.Reader, nil
 }
 
+// GetAbsPathForResource gets the absolute resource path off $GOPATH
 func GetAbsPathForResource(resourcepath string) string {
 	GOPATH := os.Getenv("GOPATH")
-	fmt.Printf("path[%s]\n", GOPATH)
+	fmt.Printf("GOPATH - [%s]\n", GOPATH)
 	paths := strings.Split(GOPATH, ":")
 	for _, path := range paths {
-		fmt.Printf("path[%s]\n", path)
+		// fmt.Printf("path[%s]\n", path)
 		absPath := path + "/" + resourcepath
 		_, err := os.Stat(absPath)
 		if err == nil {
@@ -56,6 +58,7 @@ func GetAbsPathForResource(resourcepath string) string {
 	return ""
 }
 
+// FileToString reads file content to string
 func FileToString(fileName string) string {
 	dat, err := ioutil.ReadFile(fileName)
 	if err != nil {

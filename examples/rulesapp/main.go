@@ -3,14 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
-	"regexp"
-	"strings"
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+	"github.com/vpatil-tibco/rules/common"
 )
 
 func main() {
@@ -18,8 +14,8 @@ func main() {
 	fmt.Println("** rulesapp: Example usage of the Rules module/API **")
 
 	//Load the tuple descriptor file (relative to GOPATH)
-	tupleDescAbsFileNm := getAbsPathForResource("src/github.com/project-flogo/rules/examples/rulesapp/rulesapp.json")
-	tupleDescriptor := fileToString(tupleDescAbsFileNm)
+	tupleDescAbsFileNm := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/rulesapp/rulesapp.json")
+	tupleDescriptor := common.FileToString(tupleDescAbsFileNm)
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//First register the tuple descriptors
@@ -126,34 +122,4 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 	name1, _ := t1.GetString("name")
 	name2, _ := t2.GetString("name")
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
-}
-
-func getAbsPathForResource(resourcepath string) string {
-	GOPATH := os.Getenv("GOPATH")
-	regex, err := regexp.Compile(":|;")
-	if err != nil {
-		return ""
-	}
-	paths := regex.Split(GOPATH, -1)
-	if os.PathListSeparator == ';' {
-		//windows
-		resourcepath = strings.Replace(resourcepath, "/", string(os.PathSeparator), -1)
-	}
-	for _, path := range paths {
-		absPath := path + string(os.PathSeparator) + resourcepath
-		_, err := os.Stat(absPath)
-		if err == nil {
-			return absPath
-		}
-	}
-	return ""
-}
-
-func fileToString(fileName string) string {
-	dat, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		log.Fatal(err)
-		return ""
-	}
-	return string(dat)
 }
