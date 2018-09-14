@@ -128,15 +128,15 @@ $ go get github.com/project-flogo/rules/examples/rulesapp
 ```
 Either manually run from source
 ```
-$ cd $GOTPATH/src/github.com/project-flogo/rules/examples/rulesapp
+$ cd $GOPATH/src/github.com/project-flogo/rules/examples/rulesapp
 $ go run main.go
 ```
 or install and run
 
 ```
-$ cd $GOTPATH/src/github.com/project-flogo/rules/examples/rulesapp
+$ cd $GOPATH/src/github.com/project-flogo/rules/examples/rulesapp
 $ go install
-$ ./$GOTPATH/bin/rulesapp
+$ ./$GOPATH/bin/rulesapp
 
 ```
 
