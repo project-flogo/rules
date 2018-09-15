@@ -542,6 +542,7 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 			})
 		} //else, its -ve and means, never expire
 	}
+
 }
 
 func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
@@ -593,6 +594,7 @@ func (nw *reteNetworkImpl) getOrCreateHandle(tuple model.Tuple) reteHandle {
 		h1 := handleImpl{}
 		h1.initHandleImpl()
 		h1.setTuple(tuple)
+		h1.setNew()
 		h = &h1
 		nw.allHandles[tuple.GetKey().String()] = h
 	}

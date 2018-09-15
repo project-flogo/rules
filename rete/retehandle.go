@@ -7,6 +7,12 @@ import (
 	"github.com/project-flogo/rules/common/model"
 )
 
+const (
+	RTC_ISNEW = 0x01
+	RTC_ISMODIFIED = 0x01 << 2
+	RTC_ISDELETED = 0x01 << 3
+)
+
 //Holds a tuple reference and related state
 type reteHandle interface {
 	setTuple(tuple model.Tuple)
@@ -14,11 +20,22 @@ type reteHandle interface {
 	addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable)
 	removeJoinTableRowRefs(changedProps map[string]bool)
 	removeJoinTable(joinTableVar joinTable)
+
+	setNewlyAsserted()
+	setModified()
+	setRetracted()
+
+	isNewlyAsserted() bool
+	isModified() bool
+	isRetracted() bool
+
 }
 
 type handleImpl struct {
 	tuple         model.Tuple
 	tablesAndRows map[joinTable]*list.List
+
+	rtcBits		  uint8
 }
 
 func (hdl *handleImpl) setTuple(tuple model.Tuple) {
@@ -27,6 +44,7 @@ func (hdl *handleImpl) setTuple(tuple model.Tuple) {
 
 func (hdl *handleImpl) initHandleImpl() {
 	hdl.tablesAndRows = make(map[joinTable]*list.List)
+	hdl.rtcBits = 0x00
 }
 
 func (hdl *handleImpl) getTuple() model.Tuple {
@@ -100,4 +118,23 @@ func (hdl *handleImpl) removeJoinTable(joinTableVar joinTable) {
 	if ok {
 		delete(hdl.tablesAndRows, joinTableVar)
 	}
+}
+func (hdl *handleImpl) setNewlyAsserted() {
+
+}
+func (hdl *handleImpl) setModified() {
+
+}
+func (hdl *handleImpl) setRetracted() {
+
+}
+
+func (hdl *handleImpl) isNewlyAsserted() bool {
+
+}
+func (hdl *handleImpl) isModified() bool {
+
+}
+func (hdl *handleImpl) isRetracted() bool {
+
 }
