@@ -6,7 +6,7 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"github.com/vpatil-tibco/rules/common"
+	"github.com/project-flogo/rules/common"
 )
 
 func main() {
