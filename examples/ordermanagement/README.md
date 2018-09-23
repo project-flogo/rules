@@ -7,7 +7,7 @@ Additionally, an Audit Trail of the activities (events/rule executions) is publi
 Below is one sample illustration of an deployment approach when setting things up on AWS. For now to keep things simple you can set it up on your local box.
 
 <p align="center">
-  <img src ="https://raw.githubusercontent.com/project-flogo/rules/master/examples/flogo/ordermanagement/web/resources/awsDeployment.png" />
+  <img src ="https://raw.githubusercontent.com/project-flogo/rules/master/examples/ordermanagement/web/resources/awsDeployment.png" />
 </p>
 
 ## Installation
