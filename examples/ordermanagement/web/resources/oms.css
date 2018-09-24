@@ -1,0 +1,158 @@
+
+html {
+	background: white;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: white;
+	color: black;
+	font-family: "arial", "helvetica", sans-serif;
+	font-size: .9em;
+	margin: 0;
+	padding: 2em 3em 2em 3em;
+}
+
+h1 {
+	border-bottom: solid .05em #E3EDF3;
+	margin: 1em 0;
+}
+
+.commands {
+	display: block;
+	padding: .5em .75em .5em 1em;
+	margin: .5em 0 .5em 0;
+	background: #FDFBF2;
+	border: solid .1em #eee1d4;
+	line-height: 1.5em;
+	overflow: auto;
+}
+
+code, .commands {
+	white-space: pre;
+	font-family: monospace;
+}
+
+.logs {
+	padding: 0;
+	margin: 0;
+	line-height: 1em;
+	white-space: pre;
+	font-family: monospace;
+}
+
+ol>li {
+	margin: 1em 0 2em 0;
+}
+
+table {
+	border-top   : solid .1em #E3EDF3;
+	border-right : 0;
+	border-bottom: 0;
+	border-left  : solid .1em #E3EDF3;
+	border-spacing: 0;
+}
+
+th, td {
+	vertical-align: text-top;
+	padding: 3pt 10pt 2pt 10pt;
+	margin: 0;
+	border-top   : 0;
+	border-left  : 0;
+}
+
+th {	
+	background: #005a96;
+	color: white;
+	border-right : solid .1em #5591B9;
+	border-bottom: solid .1em #5591B9;
+	text-align: left;
+}
+
+td {
+	border-right : solid .1em #E3EDF3;
+	border-bottom: solid .1em #E3EDF3;
+}
+
+form.sendEventForm {
+	margin-bottom: 2em;
+}
+
+.sendEventForm fieldset {
+	padding: 1em;
+	margin: 1em 0 1em 0;
+        border: solid .1em #E3EDF3;
+	background: #F6FBFE;
+}
+
+.sendEventForm fieldset legend {
+	padding: 0 .5em 0 1.5em;
+	background: url('event.png') no-repeat .25em center;
+}
+
+.sendEventForm fieldset>pre,
+.sendEventForm fieldset>p {
+	margin: .5em 0 0 0;
+}
+
+.sendEventForm label {
+	clear: both;
+	display: block;
+	position: relative;
+	top: 0;
+	right: 0;
+	margin:0;
+	padding: 0;
+}
+
+.sendEventForm input, .sendEventForm textarea {
+	display: block;
+	float: right;
+	margin: -1.25em 0 .2em 0;
+	width: 75%;
+}
+
+.sendEventForm button[type='submit'] {
+	clear: both;
+	padding: .5em 1em .5em 1em;
+	white-space: pre;
+	margin: 0;
+}
+
+.sendEventFormDestination {
+	padding: 0 0 0 1.75em;
+	background: url('destination.png') no-repeat left center;
+}
+
+.sendEventFormTarget {
+	display: none;
+}
+
+.footer {
+	height: 4em;
+	margin: 4em 0 0 0;
+        padding-top: .075em;
+	background: white url('tibco.gif') no-repeat top right;
+}
+
+.footer p {
+	font-size: .66em;
+	line-height: 1.3em;
+	margin: 0 19em 0 0;
+	padding: 0 .1em 0 .1em;
+	color: #C6DAE8;
+	border-top: solid .1em #E3EDF3;
+}
+
+#consoleView {
+	background-color: black;
+    width: 90%;
+    height: 90%;
+    margin-left: 10%;
+    color: white;
+}
+
+#tab {
+	padding-left:5em
+}

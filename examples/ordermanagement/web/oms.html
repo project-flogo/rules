@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>FlogoRules based Order Management System</title>
+		<meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+		<meta http-equiv="Content-Language" content="en-us" />
+
+		<link rel="Shortcut Icon" href="resources/icon.gif" type="image/gif" />
+		<style type="text/css" media="all">@import "resources/oms.css";</style>
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+		<script type="text/javascript" src="resources/oms.js" /></script>
+
+		<script type="text/javascript">
+
+			function configure() {
+				buildForms();
+				setupWebSocketConnection();
+			}
+
+			function setupWebSocketConnection() {
+				var consoleTable = document.getElementById("consoleTable");
+
+				var socket = new WebSocket("ws://localhost:8686/auditTrail");
+				
+				socket.onopen = function () {
+				};
+
+				socket.onmessage = function (e) {
+					consoleTable.innerHTML += "<p>" + e.data + "</p>";
+				};
+			}
+
+			function buildForms() {
+				 var form;
+				 SendEventForm.setServer("test.mosquitto.org");
+
+				 // order event
+				 form = SendEventForm.get("orderevent");
+				 form.setDestinationPath("orderevent");
+				 form.setEventPath("orderevent");
+				 form.addProperty("orderId", "1");
+				 form.addProperty("totalItems", "1");
+				 form.addProperty("level", "gold");
+				 form.addProperty("itemTimeout", "50");
+				 form.addProperty("shippingTimeout", "50");
+				 form.build();
+
+				 // item event
+				 form = SendEventForm.get("itemevent");
+				 form.setDestinationPath("itemevent");
+				 form.setEventPath("itemevent");
+				 form.addProperty("itemId", "1");
+				 form.addProperty("orderId", "1");
+				 form.addProperty("type", "pen");
+				 form.addProperty("quantity", "12");	
+				 form.build();
+
+				 // order shipped event
+				 form = SendEventForm.get("ordershippedevent");
+				 form.setDestinationPath("ordershippedevent");
+				 form.setEventPath("ordershippedevent");
+				 form.addProperty("orderId", "1");
+				 form.build();
+			}
+		</script>
+	</head>
+	
+	<body onLoad="configure()">
+
+		<h1>FlogoRules based Order Management System</h1>
+
+		<h2>Order Management Workflow and cases</h2>
+
+		<p>
+			<ul>
+				<li>Incoming order event can be from various devices, hand held scanners, automated carousal belt, etc. This creates an Order entity in the system and waits for order item events to come in. Optionally set a timeout to wait for the order items.</li>
+				<li>Incoming order item events associated to the parent order. Availibility check the item against the inventory (static storage system).</li>
+				<li>Issue shipping once all order items are received. Optionally set a order shipping timeout, to complete the order in the a given time frame.</li>
+				<li>On shipping confirmation event, the Order is moved to invoicing.</li>
+				<li>Based on the customer level (gold/silver/bronze), appropriate % discount is applied to the invoice</li>
+				<li>All timedout orders are cancelled</li>
+			</ul>
+		</p>
+		
+		<div id="container" style="width: 100%; display: table; height: 100%">
+			<div style="display: table-row; height: 100%">
+				<div id="leftContainer" style="width: 50%;display: table-cell;">
+					<h2>Sending Events</h2>
+					<ol>
+						<li>
+							<p>Create a new Order with the below details,</p>
+							<form id="orderevent"></form>
+						</li>
+
+						<li>
+							<p>Create Item for a pre-created Order with the below details,</p>
+							<form id="itemevent"></form>
+						</li>
+
+						<li>
+							<p>Send a shipping completed event. To move the order from shipping to invoice generation</p>
+							<form id="ordershippedevent"></form>
+						</li>
+
+					</ol>
+				</div>
+
+				<div id="rightContainer" style="display: table-cell; height: 100%">
+					<h2 style="margin-left: 10%">Audit Trail </h2>
+					<div id="consoleView" style="height: 700px; overflow-y: scroll;">
+						<table id="consoleTable">
+							<th>Timestamp</th><th>Order Id</th><th>Rule Name</th><th>Status</th><th>Description</th>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="footer">
+			<p>TIBCO Copyright&copy; 2004-2018 TIBCO Software Inc. All rights reserved.</p>
+		</div>
+	</body>
+</html>
