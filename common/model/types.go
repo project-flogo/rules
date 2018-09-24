@@ -69,6 +69,9 @@ type RuleSession interface {
 	//Retract, and remove
 	Delete(ctx context.Context, tuple Tuple)
 
+	//RtcTransactionHandler
+	RegisterRtcTransactionHandler(txnHandler RtcTransactionHandler, handlerCtx interface{})
+
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side
@@ -86,3 +89,19 @@ type StartupRSFunction func(ctx context.Context, rs RuleSession, sessionCtx map[
 type ValueChangeListener interface {
 	OnValueChange(tuple Tuple, prop string)
 }
+
+type RtcTxn interface {
+	//map of type and map of key/tuple
+	GetRtcAdded () map[string]map[string]Tuple
+	GetRtcModified() map[string]map[string]RtcModified
+	GetRtcDeleted() map[string]map[string]Tuple
+
+}
+
+type RtcModified interface {
+	GetTuple() Tuple
+	GetModifiedProps() map[string]bool
+}
+
+type RtcTransactionHandler func (ctx context.Context, rs RuleSession, txn RtcTxn, txnContext interface{})
+

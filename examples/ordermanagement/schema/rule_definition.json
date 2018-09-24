@@ -1,0 +1,113 @@
+{
+    "rules":[
+        {
+            "name": "orderevent",
+            "conditions": [
+                {
+                "name": "truecondition",
+                "identifiers": [
+                    "orderevent"
+                ],
+                "evaluator": "truecondition"
+                }
+            ],
+            "actionFunction": "ordereventAction"
+        },
+        {
+            "name": "itemevent",
+            "conditions": [
+                {
+                "name": "itemeventCondition",
+                "identifiers": [
+                    "itemevent",
+                    "order"
+                ],
+                "evaluator": "itemeventCondition"
+                }
+            ],
+            "actionFunction": "itemeventAction"
+        },
+        {
+            "name": "order",
+            "conditions": [
+                {
+                "name": "orderCondition",
+                "identifiers": [
+                    "order.receivedItems"
+                ],
+                "evaluator": "orderCondition"
+                }
+            ],
+            "actionFunction": "orderAction"
+        },
+        {
+            "name": "ordertimeoutevent",
+            "conditions": [
+                {
+                "name": "ordertimeouteventCondition",
+                "identifiers": [
+                    "order", 
+                    "ordertimeoutevent"
+                ],
+                "evaluator": "ordertimeouteventCondition"
+                }
+            ],
+            "actionFunction": "ordertimeouteventAction"
+        },
+        {
+            "name": "ordershippedevent",
+            "conditions": [
+                {
+                "name": "ordershippedCondition",
+                "identifiers": [
+                    "order", 
+                    "ordershippedevent"
+                ],
+                "evaluator": "ordershippedCondition"
+                }
+            ],
+            "actionFunction": "ordershippedAction"
+        },
+        {
+            "name": "ordercancelled",
+            "conditions": [
+                {
+                "name": "ordercancelledCondition",
+                "identifiers": [
+                    "order.status"
+                ],
+                "evaluator": "ordercancelledCondition"
+                }
+            ],
+            "actionFunction": "ordercancelledAction"
+        },
+        {
+            "name": "shippingtimeoutevent",
+            "conditions": [
+                {
+                "name": "shippingtimeouteventCondition",
+                "identifiers": [
+                    "order", 
+                    "shippingtimeoutevent"
+                ],
+                "evaluator": "shippingtimeouteventCondition"
+                }
+            ],
+            "actionFunction": "shippingtimeouteventAction"
+        },
+        {
+            "name": "orderinvoice",
+            "conditions": [
+                {
+                "name": "orderinvoiceCondition",
+                "identifiers": [
+                    "order.status"
+                ],
+                "evaluator": "orderinvoiceCondition"
+                }
+            ],
+            "actionFunction": "orderinvoiceAction"
+        }
+    ]
+}
+          

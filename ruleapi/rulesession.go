@@ -138,3 +138,7 @@ func (rs *rulesessionImpl) Start(startupCtx map[string]interface{}) error {
 func (rs *rulesessionImpl) GetAssertedTuple (key model.TupleKey) model.Tuple {
 	return rs.reteNetwork.GetAssertedTuple(key)
 }
+
+func (rs *rulesessionImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {
+	rs.reteNetwork.RegisterRtcTransactionHandler(txnHandler, txnContext)
+}

@@ -18,17 +18,17 @@ type reteCtx interface {
 	OnValueChange(tuple model.Tuple, prop string)
 
 	getRtcAdded() map[string]model.Tuple
-	getRtcModified() map[string]map[string]bool
+	getRtcModified() map[string]model.RtcModified
 	getRtcDeleted() map[string]model.Tuple
 
 	addToRtcAdded(tuple model.Tuple)
-	resetModified()
-	addToRtcDeleted(tuple model.Tuple)
-	normalize()
-
 	addToRtcModified(tuple model.Tuple)
+	addToRtcDeleted(tuple model.Tuple)
 	addRuleModifiedToOpsList()
+
+	normalize()
 	copyRuleModifiedToRtcModified()
+	resetModified()
 
 	printRtcChangeList()
 
@@ -41,26 +41,31 @@ type reteCtxImpl struct {
 	network Network
 	rs      model.RuleSession
 
-	//in each action, this map is updated with new ones
-	//key is the added tuple, value is true
-	// (we simply want the unique set of newly added tuples)
+	//newly added tuples in the current RTC
 	addMap map[string]model.Tuple
 
-	//in each action, this map is updated with modifications
-	//key is the added tuple, value is a map of the changed property to true
-	// (we simply want unique modified tuples and unique props in each that changed)
-	modifyMap map[string]map[string]bool
+	//modified tuples in the current rule action
+	modifyMap map[string]model.RtcModified
 
-	//in each action, this map is updated with deletions
-	//key is the deleted tuple value is always true
-	// (we simply want a unique set of deleted tuples)
+	//deleted (which is different than simply retracted) tuples in the current RTC (
 	deleteMap map[string]model.Tuple
 
-	//in each action, this map is updated with modifications
-	//key is the added tuple, value is a map of the changed property to true
-	// (we simply want unique modified tuples and unique props in each that changed)
-	rtcModifyMap map[string]map[string]bool
+	//modified tuples in the current RTC
+	rtcModifyMap map[string]model.RtcModified
 
+}
+
+func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
+	reteCtxVal := reteCtxImpl{}
+	reteCtxVal.cr = newConflictRes()
+	reteCtxVal.opsList = list.New()
+	reteCtxVal.network = network
+	reteCtxVal.rs = rs
+	reteCtxVal.addMap = make(map[string]model.Tuple)
+	reteCtxVal.modifyMap = make(map[string]model.RtcModified)
+	reteCtxVal.rtcModifyMap = make(map[string]model.RtcModified)
+	reteCtxVal.deleteMap = make(map[string]model.Tuple)
+	return &reteCtxVal
 }
 
 func (rctx *reteCtxImpl) getConflictResolver() conflictRes {
@@ -83,14 +88,44 @@ func (rctx *reteCtxImpl) OnValueChange(tuple model.Tuple, prop string) {
 
 	//if handle does not exist means its new
 	if nil != rctx.network.getHandle(tuple) {
-		propMap := rctx.modifyMap[tuple.GetKey().String()]
-		if propMap == nil {
-			propMap = make(map[string]bool)
-			rctx.modifyMap[tuple.GetKey().String()] = propMap
+		rtcModified := rctx.modifyMap[tuple.GetKey().String()]
+		if rtcModified == nil {
+			rtcModified = NewRtcModified(tuple)
+			(rtcModified.(*rtcModifiedImpl)).addProp(prop)
+			rctx.modifyMap[tuple.GetKey().String()] = rtcModified
 		}
-		propMap[prop] = true
 	}
 }
+
+func (rctx *reteCtxImpl) getRtcAdded() map[string]model.Tuple {
+	return rctx.addMap
+}
+func (rctx *reteCtxImpl) getRtcModified() map[string]model.RtcModified {
+	return rctx.rtcModifyMap
+}
+func (rctx *reteCtxImpl) getRtcDeleted() map[string]model.Tuple {
+	return rctx.deleteMap
+}
+
+func (rctx *reteCtxImpl) addToRtcAdded (tuple model.Tuple) {
+	rctx.addMap[tuple.GetKey().String()] = tuple
+}
+
+func (rctx *reteCtxImpl) addToRtcModified (tuple model.Tuple) {
+	rctx.addMap[tuple.GetKey().String()] = tuple
+}
+
+func (rctx *reteCtxImpl) addToRtcDeleted (tuple model.Tuple) {
+	rctx.deleteMap[tuple.GetKey().String()] = tuple
+}
+
+func (rctx *reteCtxImpl) addRuleModifiedToOpsList() {
+	for _, rtcModified := range rctx.modifyMap {
+		rctx.getOpsList().PushBack(newModifyEntry(rtcModified.GetTuple(), rtcModified.GetModifiedProps()))
+	}
+}
+
+
 
 func (rctx *reteCtxImpl) normalize() {
 
@@ -104,53 +139,13 @@ func (rctx *reteCtxImpl) normalize() {
 	}
 }
 
-func (rctx *reteCtxImpl) getRtcAdded() map[string]model.Tuple {
-	return rctx.addMap
-}
-func (rctx *reteCtxImpl) getRtcModified() map[string]map[string]bool {
-	return rctx.rtcModifyMap
-}
-func (rctx *reteCtxImpl) getRtcDeleted() map[string]model.Tuple {
-	return rctx.deleteMap
-}
-
-func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
-	reteCtxVal := reteCtxImpl{}
-	reteCtxVal.cr = newConflictRes()
-	reteCtxVal.opsList = list.New()
-	reteCtxVal.network = network
-	reteCtxVal.rs = rs
-	reteCtxVal.addMap = make(map[string]model.Tuple)
-	reteCtxVal.modifyMap = make(map[string]map[string]bool)
-	reteCtxVal.rtcModifyMap = make(map[string]map[string]bool)
-	reteCtxVal.deleteMap = make(map[string]model.Tuple)
-	return &reteCtxVal
-}
-
-func (rctx *reteCtxImpl) addToRtcAdded (tuple model.Tuple) {
-	rctx.addMap[tuple.GetKey().String()] = tuple
-}
-
-func (rctx *reteCtxImpl) addToRtcModified (tuple model.Tuple) {
-	rctx.addMap[tuple.GetKey().String()] = tuple
-}
-
-func (rctx *reteCtxImpl) addRuleModifiedToOpsList() {
-	for tupleKey, props := range rctx.modifyMap {
-		rctx.getOpsList().PushBack(newModifyEntry(rctx.getNetwork().GetAssertedTupleByStringKey(tupleKey), props))
-	}
-}
 func (rctx *reteCtxImpl) copyRuleModifiedToRtcModified () {
 	for k, v := range rctx.modifyMap {
 		rctx.rtcModifyMap[k] = v
 	}
 }
 func (rctx *reteCtxImpl) resetModified() {
-	rctx.modifyMap = make(map[string]map[string]bool)
-}
-
-func (rctx *reteCtxImpl) addToRtcDeleted (tuple model.Tuple) {
-	rctx.deleteMap[tuple.GetKey().String()] = tuple
+	rctx.modifyMap = make(map[string]model.RtcModified)
 }
 
 func (rctx *reteCtxImpl) printRtcChangeList() {

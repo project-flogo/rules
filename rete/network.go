@@ -40,6 +40,9 @@ type Network interface {
 	incrementAndGetId() int
 	GetAssertedTuple(key model.TupleKey) model.Tuple
 	GetAssertedTupleByStringKey(key string) model.Tuple
+	//RtcTransactionHandler
+	RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{})
+
 }
 
 type reteNetworkImpl struct {
@@ -61,6 +64,8 @@ type reteNetworkImpl struct {
 
 	assertLock sync.Mutex
 	crudLock   sync.Mutex
+	txnHandler model.RtcTransactionHandler
+	txnContext interface{}
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -534,7 +539,9 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 		defer nw.crudLock.Unlock()
 		nw.assertInternal(newCtx, tuple, changedProps, mode)
 		reteCtxVar.getConflictResolver().resolveConflict(newCtx)
-		fmt.Printf("*** End of RTC *** \n")
+		rtcTxn := NewRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
+		nw.txnHandler (ctx, rs, rtcTxn, nw.txnContext)
+
 	} else {
 		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple, changedProps, mode))
 	}
@@ -636,4 +643,9 @@ func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) reteHandle {
 func (nw *reteNetworkImpl) incrementAndGetId() int {
 	nw.currentId++
 	return nw.currentId
+}
+
+func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {
+	nw.txnHandler = txnHandler
+	nw.txnContext = txnContext
 }

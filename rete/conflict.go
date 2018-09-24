@@ -84,7 +84,7 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 
 	reteCtxV := getReteCtx(ctx)
 	reteCtxV.normalize()
-	reteCtxV.printRtcChangeList()
+	//reteCtxV.printRtcChangeList()
 
 }
 
