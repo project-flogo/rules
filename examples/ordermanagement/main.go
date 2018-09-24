@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/project-flogo/rules/examples/flogo/ordermanagement/audittrail"
+	"github.com/project-flogo/rules/examples/ordermanagement/audittrail"
 
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/project-flogo/rules/common"
@@ -16,8 +16,8 @@ import (
 
 const (
 	msgValueField      = "message"
-	tupleSchemaPath    = "src/local-repo/oms/ordermanagement/schema/oms_schema.json"
-	ruleDefinitionPath = "src/local-repo/oms/ordermanagement/schema/rule_definition.json"
+	tupleSchemaPath    = "src/github.com/project-flogo/rules/examples/ordermanagement/schema/oms_schema.json"
+	ruleDefinitionPath = "src/github.com/project-flogo/rules/examples/ordermanagement/schema/rule_definition.json"
 )
 
 // cli arguments

@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/project-flogo/rules/examples/flogo/ordermanagement/audittrail"
+	"github.com/project-flogo/rules/examples/ordermanagement/audittrail"
 
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/project-flogo/rules/common"
