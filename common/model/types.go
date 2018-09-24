@@ -66,6 +66,9 @@ type RuleSession interface {
 	//return the asserted tuple, nil if not found
 	GetAssertedTuple(key TupleKey) Tuple
 
+	//Retract, and remove
+	Delete(ctx context.Context, tuple Tuple)
+
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side

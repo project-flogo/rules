@@ -8,9 +8,13 @@ import (
 )
 
 const (
-	RTC_ISNEW = 0x01
-	RTC_ISMODIFIED = 0x01 << 2
-	RTC_ISDELETED = 0x01 << 3
+	one 		   = 0x01
+	rtcIsAsserted  = one
+	rtcIsModified  = one << 1
+	rtcIsRetracted = one << 2
+
+	isNew          = one << 3
+
 )
 
 //Holds a tuple reference and related state
@@ -21,13 +25,16 @@ type reteHandle interface {
 	removeJoinTableRowRefs(changedProps map[string]bool)
 	removeJoinTable(joinTableVar joinTable)
 
-	setNewlyAsserted()
+	setAsserted()
 	setModified()
 	setRetracted()
+	setNew()
 
-	isNewlyAsserted() bool
+	isAsserted() bool
 	isModified() bool
 	isRetracted() bool
+	isNew() bool
+
 
 }
 
@@ -35,7 +42,7 @@ type handleImpl struct {
 	tuple         model.Tuple
 	tablesAndRows map[joinTable]*list.List
 
-	rtcBits		  uint8
+	rtcStatus	  uint8
 }
 
 func (hdl *handleImpl) setTuple(tuple model.Tuple) {
@@ -44,7 +51,7 @@ func (hdl *handleImpl) setTuple(tuple model.Tuple) {
 
 func (hdl *handleImpl) initHandleImpl() {
 	hdl.tablesAndRows = make(map[joinTable]*list.List)
-	hdl.rtcBits = 0x00
+	hdl.rtcStatus = 0x00
 }
 
 func (hdl *handleImpl) getTuple() model.Tuple {
@@ -53,7 +60,7 @@ func (hdl *handleImpl) getTuple() model.Tuple {
 
 func getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
 	reteCtxVar := getReteCtx(ctx)
-	return reteCtxVar.getNetwork().getOrCreateHandle(tuple)
+	return reteCtxVar.getNetwork().getOrCreateHandle(ctx, tuple)
 }
 
 func (hdl *handleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable) {
@@ -119,22 +126,28 @@ func (hdl *handleImpl) removeJoinTable(joinTableVar joinTable) {
 		delete(hdl.tablesAndRows, joinTableVar)
 	}
 }
-func (hdl *handleImpl) setNewlyAsserted() {
-
+func (hdl *handleImpl) setAsserted() {
+	hdl.rtcStatus = hdl.rtcStatus | rtcIsAsserted
 }
 func (hdl *handleImpl) setModified() {
-
+	hdl.rtcStatus = hdl.rtcStatus | rtcIsModified
 }
 func (hdl *handleImpl) setRetracted() {
-
+	hdl.rtcStatus = hdl.rtcStatus | rtcIsRetracted
+}
+func (hdl *handleImpl) setNew() {
+	hdl.rtcStatus = hdl.rtcStatus | isNew
 }
 
-func (hdl *handleImpl) isNewlyAsserted() bool {
-
+func (hdl *handleImpl) isAsserted() bool {
+	return (hdl.rtcStatus & rtcIsAsserted) == rtcIsAsserted
 }
 func (hdl *handleImpl) isModified() bool {
-
+	return (hdl.rtcStatus & rtcIsModified) == rtcIsModified
 }
 func (hdl *handleImpl) isRetracted() bool {
-
+	return (hdl.rtcStatus & rtcIsRetracted) == rtcIsRetracted
+}
+func (hdl *handleImpl) isNew() bool {
+	return (hdl.rtcStatus & isNew) == isNew
 }

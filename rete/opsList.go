@@ -23,18 +23,20 @@ type assertEntry interface {
 
 type assertEntryImpl struct {
 	opsEntryImpl
+	mode RtcOprn
 }
 
-func newAssertEntry(tuple model.Tuple, changeProps map[string]bool) assertEntry {
+func newAssertEntry(tuple model.Tuple, changeProps map[string]bool, mode RtcOprn) assertEntry {
 	aEntry := assertEntryImpl{}
 	aEntry.tuple = tuple
 	aEntry.changeProps = changeProps
+	aEntry.mode = mode
 	return &aEntry
 }
 
 func (ai *assertEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
-	reteCtx.getNetwork().assertInternal(ctx, ai.tuple, ai.changeProps)
+	reteCtx.getNetwork().assertInternal(ctx, ai.tuple, ai.changeProps, ai.mode)
 }
 
 //Modify Entry
@@ -57,8 +59,8 @@ func newModifyEntry(tuple model.Tuple, changeProps map[string]bool) modifyEntry 
 func (me *modifyEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
 	reteCtx.getConflictResolver().deleteAgendaFor(ctx, me.tuple)
-	reteCtx.getNetwork().Retract(ctx, me.tuple, me.changeProps)
-	reteCtx.getNetwork().Assert(ctx, reteCtx.getRuleSession(), me.tuple, me.changeProps)
+	reteCtx.getNetwork().Retract(ctx, me.tuple, me.changeProps, MODIFY)
+	reteCtx.getNetwork().Assert(ctx, reteCtx.getRuleSession(), me.tuple, me.changeProps, MODIFY)
 }
 
 //Delete Entry
@@ -69,16 +71,18 @@ type deleteEntry interface {
 
 type deleteEntryImpl struct {
 	opsEntryImpl
+	mode RtcOprn
 }
 
-func newDeleteEntry(tuple model.Tuple) deleteEntry {
+func newDeleteEntry(tuple model.Tuple, mode RtcOprn) deleteEntry {
 	dEntry := deleteEntryImpl{}
 	dEntry.tuple = tuple
+	dEntry.mode = mode
 	return &dEntry
 }
 
 func (de *deleteEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
 	reteCtx.getConflictResolver().deleteAgendaFor(ctx, de.tuple)
-	reteCtx.getNetwork().Retract(ctx, de.tuple, de.changeProps)
+	reteCtx.getNetwork().retractInternal(ctx, de.tuple, de.changeProps, de.mode)
 }

@@ -67,12 +67,16 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err e
 	if ctx == nil {
 		ctx = context.Context(context.Background())
 	}
-	rs.reteNetwork.Assert(ctx, rs, tuple, nil)
+	rs.reteNetwork.Assert(ctx, rs, tuple, nil, rete.ADD)
 	return nil
 }
 
 func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.Tuple) {
-	rs.reteNetwork.Retract(ctx, tuple, nil)
+	rs.reteNetwork.Retract(ctx, tuple, nil, rete.RETRACT)
+}
+
+func (rs *rulesessionImpl) Delete(ctx context.Context, tuple model.Tuple) {
+	rs.reteNetwork.Retract(ctx, tuple, nil, rete.DELETE)
 }
 
 func (rs *rulesessionImpl) printNetwork() {
