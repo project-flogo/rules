@@ -3,13 +3,14 @@ package config
 import (
 	"context"
 	"encoding/json"
-	"github.com/project-flogo/rules/common/model"
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
+
+	"github.com/project-flogo/rules/common/model"
+	"github.com/stretchr/testify/assert"
 )
 
-var testSessionJson = `{
+var testRuleSessionDescriptorJson = `{
         "rules": [
           {
             "name": "n1.name == Bob",
@@ -52,14 +53,14 @@ func TestDeserialize(t *testing.T) {
 	RegisterConditionEvaluator("checkForBob", checkForBob)
 	RegisterConditionEvaluator("checkSameNamesCondition", checkSameNamesCondition)
 
-	sessionCfg := &RuleSession{}
-	err := json.Unmarshal([]byte(testSessionJson), sessionCfg)
+	ruleSessionDescriptor := &RuleSessionDescriptor{}
+	err := json.Unmarshal([]byte(testRuleSessionDescriptorJson), ruleSessionDescriptor)
 
 	assert.Nil(t, err)
-	assert.NotNil(t, sessionCfg.Rules)
-	assert.Equal(t, 2, len(sessionCfg.Rules))
+	assert.NotNil(t, ruleSessionDescriptor.Rules)
+	assert.Equal(t, 2, len(ruleSessionDescriptor.Rules))
 
-	r1Cfg := sessionCfg.Rules[0]
+	r1Cfg := ruleSessionDescriptor.Rules[0]
 
 	assert.Equal(t, "n1.name == Bob", r1Cfg.Name)
 	assert.NotNil(t, r1Cfg.Conditions)
@@ -78,7 +79,7 @@ func TestDeserialize(t *testing.T) {
 	sf2 = reflect.ValueOf(r1c1Cfg.Evaluator)
 	assert.Equal(t, sf1.Pointer(), sf2.Pointer())
 
-	r2Cfg := sessionCfg.Rules[1]
+	r2Cfg := ruleSessionDescriptor.Rules[1]
 
 	assert.Equal(t, "n1.name == Bob && n1.name == n2.name", r2Cfg.Name)
 	assert.NotNil(t, r2Cfg.Conditions)
