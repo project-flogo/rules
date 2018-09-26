@@ -7,16 +7,6 @@ import (
 	"github.com/project-flogo/rules/common/model"
 )
 
-const (
-	one 		   = 0x01
-	rtcIsAsserted  = one
-	rtcIsModified  = one << 1
-	rtcIsRetracted = one << 2
-
-	isNew          = one << 3
-
-)
-
 //Holds a tuple reference and related state
 type reteHandle interface {
 	setTuple(tuple model.Tuple)
@@ -24,25 +14,13 @@ type reteHandle interface {
 	addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable)
 	removeJoinTableRowRefs(changedProps map[string]bool)
 	removeJoinTable(joinTableVar joinTable)
-
-	setAsserted()
-	setModified()
-	setRetracted()
-	setNew()
-
-	isAsserted() bool
-	isModified() bool
-	isRetracted() bool
-	isNew() bool
-
-
 }
 
 type handleImpl struct {
 	tuple         model.Tuple
 	tablesAndRows map[joinTable]*list.List
 
-	rtcStatus	  uint8
+	rtcStatus uint8
 }
 
 func (hdl *handleImpl) setTuple(tuple model.Tuple) {
@@ -125,29 +103,4 @@ func (hdl *handleImpl) removeJoinTable(joinTableVar joinTable) {
 	if ok {
 		delete(hdl.tablesAndRows, joinTableVar)
 	}
-}
-func (hdl *handleImpl) setAsserted() {
-	hdl.rtcStatus = hdl.rtcStatus | rtcIsAsserted
-}
-func (hdl *handleImpl) setModified() {
-	hdl.rtcStatus = hdl.rtcStatus | rtcIsModified
-}
-func (hdl *handleImpl) setRetracted() {
-	hdl.rtcStatus = hdl.rtcStatus | rtcIsRetracted
-}
-func (hdl *handleImpl) setNew() {
-	hdl.rtcStatus = hdl.rtcStatus | isNew
-}
-
-func (hdl *handleImpl) isAsserted() bool {
-	return (hdl.rtcStatus & rtcIsAsserted) == rtcIsAsserted
-}
-func (hdl *handleImpl) isModified() bool {
-	return (hdl.rtcStatus & rtcIsModified) == rtcIsModified
-}
-func (hdl *handleImpl) isRetracted() bool {
-	return (hdl.rtcStatus & rtcIsRetracted) == rtcIsRetracted
-}
-func (hdl *handleImpl) isNew() bool {
-	return (hdl.rtcStatus & isNew) == isNew
 }

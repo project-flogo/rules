@@ -131,11 +131,11 @@ func (rctx *reteCtxImpl) normalize() {
 
 	//remove from modify map, those in add map
 	for k, _ := range rctx.addMap {
-		delete(rctx.modifyMap, k)
+		delete(rctx.rtcModifyMap, k)
 	}
 	//remove from modify map, those in delete map
 	for k, _ := range rctx.deleteMap {
-		delete(rctx.modifyMap, k)
+		delete(rctx.rtcModifyMap, k)
 	}
 }
 
