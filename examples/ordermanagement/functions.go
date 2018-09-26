@@ -2,15 +2,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"time"
 
 	"github.com/project-flogo/rules/examples/ordermanagement/audittrail"
 
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 )
@@ -47,24 +44,6 @@ func init() {
 	//rule orderinvoice, apply discounts based on the customer level on hte final invoice
 	config.RegisterConditionEvaluator("orderinvoiceCondition", orderinvoiceCondition)
 	config.RegisterActionFunction("orderinvoiceAction", orderinvoiceAction)
-}
-
-// create rulesession and load rules in it
-func loadRulesInRuleSession() (model.RuleSession, error) {
-	ruleDefFileAbsPath := common.GetAbsPathForResource(ruleDefinitionPath)
-
-	dat, err := ioutil.ReadFile(ruleDefFileAbsPath)
-	if err != nil {
-		logger.Error(err)
-	}
-
-	var rsConfig *config.RuleSession
-	err = json.Unmarshal([]byte(string(dat)), &rsConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return config.GetOrCreateRuleSessionFromConfig("oms_session", rsConfig)
 }
 
 func truecondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {

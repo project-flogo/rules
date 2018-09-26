@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/project-flogo/rules/examples/ordermanagement/audittrail"
+	"github.com/project-flogo/rules/ruleapi"
 
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/project-flogo/rules/common"
@@ -54,7 +54,7 @@ func main() {
 	}
 
 	logger.Info("--- Adding Rules ---")
-	ruleSession, err = loadRulesInRuleSession()
+	ruleSession, err = createAndLoadRuleSession()
 	if err != nil {
 		panic(err)
 	}
@@ -75,17 +75,24 @@ func main() {
 
 // loads the tuple schema
 func loadTupleSchema() error {
-	tupleDescFileAbsPath := common.GetAbsPathForResource(tupleSchemaPath)
-
-	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
-	if err != nil {
-		panic(err)
-	}
-	err = model.RegisterTupleDescriptors(string(dat))
+	content := getFileContent(tupleSchemaPath)
+	err := model.RegisterTupleDescriptors(string(content))
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+// create rulesession and load rules in it
+func createAndLoadRuleSession() (model.RuleSession, error) {
+	content := getFileContent(ruleDefinitionPath)
+	return ruleapi.GetOrCreateRuleSessionFromConfig("oms_session", string(content))
+}
+
+// Get file content
+func getFileContent(filePath string) string {
+	absPath := common.GetAbsPathForResource(filePath)
+	return common.FileToString(absPath)
 }
 
 // validates for any missing variables
