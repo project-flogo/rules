@@ -9,6 +9,7 @@ import (
 
 	"container/list"
 	"sync"
+	"time"
 )
 
 type RtcOprn int
@@ -539,6 +540,17 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 		defer nw.crudLock.Unlock()
 		nw.assertInternal(newCtx, tuple, changedProps, mode)
 		reteCtxVar.getConflictResolver().resolveConflict(newCtx)
+		//if Timeout is 0, remove it from rete
+		td := model.GetTupleDescriptor(tuple.GetTupleType())
+		if td != nil {
+			if td.TTLInSeconds == 0 { //remove immediately.
+				nw.removeTupleFromRete(tuple)
+			} else if td.TTLInSeconds > 0 { // TTL for the tuple type, after that, remove it from RETE
+				go time.AfterFunc(time.Second*time.Duration(td.TTLInSeconds), func() {
+					nw.removeTupleFromRete(tuple)
+				})
+			} //else, its -ve and means, never expire
+		}
 		if nw.txnHandler != nil {
 			rtcTxn := newRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
 			nw.txnHandler(ctx, rs, rtcTxn, nw.txnContext)
