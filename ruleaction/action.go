@@ -14,6 +14,7 @@ import (
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
+	"github.com/project-flogo/rules/ruleapi"
 )
 
 // Action ref to register the action factory
@@ -84,7 +85,7 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 		return nil, err
 	}
 
-	rsCfg, err := manager.GetRuleSessionConfig(settings.RuleSessionURI)
+	rsCfg, err := manager.GetRuleSessionDescriptor(settings.RuleSessionURI)
 
 	if err != nil {
 		return nil, err
@@ -121,7 +122,11 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	}
 
 	ruleAction := &RuleAction{}
-	ruleAction.rs, _ = config.GetOrCreateRuleSessionFromConfig(settings.RuleSessionURI, rsCfg)
+	ruleCollectionJSON, err := json.Marshal(rsCfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshall RuleSessionDescriptor : %s", err.Error())
+	}
+	ruleAction.rs, _ = ruleapi.GetOrCreateRuleSessionFromConfig(settings.RuleSessionURI, string(ruleCollectionJSON))
 
 	//start the rule session here, calls the startup rule function
 	err = ruleAction.rs.Start(nil)

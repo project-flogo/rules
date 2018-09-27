@@ -2,12 +2,14 @@ package ruleapi
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
 	"time"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/rete"
 )
 
@@ -32,6 +34,37 @@ func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
 	rs.initRuleSession(name)
 	rs1, _ := sessionMap.LoadOrStore(name, &rs)
 	return rs1.(*rulesessionImpl), nil
+}
+
+func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.RuleSession, error) {
+	rs, err := GetOrCreateRuleSession(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ruleSessionDescriptor := config.RuleSessionDescriptor{}
+	err = json.Unmarshal([]byte(jsonConfig), &ruleSessionDescriptor)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ruleCfg := range ruleSessionDescriptor.Rules {
+		rule := NewRule(ruleCfg.Name)
+		rule.SetContext("This is a test of context")
+		rule.SetAction(ruleCfg.ActionFunc)
+		rule.SetPriority(ruleCfg.Priority)
+
+		for _, condCfg := range ruleCfg.Conditions {
+			rule.AddCondition(condCfg.Name, condCfg.Identifiers, condCfg.Evaluator, nil)
+		}
+
+		rs.AddRule(rule)
+	}
+
+	rs.SetStartupFunction(config.GetStartupRSFunction(name))
+
+	return rs, nil
 }
 
 func (rs *rulesessionImpl) initRuleSession(name string) {
@@ -135,7 +168,7 @@ func (rs *rulesessionImpl) Start(startupCtx map[string]interface{}) error {
 	return nil
 }
 
-func (rs *rulesessionImpl) GetAssertedTuple (key model.TupleKey) model.Tuple {
+func (rs *rulesessionImpl) GetAssertedTuple(key model.TupleKey) model.Tuple {
 	return rs.reteNetwork.GetAssertedTuple(key)
 }
 

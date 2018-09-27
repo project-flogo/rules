@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"reflect"
 
 	"github.com/project-flogo/rules/common/model"
 )
@@ -12,7 +13,7 @@ var (
 	startupFunctions    = make(map[string]model.StartupRSFunction)
 )
 
-// Register registers the specified ActionFunction
+// RegisterActionFunction registers the specified ActionFunction
 func RegisterActionFunction(id string, actionFunction model.ActionFunction) error {
 
 	if actionFunction == nil {
@@ -28,14 +29,25 @@ func RegisterActionFunction(id string, actionFunction model.ActionFunction) erro
 	return nil
 }
 
-// Get gets specified ActionFunction
+// GetActionFunction gets specified ActionFunction
 func GetActionFunction(id string) model.ActionFunction {
 	return actionFunctions[id]
 }
 
-// Register registers the specified ConditionEvaluator
-func RegisterConditionEvaluator(id string, conditionEvaluator model.ConditionEvaluator) error {
+// GetActionFunctionID get ActionFunction id based on the function reference
+func GetActionFunctionID(actionFn model.ActionFunction) string {
+	actionFnToCheck := reflect.ValueOf(actionFn)
+	for key, value := range actionFunctions {
+		valueFn := reflect.ValueOf(value)
+		if valueFn.Pointer() == actionFnToCheck.Pointer() {
+			return key
+		}
+	}
+	return ""
+}
 
+// RegisterConditionEvaluator registers the specified ConditionEvaluator
+func RegisterConditionEvaluator(id string, conditionEvaluator model.ConditionEvaluator) error {
 	if conditionEvaluator == nil {
 		return errors.New("cannot register 'nil' ConditionEvaluator")
 	}
@@ -45,18 +57,28 @@ func RegisterConditionEvaluator(id string, conditionEvaluator model.ConditionEva
 	}
 
 	conditionEvaluators[id] = conditionEvaluator
-
 	return nil
 }
 
-// Get gets specified ConditionEvaluator
+// GetConditionEvaluator gets specified ConditionEvaluator
 func GetConditionEvaluator(id string) model.ConditionEvaluator {
 	return conditionEvaluators[id]
 }
 
-// Register registers the specified StartupRSFunction
-func RegisterStartupRSFunction(rsName string, startupFn model.StartupRSFunction) error {
+// GetConditionEvaluatorID gets ConditionEvaluator Id based on the function reference
+func GetConditionEvaluatorID(conditionEvaluator model.ConditionEvaluator) string {
+	conditionEvaluatorToCheck := reflect.ValueOf(conditionEvaluator)
+	for key, value := range conditionEvaluators {
+		valueFn := reflect.ValueOf(value)
+		if valueFn.Pointer() == conditionEvaluatorToCheck.Pointer() {
+			return key
+		}
+	}
+	return ""
+}
 
+// RegisterStartupRSFunction registers the specified StartupRSFunction
+func RegisterStartupRSFunction(rsName string, startupFn model.StartupRSFunction) error {
 	if startupFn == nil {
 		return errors.New("cannot register 'nil' StartupRSFunction")
 	}
@@ -70,6 +92,7 @@ func RegisterStartupRSFunction(rsName string, startupFn model.StartupRSFunction)
 	return nil
 }
 
+// GetStartupRSFunction gets registered StartupRSFunction
 func GetStartupRSFunction(rsName string) (startupFn model.StartupRSFunction) {
 	return startupFunctions[rsName]
 }
