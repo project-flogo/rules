@@ -539,9 +539,10 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 		defer nw.crudLock.Unlock()
 		nw.assertInternal(newCtx, tuple, changedProps, mode)
 		reteCtxVar.getConflictResolver().resolveConflict(newCtx)
-		rtcTxn := NewRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
-		nw.txnHandler (ctx, rs, rtcTxn, nw.txnContext)
-
+		if nw.txnHandler != nil {
+			rtcTxn := newRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
+			nw.txnHandler(ctx, rs, rtcTxn, nw.txnContext)
+		}
 	} else {
 		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple, changedProps, mode))
 	}
@@ -560,13 +561,17 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, chang
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	rCtx, isRecursive, _ := getOrSetReteCtx(ctx, nw, nil)
+	reteCtxVar, isRecursive, _ := getOrSetReteCtx(ctx, nw, nil)
 	if !isRecursive {
 		nw.crudLock.Lock()
 		defer nw.crudLock.Unlock()
 		nw.retractInternal(ctx, tuple, changedProps, mode)
+		if nw.txnHandler != nil && mode == DELETE {
+			rtcTxn := newRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
+			nw.txnHandler(ctx, reteCtxVar.getRuleSession(), rtcTxn, nw.txnContext)
+		}
 	} else {
-		rCtx.getOpsList().PushBack(newDeleteEntry(tuple, mode))
+		reteCtxVar.getOpsList().PushBack(newDeleteEntry(tuple, mode))
 	}
 }
 

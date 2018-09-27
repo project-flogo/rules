@@ -8,7 +8,7 @@ type rtcTxnImpl struct {
 	deleted  map[string]map[string]model.Tuple
 }
 
-func NewRtcTxn(addedTxn map[string]model.Tuple, modifiedTxn map[string]model.RtcModified, deletedTxn map[string]model.Tuple) model.RtcTxn {
+func newRtcTxn(addedTxn map[string]model.Tuple, modifiedTxn map[string]model.RtcModified, deletedTxn map[string]model.Tuple) model.RtcTxn {
 	rtxn := rtcTxnImpl{}
 	rtxn.init(addedTxn, modifiedTxn, deletedTxn)
 	return &rtxn
