@@ -60,14 +60,13 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 			}
 		}
 
-		reteCtxV := getReteCtx(ctx).(*reteCtxImpl)
+		reteCtxV := getReteCtx(ctx)
 
-		for mTuple, props := range reteCtxV.modifyMap {
-			//fmt.Printf("props len = [%d]\n", len(props))
-			reteCtxV.getOpsList().PushBack(newModifyEntry(mTuple, props))
-		}
-		//clear the map for the next run
-		reteCtxV.modifyMap = make(map[model.Tuple]map[string]bool)
+		reteCtxV.addRuleModifiedToOpsList()
+
+		reteCtxV.copyRuleModifiedToRtcModified()
+		//action scoped, clear it for the next action
+		reteCtxV.resetModified()
 
 		if reteCtxV != nil {
 			opsFront := reteCtxV.getOpsList().Front()
@@ -81,6 +80,12 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 
 		front = cr.agendaList.Front()
 	}
+
+
+	reteCtxV := getReteCtx(ctx)
+	reteCtxV.normalize()
+	//reteCtxV.printRtcChangeList()
+
 }
 
 func (cr *conflictResImpl) deleteAgendaFor(ctx context.Context, modifiedTuple model.Tuple) {

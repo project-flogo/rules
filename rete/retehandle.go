@@ -19,6 +19,8 @@ type reteHandle interface {
 type handleImpl struct {
 	tuple         model.Tuple
 	tablesAndRows map[joinTable]*list.List
+
+	rtcStatus uint8
 }
 
 func (hdl *handleImpl) setTuple(tuple model.Tuple) {
@@ -27,6 +29,7 @@ func (hdl *handleImpl) setTuple(tuple model.Tuple) {
 
 func (hdl *handleImpl) initHandleImpl() {
 	hdl.tablesAndRows = make(map[joinTable]*list.List)
+	hdl.rtcStatus = 0x00
 }
 
 func (hdl *handleImpl) getTuple() model.Tuple {
@@ -35,7 +38,7 @@ func (hdl *handleImpl) getTuple() model.Tuple {
 
 func getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
 	reteCtxVar := getReteCtx(ctx)
-	return reteCtxVar.getNetwork().getOrCreateHandle(tuple)
+	return reteCtxVar.getNetwork().getOrCreateHandle(ctx, tuple)
 }
 
 func (hdl *handleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable) {
