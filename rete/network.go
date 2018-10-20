@@ -43,7 +43,6 @@ type Network interface {
 	GetAssertedTupleByStringKey(key string) model.Tuple
 	//RtcTransactionHandler
 	RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{})
-
 }
 
 type reteNetworkImpl struct {
@@ -323,7 +322,7 @@ func (nw *reteNetworkImpl) createJoinNodeFromExisting(rule model.Rule, nodesOfRu
 			leftNode := j.Value.(node)
 			for k := j.Next(); k != nil; k = k.Next() {
 				rightNode := k.Value.(node)
-				if OtherTwoAreContainedByFirst(conditionVar.GetIdentifiers(), leftNode.getIdentifiers(), rightNode.getIdentifiers()) {
+				if UnionOfOtherTwoContainsAllFromFirst(conditionVar.GetIdentifiers(), leftNode.getIdentifiers(), rightNode.getIdentifiers()) {
 					commonIdr := len(IntersectionIdentifiers(leftNode.getIdentifiers(), rightNode.getIdentifiers()))
 					if maxCommonIdr < commonIdr {
 						maxCommonIdr = commonIdr

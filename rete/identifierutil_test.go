@@ -73,16 +73,16 @@ func third(t *testing.T) {
 }
 
 func fourth(t *testing.T) {
-	first := []model.TupleType{model.TupleType("1"), model.TupleType("2")}
+	first := []model.TupleType{model.TupleType("1"), model.TupleType("2"), model.TupleType("3")}
 	second := []model.TupleType{model.TupleType("1"), model.TupleType("2")}
-	third := []model.TupleType{model.TupleType("1"), model.TupleType("2"),
-		model.TupleType("3")}
+	third := []model.TupleType{model.TupleType("3")}
+	fourth := []model.TupleType{model.TupleType("2")}
 
-	if OtherTwoAreContainedByFirst(first, second, third) {
+	if !UnionOfOtherTwoContainsAllFromFirst(first, second, third) {
 		t.Error("Failed")
 	}
 
-	if !OtherTwoAreContainedByFirst(third, second, first) {
+	if UnionOfOtherTwoContainsAllFromFirst(first, third, fourth) {
 		t.Error("Failed")
 	}
 }

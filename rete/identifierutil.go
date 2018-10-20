@@ -33,12 +33,11 @@ func ContainedByFirst(first []model.TupleType, second []model.TupleType) bool {
 		}
 	}
 	return true
-
 }
 
-//OtherTwoAreContainedByFirst ... true if second and third are part of first
-func OtherTwoAreContainedByFirst(first []model.TupleType, second []model.TupleType, third []model.TupleType) bool {
-	return ContainedByFirst(first, second) && ContainedByFirst(first, third)
+//UnionOfOtherTwoContainsAllFromFirst ... true if union of second and third cover all of first
+func UnionOfOtherTwoContainsAllFromFirst(first []model.TupleType, second []model.TupleType, third []model.TupleType) bool {
+	return ContainedByFirst(UnionIdentifiers(second, third), first)
 }
 
 //UnionIdentifiers ... union of the first and second sets
