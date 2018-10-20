@@ -2,11 +2,6 @@ package tests
 
 import (
 	"testing"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"fmt"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/expr"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
-	"strings"
 	"github.com/project-flogo/rules/ruleapi"
 )
 
@@ -48,51 +43,51 @@ func Test_1_Con(t *testing.T) {
 
 
 }
+//
+//func getRefs(e *expr.Expression) (map[string]bool, error) {
+//	refs := make(map[string]bool)
+//	err := getRefRecursively(e, refs)
+//	return refs, err
+//}
+//
+//func getRefRecursively (e *expr.Expression, refs map[string]bool) (error) {
+//
+//	if e == nil {
+//		return nil
+//	}
+//	err := getRefsInternal(e.Left, refs)
+//	if err != nil {
+//		return err
+//	}
+//	err = getRefsInternal(e.Right, refs)
+//	if err != nil {
+//		return err
+//	}
+//	return nil
+//}
 
-func getRefs(e *expr.Expression) (map[string]bool, error) {
-	refs := make(map[string]bool)
-	err := getRefRecursively(e, refs)
-	return refs, err
-}
+//func getRefsInternal(e *expr.Expression, refs map[string]bool) (error) {
+//	if e.Type == funcexprtype.EXPRESSION {
+//		getRefRecursively(e, refs)
+//	} else if e.Type == funcexprtype.ARRAYREF {
+//		value := e.Value.(string)
+//
+//		split := strings.Split(value, ".")
+//		if split != nil && len(split) != 2 {
+//			return fmt.Errorf("Invalid tokens [%s]", value)
+//		}
+//
+//		refs[value] = true
+//	}
+//	return nil
+//}
 
-func getRefRecursively (e *expr.Expression, refs map[string]bool) (error) {
-
-	if e == nil {
-		return nil
-	}
-	err := getRefsInternal(e.Left, refs)
-	if err != nil {
-		return err
-	}
-	err = getRefsInternal(e.Right, refs)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func getRefsInternal(e *expr.Expression, refs map[string]bool) (error) {
-	if e.Type == funcexprtype.EXPRESSION {
-		getRefRecursively(e, refs)
-	} else if e.Type == funcexprtype.ARRAYREF {
-		value := e.Value.(string)
-
-		split := strings.Split(value, ".")
-		if split != nil && len(split) != 2 {
-			return fmt.Errorf("Invalid tokens [%s]", value)
-		}
-
-		refs[value] = true
-	}
-	return nil
-}
-
-type RuleExpressionResolver struct {
-
-}
-
-func (r *RuleExpressionResolver) Resolve(toResolve string, scope data.Scope) (value interface{}, err error) {
-	fmt.Printf("Resolve: [%s]\n", toResolve)
-	return nil, nil
-}
+//type RuleExpressionResolver struct {
+//
+//}
+//
+//func (r *RuleExpressionResolver) Resolve(toResolve string, scope data.Scope) (value interface{}, err error) {
+//	fmt.Printf("Resolve: [%s]\n", toResolve)
+//	return nil, nil
+//}
 

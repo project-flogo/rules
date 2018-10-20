@@ -2,6 +2,9 @@ package ruleapi
 
 import (
 	"github.com/project-flogo/rules/common/model"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
+	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/expr"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 )
 
 
@@ -56,8 +59,26 @@ func (cnd *exprConditionImpl) GetTupleTypeAlias() []model.TupleType {
 func (cnd *exprConditionImpl) Evaluate (condName string, ruleNm string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) (bool, error) {
 	result := false
 	if cnd.cExpr != "" {
-		//todo
+		e, err := expression.ParseExpression(cnd.cExpr)
+		exprn := e.(*expr.Expression)
+		if err != nil {
+			return result, err
+		}
+		td := TuplePropertyResolver{}
+		res, err := exprn.EvalWithScope(nil, &td)
+
+		result = res.(bool)
 	}
 
 	return result, nil
+}
+
+type TuplePropertyResolver struct {
+
+}
+
+func (t *TuplePropertyResolver) Resolve(toResolve string, scope data.Scope) (value interface{}, err error) {
+
+
+	return nil, nil
 }
