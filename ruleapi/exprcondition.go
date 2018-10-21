@@ -1,18 +1,19 @@
 package ruleapi
 
 import (
-	"github.com/project-flogo/rules/common/model"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
 	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/expr"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/project-flogo/rules/common/model"
+	"reflect"
+	"strings"
 )
-
 
 type exprConditionImpl struct {
 	name        string
 	rule        model.Rule
 	identifiers []model.TupleType
-	cExpr         string
+	cExpr       string
 	ctx         model.RuleContext
 }
 
@@ -56,7 +57,7 @@ func (cnd *exprConditionImpl) GetTupleTypeAlias() []model.TupleType {
 	return cnd.identifiers
 }
 
-func (cnd *exprConditionImpl) Evaluate (condName string, ruleNm string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) (bool, error) {
+func (cnd *exprConditionImpl) Evaluate(condName string, ruleNm string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) (bool, error) {
 	result := false
 	if cnd.cExpr != "" {
 		e, err := expression.ParseExpression(cnd.cExpr)
@@ -64,21 +65,62 @@ func (cnd *exprConditionImpl) Evaluate (condName string, ruleNm string, tuples m
 		if err != nil {
 			return result, err
 		}
-		td := TuplePropertyResolver{}
-		res, err := exprn.EvalWithScope(nil, &td)
-
-		result = res.(bool)
+		td := tuplePropertyResolver{}
+		scope := tupleScope{tuples}
+		res, err := exprn.EvalWithData(tuples, &scope, &td)
+		if err != nil {
+			return false, err
+		} else if reflect.TypeOf(res).Kind() == reflect.Bool {
+			result = res.(bool)
+		}
 	}
 
 	return result, nil
 }
 
-type TuplePropertyResolver struct {
-
+//////////////////////////////////////////////////////////
+type tupleScope struct {
+	tuples map[model.TupleType]model.Tuple
 }
 
-func (t *TuplePropertyResolver) Resolve(toResolve string, scope data.Scope) (value interface{}, err error) {
+func (ts *tupleScope) GetAttr(name string) (attr *data.Attribute, exists bool) {
+	return nil, false
+}
 
+// SetAttrValue sets the value of the specified attribute
+func (ts *tupleScope) SetAttrValue(name string, value interface{}) error {
+	return nil
+}
 
-	return nil, nil
+///////////////////////////////////////////////////////////
+type tuplePropertyResolver struct {
+}
+
+func (t *tuplePropertyResolver) Resolve(toResolve string, scope data.Scope) (value interface{}, err error) {
+
+	toResolve = toResolve[1:]
+	aliasAndProp := strings.Split(toResolve, ".")
+
+	ts := scope.(*tupleScope)
+	var v interface{}
+	if ts != nil {
+		tuple := ts.tuples[model.TupleType(aliasAndProp[0])].(model.Tuple)
+		if tuple != nil {
+
+			p := tuple.GetTupleDescriptor().GetProperty(aliasAndProp[1])
+			switch p.PropType {
+			case data.TypeString:
+				v, err = tuple.GetString(aliasAndProp[1])
+			case data.TypeInteger:
+				v, err = tuple.GetInt(aliasAndProp[1])
+			case data.TypeLong:
+				v, err = tuple.GetLong(aliasAndProp[1])
+			case data.TypeDouble:
+				v, err = tuple.GetDouble(aliasAndProp[1])
+			case data.TypeBoolean:
+				v, err = tuple.GetBool(aliasAndProp[1])
+			}
+		}
+	}
+	return v, err
 }

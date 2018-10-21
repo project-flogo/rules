@@ -14,7 +14,7 @@ func Test_T1(t *testing.T) {
 	rs, _ := createRuleSession()
 
 	rule := ruleapi.NewRule("R1")
-	rule.AddCondition("R1_c1", []string{"t1.none"}, trueCondition, nil)
+	rule.AddCondition("R1_c1", []string{"t1.none"}, trueCondition, t)
 	rule.SetAction(emptyAction)
 	rule.SetPriority(1)
 	rs.AddRule(rule)

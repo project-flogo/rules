@@ -32,7 +32,6 @@ type MutableRule interface {
 //Condition interface to maintain/get various condition properties
 type Condition interface {
 	GetName() string
-	//GetEvaluator() ConditionEvaluator
 	GetRule() Rule
 	GetIdentifiers() []TupleType
 	GetContext() RuleContext

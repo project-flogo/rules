@@ -231,37 +231,6 @@ func (rule *ruleImpl) AddExprCondition(conditionName string, cstr string, ctx mo
 
 }
 
-//func parseRefs(refs map[string]bool) (map[string]map[string]bool, error) {
-//
-//	aliasAndRefs := make(map[string]map[string]bool)
-//
-//	for val, _ := range refs {
-//
-//		vals := strings.Split(val, ".")
-//
-//		td := model.GetTupleDescriptor(model.TupleType(vals[0]))
-//		if td == nil {
-//			return aliasAndRefs, fmt.Errorf("Invalid TupleType [%s]", vals[0])
-//		}
-//
-//		prop := td.GetProperty(vals[1])
-//		if prop == nil {
-//			return aliasAndRefs, fmt.Errorf("Property [%s] not found in TupleType [%s]", vals[1], vals[0])
-//		}
-//
-//		propsMap, found := aliasAndRefs[vals[0]]
-//		if !found {
-//			propsMap = make(map[string]bool)
-//			aliasAndRefs[vals[0]] = propsMap
-//		}
-//
-//		propsMap[vals[1]] = true
-//
-//	}
-//
-//	return aliasAndRefs, nil
-//}
-
 func validateRefs(refs []string) (error) {
 	for _, ref := range refs {
 		vals := strings.Split(ref, ".")
