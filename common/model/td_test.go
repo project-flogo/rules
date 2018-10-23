@@ -2,7 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/TIBCOSoftware/flogo-lib/core/data"
@@ -26,14 +25,14 @@ func TestOne(t *testing.T) {
 	td1.Props = []TuplePropertyDescriptor{td1p1, td1p2}
 
 	str, _ := json.Marshal(&td1)
-	fmt.Printf("succes %s\n", str)
+	t.Logf("succes %s\n", str)
 
 	tpdx := TupleDescriptor{}
 	tpdx.TTLInSeconds = -1
 	json.Unmarshal([]byte(str), &tpdx)
 
 	str1, _ := json.Marshal(&tpdx)
-	fmt.Printf("succes %s\n", str1)
+	t.Logf("succes %s\n", str1)
 
 }
 
@@ -41,7 +40,7 @@ func TestTwo(t *testing.T) {
 	tupleDescAbsFileNm := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/rulesapp/rulesapp.json")
 	tupleDescriptor := common.FileToString(tupleDescAbsFileNm)
 
-	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
+	t.Logf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//First register the tuple descriptors
 	RegisterTupleDescriptors(tupleDescriptor)
 

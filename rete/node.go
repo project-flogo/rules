@@ -26,11 +26,11 @@ type nodeImpl struct {
 }
 
 //NewNode ... returns a new node
-func newNode(nw Network, rule model.Rule, identifiers []model.TupleType) node {
-	n := nodeImpl{}
-	n.initNodeImpl(nw, rule, identifiers)
-	return &n
-}
+//func newNode(nw Network, rule model.Rule, identifiers []model.TupleType) node {
+//	n := nodeImpl{}
+//	n.initNodeImpl(nw, rule, identifiers)
+//	return &n
+//}
 
 func (n *nodeImpl) initNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleType) {
 
