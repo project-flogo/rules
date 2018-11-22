@@ -72,7 +72,7 @@ func aPrintMoveEvent(ctx context.Context, rs model.RuleSession, ruleName string,
 	m, _ := me.GetDouble("moving")
 	d, _ := me.GetDouble("dropped")
 
-	fmt.Printf("Received a 'moveevent' [%s] sitting [%d], moving [%d], dropped [%d]\n",
+	fmt.Printf("Received a 'moveevent' [%s] sitting [%f], moving [%f], dropped [%f]\n",
 		meid, s, m, d)
 }
 

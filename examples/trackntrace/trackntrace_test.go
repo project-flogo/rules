@@ -1,7 +1,6 @@
 package trackntrace
 
 import (
-	"fmt"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
 	"github.com/project-flogo/rules/common"
@@ -9,20 +8,20 @@ import (
 	"testing"
 	"time"
 	"io/ioutil"
-	"log"
 	"strconv"
 	"context"
+	"fmt"
 )
 
 func TestPkgFlowNormal(t *testing.T) {
 
-	rs, err := createRuleSessionAndRules()
+	rs, err := createRuleSessionAndRules(t)
 	if err != nil {
-		fmt.Printf("Error [%s]\n", err)
+		t.Fatalf("Error [%s]\n", err)
 		return
 	}
 
-	loadPkgRulesWithDeps(rs)
+	loadPkgRulesWithDeps(t, rs)
 	rs.Start(nil)
 
 	pkgEvt, _ := model.NewTupleWithKeyValues("packageevent", "1")
@@ -30,9 +29,10 @@ func TestPkgFlowNormal(t *testing.T) {
 	pkgEvt.SetString(nil, "status", "normal")
 	pkgEvt.SetString(nil, "isnew", "true")
 
-	err = rs.Assert(nil, pkgEvt)
+	ctx := context.WithValue(context.TODO(), TestKey{}, t)
+	err = rs.Assert(ctx, pkgEvt)
 	if err != nil {
-		fmt.Printf("Error...[%s]\n", err)
+		t.Fatalf("Error...[%s]\n", err)
 		return
 	}
 	//time.Sleep(time.Second*20)
@@ -41,74 +41,76 @@ func TestPkgFlowNormal(t *testing.T) {
 	scanEv.SetString(nil, "next", "ny")
 	err = scanEv.SetValue(nil, "eta", 10)
 	if err != nil {
-		fmt.Printf("[%s]\n", err)
+		t.Fatalf("[%s]\n", err)
 	}
 
-	rs.Assert(nil, scanEv)
+	ctx = context.WithValue(context.TODO(), TestKey{}, t)
+	rs.Assert(ctx, scanEv)
 
 	scanEv1, _ := model.NewTupleWithKeyValues("scanevent", "1")
 	scanEv1.SetString(nil, "curr", "ny")
 	scanEv1.SetString(nil, "next", "done")
 	scanEv.SetString(nil, "next", "ny")
 
-	rs.Assert(nil, scanEv1)
-
+	ctx = context.WithValue(context.TODO(), TestKey{}, t)
+	rs.Assert(ctx, scanEv1)
+	rs.Unregister()
 }
 
 func TestPkgFlowTimeout(t *testing.T) {
 
-	rs, err := createRuleSessionAndRules()
+	rs, err := createRuleSessionAndRules(t)
 	if err != nil {
-		fmt.Printf("Error [%s]\n", err)
+		t.Fatalf("Error [%s]\n", err)
 		return
 	}
 
-	loadPkgRulesWithDeps(rs)
+	loadPkgRulesWithDeps(t, rs)
 	rs.Start(nil)
 
 	pkgEvt, _ := model.NewTupleWithKeyValues("packageevent", "1")
 	pkgEvt.SetString(nil, "next", "sfo")
 	pkgEvt.SetString(nil, "status", "normal")
 	pkgEvt.SetString(nil, "isnew", "true")
-
-	rs.Assert(nil, pkgEvt)
+	ctx := context.WithValue(context.TODO(), TestKey{}, t)
+	rs.Assert(ctx, pkgEvt)
 	//time.Sleep(time.Second*20)
 	scanEv, _ := model.NewTupleWithKeyValues("scanevent", "1")
 	scanEv.SetString(nil, "curr", "sfo")
 	scanEv.SetString(nil, "next", "ny")
 	err = scanEv.SetValue(nil, "eta", 3)
 	if err != nil {
-		fmt.Printf("[%s]\n", err)
+		t.Fatalf("[%s]\n", err)
 	}
-
-	rs.Assert(nil, scanEv)
+	ctx = context.WithValue(context.TODO(), TestKey{}, t)
+	rs.Assert(ctx, scanEv)
 
 	time.Sleep(time.Second * time.Duration(20))
-
+	rs.Unregister()
 }
 
 func TestPkgFlowNormalWithMapValues(t *testing.T) {
 
-	rs, err := createRuleSessionAndRules()
+	rs, err := createRuleSessionAndRules(t)
 	if err != nil {
-		fmt.Printf("Error [%s]\n", err)
+		t.Fatalf("Error [%s]\n", err)
 		return
 	}
 
-	loadPkgRulesWithDeps(rs)
+	loadPkgRulesWithDeps(t, rs)
 	rs.Start(nil)
 
 	pkgEvt, err := model.NewTupleWithKeyValues("packageevent", "1")
 	if err != nil {
-		fmt.Printf("error: [%s]\n", err)
+		t.Fatalf("error: [%s]\n", err)
 		return
 	}
 	pkgEvt.SetString(nil, "next", "sfo")
 	pkgEvt.SetString(nil, "status", "normal")
 	pkgEvt.SetString(nil, "isnew", "true")
-	fmt.Printf("Asserting package with key [%s]\n", pkgEvt.GetKey().String())
-
-	rs.Assert(nil, pkgEvt)
+	t.Logf("Asserting package with key [%s]\n", pkgEvt.GetKey().String())
+	ctx := context.WithValue(context.TODO(), TestKey{}, t)
+	rs.Assert(ctx, pkgEvt)
 
 	values := make(map[string]interface{})
 	values["packageid"] = "1"
@@ -117,8 +119,8 @@ func TestPkgFlowNormalWithMapValues(t *testing.T) {
 	values["eta"] = 5
 
 	scanEv, _ := model.NewTuple("scanevent", values)
-
-	rs.Assert(nil, scanEv)
+	ctx = context.WithValue(context.TODO(), TestKey{}, t)
+	rs.Assert(ctx, scanEv)
 
 	values = make(map[string]interface{})
 	values["packageid"] = "1"
@@ -127,30 +129,31 @@ func TestPkgFlowNormalWithMapValues(t *testing.T) {
 	values["eta"] = 5
 
 	scanEv2, _ := model.NewTuple("scanevent", values)
-	rs.Assert(nil, scanEv2)
+	ctx = context.WithValue(context.TODO(), TestKey{}, t)
+	rs.Assert(ctx, scanEv2)
 
 	time.Sleep(time.Second * time.Duration(20))
+	rs.Unregister()
 }
 
 func TestDuplicateAssert(t *testing.T) {
 
-	rs, err := createRuleSessionAndRules()
+	rs, err := createRuleSessionAndRules(t)
 	if err != nil {
-		fmt.Printf("Error [%s]\n", err)
-		return
+		t.Fatalf("Error [%s]\n", err)
 	}
 
-	loadPkgRulesWithDeps(rs)
+	loadPkgRulesWithDeps(t, rs)
 	rs.Start(nil)
 
 	pkgEvt, _ := model.NewTupleWithKeyValues("package", "1")
 	pkgEvt.SetString(nil, "curr", "none")
 	pkgEvt.SetString(nil, "next", "sfo")
 	pkgEvt.SetString(nil, "status", "normal")
-
-	err = rs.Assert(nil, pkgEvt)
+	ctx := context.WithValue(context.TODO(), TestKey{}, t)
+	err = rs.Assert(ctx, pkgEvt)
 	if err != nil {
-		fmt.Printf("Error...[%s]\n", err)
+		t.Fatalf("Error...[%s]\n", err)
 		return
 	}
 
@@ -158,53 +161,52 @@ func TestDuplicateAssert(t *testing.T) {
 	pkgEvt2.SetString(nil, "curr", "sfo")
 	pkgEvt2.SetString(nil, "next", "ny")
 	pkgEvt2.SetString(nil, "status", "normal")
-
-	err = rs.Assert(nil, pkgEvt2)
-	if err != nil {
-		fmt.Printf("Error...[%s]\n", err)
+	ctx = context.WithValue(context.TODO(), TestKey{}, t)
+	err = rs.Assert(ctx, pkgEvt2)
+	if err == nil {
+		t.Fatalf("Expected an already asserted error here\n")
 		return
 	}
+	rs.Unregister()
 }
 
 func TestSameTupleInstanceAssert(t *testing.T) {
 
-	rs, err := createRuleSessionAndRules()
+	rs, err := createRuleSessionAndRules(t)
 	if err != nil {
-		fmt.Printf("Error [%s]\n", err)
-		return
+		t.Fatalf("Error [%s]\n", err)
 	}
 
-	loadPkgRulesWithDeps(rs)
+	loadPkgRulesWithDeps(t, rs)
 	rs.Start(nil)
 
 	pkgEvt, _ := model.NewTupleWithKeyValues("package", "1")
 	pkgEvt.SetString(nil, "curr", "none")
 	pkgEvt.SetString(nil, "next", "sfo")
 	pkgEvt.SetString(nil, "status", "normal")
-
-	err = rs.Assert(nil, pkgEvt)
+	ctx := context.WithValue(context.TODO(), TestKey{}, t)
+	err = rs.Assert(ctx, pkgEvt)
 	if err != nil {
-		fmt.Printf("Error...[%s]\n", err)
-		return
+		t.Fatalf("Error [%s]\n", err)
 	}
-
-	err = rs.Assert(nil, pkgEvt)
-	if err != nil {
-		fmt.Printf("Error...[%s]\n", err)
-		return
+	ctx = context.WithValue(context.TODO(), TestKey{}, t)
+	err = rs.Assert(ctx, pkgEvt)
+	if err == nil {
+		t.Fatalf("Expected an already asserted error here\n")
 	}
+	rs.Unregister()
 }
 
 
 
-func createRuleSessionAndRules() (model.RuleSession, error) {
+func createRuleSessionAndRules(t *testing.T) (model.RuleSession, error) {
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
 	tupleDescFileAbsPath := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/trackntrace/trackntrace.json")
 
 	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("Error...[%s]\n", err)
 	}
 	err = model.RegisterTupleDescriptors(string(dat))
 	if err != nil {
@@ -213,7 +215,7 @@ func createRuleSessionAndRules() (model.RuleSession, error) {
 	return rs, nil
 }
 
-func loadPkgRulesWithDeps(rs model.RuleSession) {
+func loadPkgRulesWithDeps(t *testing.T, rs model.RuleSession) {
 
 	//handle a package event, create a package in the packageAction
 	rule := ruleapi.NewRule("packageevent")
@@ -221,7 +223,7 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 	rule.SetAction(packageeventAction)
 	rule.SetPriority(1)
 	rs.AddRule(rule)
-	fmt.Printf("Rule added: [%s]\n", rule.GetName())
+	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	//handle a package, print package details in the packageAction
 	rule1 := ruleapi.NewRule("package")
@@ -229,7 +231,7 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 	rule1.SetAction(packageAction)
 	rule1.SetPriority(2)
 	rs.AddRule(rule1)
-	fmt.Printf("Rule added: [%s]\n", rule1.GetName())
+	t.Logf("Rule added: [%s]\n", rule1.GetName())
 
 	//handle a scan event, see if there is matching package if so, do necessary things such as set off a timer
 	//for the next destination, etc in the scaneventAction
@@ -238,7 +240,7 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 	rule2.SetAction(scaneventAction)
 	rule2.SetPriority(2)
 	rs.AddRule(rule2)
-	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
+	t.Logf("Rule added: [%s]\n", rule2.GetName())
 
 	//handle a timeout event, triggered by scaneventAction, mark the package as delayed in scantimeoutAction
 	rule3 := ruleapi.NewRule("scantimeout")
@@ -246,7 +248,7 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 	rule3.SetAction(scantimeoutAction)
 	rule3.SetPriority(1)
 	rs.AddRule(rule3)
-	fmt.Printf("Rule added: [%s]\n", rule3.GetName())
+	t.Logf("Rule added: [%s]\n", rule3.GetName())
 
 	//notify when a package is marked as delayed, print as such in the packagedelayedAction
 	rule4 := ruleapi.NewRule("packagedelayed")
@@ -254,7 +256,7 @@ func loadPkgRulesWithDeps(rs model.RuleSession) {
 	rule4.SetAction(packagedelayedAction)
 	rule4.SetPriority(1)
 	rs.AddRule(rule4)
-	fmt.Printf("Rule added: [%s]\n", rule4.GetName())
+	t.Logf("Rule added: [%s]\n", rule4.GetName())
 }
 
 //conditions and actions
@@ -264,9 +266,10 @@ func truecondition(ruleName string, condName string, tuples map[model.TupleType]
 
 func packageeventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 
+	t := ctx.Value(TestKey{}).(*testing.T)
 	pkgEvent := tuples["packageevent"]
 	pkgid, _ := pkgEvent.GetString("packageid")
-	fmt.Printf("Received a new package asserting package id[%s]\n", pkgid)
+	t.Logf("Received a new package asserting package id[%s]\n", pkgid)
 
 	//assert a package
 	pkg, _ := model.NewTupleWithKeyValues(model.TupleType("package"), pkgid)
@@ -296,6 +299,7 @@ func scaneventCondition(ruleName string, condName string, tuples map[model.Tuple
 }
 
 func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+	t := ctx.Value(TestKey{}).(*testing.T)
 	scanevent := tuples["scanevent"]
 
 	pkg := tuples["package"].(model.MutableTuple)
@@ -303,10 +307,10 @@ func scaneventAction(ctx context.Context, rs model.RuleSession, ruleName string,
 
 	scurr, _ := scanevent.GetString("curr")
 	snext, _ := scanevent.GetString("next")
-	fmt.Printf("Received a new scan event for package id[%s], current loc [%s], next loc [%s]\n", pkgid, scurr, snext)
+	t.Logf("Received a new scan event for package id[%s], current loc [%s], next loc [%s]\n", pkgid, scurr, snext)
 
 	if scanevent == nil || pkg == nil {
-		fmt.Println("Should not get a nil tuple here! This is an error")
+		t.Fatalf("Should not get a nil tuple here! This is an error")
 		return
 	}
 
@@ -347,7 +351,6 @@ func scantimeoutCondition(ruleName string, condName string, tuples map[model.Tup
 }
 
 func scantimeoutAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-
 	pkg := tuples["package"].(model.MutableTuple)
 
 	pkgid, _ := pkg.GetString("packageid")
@@ -366,12 +369,13 @@ func packageCondition(ruleName string, condName string, tuples map[model.TupleTy
 }
 
 func packageAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+	t := ctx.Value(TestKey{}).(*testing.T)
 	pkg := tuples["package"].(model.MutableTuple)
 	pkgid, _ := pkg.GetString("packageid")
 
 	pcurr, _ := pkg.GetString("curr")
 	pnext, _ := pkg.GetString("next")
-	fmt.Printf("Received a new package id[%s], current loc [%s], next loc [%s]\n", pkgid, pcurr, pnext)
+	t.Logf("Received a new package id[%s], current loc [%s], next loc [%s]\n", pkgid, pcurr, pnext)
 	pkg.SetString(ctx, "isnew", "false")
 }
 
@@ -387,3 +391,5 @@ func packagedelayedAction(ctx context.Context, rs model.RuleSession, ruleName st
 
 	fmt.Printf("Package is now delayed id[%s]\n", pkgid)
 }
+
+type TestKey struct {}

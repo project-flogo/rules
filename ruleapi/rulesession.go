@@ -92,8 +92,7 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err e
 	}
 	assertedTuple := rs.GetAssertedTuple(tuple.GetKey())
 	if assertedTuple == tuple {
-		fmt.Printf("Tuple with key [%s] already asserted", tuple.GetKey().String())
-		return
+		return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
 	} else if assertedTuple != nil {
 		return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
 	}
