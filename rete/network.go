@@ -353,7 +353,7 @@ func (nw *reteNetworkImpl) createJoinNodeFromExisting(rule model.Rule, nodesOfRu
 
 func (nw *reteNetworkImpl) createJoinNodeFromSome(rule model.Rule, nodesOfRule *list.List,
 	classNodeLinksOfRule *list.List, conditionSet *list.List, nodeSet *list.List) bool {
-	leastNeeded := math.MaxUint32
+	leastNeeded := math.MaxInt32
 	maxIdentifier := -1
 	var targetNode node
 	var targetCondition model.Condition
