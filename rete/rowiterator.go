@@ -8,7 +8,7 @@ type rowIterator interface {
 }
 
 type rowIteratorImpl struct {
-	table map[joinTableRow]joinTableRow
+	table map[int]joinTableRow
 	kList list.List
 	curr  *list.Element
 }
@@ -18,7 +18,8 @@ func (ri *rowIteratorImpl) hasNext() bool {
 }
 
 func (ri *rowIteratorImpl) next() joinTableRow {
-	val := ri.curr.Value.(joinTableRow)
+	id := ri.curr.Value.(int)
+	val := ri.table[id]
 	ri.curr = ri.curr.Next()
 	return val
 }

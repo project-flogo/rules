@@ -43,6 +43,8 @@ type Network interface {
 	GetAssertedTupleByStringKey(key string) model.Tuple
 	//RtcTransactionHandler
 	RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{})
+
+	getJoinTable(joinTableID int) joinTable
 }
 
 type reteNetworkImpl struct {
@@ -66,6 +68,8 @@ type reteNetworkImpl struct {
 	crudLock   sync.Mutex
 	txnHandler model.RtcTransactionHandler
 	txnContext interface{}
+
+	allJoinTables map[int]joinTable
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -81,6 +85,7 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 	nw.ruleNameNodesOfRule = make(map[string]*list.List)
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
 	nw.allHandles = make(map[string]reteHandle)
+	nw.allJoinTables = make(map[int]joinTable)
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
@@ -646,6 +651,7 @@ func (nw *reteNetworkImpl) getOrCreateHandle(ctx context.Context, tuple model.Tu
 	if h == nil {
 		h1 := handleImpl{}
 		h1.initHandleImpl()
+		h1.nw = nw
 		h1.setTuple(tuple)
 		h = &h1
 		nw.allHandles[tuple.GetKey().String()] = h
@@ -667,4 +673,8 @@ func (nw *reteNetworkImpl) incrementAndGetId() int {
 func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {
 	nw.txnHandler = txnHandler
 	nw.txnContext = txnContext
+}
+
+func (nw *reteNetworkImpl) getJoinTable(joinTableID int) joinTable {
+	return nw.allJoinTables[joinTableID]
 }

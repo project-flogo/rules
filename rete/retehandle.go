@@ -18,9 +18,11 @@ type reteHandle interface {
 
 type handleImpl struct {
 	tuple         model.Tuple
-	tablesAndRows map[joinTable]*list.List
+	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
+	tablesAndRows map[int]*list.List
 
 	rtcStatus uint8
+	nw Network
 }
 
 func (hdl *handleImpl) setTuple(tuple model.Tuple) {
@@ -28,7 +30,7 @@ func (hdl *handleImpl) setTuple(tuple model.Tuple) {
 }
 
 func (hdl *handleImpl) initHandleImpl() {
-	hdl.tablesAndRows = make(map[joinTable]*list.List)
+	hdl.tablesAndRows = make(map[int]*list.List)
 	hdl.rtcStatus = 0x00
 }
 
@@ -43,12 +45,12 @@ func getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
 
 func (hdl *handleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable) {
 
-	rowsForJoinTable := hdl.tablesAndRows[joinTableVar]
+	rowsForJoinTable := hdl.tablesAndRows[joinTableVar.getID()]
 	if rowsForJoinTable == nil {
 		rowsForJoinTable = list.New()
-		hdl.tablesAndRows[joinTableVar] = rowsForJoinTable
+		hdl.tablesAndRows[joinTableVar.getID()] = rowsForJoinTable
 	}
-	rowsForJoinTable.PushBack(joinTableRowVar)
+	rowsForJoinTable.PushBack(joinTableRowVar.getID())
 
 }
 
@@ -59,8 +61,8 @@ func (hdl *handleImpl) removeJoinTableRowRefs(changedProps map[string]bool) {
 
 	emptyJoinTables := list.New()
 
-	for joinTable, listOfRows := range hdl.tablesAndRows {
-
+	for joinTableID, rowIDs := range hdl.tablesAndRows {
+		joinTable := hdl.nw.getJoinTable(joinTableID)
 		toDelete := false
 		if changedProps != nil {
 			rule := joinTable.getRule()
@@ -82,25 +84,25 @@ func (hdl *handleImpl) removeJoinTableRowRefs(changedProps map[string]bool) {
 			continue
 		}
 
-		for e := listOfRows.Front(); e != nil; e = e.Next() {
-			row := e.Value.(joinTableRow)
-			joinTable.removeRow(row)
+		for e := rowIDs.Front(); e != nil; e = e.Next() {
+			rowID := e.Value.(int)
+			joinTable.removeRow(rowID)
 		}
 		if joinTable.len() == 0 {
-			emptyJoinTables.PushBack(joinTable)
+			emptyJoinTables.PushBack(joinTable.getID())
 		}
 	}
 
 	for e := emptyJoinTables.Front(); e != nil; e = e.Next() {
-		emptyJoinTable := e.Value.(joinTable)
-		delete(hdl.tablesAndRows, emptyJoinTable)
+		joinTableID := e.Value.(int)
+		delete(hdl.tablesAndRows, joinTableID)
 	}
 }
 
 //Used when a rule is deleted. See Network.RemoveRule
 func (hdl *handleImpl) removeJoinTable(joinTableVar joinTable) {
-	_, ok := hdl.tablesAndRows[joinTableVar]
+	_, ok := hdl.tablesAndRows[joinTableVar.getID()]
 	if ok {
-		delete(hdl.tablesAndRows, joinTableVar)
+		delete(hdl.tablesAndRows, joinTableVar.getID())
 	}
 }
