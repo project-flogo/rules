@@ -23,6 +23,7 @@ type nodeImpl struct {
 	nodeLinkVar nodeLink
 	id          int
 	rule        model.Rule
+	nw 			Network
 }
 
 //NewNode ... returns a new node
@@ -33,7 +34,7 @@ type nodeImpl struct {
 //}
 
 func (n *nodeImpl) initNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleType) {
-
+	n.nw = nw
 	n.id = nw.incrementAndGetId()
 
 	n.identifiers = identifiers

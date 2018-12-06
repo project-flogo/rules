@@ -166,7 +166,7 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []reteHandl
 
 	//TODO: other stuff. right now focus on tuple table
 	jn.joinRightObjects(handles, joinedHandles)
-	tupleTableRow := newJoinTableRow(handles)
+	tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
 	jn.rightTable.addRow(tupleTableRow)
 	//TODO: rete listeners etc.
 	rIterator:= jn.leftTable.iterator()
@@ -216,7 +216,7 @@ func (jn *joinNodeImpl) joinRightObjects(rightHandles []reteHandle, joinedHandle
 func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []reteHandle, joinedHandles []reteHandle) {
 	jn.joinLeftObjects(handles, joinedHandles)
 	//TODO: other stuff. right now focus on tuple table
-	tupleTableRow := newJoinTableRow(handles)
+	tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
 	jn.leftTable.addRow(tupleTableRow)
 	//TODO: rete listeners etc.
 	rIterator := jn.rightTable.iterator()
