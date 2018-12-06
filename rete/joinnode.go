@@ -169,7 +169,9 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []reteHandl
 	tupleTableRow := newJoinTableRow(handles)
 	jn.rightTable.addRow(tupleTableRow)
 	//TODO: rete listeners etc.
-	for tupleTableRowLeft := range jn.leftTable.getMap() {
+	rIterator:= jn.leftTable.iterator()
+	for rIterator.hasNext() {
+		tupleTableRowLeft := rIterator.next()
 		success := jn.joinLeftObjects(tupleTableRowLeft.getHandles(), joinedHandles)
 		if !success {
 			//TODO: handle it
@@ -217,8 +219,10 @@ func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []reteHandle
 	tupleTableRow := newJoinTableRow(handles)
 	jn.leftTable.addRow(tupleTableRow)
 	//TODO: rete listeners etc.
-	for tupleTableRowRight := range jn.rightTable.getMap() {
-		success := jn.joinRightObjects(tupleTableRowRight.getHandles(), joinedHandles)
+	rIterator := jn.rightTable.iterator()
+	for rIterator.hasNext() {
+		tupleTableRowRight := rIterator.next()
+			success := jn.joinRightObjects(tupleTableRowRight.getHandles(), joinedHandles)
 		if !success {
 			//TODO: handle it
 			continue

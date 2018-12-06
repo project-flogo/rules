@@ -197,7 +197,9 @@ func removeRefsFromReteHandles(joinTableVar joinTable) {
 	if joinTableVar == nil {
 		return
 	}
-	for tableRow := range joinTableVar.getMap() {
+	rIterator := joinTableVar.iterator()
+	for rIterator.hasNext() {
+		tableRow := rIterator.next()
 		for _, handle := range tableRow.getHandles() {
 			handle.removeJoinTable(joinTableVar)
 		}

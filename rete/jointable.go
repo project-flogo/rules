@@ -1,14 +1,18 @@
 package rete
 
-import "github.com/project-flogo/rules/common/model"
+import (
+	"github.com/project-flogo/rules/common/model"
+	"container/list"
+)
 
 type joinTable interface {
 	addRow(row joinTableRow) //list of Tuples
 	getID() int
 	len() int
-	getMap() map[joinTableRow]joinTableRow
+	//getMap() map[joinTableRow]joinTableRow
 	removeRow(row joinTableRow)
 	getRule() model.Rule
+	iterator() rowIterator
 }
 
 type joinTableImpl struct {
@@ -57,4 +61,15 @@ func (jt *joinTableImpl) getMap() map[joinTableRow]joinTableRow {
 
 func (jt *joinTableImpl) getRule() model.Rule {
 	return jt.rule
+}
+
+func (jt *joinTableImpl) iterator() rowIterator {
+	ri := rowIteratorImpl{}
+	ri.table = jt.table
+	ri.kList = list.List{}
+	for k, _:= range jt.table {
+		ri.kList.PushBack(k)
+	}
+	ri.curr = ri.kList.Front()
+	return &ri
 }
