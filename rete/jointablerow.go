@@ -6,7 +6,7 @@ type joinTableRow interface {
 }
 
 type joinTableRowImpl struct {
-	id int
+	id      int
 	handles []reteHandle
 }
 

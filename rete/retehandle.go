@@ -1,7 +1,6 @@
 package rete
 
 import (
-	"container/list"
 	"context"
 
 	"github.com/project-flogo/rules/common/model"
@@ -13,28 +12,25 @@ type reteHandle interface {
 	getTuple() model.Tuple
 	addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable)
 	removeJoinTableRowRefs(changedProps map[string]bool)
-	removeJoinTable(joinTableVar joinTable)
+	removeJoinTable(joinTableID int)
 }
 
-type handleImpl struct {
-	tuple         model.Tuple
-	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
-	tablesAndRows map[int]*list.List
-
+type reteHandleImpl struct {
+	tuple     model.Tuple
 	rtcStatus uint8
-	nw Network
+	nw        Network
+	rhRef     reteHandleRefs
 }
 
-func (hdl *handleImpl) setTuple(tuple model.Tuple) {
+func (hdl *reteHandleImpl) setTuple(tuple model.Tuple) {
 	hdl.tuple = tuple
 }
 
-func (hdl *handleImpl) initHandleImpl() {
-	hdl.tablesAndRows = make(map[int]*list.List)
-	hdl.rtcStatus = 0x00
+func (hdl *reteHandleImpl) initHandleImpl() {
+	hdl.rhRef = newReteHandleRefsImpl()
 }
 
-func (hdl *handleImpl) getTuple() model.Tuple {
+func (hdl *reteHandleImpl) getTuple() model.Tuple {
 	return hdl.tuple
 }
 
@@ -43,25 +39,21 @@ func getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
 	return reteCtxVar.getNetwork().getOrCreateHandle(ctx, tuple)
 }
 
-func (hdl *handleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable) {
-
-	rowsForJoinTable := hdl.tablesAndRows[joinTableVar.getID()]
-	if rowsForJoinTable == nil {
-		rowsForJoinTable = list.New()
-		hdl.tablesAndRows[joinTableVar.getID()] = rowsForJoinTable
-	}
-	rowsForJoinTable.PushBack(joinTableRowVar.getID())
-
+func (hdl *reteHandleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable) {
+	hdl.rhRef.addEntry(joinTableVar.getID(), joinTableRowVar.getID())
 }
 
-func (hdl *handleImpl) removeJoinTableRowRefs(changedProps map[string]bool) {
+func (hdl *reteHandleImpl) removeJoinTableRowRefs(changedProps map[string]bool) {
 
 	tuple := hdl.tuple
 	alias := tuple.GetTupleType()
 
-	emptyJoinTables := list.New()
+	//emptyJoinTables := list.New()
 
-	for joinTableID, rowIDs := range hdl.tablesAndRows {
+	hdlTblIter := hdl.newHdlTblIterator()
+
+	for hdlTblIter.hasNext() {
+		joinTableID, rowIDs := hdlTblIter.next()
 		joinTable := hdl.nw.getJoinTable(joinTableID)
 		toDelete := false
 		if changedProps != nil {
@@ -88,21 +80,16 @@ func (hdl *handleImpl) removeJoinTableRowRefs(changedProps map[string]bool) {
 			rowID := e.Value.(int)
 			joinTable.removeRow(rowID)
 		}
-		if joinTable.len() == 0 {
-			emptyJoinTables.PushBack(joinTable.getID())
-		}
-	}
 
-	for e := emptyJoinTables.Front(); e != nil; e = e.Next() {
-		joinTableID := e.Value.(int)
-		delete(hdl.tablesAndRows, joinTableID)
+		hdl.rhRef.removeEntry(joinTableID)
 	}
 }
 
 //Used when a rule is deleted. See Network.RemoveRule
-func (hdl *handleImpl) removeJoinTable(joinTableVar joinTable) {
-	_, ok := hdl.tablesAndRows[joinTableVar.getID()]
-	if ok {
-		delete(hdl.tablesAndRows, joinTableVar.getID())
-	}
+func (hdl *reteHandleImpl) removeJoinTable(joinTableID int) {
+	hdl.rhRef.removeEntry(joinTableID)
 }
+
+//func (hdl *reteHandleImpl) deleteRefsToJoinTables (jointTableID int) {
+//	delete (hdl.tablesAndRows, jointTableID)
+//}

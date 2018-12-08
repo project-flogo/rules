@@ -35,7 +35,7 @@ func t2Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 	lA := len(rtxn.GetRtcAdded())
 	if lA != 0 {
 		t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 0, lA)
-		printTuples(t,"Added", rtxn.GetRtcAdded())
+		printTuples(t, "Added", rtxn.GetRtcAdded())
 	}
 	lM := len(rtxn.GetRtcModified())
 	if lM != 0 {
@@ -46,6 +46,6 @@ func t2Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 	lD := len(rtxn.GetRtcDeleted())
 	if lD != 0 {
 		t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 0, lD)
-		printTuples(t,"Deleted", rtxn.GetRtcDeleted())
+		printTuples(t, "Deleted", rtxn.GetRtcDeleted())
 	}
 }

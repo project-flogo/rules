@@ -23,7 +23,7 @@ type nodeImpl struct {
 	nodeLinkVar nodeLink
 	id          int
 	rule        model.Rule
-	nw 			Network
+	nw          Network
 }
 
 //NewNode ... returns a new node

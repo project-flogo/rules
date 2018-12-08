@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/core/data"
 	"reflect"
 	"github.com/project-flogo/core/data/coerce"
 )

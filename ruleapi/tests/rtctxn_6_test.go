@@ -38,17 +38,17 @@ func Test_T6(t *testing.T) {
 func r6_action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	t1 := tuples[model.TupleType("t1")].(model.MutableTuple)
 	id, _ := t1.GetString("id")
-	if  id == "t11" {
-		tk, _:= model.NewTupleKeyWithKeyValues("t1", "t10")
-		t10 := rs.GetAssertedTuple (tk).(model.MutableTuple)
+	if id == "t11" {
+		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
+		t10 := rs.GetAssertedTuple(tk).(model.MutableTuple)
 		if t10 != nil {
 			t10.SetString(ctx, "p3", "v3")
 			t10.SetDouble(ctx, "p2", 11.11)
 		}
-	} else if (id == "t13") {
+	} else if id == "t13" {
 		//delete t11
-		tk, _:= model.NewTupleKeyWithKeyValues("t1", "t11")
-		t11 := rs.GetAssertedTuple (tk).(model.MutableTuple)
+		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t11")
+		t11 := rs.GetAssertedTuple(tk).(model.MutableTuple)
 		if t11 != nil {
 			rs.Delete(ctx, t11)
 		}
@@ -70,7 +70,7 @@ func t6Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 		lA := len(rtxn.GetRtcAdded())
 		if lA != 1 {
 			t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 1, lA)
-			printTuples(t,"Added", rtxn.GetRtcAdded())
+			printTuples(t, "Added", rtxn.GetRtcAdded())
 		}
 		lM := len(rtxn.GetRtcModified())
 		if lM != 0 {
@@ -80,13 +80,13 @@ func t6Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 		lD := len(rtxn.GetRtcDeleted())
 		if lD != 0 {
 			t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 0, lD)
-			printTuples(t,"Deleted", rtxn.GetRtcDeleted())
+			printTuples(t, "Deleted", rtxn.GetRtcDeleted())
 		}
 	} else if txnCtx.TxnCnt == 2 {
 		lA := len(rtxn.GetRtcAdded())
 		if lA != 1 {
 			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 1, lA)
-			printTuples(t,"Added", rtxn.GetRtcAdded())
+			printTuples(t, "Added", rtxn.GetRtcAdded())
 		}
 		lM := len(rtxn.GetRtcModified())
 		if lM != 1 {
@@ -96,18 +96,18 @@ func t6Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 		lD := len(rtxn.GetRtcDeleted())
 		if lD != 0 {
 			t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 0, lD)
-			printTuples(t,"Deleted", rtxn.GetRtcDeleted())
+			printTuples(t, "Deleted", rtxn.GetRtcDeleted())
 		}
 	} else if txnCtx.TxnCnt == 3 {
 		lA := len(rtxn.GetRtcAdded())
 		if lA != 1 {
 			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 1, lA)
-			printTuples(t,"Added", rtxn.GetRtcAdded())
+			printTuples(t, "Added", rtxn.GetRtcAdded())
 		} else {
-			added, _ := rtxn.GetRtcAdded() ["t1"]
+			added, _ := rtxn.GetRtcAdded()["t1"]
 			if len(added) != 2 {
 				t.Errorf("RtcAdded: Tuples expected [%d], got [%d]\n", 2, len(added))
-				printTuples(t,"Added", rtxn.GetRtcAdded())
+				printTuples(t, "Added", rtxn.GetRtcAdded())
 			}
 		}
 		lM := len(rtxn.GetRtcModified())
@@ -118,7 +118,7 @@ func t6Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 		lD := len(rtxn.GetRtcDeleted())
 		if lD != 1 {
 			t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 1, lD)
-			printTuples(t,"Deleted", rtxn.GetRtcDeleted())
+			printTuples(t, "Deleted", rtxn.GetRtcDeleted())
 		}
 	}
 }

@@ -202,11 +202,11 @@ func removeRefsFromReteHandles(joinTableVar joinTable) {
 	if joinTableVar == nil {
 		return
 	}
-	rIterator := joinTableVar.iterator()
+	rIterator := joinTableVar.getRowIterator()
 	for rIterator.hasNext() {
 		tableRow := rIterator.next()
 		for _, handle := range tableRow.getHandles() {
-			handle.removeJoinTable(joinTableVar)
+			handle.removeJoinTable(joinTableVar.getID())
 		}
 	}
 }
@@ -649,7 +649,7 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 func (nw *reteNetworkImpl) getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
 	h := nw.allHandles[tuple.GetKey().String()]
 	if h == nil {
-		h1 := handleImpl{}
+		h1 := reteHandleImpl{}
 		h1.initHandleImpl()
 		h1.nw = nw
 		h1.setTuple(tuple)

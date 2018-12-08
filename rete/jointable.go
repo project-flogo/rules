@@ -2,17 +2,18 @@ package rete
 
 import (
 	"github.com/project-flogo/rules/common/model"
-	"container/list"
 )
 
 type joinTable interface {
-	addRow(row joinTableRow) //list of Tuples
 	getID() int
-	len() int
-	//getMap() map[joinTableRow]joinTableRow
-	removeRow(rowID int)
 	getRule() model.Rule
-	iterator() rowIterator
+
+	addRow(handles []reteHandle)
+	removeRow(rowID int)
+	getRowIterator() rowIterator
+
+	getRowCount() int
+	//getMap() map[joinTableRow]joinTableRow
 }
 
 type joinTableImpl struct {
@@ -20,6 +21,7 @@ type joinTableImpl struct {
 	table map[int]joinTableRow
 	idr   []model.TupleType
 	rule  model.Rule
+	nw    Network
 }
 
 func newJoinTable(nw Network, rule model.Rule, identifiers []model.TupleType) joinTable {
@@ -37,13 +39,17 @@ func (jt *joinTableImpl) initJoinTableImpl(nw Network, rule model.Rule, identifi
 	jt.idr = identifiers
 	jt.table = map[int]joinTableRow{}
 	jt.rule = rule
+	jt.nw = nw
 }
 
 func (jt *joinTableImpl) getID() int {
 	return jt.id
 }
 
-func (jt *joinTableImpl) addRow(row joinTableRow) {
+func (jt *joinTableImpl) addRow(handles []reteHandle) {
+
+	row := newJoinTableRow(handles, jt.nw.incrementAndGetId())
+
 	jt.table[row.getID()] = row
 	for i := 0; i < len(row.getHandles()); i++ {
 		handle := row.getHandles()[i]
@@ -55,7 +61,7 @@ func (jt *joinTableImpl) removeRow(rowID int) {
 	delete(jt.table, rowID)
 }
 
-func (jt *joinTableImpl) len() int {
+func (jt *joinTableImpl) getRowCount() int {
 	return len(jt.table)
 }
 
@@ -67,13 +73,6 @@ func (jt *joinTableImpl) getRule() model.Rule {
 	return jt.rule
 }
 
-func (jt *joinTableImpl) iterator() rowIterator {
-	ri := rowIteratorImpl{}
-	ri.table = jt.table
-	ri.kList = list.List{}
-	for k, _:= range jt.table {
-		ri.kList.PushBack(k)
-	}
-	ri.curr = ri.kList.Front()
-	return &ri
+func (jt *joinTableImpl) getRowIterator() rowIterator {
+	return newRowIterator(jt.table)
 }

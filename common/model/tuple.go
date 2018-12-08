@@ -210,7 +210,7 @@ func (t *tupleImpl) initTupleWithKeyValues(td *TupleDescriptor, values ...interf
 	t.key = tk
 	//populate the tuple key fields with the key values
 	for _, keyProp := range td.GetKeyProps() {
-		t.tuples [keyProp] = tk.GetValue(keyProp)
+		t.tuples[keyProp] = tk.GetValue(keyProp)
 	}
 	return err
 }

@@ -166,10 +166,10 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []reteHandl
 
 	//TODO: other stuff. right now focus on tuple table
 	jn.joinRightObjects(handles, joinedHandles)
-	tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
-	jn.rightTable.addRow(tupleTableRow)
+	//tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
+	jn.rightTable.addRow(handles)
 	//TODO: rete listeners etc.
-	rIterator:= jn.leftTable.iterator()
+	rIterator := jn.leftTable.getRowIterator()
 	for rIterator.hasNext() {
 		tupleTableRowLeft := rIterator.next()
 		success := jn.joinLeftObjects(tupleTableRowLeft.getHandles(), joinedHandles)
@@ -216,13 +216,13 @@ func (jn *joinNodeImpl) joinRightObjects(rightHandles []reteHandle, joinedHandle
 func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []reteHandle, joinedHandles []reteHandle) {
 	jn.joinLeftObjects(handles, joinedHandles)
 	//TODO: other stuff. right now focus on tuple table
-	tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
-	jn.leftTable.addRow(tupleTableRow)
+	//tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
+	jn.leftTable.addRow(handles)
 	//TODO: rete listeners etc.
-	rIterator := jn.rightTable.iterator()
+	rIterator := jn.rightTable.getRowIterator()
 	for rIterator.hasNext() {
 		tupleTableRowRight := rIterator.next()
-			success := jn.joinRightObjects(tupleTableRowRight.getHandles(), joinedHandles)
+		success := jn.joinRightObjects(tupleTableRowRight.getHandles(), joinedHandles)
 		if !success {
 			//TODO: handle it
 			continue

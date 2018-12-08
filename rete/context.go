@@ -4,8 +4,8 @@ import (
 	"container/list"
 	"context"
 
-	"github.com/project-flogo/rules/common/model"
 	"fmt"
+	"github.com/project-flogo/rules/common/model"
 )
 
 var reteCTXKEY = model.RetecontextKeyType{}
@@ -31,7 +31,6 @@ type reteCtx interface {
 	resetModified()
 
 	printRtcChangeList()
-
 }
 
 //store any context, may not know all keys upfront
@@ -52,7 +51,6 @@ type reteCtxImpl struct {
 
 	//modified tuples in the current RTC
 	rtcModifyMap map[string]model.RtcModified
-
 }
 
 func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
@@ -107,15 +105,15 @@ func (rctx *reteCtxImpl) getRtcDeleted() map[string]model.Tuple {
 	return rctx.deleteMap
 }
 
-func (rctx *reteCtxImpl) addToRtcAdded (tuple model.Tuple) {
+func (rctx *reteCtxImpl) addToRtcAdded(tuple model.Tuple) {
 	rctx.addMap[tuple.GetKey().String()] = tuple
 }
 
-func (rctx *reteCtxImpl) addToRtcModified (tuple model.Tuple) {
+func (rctx *reteCtxImpl) addToRtcModified(tuple model.Tuple) {
 	rctx.addMap[tuple.GetKey().String()] = tuple
 }
 
-func (rctx *reteCtxImpl) addToRtcDeleted (tuple model.Tuple) {
+func (rctx *reteCtxImpl) addToRtcDeleted(tuple model.Tuple) {
 	rctx.deleteMap[tuple.GetKey().String()] = tuple
 }
 
@@ -124,8 +122,6 @@ func (rctx *reteCtxImpl) addRuleModifiedToOpsList() {
 		rctx.getOpsList().PushBack(newModifyEntry(rtcModified.GetTuple(), rtcModified.GetModifiedProps()))
 	}
 }
-
-
 
 func (rctx *reteCtxImpl) normalize() {
 
@@ -139,7 +135,7 @@ func (rctx *reteCtxImpl) normalize() {
 	}
 }
 
-func (rctx *reteCtxImpl) copyRuleModifiedToRtcModified () {
+func (rctx *reteCtxImpl) copyRuleModifiedToRtcModified() {
 	for k, v := range rctx.modifyMap {
 		rctx.rtcModifyMap[k] = v
 	}

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"github.com/project-flogo/rules/common"
 )
 
 func main() {

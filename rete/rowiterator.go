@@ -13,6 +13,17 @@ type rowIteratorImpl struct {
 	curr  *list.Element
 }
 
+func newRowIterator(jTable map[int]joinTableRow) rowIterator {
+	ri := rowIteratorImpl{}
+	ri.table = jTable
+	ri.kList = list.List{}
+	for k, _ := range jTable {
+		ri.kList.PushBack(k)
+	}
+	ri.curr = ri.kList.Front()
+	return &ri
+}
+
 func (ri *rowIteratorImpl) hasNext() bool {
 	return ri.curr != nil
 }

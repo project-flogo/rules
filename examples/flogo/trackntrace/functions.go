@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	lastEventType         string
-	currentEventType      string
+	lastEventType    string
+	currentEventType string
 )
 
 //add this sample file to your flogo project
