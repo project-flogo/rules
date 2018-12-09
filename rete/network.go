@@ -649,11 +649,7 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 func (nw *reteNetworkImpl) getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
 	h := nw.allHandles[tuple.GetKey().String()]
 	if h == nil {
-		h1 := reteHandleImpl{}
-		h1.initHandleImpl()
-		h1.nw = nw
-		h1.setTuple(tuple)
-		h = &h1
+		h = newReteHandleImpl(nw, tuple)
 		nw.allHandles[tuple.GetKey().String()] = h
 	}
 	return h
@@ -661,7 +657,6 @@ func (nw *reteNetworkImpl) getOrCreateHandle(ctx context.Context, tuple model.Tu
 
 func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) reteHandle {
 	h := nw.allHandles[tuple.GetKey().String()]
-
 	return h
 }
 

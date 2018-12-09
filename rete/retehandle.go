@@ -13,24 +13,40 @@ type reteHandle interface {
 	addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable)
 	removeJoinTableRowRefs(changedProps map[string]bool)
 	removeJoinTable(joinTableID int)
+	getTupleKey() model.TupleKey
 }
 
 type reteHandleImpl struct {
-	tuple     model.Tuple
-	nw        Network
-	jtRefs    joinTableRefsInHdl
+	//this is "transient"
+	tuple model.Tuple
+	//this is the identity of the handle.
+	tupleKey model.TupleKey
+	nw       Network
+	jtRefs   joinTableRefsInHdl
+}
+
+func newReteHandleImpl(nw *reteNetworkImpl, tuple model.Tuple) reteHandle {
+	h1 := reteHandleImpl{}
+	h1.initHandleImpl(nw, tuple)
+	return &h1
 }
 
 func (hdl *reteHandleImpl) setTuple(tuple model.Tuple) {
 	hdl.tuple = tuple
 }
 
-func (hdl *reteHandleImpl) initHandleImpl() {
+func (hdl *reteHandleImpl) initHandleImpl(nw *reteNetworkImpl, tuple model.Tuple) {
+	hdl.nw = nw
+	hdl.setTuple(tuple)
 	hdl.jtRefs = newJoinTableRefsInHdlImpl()
 }
 
 func (hdl *reteHandleImpl) getTuple() model.Tuple {
 	return hdl.tuple
+}
+
+func (hdl *reteHandleImpl) getTupleKey() model.TupleKey {
+	return hdl.tupleKey
 }
 
 func getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
