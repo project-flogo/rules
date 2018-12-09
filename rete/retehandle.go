@@ -17,9 +17,8 @@ type reteHandle interface {
 
 type reteHandleImpl struct {
 	tuple     model.Tuple
-	rtcStatus uint8
 	nw        Network
-	rhRef     reteHandleRefs
+	jtRefs    joinTableRefsInHdl
 }
 
 func (hdl *reteHandleImpl) setTuple(tuple model.Tuple) {
@@ -27,7 +26,7 @@ func (hdl *reteHandleImpl) setTuple(tuple model.Tuple) {
 }
 
 func (hdl *reteHandleImpl) initHandleImpl() {
-	hdl.rhRef = newReteHandleRefsImpl()
+	hdl.jtRefs = newJoinTableRefsInHdlImpl()
 }
 
 func (hdl *reteHandleImpl) getTuple() model.Tuple {
@@ -40,7 +39,7 @@ func getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
 }
 
 func (hdl *reteHandleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable) {
-	hdl.rhRef.addEntry(joinTableVar.getID(), joinTableRowVar.getID())
+	hdl.jtRefs.addEntry(joinTableVar.getID(), joinTableRowVar.getID())
 }
 
 func (hdl *reteHandleImpl) removeJoinTableRowRefs(changedProps map[string]bool) {
@@ -75,21 +74,24 @@ func (hdl *reteHandleImpl) removeJoinTableRowRefs(changedProps map[string]bool) 
 		if !toDelete {
 			continue
 		}
-
+		//Remove rows from corresponding join tables
 		for e := rowIDs.Front(); e != nil; e = e.Next() {
 			rowID := e.Value.(int)
-			joinTable.removeRow(rowID)
+			row := joinTable.removeRow(rowID)
+
+			//Remove other refs recursively.
+			for _, otherHdl := range row.getHandles() {
+				otherHdl.removeJoinTableRowRefs(nil)
+			}
+
 		}
 
-		hdl.rhRef.removeEntry(joinTableID)
+		//Remove the reference to the table itself
+		hdl.jtRefs.removeEntry(joinTableID)
 	}
 }
 
 //Used when a rule is deleted. See Network.RemoveRule
 func (hdl *reteHandleImpl) removeJoinTable(joinTableID int) {
-	hdl.rhRef.removeEntry(joinTableID)
+	hdl.jtRefs.removeEntry(joinTableID)
 }
-
-//func (hdl *reteHandleImpl) deleteRefsToJoinTables (jointTableID int) {
-//	delete (hdl.tablesAndRows, jointTableID)
-//}

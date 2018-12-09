@@ -8,8 +8,9 @@ type joinTable interface {
 	getID() int
 	getRule() model.Rule
 
-	addRow(handles []reteHandle)
-	removeRow(rowID int)
+	addRow(handles []reteHandle) joinTableRow
+	removeRow(rowID int) joinTableRow
+	getRow(rowID int) joinTableRow
 	getRowIterator() rowIterator
 
 	getRowCount() int
@@ -46,7 +47,7 @@ func (jt *joinTableImpl) getID() int {
 	return jt.id
 }
 
-func (jt *joinTableImpl) addRow(handles []reteHandle) {
+func (jt *joinTableImpl) addRow(handles []reteHandle) joinTableRow {
 
 	row := newJoinTableRow(handles, jt.nw.incrementAndGetId())
 
@@ -55,19 +56,18 @@ func (jt *joinTableImpl) addRow(handles []reteHandle) {
 		handle := row.getHandles()[i]
 		handle.addJoinTableRowRef(row, jt)
 	}
+	return row
 }
 
-func (jt *joinTableImpl) removeRow(rowID int) {
+func (jt *joinTableImpl) removeRow(rowID int) joinTableRow {
+	row := jt.table[rowID]
 	delete(jt.table, rowID)
+	return row
 }
 
 func (jt *joinTableImpl) getRowCount() int {
 	return len(jt.table)
 }
-
-//func (jt *joinTableImpl) getMap() map[joinTableRow]joinTableRow {
-//	return jt.table
-//}
 
 func (jt *joinTableImpl) getRule() model.Rule {
 	return jt.rule
@@ -75,4 +75,8 @@ func (jt *joinTableImpl) getRule() model.Rule {
 
 func (jt *joinTableImpl) getRowIterator() rowIterator {
 	return newRowIterator(jt.table)
+}
+
+func (jt *joinTableImpl) getRow(rowID int) joinTableRow {
+	return jt.table[rowID]
 }

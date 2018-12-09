@@ -2,23 +2,23 @@ package rete
 
 import "container/list"
 
-type reteHandleRefs interface {
+type joinTableRefsInHdl interface {
 	addEntry(jointTableID int, rowID int)
 	removeEntry(jointTableID int)
 }
 
-type reteHandleRefsImpl struct {
+type joinTableRefsInHdlImpl struct {
 	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
 	tablesAndRows map[int]*list.List
 }
 
-func newReteHandleRefsImpl() reteHandleRefs {
-	hdlJt := reteHandleRefsImpl{}
+func newJoinTableRefsInHdlImpl() joinTableRefsInHdl {
+	hdlJt := joinTableRefsInHdlImpl{}
 	hdlJt.tablesAndRows = make(map[int]*list.List)
 	return &hdlJt
 }
 
-func (h *reteHandleRefsImpl) addEntry(jointTableID int, rowID int) {
+func (h *joinTableRefsInHdlImpl) addEntry(jointTableID int, rowID int) {
 	rowsForJoinTable := h.tablesAndRows[jointTableID]
 	if rowsForJoinTable == nil {
 		rowsForJoinTable = list.New()
@@ -27,7 +27,7 @@ func (h *reteHandleRefsImpl) addEntry(jointTableID int, rowID int) {
 	rowsForJoinTable.PushBack(rowID)
 }
 
-func (h *reteHandleRefsImpl) removeEntry(jointTableID int) {
+func (h *joinTableRefsInHdlImpl) removeEntry(jointTableID int) {
 	delete(h.tablesAndRows, jointTableID)
 }
 
@@ -37,7 +37,7 @@ type hdlTblIterator interface {
 }
 
 type hdlTblIteratorImpl struct {
-	hdlJtImpl *reteHandleRefsImpl
+	hdlJtImpl *joinTableRefsInHdlImpl
 	kList     list.List
 	curr      *list.Element
 }
@@ -55,7 +55,7 @@ func (ri *hdlTblIteratorImpl) next() (int, *list.List) {
 
 func (hdl *reteHandleImpl) newHdlTblIterator() hdlTblIterator {
 	ri := hdlTblIteratorImpl{}
-	ri.hdlJtImpl = hdl.rhRef.(*reteHandleRefsImpl)
+	ri.hdlJtImpl = hdl.jtRefs.(*joinTableRefsInHdlImpl)
 	ri.kList = list.List{}
 	for k, _ := range ri.hdlJtImpl.tablesAndRows {
 		ri.kList.PushBack(k)
