@@ -5,7 +5,7 @@ import (
 )
 
 type joinTable interface {
-	getID() int
+	nwElemId
 	getRule() model.Rule
 
 	addRow(handles []reteHandle) joinTableRow
@@ -14,15 +14,13 @@ type joinTable interface {
 	getRowIterator() rowIterator
 
 	getRowCount() int
-	//getMap() map[joinTableRow]joinTableRow
 }
 
 type joinTableImpl struct {
-	id    int
+	nwElemIdImpl
 	table map[int]joinTableRow
 	idr   []model.TupleType
 	rule  model.Rule
-	nw    Network
 }
 
 func newJoinTable(nw Network, rule model.Rule, identifiers []model.TupleType) joinTable {
@@ -36,20 +34,15 @@ func newJoinTable(nw Network, rule model.Rule, identifiers []model.TupleType) jo
 }
 
 func (jt *joinTableImpl) initJoinTableImpl(nw Network, rule model.Rule, identifiers []model.TupleType) {
-	jt.id = nw.incrementAndGetId()
+	jt.setID(nw)
 	jt.idr = identifiers
 	jt.table = map[int]joinTableRow{}
 	jt.rule = rule
-	jt.nw = nw
-}
-
-func (jt *joinTableImpl) getID() int {
-	return jt.id
 }
 
 func (jt *joinTableImpl) addRow(handles []reteHandle) joinTableRow {
 
-	row := newJoinTableRow(handles, jt.nw.incrementAndGetId())
+	row := newJoinTableRow(handles, jt.nw)
 
 	jt.table[row.getID()] = row
 	for i := 0; i < len(row.getHandles()); i++ {
@@ -60,9 +53,12 @@ func (jt *joinTableImpl) addRow(handles []reteHandle) joinTableRow {
 }
 
 func (jt *joinTableImpl) removeRow(rowID int) joinTableRow {
-	row := jt.table[rowID]
-	delete(jt.table, rowID)
-	return row
+	row, found := jt.table[rowID]
+	if found {
+		delete(jt.table, rowID)
+		return row
+	}
+	return nil
 }
 
 func (jt *joinTableImpl) getRowCount() int {

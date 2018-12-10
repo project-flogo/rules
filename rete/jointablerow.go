@@ -1,30 +1,26 @@
 package rete
 
 type joinTableRow interface {
-	getID() int
+	nwElemId
 	getHandles() []reteHandle
 }
 
 type joinTableRowImpl struct {
-	id      int
+	nwElemIdImpl
 	handles []reteHandle
 }
 
-func newJoinTableRow(handles []reteHandle, id int) joinTableRow {
+func newJoinTableRow(handles []reteHandle, nw Network) joinTableRow {
 	jtr := joinTableRowImpl{}
-	jtr.initJoinTableRow(handles, id)
+	jtr.initJoinTableRow(handles, nw)
 	return &jtr
 }
 
-func (jtr *joinTableRowImpl) initJoinTableRow(handles []reteHandle, id int) {
+func (jtr *joinTableRowImpl) initJoinTableRow(handles []reteHandle, nw Network) {
+	jtr.setID(nw)
 	jtr.handles = append([]reteHandle{}, handles...)
-	jtr.id = id
 }
 
 func (jtr *joinTableRowImpl) getHandles() []reteHandle {
 	return jtr.handles
-}
-
-func (jtr *joinTableRowImpl) getID() int {
-	return jtr.id
 }

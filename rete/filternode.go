@@ -70,7 +70,7 @@ func (fn *filterNodeImpl) String() string {
 		linkTo += "r" + strconv.Itoa(fn.nodeLinkVar.getChild().getID())
 	}
 
-	return "\t[FilterNode id(" + strconv.Itoa(fn.nodeImpl.id) + ") link(" + linkTo + "):\n" +
+	return "\t[FilterNode id(" + strconv.Itoa(fn.nodeImpl.getID()) + ") link(" + linkTo + "):\n" +
 		"\t\tIdentifier            = " + model.IdentifiersToString(fn.identifiers) + " ;\n" +
 		"\t\tCondition Identifiers = " + cond + ";\n" +
 		"\t\tCondition             = " + fn.conditionVar.String() + "]"

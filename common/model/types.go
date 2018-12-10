@@ -102,3 +102,18 @@ type RtcModified interface {
 }
 
 type RtcTransactionHandler func(ctx context.Context, rs RuleSession, txn RtcTxn, txnContext interface{})
+
+type IntegerID interface {
+	getID() int
+	setID(ID int)
+}
+type IntegerIDImpl struct {
+	id int
+}
+
+func (i *IntegerIDImpl) getID() int {
+	return i.id
+}
+func (i *IntegerIDImpl) setID(ID int) {
+	i.id = ID
+}

@@ -12,31 +12,21 @@ import (
 //node a building block of the rete network
 type node interface {
 	abstractNode
+	nwElemId
 	getIdentifiers() []model.TupleType
-	getID() int
 	addNodeLink(nodeLink)
 	assertObjects(ctx context.Context, handles []reteHandle, isRight bool)
 }
 
 type nodeImpl struct {
+	nwElemIdImpl
 	identifiers []model.TupleType
 	nodeLinkVar nodeLink
-	id          int
 	rule        model.Rule
-	nw          Network
 }
 
-//NewNode ... returns a new node
-//func newNode(nw Network, rule model.Rule, identifiers []model.TupleType) node {
-//	n := nodeImpl{}
-//	n.initNodeImpl(nw, rule, identifiers)
-//	return &n
-//}
-
 func (n *nodeImpl) initNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleType) {
-	n.nw = nw
-	n.id = nw.incrementAndGetId()
-
+	n.setID(nw)
 	n.identifiers = identifiers
 	n.rule = rule
 }
@@ -45,16 +35,12 @@ func (n *nodeImpl) getIdentifiers() []model.TupleType {
 	return n.identifiers
 }
 
-func (n *nodeImpl) getID() int {
-	return n.id
-}
-
 func (n *nodeImpl) addNodeLink(nl nodeLink) {
 	n.nodeLinkVar = nl
 }
 
 func (n *nodeImpl) String() string {
-	str := "id:" + strconv.Itoa(n.id) + ", idrs:"
+	str := "id:" + strconv.Itoa(n.getID()) + ", idrs:"
 	for _, nodeIdentifier := range n.identifiers {
 		str += string(nodeIdentifier) + ","
 	}

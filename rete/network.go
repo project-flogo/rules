@@ -80,6 +80,7 @@ func NewReteNetwork() Network {
 }
 
 func (nw *reteNetworkImpl) initReteNetwork() {
+	nw.currentId = 0
 	nw.allRules = make(map[string]model.Rule)
 	nw.allClassNodes = make(map[string]classNode)
 	nw.ruleNameNodesOfRule = make(map[string]*list.List)

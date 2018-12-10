@@ -8,6 +8,7 @@ import (
 
 //Holds a tuple reference and related state
 type reteHandle interface {
+	nwElemId
 	setTuple(tuple model.Tuple)
 	getTuple() model.Tuple
 	addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable)
@@ -17,11 +18,9 @@ type reteHandle interface {
 }
 
 type reteHandleImpl struct {
-	//this is "transient"
-	tuple model.Tuple
-	//this is the identity of the handle.
+	nwElemIdImpl
+	tuple    model.Tuple
 	tupleKey model.TupleKey
-	nw       Network
 	jtRefs   joinTableRefsInHdl
 }
 
@@ -36,7 +35,7 @@ func (hdl *reteHandleImpl) setTuple(tuple model.Tuple) {
 }
 
 func (hdl *reteHandleImpl) initHandleImpl(nw *reteNetworkImpl, tuple model.Tuple) {
-	hdl.nw = nw
+	hdl.setID(nw)
 	hdl.setTuple(tuple)
 	hdl.jtRefs = newJoinTableRefsInHdlImpl()
 }
@@ -63,8 +62,6 @@ func (hdl *reteHandleImpl) removeJoinTableRowRefs(changedProps map[string]bool) 
 	tuple := hdl.tuple
 	alias := tuple.GetTupleType()
 
-	//emptyJoinTables := list.New()
-
 	hdlTblIter := hdl.newHdlTblIterator()
 
 	for hdlTblIter.hasNext() {
@@ -90,16 +87,22 @@ func (hdl *reteHandleImpl) removeJoinTableRowRefs(changedProps map[string]bool) 
 		if !toDelete {
 			continue
 		}
-		//Remove rows from corresponding join tables
+		//this can happen if some other handle removed a row as a result of retraction
+		if rowIDs == nil {
+			continue
+		}
+		////Remove rows from corresponding join tables
 		for e := rowIDs.Front(); e != nil; e = e.Next() {
 			rowID := e.Value.(int)
 			row := joinTable.removeRow(rowID)
-
-			//Remove other refs recursively.
-			for _, otherHdl := range row.getHandles() {
-				otherHdl.removeJoinTableRowRefs(nil)
+			if row != nil {
+				//Remove other refs recursively.
+				for _, otherHdl := range row.getHandles() {
+					//if otherHdl != nil {
+					otherHdl.removeJoinTableRowRefs(nil)
+					//}
+				}
 			}
-
 		}
 
 		//Remove the reference to the table itself

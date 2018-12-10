@@ -26,7 +26,7 @@ func newRuleNode(rule model.Rule) ruleNode {
 }
 
 func (rn *ruleNodeImpl) String() string {
-	return "\t[RuleNode id(" + strconv.Itoa(rn.id) + "): \n" +
+	return "\t[RuleNode id(" + strconv.Itoa(rn.getID()) + "): \n" +
 		"\t\tIdentifier           = " + model.IdentifiersToString(rn.identifiers) + " ;\n" +
 		"\t\tRule                 = " + rn.rule.GetName() + "]\n"
 }

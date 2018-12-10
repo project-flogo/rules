@@ -9,6 +9,7 @@ import (
 
 //nodelink connects 2 nodes, a rete building block
 type nodeLink interface {
+	nwElemId
 	String() string
 	getChild() node
 	isRightNode() bool
@@ -19,17 +20,14 @@ type nodeLink interface {
 }
 
 type nodeLinkImpl struct {
+	nwElemIdImpl
 	convert        []int
 	numIdentifiers int
-
-	parent    node
-	parentIds []model.TupleType
-
-	child    node
-	childIds []model.TupleType
-
-	isRight bool
-	id      int
+	parent         node
+	parentIds      []model.TupleType
+	child          node
+	childIds       []model.TupleType
+	isRight        bool
 }
 
 func newNodeLink(nw Network, parent node, child node, isRight bool) nodeLink {
@@ -39,7 +37,7 @@ func newNodeLink(nw Network, parent node, child node, isRight bool) nodeLink {
 }
 
 func (nl *nodeLinkImpl) initNodeLink(nw Network, parent node, child node, isRight bool) {
-	nl.id = nw.incrementAndGetId()
+	nl.setID(nw)
 	nl.child = child
 	nl.isRight = isRight
 
@@ -60,8 +58,8 @@ func (nl *nodeLinkImpl) initNodeLink(nw Network, parent node, child node, isRigh
 }
 
 //initialize node link : for use with ClassNodeLink
-func initClassNodeLink(nw Network, nl *nodeLinkImpl, child node) {
-	nl.id = nw.incrementAndGetId()
+func (nl *nodeLinkImpl) initClassNodeLink(nw Network, child node) {
+	nl.setID(nw)
 	nl.child = child
 	nl.childIds = child.getIdentifiers()
 }

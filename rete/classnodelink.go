@@ -24,7 +24,7 @@ func newClassNodeLink(nw Network, classNodeVar classNode, child node, rule model
 }
 
 func (cnl *classNodeLinkImpl) initClassNodeLinkImpl(nw Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleType) {
-	initClassNodeLink(nw, &cnl.nodeLinkImpl, child)
+	cnl.initClassNodeLink(nw, child)
 	cnl.classNodeVar = classNodeVar
 	cnl.rule = rule
 	cnl.identifierVar = identifierVar
