@@ -71,6 +71,8 @@ type RuleSession interface {
 
 	//RtcTransactionHandler
 	RegisterRtcTransactionHandler(txnHandler RtcTransactionHandler, handlerCtx interface{})
+
+	SetConfig(config map[string]string)
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side
@@ -102,18 +104,3 @@ type RtcModified interface {
 }
 
 type RtcTransactionHandler func(ctx context.Context, rs RuleSession, txn RtcTxn, txnContext interface{})
-
-type IntegerID interface {
-	getID() int
-	setID(ID int)
-}
-type IntegerIDImpl struct {
-	id int
-}
-
-func (i *IntegerIDImpl) getID() int {
-	return i.id
-}
-func (i *IntegerIDImpl) setID(ID int) {
-	i.id = ID
-}

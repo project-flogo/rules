@@ -37,7 +37,7 @@ func (hdl *reteHandleImpl) setTuple(tuple model.Tuple) {
 func (hdl *reteHandleImpl) initHandleImpl(nw *reteNetworkImpl, tuple model.Tuple) {
 	hdl.setID(nw)
 	hdl.setTuple(tuple)
-	hdl.jtRefs = newJoinTableRefsInHdlImpl()
+	hdl.jtRefs = nw.getFactory().getJoinTableRefs()
 }
 
 func (hdl *reteHandleImpl) getTuple() model.Tuple {

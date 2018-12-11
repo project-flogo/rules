@@ -199,6 +199,9 @@ func TestSameTupleInstanceAssert(t *testing.T) {
 
 func createRuleSessionAndRules(t *testing.T) (model.RuleSession, error) {
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
+	props := make(map[string]string)
+	props["jtstore"] = "memory"
+	rs.SetConfig(props)
 
 	tupleDescFileAbsPath := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/trackntrace/trackntrace.json")
 

@@ -45,6 +45,10 @@ type Network interface {
 	RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{})
 
 	getJoinTable(joinTableID int) joinTable
+	SetConfig(config map[string]string)
+	GetConfigValue(key string) string
+	GetConfig() map[string]string
+	getFactory() TypeFactory
 }
 
 type reteNetworkImpl struct {
@@ -70,6 +74,9 @@ type reteNetworkImpl struct {
 	txnContext interface{}
 
 	allJoinTables map[int]joinTable
+	config        map[string]string
+
+	factory TypeFactory
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -87,6 +94,7 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
 	nw.allHandles = make(map[string]reteHandle)
 	nw.allJoinTables = make(map[int]joinTable)
+	nw.factory = TypeFactory{}
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
@@ -673,4 +681,23 @@ func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTra
 
 func (nw *reteNetworkImpl) getJoinTable(joinTableID int) joinTable {
 	return nw.allJoinTables[joinTableID]
+}
+
+func (nw *reteNetworkImpl) SetConfig(config map[string]string) {
+	nw.config = config
+	nw.factory = TypeFactory{config}
+
+}
+
+func (nw *reteNetworkImpl) GetConfigValue(key string) string {
+	val, _ := nw.config[key]
+	return val
+}
+
+func (nw *reteNetworkImpl) GetConfig() map[string]string {
+	return nw.config
+}
+
+func (nw *reteNetworkImpl) getFactory() TypeFactory {
+	return nw.factory
 }

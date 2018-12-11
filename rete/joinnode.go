@@ -41,8 +41,8 @@ func (jn *joinNodeImpl) initjoinNodeImplVar(nw Network, rule model.Rule, leftIdr
 	jn.leftIdrs = leftIdrs
 	jn.rightIdrs = rightIdrs
 	jn.conditionVar = conditionVar
-	jn.leftTable = newJoinTable(nw, rule, leftIdrs)
-	jn.rightTable = newJoinTable(nw, rule, rightIdrs)
+	jn.leftTable = nw.getFactory().getJoinTable(nw, rule, leftIdrs)
+	jn.rightTable = nw.getFactory().getJoinTable(nw, rule, rightIdrs)
 	jn.setJoinIdentifiers()
 }
 

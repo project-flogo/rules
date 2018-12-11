@@ -2,7 +2,9 @@ package rete
 
 //translation utilities between handles/tuples to pass to user conditions and actions
 
-import "github.com/project-flogo/rules/common/model"
+import (
+	"github.com/project-flogo/rules/common/model"
+)
 
 func copyIntoTupleArray(handles []reteHandle) []model.Tuple {
 	tuples := make([]model.Tuple, len(handles))
