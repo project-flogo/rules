@@ -8,48 +8,12 @@ import (
 	"github.com/project-flogo/rules/common/model"
 
 	"container/list"
+	"github.com/project-flogo/rules/rete/internal/types"
 	"sync"
 	"time"
+	//"github.com/project-flogo/rules/rete/common"
+	"github.com/project-flogo/rules/rete/common"
 )
-
-type RtcOprn int
-
-const (
-	ADD RtcOprn = 1 + iota
-	RETRACT
-	MODIFY
-	DELETE
-)
-
-//Network ... the rete network
-type Network interface {
-	AddRule(model.Rule) error
-	String() string
-	RemoveRule(string) model.Rule
-	GetRules() []model.Rule
-	//changedProps are the properties that changed in a previous action
-	Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn)
-	//mode can be one of retract, modify, delete
-	Retract(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn)
-
-	retractInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn)
-
-	assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn)
-	getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle
-	getHandle(tuple model.Tuple) reteHandle
-
-	incrementAndGetId() int
-	GetAssertedTuple(key model.TupleKey) model.Tuple
-	GetAssertedTupleByStringKey(key string) model.Tuple
-	//RtcTransactionHandler
-	RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{})
-
-	getJoinTable(joinTableID int) joinTable
-	SetConfig(config map[string]string)
-	GetConfigValue(key string) string
-	GetConfig() map[string]string
-	getFactory() TypeFactory
-}
 
 type reteNetworkImpl struct {
 	//All rules in the network
@@ -64,7 +28,7 @@ type reteNetworkImpl struct {
 	//Holds the Rule name as key and a pointer to a slice of NodeLinks as value
 	ruleNameClassNodeLinksOfRule map[string]*list.List //*list.List of ClassNodeLink
 
-	allHandles map[string]reteHandle
+	allHandles map[string]types.ReteHandle
 
 	currentId int
 
@@ -73,14 +37,15 @@ type reteNetworkImpl struct {
 	txnHandler model.RtcTransactionHandler
 	txnContext interface{}
 
-	allJoinTables map[int]joinTable
-	config        map[string]string
+	allJoinTables map[int]types.JoinTable
+	//allJoinTables types.JoinTableCollection
+	config map[string]string
 
-	factory TypeFactory
+	factory *TypeFactory
 }
 
 //NewReteNetwork ... creates a new rete network
-func NewReteNetwork() Network {
+func NewReteNetwork() types.Network {
 	reteNetworkImpl := reteNetworkImpl{}
 	reteNetworkImpl.initReteNetwork()
 	return &reteNetworkImpl
@@ -92,9 +57,10 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 	nw.allClassNodes = make(map[string]classNode)
 	nw.ruleNameNodesOfRule = make(map[string]*list.List)
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
-	nw.allHandles = make(map[string]reteHandle)
-	nw.allJoinTables = make(map[int]joinTable)
-	nw.factory = TypeFactory{}
+	nw.allHandles = make(map[string]types.ReteHandle)
+	nw.allJoinTables = make(map[int]types.JoinTable)
+	//nw.allJoinTables =
+	nw.factory = NewFactory(nw, nil)
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
@@ -207,15 +173,15 @@ func (nw *reteNetworkImpl) GetRules() []model.Rule {
 	return rules
 }
 
-func removeRefsFromReteHandles(joinTableVar joinTable) {
+func removeRefsFromReteHandles(joinTableVar types.JoinTable) {
 	if joinTableVar == nil {
 		return
 	}
-	rIterator := joinTableVar.getRowIterator()
-	for rIterator.hasNext() {
-		tableRow := rIterator.next()
-		for _, handle := range tableRow.getHandles() {
-			handle.removeJoinTable(joinTableVar.getID())
+	rIterator := joinTableVar.GetRowIterator()
+	for rIterator.HasNext() {
+		tableRow := rIterator.Next()
+		for _, handle := range tableRow.GetHandles() {
+			handle.RemoveJoinTable(joinTableVar.GetID())
 		}
 	}
 }
@@ -542,7 +508,7 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 	return "\t[ClassNode Class(" + classNodeImpl.getName() + ")" + links + "]\n"
 }
 
-func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn) {
+func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) {
 
 	if ctx == nil {
 		ctx = context.Background()
@@ -579,11 +545,11 @@ func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
 	reteHandle, found := nw.allHandles[tuple.GetKey().String()]
 	if found && reteHandle != nil {
 		delete(nw.allHandles, tuple.GetKey().String())
-		reteHandle.removeJoinTableRowRefs(nil)
+		reteHandle.RemoveJoinTableRowRefs(nil)
 	}
 }
 
-func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn) {
+func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) {
 
 	if ctx == nil {
 		ctx = context.Background()
@@ -593,7 +559,7 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, chang
 		nw.crudLock.Lock()
 		defer nw.crudLock.Unlock()
 		nw.retractInternal(ctx, tuple, changedProps, mode)
-		if nw.txnHandler != nil && mode == DELETE {
+		if nw.txnHandler != nil && mode == common.DELETE {
 			rtcTxn := newRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
 			nw.txnHandler(ctx, reteCtxVar.getRuleSession(), rtcTxn, nw.txnContext)
 		}
@@ -602,7 +568,7 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, chang
 	}
 }
 
-func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn) {
+func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) {
 
 	if ctx == nil {
 		ctx = context.Background()
@@ -611,10 +577,10 @@ func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tupl
 
 	reteHandle := nw.allHandles[tuple.GetKey().String()]
 	if reteHandle != nil {
-		reteHandle.removeJoinTableRowRefs(changedProps)
+		reteHandle.RemoveJoinTableRowRefs(changedProps)
 
 		//add it to the delete list
-		if mode == DELETE {
+		if mode == common.DELETE {
 			rCtx.addToRtcDeleted(tuple)
 		}
 		delete(nw.allHandles, tuple.GetKey().String())
@@ -624,7 +590,7 @@ func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tupl
 func (nw *reteNetworkImpl) GetAssertedTuple(key model.TupleKey) model.Tuple {
 	reteHandle, found := nw.allHandles[key.String()]
 	if found {
-		return reteHandle.getTuple()
+		return reteHandle.GetTuple()
 	}
 	return nil
 }
@@ -632,12 +598,12 @@ func (nw *reteNetworkImpl) GetAssertedTuple(key model.TupleKey) model.Tuple {
 func (nw *reteNetworkImpl) GetAssertedTupleByStringKey(key string) model.Tuple {
 	reteHandle, found := nw.allHandles[key]
 	if found {
-		return reteHandle.getTuple()
+		return reteHandle.GetTuple()
 	}
 	return nil
 }
 
-func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn) {
+func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) {
 	tupleType := tuple.GetTupleType()
 	listItem := nw.allClassNodes[string(tupleType)]
 	if listItem != nil {
@@ -646,7 +612,7 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 	}
 	td := model.GetTupleDescriptor(tuple.GetTupleType())
 	if td != nil {
-		if td.TTLInSeconds != 0 && mode == ADD {
+		if td.TTLInSeconds != 0 && mode == common.ADD {
 			rCtx := getReteCtx(ctx)
 			if rCtx != nil {
 				rCtx.addToRtcAdded(tuple)
@@ -655,7 +621,7 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 	}
 }
 
-func (nw *reteNetworkImpl) getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
+func (nw *reteNetworkImpl) getOrCreateHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle {
 	h := nw.allHandles[tuple.GetKey().String()]
 	if h == nil {
 		h = newReteHandleImpl(nw, tuple)
@@ -664,12 +630,12 @@ func (nw *reteNetworkImpl) getOrCreateHandle(ctx context.Context, tuple model.Tu
 	return h
 }
 
-func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) reteHandle {
+func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) types.ReteHandle {
 	h := nw.allHandles[tuple.GetKey().String()]
 	return h
 }
 
-func (nw *reteNetworkImpl) incrementAndGetId() int {
+func (nw *reteNetworkImpl) IncrementAndGetId() int {
 	nw.currentId++
 	return nw.currentId
 }
@@ -679,13 +645,13 @@ func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTra
 	nw.txnContext = txnContext
 }
 
-func (nw *reteNetworkImpl) getJoinTable(joinTableID int) joinTable {
+func (nw *reteNetworkImpl) GetJoinTable(joinTableID int) types.JoinTable {
 	return nw.allJoinTables[joinTableID]
 }
 
 func (nw *reteNetworkImpl) SetConfig(config map[string]string) {
 	nw.config = config
-	nw.factory = TypeFactory{config}
+	nw.factory = &TypeFactory{nw, config}
 
 }
 
@@ -698,6 +664,10 @@ func (nw *reteNetworkImpl) GetConfig() map[string]string {
 	return nw.config
 }
 
-func (nw *reteNetworkImpl) getFactory() TypeFactory {
+func (nw *reteNetworkImpl) getFactory() *TypeFactory {
 	return nw.factory
+}
+
+func (nw *reteNetworkImpl) AddToAllJoinTables(joinTable types.JoinTable) {
+	nw.allJoinTables[joinTable.GetID()] = joinTable
 }

@@ -1,19 +1,22 @@
-package rete
+package memimpl
 
-import "container/list"
+import (
+	"container/list"
+	"github.com/project-flogo/rules/rete/internal/types"
+)
 
 type joinTableRefsInHdlImpl struct {
 	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
 	tablesAndRows map[int]*list.List
 }
 
-func newJoinTableRefsInHdlImpl() joinTableRefsInHdl {
+func NewJoinTableRefsInHdlImpl() types.JoinTableRefsInHdl {
 	hdlJt := joinTableRefsInHdlImpl{}
 	hdlJt.tablesAndRows = make(map[int]*list.List)
 	return &hdlJt
 }
 
-func (h *joinTableRefsInHdlImpl) addEntry(jointTableID int, rowID int) {
+func (h *joinTableRefsInHdlImpl) AddEntry(jointTableID int, rowID int) {
 	rowsForJoinTable := h.tablesAndRows[jointTableID]
 	if rowsForJoinTable == nil {
 		rowsForJoinTable = list.New()
@@ -22,13 +25,19 @@ func (h *joinTableRefsInHdlImpl) addEntry(jointTableID int, rowID int) {
 	rowsForJoinTable.PushBack(rowID)
 }
 
-func (h *joinTableRefsInHdlImpl) removeEntry(jointTableID int) {
+func (h *joinTableRefsInHdlImpl) RemoveEntry(jointTableID int) {
 	delete(h.tablesAndRows, jointTableID)
 }
 
-type hdlTblIterator interface {
-	hasNext() bool
-	next() (int, *list.List)
+func (h *joinTableRefsInHdlImpl) GetIterator() types.HdlTblIterator {
+	ri := hdlTblIteratorImpl{}
+	ri.hdlJtImpl = h
+	ri.kList = list.List{}
+	for k, _ := range ri.hdlJtImpl.tablesAndRows {
+		ri.kList.PushBack(k)
+	}
+	ri.curr = ri.kList.Front()
+	return &ri
 }
 
 type hdlTblIteratorImpl struct {
@@ -37,24 +46,13 @@ type hdlTblIteratorImpl struct {
 	curr      *list.Element
 }
 
-func (ri *hdlTblIteratorImpl) hasNext() bool {
+func (ri *hdlTblIteratorImpl) HasNext() bool {
 	return ri.curr != nil
 }
 
-func (ri *hdlTblIteratorImpl) next() (int, *list.List) {
+func (ri *hdlTblIteratorImpl) Next() (int, *list.List) {
 	id := ri.curr.Value.(int)
 	lst := ri.hdlJtImpl.tablesAndRows[id]
 	ri.curr = ri.curr.Next()
 	return id, lst
-}
-
-func (hdl *reteHandleImpl) newHdlTblIterator() hdlTblIterator {
-	ri := hdlTblIteratorImpl{}
-	ri.hdlJtImpl = hdl.jtRefs.(*joinTableRefsInHdlImpl)
-	ri.kList = list.List{}
-	for k, _ := range ri.hdlJtImpl.tablesAndRows {
-		ri.kList.PushBack(k)
-	}
-	ri.curr = ri.kList.Front()
-	return &ri
 }

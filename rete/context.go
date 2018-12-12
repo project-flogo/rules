@@ -13,7 +13,7 @@ var reteCTXKEY = model.RetecontextKeyType{}
 type reteCtx interface {
 	getConflictResolver() conflictRes
 	getOpsList() *list.List
-	getNetwork() Network
+	getNetwork() *reteNetworkImpl
 	getRuleSession() model.RuleSession
 	OnValueChange(tuple model.Tuple, prop string)
 
@@ -37,7 +37,7 @@ type reteCtx interface {
 type reteCtxImpl struct {
 	cr      conflictRes
 	opsList *list.List
-	network Network
+	network *reteNetworkImpl
 	rs      model.RuleSession
 
 	//newly added tuples in the current RTC
@@ -53,7 +53,7 @@ type reteCtxImpl struct {
 	rtcModifyMap map[string]model.RtcModified
 }
 
-func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
+func newReteCtxImpl(network *reteNetworkImpl, rs model.RuleSession) reteCtx {
 	reteCtxVal := reteCtxImpl{}
 	reteCtxVal.cr = newConflictRes()
 	reteCtxVal.opsList = list.New()
@@ -74,7 +74,7 @@ func (rctx *reteCtxImpl) getOpsList() *list.List {
 	return rctx.opsList
 }
 
-func (rctx *reteCtxImpl) getNetwork() Network {
+func (rctx *reteCtxImpl) getNetwork() *reteNetworkImpl {
 	return rctx.network
 }
 
@@ -171,13 +171,13 @@ func getReteCtx(ctx context.Context) reteCtx {
 	return intr.(reteCtx)
 }
 
-func newReteCtx(ctx context.Context, network Network, rs model.RuleSession) (context.Context, reteCtx) {
+func newReteCtx(ctx context.Context, network *reteNetworkImpl, rs model.RuleSession) (context.Context, reteCtx) {
 	reteCtxVar := newReteCtxImpl(network, rs)
 	ctx = context.WithValue(ctx, reteCTXKEY, reteCtxVar)
 	return ctx, reteCtxVar
 }
 
-func getOrSetReteCtx(ctx context.Context, network Network, rs model.RuleSession) (reteCtx, bool, context.Context) {
+func getOrSetReteCtx(ctx context.Context, network *reteNetworkImpl, rs model.RuleSession) (reteCtx, bool, context.Context) {
 	isRecursive := false
 	newCtx := ctx
 	reteCtxVar := getReteCtx(ctx)

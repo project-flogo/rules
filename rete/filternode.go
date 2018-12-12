@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 //filter node holds the filter condition
@@ -18,13 +19,13 @@ type filterNodeImpl struct {
 	convert      []int
 }
 
-func newFilterNode(nw Network, rule model.Rule, identifiers []model.TupleType, conditionVar model.Condition) filterNode {
+func newFilterNode(nw *reteNetworkImpl, rule model.Rule, identifiers []model.TupleType, conditionVar model.Condition) filterNode {
 	fn := filterNodeImpl{}
 	fn.initFilterNodeImpl(nw, rule, identifiers, conditionVar)
 	return &fn
 }
 
-func (fn *filterNodeImpl) initFilterNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleType, conditionVar model.Condition) {
+func (fn *filterNodeImpl) initFilterNodeImpl(nw *reteNetworkImpl, rule model.Rule, identifiers []model.TupleType, conditionVar model.Condition) {
 	fn.nodeImpl.initNodeImpl(nw, rule, identifiers)
 	fn.conditionVar = conditionVar
 	fn.setConvert()
@@ -60,23 +61,23 @@ func (fn *filterNodeImpl) String() string {
 	switch fn.nodeLinkVar.getChild().(type) {
 	case *joinNodeImpl:
 		if fn.nodeLinkVar.isRightNode() {
-			linkTo += "j" + strconv.Itoa(fn.nodeLinkVar.getChild().getID()) + "R"
+			linkTo += "j" + strconv.Itoa(fn.nodeLinkVar.getChild().GetID()) + "R"
 		} else {
-			linkTo += "j" + strconv.Itoa(fn.nodeLinkVar.getChild().getID()) + "L"
+			linkTo += "j" + strconv.Itoa(fn.nodeLinkVar.getChild().GetID()) + "L"
 		}
 	case *filterNodeImpl:
-		linkTo += "f" + strconv.Itoa(fn.nodeLinkVar.getChild().getID())
+		linkTo += "f" + strconv.Itoa(fn.nodeLinkVar.getChild().GetID())
 	case *ruleNodeImpl:
-		linkTo += "r" + strconv.Itoa(fn.nodeLinkVar.getChild().getID())
+		linkTo += "r" + strconv.Itoa(fn.nodeLinkVar.getChild().GetID())
 	}
 
-	return "\t[FilterNode id(" + strconv.Itoa(fn.nodeImpl.getID()) + ") link(" + linkTo + "):\n" +
+	return "\t[FilterNode id(" + strconv.Itoa(fn.nodeImpl.GetID()) + ") link(" + linkTo + "):\n" +
 		"\t\tIdentifier            = " + model.IdentifiersToString(fn.identifiers) + " ;\n" +
 		"\t\tCondition Identifiers = " + cond + ";\n" +
 		"\t\tCondition             = " + fn.conditionVar.String() + "]"
 }
 
-func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []reteHandle, isRight bool) {
+func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []types.ReteHandle, isRight bool) {
 	if fn.conditionVar == nil {
 		fn.nodeLinkVar.propagateObjects(ctx, handles)
 	} else {
@@ -88,7 +89,7 @@ func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []reteHandl
 		} else {
 			tuples = make([]model.Tuple, len(fn.convert))
 			for i := 0; i < len(fn.convert); i++ {
-				tuples[i] = handles[fn.convert[i]].getTuple()
+				tuples[i] = handles[fn.convert[i]].GetTuple()
 				// tupleMap[tuples[i].GetTupleType()] = tuples[i]
 			}
 		}

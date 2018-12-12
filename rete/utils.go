@@ -4,21 +4,22 @@ package rete
 
 import (
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
-func copyIntoTupleArray(handles []reteHandle) []model.Tuple {
+func copyIntoTupleArray(handles []types.ReteHandle) []model.Tuple {
 	tuples := make([]model.Tuple, len(handles))
 	for i := 0; i < len(handles); i++ {
-		tuples[i] = handles[i].getTuple()
+		tuples[i] = handles[i].GetTuple()
 	}
 	return tuples
 }
 
-func copyIntoTupleMap(handles []reteHandle) map[model.TupleType]model.Tuple {
+func copyIntoTupleMap(handles []types.ReteHandle) map[model.TupleType]model.Tuple {
 	tupleMap := map[model.TupleType]model.Tuple{}
 	tuples := make([]model.Tuple, len(handles))
 	for i := 0; i < len(handles); i++ {
-		tuples[i] = handles[i].getTuple()
+		tuples[i] = handles[i].GetTuple()
 		tupleMap[tuples[i].GetTupleType()] = tuples[i] //assuming no self-joins! need to correct this!
 	}
 	return tupleMap

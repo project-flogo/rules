@@ -7,26 +7,27 @@ import (
 	"strconv"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 //node a building block of the rete network
 type node interface {
 	abstractNode
-	nwElemId
+	types.NwElemId
 	getIdentifiers() []model.TupleType
 	addNodeLink(nodeLink)
-	assertObjects(ctx context.Context, handles []reteHandle, isRight bool)
+	assertObjects(ctx context.Context, handles []types.ReteHandle, isRight bool)
 }
 
 type nodeImpl struct {
-	nwElemIdImpl
+	types.NwElemIdImpl
 	identifiers []model.TupleType
 	nodeLinkVar nodeLink
 	rule        model.Rule
 }
 
-func (n *nodeImpl) initNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleType) {
-	n.setID(nw)
+func (n *nodeImpl) initNodeImpl(nw *reteNetworkImpl, rule model.Rule, identifiers []model.TupleType) {
+	n.SetID(nw)
 	n.identifiers = identifiers
 	n.rule = rule
 }
@@ -40,7 +41,7 @@ func (n *nodeImpl) addNodeLink(nl nodeLink) {
 }
 
 func (n *nodeImpl) String() string {
-	str := "id:" + strconv.Itoa(n.getID()) + ", idrs:"
+	str := "id:" + strconv.Itoa(n.GetID()) + ", idrs:"
 	for _, nodeIdentifier := range n.identifiers {
 		str += string(nodeIdentifier) + ","
 	}
@@ -74,6 +75,6 @@ func findSimilarNodes(nodeSet *list.List) []node {
 	return similarNodes
 }
 
-func (n *nodeImpl) assertObjects(ctx context.Context, handles []reteHandle, isRight bool) {
+func (n *nodeImpl) assertObjects(ctx context.Context, handles []types.ReteHandle, isRight bool) {
 	fmt.Println("Abstract method here.., see filterNodeImpl and joinNodeImpl")
 }

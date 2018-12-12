@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 //classNode holds links to filter and join nodes eventually leading upto the rule node
@@ -76,7 +77,7 @@ func (cn *classNodeImpl) String() string {
 
 func (cn *classNodeImpl) assert(ctx context.Context, tuple model.Tuple, changedProps map[string]bool) {
 	handle := getOrCreateHandle(ctx, tuple)
-	handles := make([]reteHandle, 1)
+	handles := make([]types.ReteHandle, 1)
 	handles[0] = handle
 	propagate := false
 	for e := cn.getClassNodeLinks().Front(); e != nil; e = e.Next() {

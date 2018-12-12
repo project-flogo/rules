@@ -1,19 +1,17 @@
-package rete
+package memimpl
 
-import "container/list"
-
-type rowIterator interface {
-	hasNext() bool
-	next() joinTableRow
-}
+import (
+	"container/list"
+	"github.com/project-flogo/rules/rete/internal/types"
+)
 
 type rowIteratorImpl struct {
-	table map[int]joinTableRow
+	table map[int]types.JoinTableRow
 	kList list.List
 	curr  *list.Element
 }
 
-func newRowIterator(jTable map[int]joinTableRow) rowIterator {
+func newRowIterator(jTable map[int]types.JoinTableRow) types.RowIterator {
 	ri := rowIteratorImpl{}
 	ri.table = jTable
 	ri.kList = list.List{}
@@ -24,11 +22,11 @@ func newRowIterator(jTable map[int]joinTableRow) rowIterator {
 	return &ri
 }
 
-func (ri *rowIteratorImpl) hasNext() bool {
+func (ri *rowIteratorImpl) HasNext() bool {
 	return ri.curr != nil
 }
 
-func (ri *rowIteratorImpl) next() joinTableRow {
+func (ri *rowIteratorImpl) Next() types.JoinTableRow {
 	id := ri.curr.Value.(int)
 	val := ri.table[id]
 	ri.curr = ri.curr.Next()

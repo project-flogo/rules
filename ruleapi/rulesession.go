@@ -11,6 +11,7 @@ import (
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/rete"
+	"github.com/project-flogo/rules/rete/common"
 )
 
 var (
@@ -19,7 +20,7 @@ var (
 
 type rulesessionImpl struct {
 	name        string
-	reteNetwork rete.Network
+	reteNetwork common.Network
 
 	timers    map[interface{}]*time.Timer
 	startupFn model.StartupRSFunction
@@ -100,16 +101,16 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err e
 	if ctx == nil {
 		ctx = context.Context(context.Background())
 	}
-	rs.reteNetwork.Assert(ctx, rs, tuple, nil, rete.ADD)
+	rs.reteNetwork.Assert(ctx, rs, tuple, nil, common.ADD)
 	return nil
 }
 
 func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.Tuple) {
-	rs.reteNetwork.Retract(ctx, tuple, nil, rete.RETRACT)
+	rs.reteNetwork.Retract(ctx, tuple, nil, common.RETRACT)
 }
 
 func (rs *rulesessionImpl) Delete(ctx context.Context, tuple model.Tuple) {
-	rs.reteNetwork.Retract(ctx, tuple, nil, rete.DELETE)
+	rs.reteNetwork.Retract(ctx, tuple, nil, common.DELETE)
 }
 
 func (rs *rulesessionImpl) printNetwork() {
@@ -180,7 +181,7 @@ func (rs *rulesessionImpl) SetConfig(config map[string]string) {
 	if rs.config == nil {
 		rs.config = config
 	}
-	if rs.reteNetwork != nil && rs.reteNetwork.GetConfig() != nil {
+	if rs.reteNetwork != nil && rs.reteNetwork.GetConfig() == nil {
 		rs.reteNetwork.SetConfig(config)
 	}
 }

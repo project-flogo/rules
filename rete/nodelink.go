@@ -5,22 +5,23 @@ import (
 	"strconv"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 //nodelink connects 2 nodes, a rete building block
 type nodeLink interface {
-	nwElemId
+	types.NwElemId
 	String() string
 	getChild() node
 	isRightNode() bool
 
 	setChild(child node)
 	setIsRightChild(isRight bool)
-	propagateObjects(ctx context.Context, handles []reteHandle)
+	propagateObjects(ctx context.Context, handles []types.ReteHandle)
 }
 
 type nodeLinkImpl struct {
-	nwElemIdImpl
+	types.NwElemIdImpl
 	convert        []int
 	numIdentifiers int
 	parent         node
@@ -30,14 +31,14 @@ type nodeLinkImpl struct {
 	isRight        bool
 }
 
-func newNodeLink(nw Network, parent node, child node, isRight bool) nodeLink {
+func newNodeLink(nw types.Network, parent node, child node, isRight bool) nodeLink {
 	nl := nodeLinkImpl{}
 	nl.initNodeLink(nw, parent, child, isRight)
 	return &nl
 }
 
-func (nl *nodeLinkImpl) initNodeLink(nw Network, parent node, child node, isRight bool) {
-	nl.setID(nw)
+func (nl *nodeLinkImpl) initNodeLink(nw types.Network, parent node, child node, isRight bool) {
+	nl.SetID(nw)
 	nl.child = child
 	nl.isRight = isRight
 
@@ -58,8 +59,8 @@ func (nl *nodeLinkImpl) initNodeLink(nw Network, parent node, child node, isRigh
 }
 
 //initialize node link : for use with ClassNodeLink
-func (nl *nodeLinkImpl) initClassNodeLink(nw Network, child node) {
-	nl.setID(nw)
+func (nl *nodeLinkImpl) initClassNodeLink(nw types.Network, child node) {
+	nl.SetID(nw)
 	nl.child = child
 	nl.childIds = child.getIdentifiers()
 }
@@ -107,12 +108,12 @@ func (nl *nodeLinkImpl) String() string {
 	switch nl.child.(type) {
 	case *joinNodeImpl:
 		if nl.isRight {
-			nextNode += "j" + strconv.Itoa(nl.child.getID()) + "R"
+			nextNode += "j" + strconv.Itoa(nl.child.GetID()) + "R"
 		} else {
-			nextNode += "j" + strconv.Itoa(nl.child.getID()) + "L"
+			nextNode += "j" + strconv.Itoa(nl.child.GetID()) + "L"
 		}
 	case *filterNodeImpl:
-		nextNode += "f" + strconv.Itoa(nl.child.getID())
+		nextNode += "f" + strconv.Itoa(nl.child.GetID())
 	}
 	return "link (" + nextNode + ")"
 }
@@ -128,9 +129,9 @@ func (nl *nodeLinkImpl) setIsRightChild(isRight bool) {
 	nl.isRight = isRight
 }
 
-func (nl *nodeLinkImpl) propagateObjects(ctx context.Context, handles []reteHandle) {
+func (nl *nodeLinkImpl) propagateObjects(ctx context.Context, handles []types.ReteHandle) {
 	if nl.convert != nil {
-		convertedHandles := make([]reteHandle, nl.numIdentifiers)
+		convertedHandles := make([]types.ReteHandle, nl.numIdentifiers)
 		for i := 0; i < nl.numIdentifiers; i++ {
 			convertedHandles[nl.convert[i]] = handles[i]
 		}

@@ -4,72 +4,64 @@ import (
 	"context"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 //Holds a tuple reference and related state
-type reteHandle interface {
-	nwElemId
-	setTuple(tuple model.Tuple)
-	getTuple() model.Tuple
-	addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable)
-	removeJoinTableRowRefs(changedProps map[string]bool)
-	removeJoinTable(joinTableID int)
-	getTupleKey() model.TupleKey
-}
 
 type reteHandleImpl struct {
-	nwElemIdImpl
+	types.NwElemIdImpl
 	tuple    model.Tuple
 	tupleKey model.TupleKey
-	jtRefs   joinTableRefsInHdl
+	jtRefs   types.JoinTableRefsInHdl
 }
 
-func newReteHandleImpl(nw *reteNetworkImpl, tuple model.Tuple) reteHandle {
+func newReteHandleImpl(nw *reteNetworkImpl, tuple model.Tuple) types.ReteHandle {
 	h1 := reteHandleImpl{}
 	h1.initHandleImpl(nw, tuple)
 	return &h1
 }
 
-func (hdl *reteHandleImpl) setTuple(tuple model.Tuple) {
+func (hdl *reteHandleImpl) SetTuple(tuple model.Tuple) {
 	hdl.tuple = tuple
 }
 
 func (hdl *reteHandleImpl) initHandleImpl(nw *reteNetworkImpl, tuple model.Tuple) {
-	hdl.setID(nw)
-	hdl.setTuple(tuple)
+	hdl.SetID(nw)
+	hdl.SetTuple(tuple)
 	hdl.jtRefs = nw.getFactory().getJoinTableRefs()
 }
 
-func (hdl *reteHandleImpl) getTuple() model.Tuple {
+func (hdl *reteHandleImpl) GetTuple() model.Tuple {
 	return hdl.tuple
 }
 
-func (hdl *reteHandleImpl) getTupleKey() model.TupleKey {
+func (hdl *reteHandleImpl) GetTupleKey() model.TupleKey {
 	return hdl.tupleKey
 }
 
-func getOrCreateHandle(ctx context.Context, tuple model.Tuple) reteHandle {
+func getOrCreateHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle {
 	reteCtxVar := getReteCtx(ctx)
 	return reteCtxVar.getNetwork().getOrCreateHandle(ctx, tuple)
 }
 
-func (hdl *reteHandleImpl) addJoinTableRowRef(joinTableRowVar joinTableRow, joinTableVar joinTable) {
-	hdl.jtRefs.addEntry(joinTableVar.getID(), joinTableRowVar.getID())
+func (hdl *reteHandleImpl) AddJoinTableRowRef(joinTableRowVar types.JoinTableRow, joinTableVar types.JoinTable) {
+	hdl.jtRefs.AddEntry(joinTableVar.GetID(), joinTableRowVar.GetID())
 }
 
-func (hdl *reteHandleImpl) removeJoinTableRowRefs(changedProps map[string]bool) {
+func (hdl *reteHandleImpl) RemoveJoinTableRowRefs(changedProps map[string]bool) {
 
 	tuple := hdl.tuple
 	alias := tuple.GetTupleType()
 
-	hdlTblIter := hdl.newHdlTblIterator()
+	hdlTblIter := hdl.GetRefTableIterator()
 
-	for hdlTblIter.hasNext() {
-		joinTableID, rowIDs := hdlTblIter.next()
-		joinTable := hdl.nw.getJoinTable(joinTableID)
+	for hdlTblIter.HasNext() {
+		joinTableID, rowIDs := hdlTblIter.Next()
+		joinTable := hdl.Nw.GetJoinTable(joinTableID)
 		toDelete := false
 		if changedProps != nil {
-			rule := joinTable.getRule()
+			rule := joinTable.GetRule()
 			depProps, found := rule.GetDeps()[alias]
 			if found { // rule depends on this type
 				for changedProp := range changedProps {
@@ -94,23 +86,29 @@ func (hdl *reteHandleImpl) removeJoinTableRowRefs(changedProps map[string]bool) 
 		////Remove rows from corresponding join tables
 		for e := rowIDs.Front(); e != nil; e = e.Next() {
 			rowID := e.Value.(int)
-			row := joinTable.removeRow(rowID)
+			row := joinTable.RemoveRow(rowID)
 			if row != nil {
 				//Remove other refs recursively.
-				for _, otherHdl := range row.getHandles() {
+				for _, otherHdl := range row.GetHandles() {
 					//if otherHdl != nil {
-					otherHdl.removeJoinTableRowRefs(nil)
+					otherHdl.RemoveJoinTableRowRefs(nil)
 					//}
 				}
 			}
 		}
 
 		//Remove the reference to the table itself
-		hdl.jtRefs.removeEntry(joinTableID)
+		hdl.jtRefs.RemoveEntry(joinTableID)
 	}
 }
 
 //Used when a rule is deleted. See Network.RemoveRule
-func (hdl *reteHandleImpl) removeJoinTable(joinTableID int) {
-	hdl.jtRefs.removeEntry(joinTableID)
+func (hdl *reteHandleImpl) RemoveJoinTable(joinTableID int) {
+	hdl.jtRefs.RemoveEntry(joinTableID)
+}
+
+func (hdl *reteHandleImpl) GetRefTableIterator() types.HdlTblIterator {
+	refTblIteator := hdl.jtRefs.GetIterator()
+	return refTblIteator
+
 }
