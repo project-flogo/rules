@@ -74,4 +74,13 @@ type HdlTblIterator interface {
 }
 
 type JoinTableCollection interface {
+	GetJoinTable(joinTableID int) JoinTable
+	AddJoinTable(joinTable JoinTable)
+}
+
+type HandleCollection interface {
+	AddHandle(hdl ReteHandle)
+	RemoveHandle(tuple model.Tuple) ReteHandle
+	GetHandle(tuple model.Tuple) ReteHandle
+	GetHandleByKey(key model.TupleKey) ReteHandle
 }

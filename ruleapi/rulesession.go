@@ -70,7 +70,7 @@ func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.Rul
 }
 
 func (rs *rulesessionImpl) initRuleSession(name string) {
-	rs.reteNetwork = rete.NewReteNetwork()
+	rs.reteNetwork = rete.NewReteNetwork(nil)
 	rs.name = name
 	rs.timers = make(map[interface{}]*time.Timer)
 	rs.started = false
