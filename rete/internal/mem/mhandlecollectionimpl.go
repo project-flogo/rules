@@ -1,4 +1,4 @@
-package memimpl
+package mem
 
 import (
 	"github.com/project-flogo/rules/common/model"
@@ -34,4 +34,13 @@ func (hc *handleCollectionImpl) GetHandle(tuple model.Tuple) types.ReteHandle {
 
 func (hc *handleCollectionImpl) GetHandleByKey(key model.TupleKey) types.ReteHandle {
 	return hc.allHandles[key.String()]
+}
+
+func (hc *handleCollectionImpl) GetOrCreateHandle(nw types.Network, tuple model.Tuple) types.ReteHandle {
+	h, found := hc.allHandles[tuple.GetKey().String()]
+	if !found {
+		h = newReteHandleImpl(nw, tuple)
+		hc.allHandles[tuple.GetKey().String()] = h //[tuple.GetKey().String()] = h
+	}
+	return h
 }

@@ -1,4 +1,4 @@
-package memimpl
+package mem
 
 import (
 	"container/list"

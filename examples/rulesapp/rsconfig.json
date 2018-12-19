@@ -1,0 +1,29 @@
+{
+  "rs" : {
+    "store-ref" : "mem"
+  },
+  "rete": {
+    "jt": "redis",
+    "idgen" : "redis"
+  },
+  "store": [
+    {
+      "name": "memory"
+    },
+    {
+      "name": "redis",
+      "network": "tcp",
+      "address": ":6379"
+    }
+  ],
+  "idgen-ref": [
+    {
+      "name": "memory"
+    },
+    {
+      "name": "redis",
+      "network": "tcp",
+      "address": ":6379"
+    }
+  ]
+}

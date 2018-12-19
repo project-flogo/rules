@@ -72,7 +72,7 @@ type RuleSession interface {
 	//RtcTransactionHandler
 	RegisterRtcTransactionHandler(txnHandler RtcTransactionHandler, handlerCtx interface{})
 
-	SetConfig(config map[string]string)
+	//SetConfig(config map[string]string)
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side

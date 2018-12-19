@@ -1,73 +1,119 @@
 package rete
 
 import (
+	"encoding/json"
 	"github.com/project-flogo/rules/common/model"
-	"github.com/project-flogo/rules/rete/internal/memimpl"
+	"github.com/project-flogo/rules/rete/internal/mem"
+	"github.com/project-flogo/rules/rete/internal/redis"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 type TypeFactory struct {
-	nw     *reteNetworkImpl
-	config map[string]string
+	nw         *reteNetworkImpl
+	config     string
+	parsedJson map[string]interface{}
 }
 
-func NewFactory(nw *reteNetworkImpl, config map[string]string) *TypeFactory {
-	tf := TypeFactory{nw, config}
+func NewFactory(nw *reteNetworkImpl, config string) *TypeFactory {
+	tf := TypeFactory{}
+	tf.config = config
+	json.Unmarshal([]byte(config), &tf.parsedJson)
+	tf.nw = nw
+
 	return &tf
 }
 
 func (f *TypeFactory) getJoinTable(rule model.Rule, identifiers []model.TupleType) types.JoinTable {
-	if f.config == nil {
-		jt := memimpl.NewJoinTable(f.nw, rule, identifiers)
-		return jt
+	var jt types.JoinTable
+	if f.parsedJson == nil {
+		jt = mem.NewJoinTable(f.nw, rule, identifiers)
+
 	} else {
-		jtStore := f.config["jtstore"]
-		if jtStore == "" || jtStore == "memory" {
-			jt := memimpl.NewJoinTable(f.nw, rule, identifiers)
-			return jt
+		rete := f.parsedJson["rete"].(map[string]interface{})
+		if rete != nil {
+			idgen := rete["jt"].(string)
+			if idgen == "" || idgen == "mem" {
+				jt = mem.NewJoinTable(f.nw, rule, identifiers)
+			} else if idgen == "redis" {
+				jt = mem.NewJoinTable(f.nw, rule, identifiers)
+			}
 		}
 	}
-	return nil
+	return jt
 }
 
 func (f *TypeFactory) getJoinTableRefs() types.JoinTableRefsInHdl {
-	if f.config == nil {
-		jtRef := memimpl.NewJoinTableRefsInHdlImpl()
-		return jtRef
+	var jtRefs types.JoinTableRefsInHdl
+	if f.parsedJson == nil {
+		jtRefs = mem.NewJoinTableRefsInHdlImpl()
+
 	} else {
-		jtType := f.config["jtstore"]
-		if jtType == "" || jtType == "memory" {
-			jtRef := memimpl.NewJoinTableRefsInHdlImpl()
-			return jtRef
+		rete := f.parsedJson["rete"].(map[string]interface{})
+		if rete != nil {
+			idgen := rete["jt"].(string)
+			if idgen == "" || idgen == "mem" {
+				jtRefs = mem.NewJoinTableRefsInHdlImpl()
+			} else if idgen == "redis" {
+				jtRefs = mem.NewJoinTableRefsInHdlImpl()
+			}
 		}
 	}
-	return nil
+	return jtRefs
 }
 
 func (f *TypeFactory) getJoinTableCollection() types.JoinTableCollection {
-	if f.config == nil {
-		jtRef := memimpl.NewJoinTableCollection()
-		return jtRef
+	var allJt types.JoinTableCollection
+	if f.parsedJson == nil {
+		allJt = mem.NewJoinTableCollection()
+
 	} else {
-		jtType := f.config["jtstore"]
-		if jtType == "" || jtType == "memory" {
-			jtRef := memimpl.NewJoinTableCollection()
-			return jtRef
+		rete := f.parsedJson["rete"].(map[string]interface{})
+		if rete != nil {
+			idgen := rete["jt"].(string)
+			if idgen == "" || idgen == "mem" {
+				allJt = mem.NewJoinTableCollection()
+			} else if idgen == "redis" {
+				allJt = mem.NewJoinTableCollection()
+			}
 		}
 	}
-	return nil
+	return allJt
 }
 
 func (f *TypeFactory) getHandleCollection() types.HandleCollection {
-	if f.config == nil {
-		hc := memimpl.NewHandleCollection()
-		return hc
+	var hc types.HandleCollection
+	if f.parsedJson == nil {
+		hc = mem.NewHandleCollection()
 	} else {
-		jtType := f.config["jtstore"]
-		if jtType == "" || jtType == "memory" {
-			hc := memimpl.NewHandleCollection()
-			return hc
+		rete := f.parsedJson["rete"].(map[string]interface{})
+		if rete != nil {
+			idgen := rete["jt"].(string)
+			if idgen == "" || idgen == "mem" {
+				hc = mem.NewHandleCollection()
+			} else if idgen == "redis" {
+				hc = mem.NewHandleCollection()
+			}
 		}
 	}
-	return nil
+	return hc
+}
+
+func (f *TypeFactory) getIdGen() types.IdGen {
+	var idg types.IdGen
+	if f.parsedJson == nil {
+		idg = mem.NewIdImpl(f.config)
+		return idg
+	} else {
+		rete := f.parsedJson["rete"].(map[string]interface{})
+		if rete != nil {
+
+			idgen := rete["idgen"].(string)
+			if idgen == "" || idgen == "mem" {
+				idg = mem.NewIdImpl(f.config)
+			} else if idgen == "redis" {
+				idg = redis.NewIdImpl(f.config)
+			}
+		}
+	}
+	return idg
 }

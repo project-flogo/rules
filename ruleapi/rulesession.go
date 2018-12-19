@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/common/services"
 	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/rete"
 	"github.com/project-flogo/rules/rete/common"
+	"github.com/project-flogo/rules/ruleapi/internal/store/mem"
 )
 
 var (
@@ -22,10 +24,12 @@ type rulesessionImpl struct {
 	name        string
 	reteNetwork common.Network
 
-	timers    map[interface{}]*time.Timer
-	startupFn model.StartupRSFunction
-	started   bool
-	config    map[string]string
+	timers     map[interface{}]*time.Timer
+	startupFn  model.StartupRSFunction
+	started    bool
+	config     map[string]string
+	tupleStore services.TupleStore
+	jsonConfig map[string]interface{}
 }
 
 func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
@@ -39,14 +43,17 @@ func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
 }
 
 func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.RuleSession, error) {
-	rs, err := GetOrCreateRuleSession(name)
-
-	if err != nil {
-		return nil, err
+	if name == "" {
+		return nil, errors.New("RuleSession name cannot be empty")
 	}
+	rs := rulesessionImpl{}
+	rs.initRuleSessionWithConfig(name, jsonConfig)
+	//existing, _ := sessionMap.LoadOrStore(name, &rs)
+	//rs1 := existing.(*rulesessionImpl)
+	//rs = *rs1
 
 	ruleSessionDescriptor := config.RuleSessionDescriptor{}
-	err = json.Unmarshal([]byte(jsonConfig), &ruleSessionDescriptor)
+	err := json.Unmarshal([]byte(jsonConfig), &ruleSessionDescriptor)
 	if err != nil {
 		return nil, err
 	}
@@ -66,14 +73,47 @@ func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.Rul
 
 	rs.SetStartupFunction(config.GetStartupRSFunction(name))
 
-	return rs, nil
+	return &rs, nil
 }
 
 func (rs *rulesessionImpl) initRuleSession(name string) {
-	rs.reteNetwork = rete.NewReteNetwork(nil)
+	rs.reteNetwork = rete.NewReteNetwork("")
 	rs.name = name
 	rs.timers = make(map[interface{}]*time.Timer)
 	rs.started = false
+}
+
+func (rs *rulesessionImpl) initRuleSessionWithConfig(name string, jsonConfig string) error {
+
+	err := json.Unmarshal([]byte(jsonConfig), &rs.jsonConfig)
+	if err != nil {
+		return err
+	}
+
+	rs.name = name
+	rs.timers = make(map[interface{}]*time.Timer)
+
+	//TODO: Configure it from jconsonfig
+	rs.tupleStore = getTupleStore(rs.jsonConfig)
+
+	rs.reteNetwork = rete.NewReteNetwork(jsonConfig)
+	rs.reteNetwork.SetTupleStore(rs.tupleStore)
+
+	rs.started = false
+	return nil
+}
+
+func getTupleStore(jsonConfig map[string]interface{}) services.TupleStore {
+	rsCfg := jsonConfig["rs"].(map[string]interface{})
+
+	storeRef := rsCfg["store-ref"].(string)
+
+	if storeRef == "" || storeRef == "mem" {
+		return mem.NewStore()
+	} else if storeRef == "redisutils" {
+		return mem.NewStore()
+	}
+	return nil
 }
 
 func (rs *rulesessionImpl) AddRule(rule model.Rule) (err error) {
@@ -93,9 +133,10 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err e
 		return fmt.Errorf("Cannot assert tuple. Rulesession [%s] not started", rs.name)
 	}
 	assertedTuple := rs.GetAssertedTuple(tuple.GetKey())
-	if assertedTuple == tuple {
-		return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
-	} else if assertedTuple != nil {
+	//if assertedTuple == tuple {
+	//	return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+	//} else
+	if assertedTuple != nil {
 		return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
 	}
 	if ctx == nil {
@@ -177,11 +218,12 @@ func (rs *rulesessionImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTra
 	rs.reteNetwork.RegisterRtcTransactionHandler(txnHandler, txnContext)
 }
 
-func (rs *rulesessionImpl) SetConfig(config map[string]string) {
-	if rs.config == nil {
-		rs.config = config
-	}
-	if rs.reteNetwork != nil && rs.reteNetwork.GetConfig() == nil {
-		rs.reteNetwork.SetConfig(config)
-	}
-}
+//
+//func (rs *rulesessionImpl) SetConfig(config map[string]string) {
+//	if rs.config == nil {
+//		rs.config = config
+//	}
+//	if rs.reteNetwork != nil && rs.reteNetwork.GetConfig() == nil {
+//		rs.reteNetwork.SetConfig(config)
+//	}
+//}

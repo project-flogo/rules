@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/common/services"
 )
 
 type RtcOprn int
@@ -24,7 +25,9 @@ type Network interface {
 	Retract(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn)
 	GetAssertedTuple(key model.TupleKey) model.Tuple
 	RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{})
-	SetConfig(config map[string]string)
-	GetConfigValue(key string) string
-	GetConfig() map[string]string
+	//SetConfig(config map[string]string)
+	//GetConfigValue(key string) string
+	//GetConfig() map[string]string
+
+	SetTupleStore(tupleStore services.TupleStore)
 }

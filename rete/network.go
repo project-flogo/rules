@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 	//"github.com/project-flogo/rules/rete/common"
+	"github.com/project-flogo/rules/common/services"
 	"github.com/project-flogo/rules/rete/common"
 )
 
@@ -31,8 +32,6 @@ type reteNetworkImpl struct {
 	//allHandles map[string]types.ReteHandle
 	allHandles types.HandleCollection
 
-	currentId int
-
 	assertLock sync.Mutex
 	crudLock   sync.Mutex
 	txnHandler model.RtcTransactionHandler
@@ -42,29 +41,36 @@ type reteNetworkImpl struct {
 	allJoinTables types.JoinTableCollection
 	config        map[string]string
 
-	factory *TypeFactory
+	factory    *TypeFactory
+	idGen      types.IdGen
+	tupleStore services.TupleStore
 }
 
 //NewReteNetwork ... creates a new rete network
-func NewReteNetwork(config map[string]string) types.Network {
+func NewReteNetwork(jsonConfig string) types.Network {
 	reteNetworkImpl := reteNetworkImpl{}
-	reteNetworkImpl.initReteNetwork(config)
+	reteNetworkImpl.initReteNetwork(jsonConfig)
 	return &reteNetworkImpl
 }
 
-func (nw *reteNetworkImpl) initReteNetwork(config map[string]string) {
-	nw.currentId = 0
+func (nw *reteNetworkImpl) initReteNetwork(config string) {
+	//nw.currentId = 0
 	nw.allRules = make(map[string]model.Rule)
 	nw.allClassNodes = make(map[string]classNode)
 	nw.ruleNameNodesOfRule = make(map[string]*list.List)
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
-	//nw.allHandles = make(map[string]types.ReteHandle)
-	//nw.allJoinTables =
+
 	nw.factory = NewFactory(nw, config)
 
+	nw.idGen = nw.factory.getIdGen()
 	nw.allJoinTables = nw.factory.getJoinTableCollection()
 	nw.allHandles = nw.factory.getHandleCollection()
 
+	nw.initNwServices()
+}
+
+func (nw *reteNetworkImpl) initNwServices() {
+	nw.idGen.Init()
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
@@ -548,7 +554,7 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
 	reteHandle := nw.allHandles.RemoveHandle(tuple)
 	if reteHandle != nil {
-		reteHandle.RemoveJoinTableRowRefs(nil)
+		nw.removeJoinTableRowRefs(reteHandle, nil)
 	}
 }
 
@@ -580,7 +586,7 @@ func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tupl
 
 	reteHandle := nw.allHandles.RemoveHandle(tuple)
 	if reteHandle != nil {
-		reteHandle.RemoveJoinTableRowRefs(changedProps)
+		nw.removeJoinTableRowRefs(reteHandle, changedProps)
 
 		//add it to the delete list
 		if mode == common.DELETE {
@@ -617,11 +623,7 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 }
 
 func (nw *reteNetworkImpl) getOrCreateHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle {
-	h := nw.allHandles.GetHandle(tuple)
-	if h == nil {
-		h = newReteHandleImpl(nw, tuple)
-		nw.allHandles.AddHandle(h) //[tuple.GetKey().String()] = h
-	}
+	h := nw.allHandles.GetOrCreateHandle(nw, tuple)
 	return h
 }
 
@@ -631,8 +633,7 @@ func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) types.ReteHandle {
 }
 
 func (nw *reteNetworkImpl) IncrementAndGetId() int {
-	nw.currentId++
-	return nw.currentId
+	return nw.idGen.GetNextID()
 }
 
 func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {
@@ -642,12 +643,6 @@ func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTra
 
 func (nw *reteNetworkImpl) GetJoinTable(joinTableID int) types.JoinTable {
 	return nw.allJoinTables.GetJoinTable(joinTableID)
-}
-
-func (nw *reteNetworkImpl) SetConfig(config map[string]string) {
-	nw.config = config
-	nw.factory = &TypeFactory{nw, config}
-
 }
 
 func (nw *reteNetworkImpl) GetConfigValue(key string) string {
@@ -665,4 +660,66 @@ func (nw *reteNetworkImpl) getFactory() *TypeFactory {
 
 func (nw *reteNetworkImpl) AddToAllJoinTables(joinTable types.JoinTable) {
 	nw.allJoinTables.AddJoinTable(joinTable)
+}
+
+func (nw *reteNetworkImpl) SetTupleStore(tupleStore services.TupleStore) {
+	nw.tupleStore = tupleStore
+}
+
+func getOrCreateHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle {
+	reteCtxVar := getReteCtx(ctx)
+	return reteCtxVar.getNetwork().getOrCreateHandle(ctx, tuple)
+}
+
+func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedProps map[string]bool) {
+
+	tuple := hdl.GetTuple()
+	alias := tuple.GetTupleType()
+
+	hdlTblIter := hdl.GetRefTableIterator()
+
+	for hdlTblIter.HasNext() {
+		joinTableID, rowIDs := hdlTblIter.Next()
+		joinTable := nw.GetJoinTable(joinTableID)
+		toDelete := false
+		if changedProps != nil {
+			rule := joinTable.GetRule()
+			depProps, found := rule.GetDeps()[alias]
+			if found { // rule depends on this type
+				for changedProp := range changedProps {
+					_, foundProp := depProps[changedProp]
+					if foundProp {
+						toDelete = true
+						break
+					}
+				}
+			}
+		} else {
+			toDelete = true
+		}
+
+		if !toDelete {
+			continue
+		}
+		//this can happen if some other handle removed a row as a result of retraction
+		if rowIDs == nil {
+			continue
+		}
+		////Remove rows from corresponding join tables
+		for e := rowIDs.Front(); e != nil; e = e.Next() {
+			rowID := e.Value.(int)
+			row := joinTable.RemoveRow(rowID)
+			if row != nil {
+				//Remove other refs recursively.
+				for _, otherHdl := range row.GetHandles() {
+					if otherHdl != nil {
+						nw.removeJoinTableRowRefs(otherHdl, nil)
+					}
+				}
+			}
+		}
+
+		//Remove the reference to the table itself
+		hdl.RemoveJoinTable(joinTableID)
+	}
 }

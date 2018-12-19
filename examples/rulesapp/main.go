@@ -25,8 +25,9 @@ func main() {
 		return
 	}
 
+	content := getFileContent("src/github.com/project-flogo/rules/examples/rulesapp/rsconfig.json")
+	rs, _ := ruleapi.GetOrCreateRuleSessionFromConfig("asession", string(content))
 	//Create a RuleSession
-	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")
@@ -122,4 +123,9 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 	name1, _ := t1.GetString("name")
 	name2, _ := t2.GetString("name")
 	fmt.Printf("n1.name = [%s], n2.name = [%s]\n", name1, name2)
+}
+
+func getFileContent(filePath string) string {
+	absPath := common.GetAbsPathForResource(filePath)
+	return common.FileToString(absPath)
 }

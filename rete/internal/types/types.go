@@ -8,6 +8,7 @@ import (
 
 type Network interface {
 	common.Network
+
 	IncrementAndGetId() int
 	GetJoinTable(joinTableID int) JoinTable
 	AddToAllJoinTables(jT JoinTable)
@@ -51,7 +52,7 @@ type ReteHandle interface {
 	SetTuple(tuple model.Tuple)
 	GetTuple() model.Tuple
 	AddJoinTableRowRef(joinTableRowVar JoinTableRow, joinTableVar JoinTable)
-	RemoveJoinTableRowRefs(changedProps map[string]bool)
+	//removeJoinTableRowRefs(changedProps map[string]bool)
 	RemoveJoinTable(joinTableID int)
 	GetTupleKey() model.TupleKey
 	GetRefTableIterator() HdlTblIterator
@@ -83,4 +84,11 @@ type HandleCollection interface {
 	RemoveHandle(tuple model.Tuple) ReteHandle
 	GetHandle(tuple model.Tuple) ReteHandle
 	GetHandleByKey(key model.TupleKey) ReteHandle
+	GetOrCreateHandle(nw Network, tuple model.Tuple) ReteHandle
+}
+
+type IdGen interface {
+	Init()
+	GetMaxID() int
+	GetNextID() int
 }

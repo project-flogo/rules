@@ -1,4 +1,4 @@
-package memimpl
+package mem
 
 import "github.com/project-flogo/rules/rete/internal/types"
 
