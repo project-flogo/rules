@@ -12,7 +12,7 @@ type joinTableImpl struct {
 	rule  model.Rule
 }
 
-func NewJoinTable(nw types.Network, rule model.Rule, identifiers []model.TupleType) types.JoinTable {
+func CreateOrGetJoinTable(nw types.Network, rule model.Rule, conditionVar model.Condition, identifiers []model.TupleType) types.JoinTable {
 	jT := joinTableImpl{}
 	jT.initJoinTableImpl(nw, rule, identifiers)
 

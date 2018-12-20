@@ -23,19 +23,18 @@ func NewFactory(nw *reteNetworkImpl, config string) *TypeFactory {
 	return &tf
 }
 
-func (f *TypeFactory) getJoinTable(rule model.Rule, identifiers []model.TupleType) types.JoinTable {
+func (f *TypeFactory) getJoinTable(rule model.Rule, conditionVar model.Condition, identifiers []model.TupleType) types.JoinTable {
 	var jt types.JoinTable
 	if f.parsedJson == nil {
-		jt = mem.NewJoinTable(f.nw, rule, identifiers)
-
+		jt = mem.CreateOrGetJoinTable(f.nw, rule, conditionVar, identifiers)
 	} else {
 		rete := f.parsedJson["rete"].(map[string]interface{})
 		if rete != nil {
 			idgen := rete["jt"].(string)
 			if idgen == "" || idgen == "mem" {
-				jt = mem.NewJoinTable(f.nw, rule, identifiers)
+				jt = mem.CreateOrGetJoinTable(f.nw, rule, conditionVar, identifiers)
 			} else if idgen == "redis" {
-				jt = mem.NewJoinTable(f.nw, rule, identifiers)
+				jt = mem.CreateOrGetJoinTable(f.nw, rule, conditionVar, identifiers)
 			}
 		}
 	}
