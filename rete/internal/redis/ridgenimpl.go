@@ -13,12 +13,12 @@ const (
 )
 
 type ridImpl struct {
-	config string
+	config map[string]interface{}
 	//current int
 	rh redisutils.RedisHdl
 }
 
-func NewIdImpl(config string) types.IdGen {
+func NewIdImpl(config map[string]interface{}) types.IdGen {
 	r := ridImpl{}
 	r.config = config
 	return &r

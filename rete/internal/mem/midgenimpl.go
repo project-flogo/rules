@@ -6,11 +6,11 @@ import (
 )
 
 type idGenImpl struct {
-	config    string
+	config    map[string]interface{}
 	currentId int32
 }
 
-func NewIdImpl(config string) types.IdGen {
+func NewIdImpl(config map[string]interface{}) types.IdGen {
 	idg := idGenImpl{}
 	idg.config = config
 	idg.currentId = 0

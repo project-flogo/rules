@@ -29,16 +29,19 @@ type reteNetworkImpl struct {
 	//Holds the Rule name as key and a pointer to a slice of NodeLinks as value
 	ruleNameClassNodeLinksOfRule map[string]*list.List //*list.List of ClassNodeLink
 
-	//allHandles map[string]types.ReteHandle
-	allHandles types.HandleCollection
+	//handleService map[string]types.ReteHandle
+	handleService types.HandleService
 
 	assertLock sync.Mutex
 	crudLock   sync.Mutex
 	txnHandler model.RtcTransactionHandler
 	txnContext interface{}
 
-	//allJoinTables map[int]types.JoinTable
-	allJoinTables types.JoinTableCollection
+	//jtService map[int]types.JoinTable
+	jtService types.JtService
+
+	jtRefsService types.JtRefsService
+
 	config        map[string]string
 
 	factory    *TypeFactory
@@ -63,14 +66,17 @@ func (nw *reteNetworkImpl) initReteNetwork(config string) {
 	nw.factory = NewFactory(nw, config)
 
 	nw.idGen = nw.factory.getIdGen()
-	nw.allJoinTables = nw.factory.getJoinTableCollection()
-	nw.allHandles = nw.factory.getHandleCollection()
+	nw.jtService = nw.factory.getJoinTableCollection()
+	nw.handleService = nw.factory.getHandleCollection()
 
 	nw.initNwServices()
 }
 
 func (nw *reteNetworkImpl) initNwServices() {
 	nw.idGen.Init()
+	nw.jtService.Init()
+	nw.handleService.Init()
+	nw.jtRefsService.Init()
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
@@ -552,7 +558,7 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 }
 
 func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
-	reteHandle := nw.allHandles.RemoveHandle(tuple)
+	reteHandle := nw.handleService.RemoveHandle(tuple)
 	if reteHandle != nil {
 		nw.removeJoinTableRowRefs(reteHandle, nil)
 	}
@@ -584,7 +590,7 @@ func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tupl
 	}
 	rCtx, _, _ := getOrSetReteCtx(ctx, nw, nil)
 
-	reteHandle := nw.allHandles.RemoveHandle(tuple)
+	reteHandle := nw.handleService.RemoveHandle(tuple)
 	if reteHandle != nil {
 		nw.removeJoinTableRowRefs(reteHandle, changedProps)
 
@@ -597,7 +603,7 @@ func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tupl
 }
 
 func (nw *reteNetworkImpl) GetAssertedTuple(key model.TupleKey) model.Tuple {
-	reteHandle := nw.allHandles.GetHandleByKey(key)
+	reteHandle := nw.handleService.GetHandleByKey(key)
 	if reteHandle != nil {
 		return reteHandle.GetTuple()
 	}
@@ -623,12 +629,12 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 }
 
 func (nw *reteNetworkImpl) getOrCreateHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle {
-	h := nw.allHandles.GetOrCreateHandle(nw, tuple)
+	h := nw.handleService.GetOrCreateHandle(nw, tuple)
 	return h
 }
 
 func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) types.ReteHandle {
-	h := nw.allHandles.GetHandleByKey(tuple.GetKey())
+	h := nw.handleService.GetHandleByKey(tuple.GetKey())
 	return h
 }
 
@@ -642,7 +648,7 @@ func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTra
 }
 
 func (nw *reteNetworkImpl) GetJoinTable(joinTableID int) types.JoinTable {
-	return nw.allJoinTables.GetJoinTable(joinTableID)
+	return nw.jtService.GetJoinTable(joinTableID)
 }
 
 func (nw *reteNetworkImpl) GetConfigValue(key string) string {
@@ -659,7 +665,7 @@ func (nw *reteNetworkImpl) getFactory() *TypeFactory {
 }
 
 func (nw *reteNetworkImpl) AddToAllJoinTables(joinTable types.JoinTable) {
-	nw.allJoinTables.AddJoinTable(joinTable)
+	nw.jtService.AddJoinTable(joinTable)
 }
 
 func (nw *reteNetworkImpl) SetTupleStore(tupleStore services.TupleStore) {
@@ -722,4 +728,16 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 		//Remove the reference to the table itself
 		hdl.RemoveJoinTable(joinTableID)
 	}
+}
+
+func (nw *reteNetworkImpl) GetJtService() types.JtService {
+	return nw.jtService
+}
+
+func (nw *reteNetworkImpl) GetJtRefService() types.JtRefsService {
+	return nw.jtRefsService
+}
+
+func (nw *reteNetworkImpl) GetHandleService() types.HandleService {
+	return nw.handleService
 }

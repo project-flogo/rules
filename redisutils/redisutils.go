@@ -9,11 +9,11 @@ var rd RedisHdl
 type RedisHdl = *RedisHandle
 
 type RedisHandle struct {
-	config string
+	config map[string]interface{}
 	pool   *redis.Pool
 }
 
-func InitService(config string) {
+func InitService(config map[string]interface{}) {
 	if rd == nil {
 		rd = &RedisHandle{}
 		rd.config = config

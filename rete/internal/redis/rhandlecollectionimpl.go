@@ -1,4 +1,4 @@
-package mem
+package redis
 
 import (
 	"github.com/project-flogo/rules/common/model"
@@ -44,8 +44,10 @@ func (hc *handleCollectionImpl) GetOrCreateHandle(nw types.Network, tuple model.
 	h, found := hc.allHandles[tuple.GetKey().String()]
 	if !found {
 		h = newReteHandleImpl(nw, tuple)
-
+		//hci := h.(*reteHandleImpl)
+		//hci.jtRefs = nw
 		hc.allHandles[tuple.GetKey().String()] = h //[tuple.GetKey().String()] = h
 	}
 	return h
 }
+

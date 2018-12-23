@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/rete/common"
+	"github.com/project-flogo/rules/common/services"
 )
 
 type Network interface {
@@ -12,6 +13,10 @@ type Network interface {
 	IncrementAndGetId() int
 	GetJoinTable(joinTableID int) JoinTable
 	AddToAllJoinTables(jT JoinTable)
+
+	GetJtService() JtService
+	GetHandleService() HandleService
+	GetJtRefService() JtRefsService
 }
 
 type NwElemId interface {
@@ -63,10 +68,11 @@ type RowIterator interface {
 	Next() JoinTableRow
 }
 
-type JoinTableRefsInHdl interface {
-	AddEntry(jointTableID int, rowID int)
-	RemoveEntry(jointTableID int)
-	GetIterator() HdlTblIterator
+type JtRefsService interface {
+	services.Service
+	AddEntry(handle ReteHandle, jointTableID int, rowID int)
+	RemoveEntry(handle ReteHandle, jointTableID int)
+	GetIterator(handle ReteHandle) HdlTblIterator
 }
 
 type HdlTblIterator interface {
@@ -74,12 +80,15 @@ type HdlTblIterator interface {
 	Next() (int, *list.List)
 }
 
-type JoinTableCollection interface {
+type JtService interface {
+	services.Service
 	GetJoinTable(joinTableID int) JoinTable
 	AddJoinTable(joinTable JoinTable)
+	RemoveJoinTable(joinTable JoinTable)
 }
 
-type HandleCollection interface {
+type HandleService interface {
+	services.Service
 	AddHandle(hdl ReteHandle)
 	RemoveHandle(tuple model.Tuple) ReteHandle
 	GetHandle(tuple model.Tuple) ReteHandle
@@ -88,7 +97,7 @@ type HandleCollection interface {
 }
 
 type IdGen interface {
-	Init()
+	services.Service
 	GetMaxID() int
 	GetNextID() int
 }

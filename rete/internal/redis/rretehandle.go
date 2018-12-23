@@ -1,4 +1,4 @@
-package mem
+package redis
 
 import (
 	"github.com/project-flogo/rules/common/model"
@@ -40,15 +40,15 @@ func (hdl *reteHandleImpl) GetTupleKey() model.TupleKey {
 }
 
 func (hdl *reteHandleImpl) AddJoinTableRowRef(joinTableRowVar types.JoinTableRow, joinTableVar types.JoinTable) {
-	hdl.Nw.GetJtRefService().AddEntry(hdl,joinTableVar.GetID(), joinTableRowVar.GetID())
+	hdl.Nw.GetJtRefService().AddEntry(hdl, joinTableVar.GetID(), joinTableRowVar.GetID())
 }
 
 //Used when a rule is deleted. See Network.RemoveRule
 func (hdl *reteHandleImpl) RemoveJoinTable(joinTableID int) {
-	hdl.Nw.GetJtRefService().RemoveEntry(hdl,joinTableID)
+	hdl.Nw.GetJtRefService().RemoveEntry(hdl, joinTableID)
 }
 
 func (hdl *reteHandleImpl) GetRefTableIterator() types.HdlTblIterator {
-	refTblIterator := hdl.Nw.GetJtRefService().GetIterator(hdl)
-	return refTblIterator
+	refTblIteator := hdl.Nw.GetJtRefService().GetIterator(hdl)
+	return refTblIteator
 }

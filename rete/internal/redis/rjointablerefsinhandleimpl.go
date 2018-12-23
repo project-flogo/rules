@@ -1,4 +1,4 @@
-package mem
+package redis
 
 import (
 	"container/list"
@@ -33,7 +33,7 @@ func (h *joinTableRefsInHdlImpl) RemoveEntry(handle types.ReteHandle, jointTable
 	delete(h.tablesAndRows, jointTableID)
 }
 
-func (h *joinTableRefsInHdlImpl) GetIterator(handle types.ReteHandle) types.HdlTblIterator {
+func (h *joinTableRefsInHdlImpl) GetIterator(handle types.ReteHandle, ) types.HdlTblIterator {
 	ri := hdlTblIteratorImpl{}
 	ri.hdlJtImpl = h
 	ri.kList = list.List{}

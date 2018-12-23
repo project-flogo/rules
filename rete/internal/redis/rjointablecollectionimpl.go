@@ -1,4 +1,4 @@
-package mem
+package redis
 
 import "github.com/project-flogo/rules/rete/internal/types"
 
@@ -24,5 +24,5 @@ func (jtc *joinTableCollectionImpl) AddJoinTable(joinTable types.JoinTable) {
 }
 
 func (jtc *joinTableCollectionImpl) RemoveJoinTable(joinTable types.JoinTable) {
-	delete (jtc.allJoinTables,joinTable.GetID())
+	delete(jtc.allJoinTables,joinTable.GetID())
 }

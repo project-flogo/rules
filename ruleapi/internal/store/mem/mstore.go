@@ -15,6 +15,10 @@ func NewStore() services.TupleStore {
 	return &ms
 }
 
+func (ms *store) Init() {
+
+}
+
 func (ms *store) GetTupleByStringKey(key string) model.Tuple {
 	return ms.allTuples[key]
 }

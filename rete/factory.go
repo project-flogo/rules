@@ -41,56 +41,56 @@ func (f *TypeFactory) getJoinTable(rule model.Rule, conditionVar model.Condition
 	return jt
 }
 
-func (f *TypeFactory) getJoinTableRefs() types.JoinTableRefsInHdl {
-	var jtRefs types.JoinTableRefsInHdl
+func (f *TypeFactory) getJoinTableRefs() types.JtRefsService {
+	var jtRefs types.JtRefsService
 	if f.parsedJson == nil {
-		jtRefs = mem.NewJoinTableRefsInHdlImpl()
+		jtRefs = mem.NewJoinTableRefsInHdlImpl(f.parsedJson)
 
 	} else {
 		rete := f.parsedJson["rete"].(map[string]interface{})
 		if rete != nil {
 			idgen := rete["jt"].(string)
 			if idgen == "" || idgen == "mem" {
-				jtRefs = mem.NewJoinTableRefsInHdlImpl()
+				jtRefs = mem.NewJoinTableRefsInHdlImpl(f.parsedJson)
 			} else if idgen == "redis" {
-				jtRefs = mem.NewJoinTableRefsInHdlImpl()
+				jtRefs = redis.NewJoinTableRefsInHdlImpl(f.parsedJson)
 			}
 		}
 	}
 	return jtRefs
 }
 
-func (f *TypeFactory) getJoinTableCollection() types.JoinTableCollection {
-	var allJt types.JoinTableCollection
+func (f *TypeFactory) getJoinTableCollection() types.JtService {
+	var allJt types.JtService
 	if f.parsedJson == nil {
-		allJt = mem.NewJoinTableCollection()
+		allJt = mem.NewJoinTableCollection(f.parsedJson)
 
 	} else {
 		rete := f.parsedJson["rete"].(map[string]interface{})
 		if rete != nil {
 			idgen := rete["jt"].(string)
 			if idgen == "" || idgen == "mem" {
-				allJt = mem.NewJoinTableCollection()
+				allJt = mem.NewJoinTableCollection(f.parsedJson)
 			} else if idgen == "redis" {
-				allJt = mem.NewJoinTableCollection()
+				allJt = redis.NewJoinTableCollection(f.parsedJson)
 			}
 		}
 	}
 	return allJt
 }
 
-func (f *TypeFactory) getHandleCollection() types.HandleCollection {
-	var hc types.HandleCollection
+func (f *TypeFactory) getHandleCollection() types.HandleService {
+	var hc types.HandleService
 	if f.parsedJson == nil {
-		hc = mem.NewHandleCollection()
+		hc = mem.NewHandleCollection(f.parsedJson)
 	} else {
 		rete := f.parsedJson["rete"].(map[string]interface{})
 		if rete != nil {
 			idgen := rete["jt"].(string)
 			if idgen == "" || idgen == "mem" {
-				hc = mem.NewHandleCollection()
+				hc = mem.NewHandleCollection(f.parsedJson)
 			} else if idgen == "redis" {
-				hc = mem.NewHandleCollection()
+				hc = redis.NewHandleCollection(f.parsedJson)
 			}
 		}
 	}
@@ -100,7 +100,7 @@ func (f *TypeFactory) getHandleCollection() types.HandleCollection {
 func (f *TypeFactory) getIdGen() types.IdGen {
 	var idg types.IdGen
 	if f.parsedJson == nil {
-		idg = mem.NewIdImpl(f.config)
+		idg = mem.NewIdImpl(f.parsedJson)
 		return idg
 	} else {
 		rete := f.parsedJson["rete"].(map[string]interface{})
@@ -108,9 +108,9 @@ func (f *TypeFactory) getIdGen() types.IdGen {
 
 			idgen := rete["idgen"].(string)
 			if idgen == "" || idgen == "mem" {
-				idg = mem.NewIdImpl(f.config)
+				idg = mem.NewIdImpl(f.parsedJson)
 			} else if idgen == "redis" {
-				idg = redis.NewIdImpl(f.config)
+				idg = redis.NewIdImpl(f.parsedJson)
 			}
 		}
 	}
