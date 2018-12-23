@@ -34,7 +34,7 @@ func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName strin
 	fmt.Printf("Context is [%s]\n", ruleCtx)
 	t1 := tuples["n1"]
 	if t1 == nil {
-		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
+		fmt.Println("Should not get nil tuples here in JoinCondition3! This is an error")
 		return
 	}
 }
@@ -43,7 +43,7 @@ func checkSameNamesCondition(ruleName string, condName string, tuples map[model.
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]
 	if t1 == nil || t2 == nil {
-		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
+		fmt.Println("Should not get nil tuples here in JoinCondition4! This is an error")
 		return false
 	}
 	name1, _ := t1.GetString("name")

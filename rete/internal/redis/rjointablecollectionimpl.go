@@ -22,20 +22,19 @@ func (jtc *joinTableCollectionImpl) GetJoinTable(joinTableName string) types.Joi
 	return jtc.allJoinTables[joinTableName]
 }
 
-func (jtc *joinTableCollectionImpl) GetOrCreateJoinTable(nw types.Network, rule model.Rule, conditionVar model.Condition, identifiers []model.TupleType) types.JoinTable {
-	jT, found := jtc.allJoinTables[conditionVar.GetName()]
+func (jtc *joinTableCollectionImpl) GetOrCreateJoinTable(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
+	jT, found := jtc.allJoinTables[name]
 	if !found {
-		jTn := joinTableImpl{}
-		jTn.initJoinTableImpl(nw, rule, identifiers)
-		jtc.allJoinTables[conditionVar.GetName()] = &jTn
-		jT = &jTn
+		jT = newJoinTableImpl(nw, rule, identifiers, name)
+		jtc.allJoinTables[name] = jT
 	}
-	return jT}
+	return jT
+}
 
 func (jtc *joinTableCollectionImpl) AddJoinTable(joinTable types.JoinTable) {
 	jtc.allJoinTables[joinTable.GetName()] = joinTable
 }
 
-func (jtc *joinTableCollectionImpl) RemoveJoinTable(joinTable types.JoinTable) {
-	delete(jtc.allJoinTables,joinTable.GetName())
+func (jtc *joinTableCollectionImpl) RemoveJoinTable(jtName string) {
+	delete(jtc.allJoinTables,jtName)
 }

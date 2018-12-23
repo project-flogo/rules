@@ -9,11 +9,7 @@ import (
 
 type Network interface {
 	common.Network
-
-	IncrementAndGetId() int
-	//GetJoinTable(jtName int) JoinTable
-	//AddToAllJoinTables(jT JoinTable)
-
+	GetIdGenService() IdGen
 	GetJtService() JtService
 	GetHandleService() HandleService
 	GetJtRefService() JtRefsService
@@ -30,7 +26,7 @@ type NwElemIdImpl struct {
 
 func (ide *NwElemIdImpl) SetID(nw Network) {
 	ide.Nw = nw
-	ide.ID = nw.IncrementAndGetId()
+	ide.ID = nw.GetIdGenService().GetNextID()
 }
 func (ide *NwElemIdImpl) GetID() int {
 	return ide.ID
@@ -57,11 +53,7 @@ type ReteHandle interface {
 	NwElemId
 	SetTuple(tuple model.Tuple)
 	GetTuple() model.Tuple
-	AddJoinTableRowRef(joinTableRowVar JoinTableRow, joinTableVar JoinTable)
-	//removeJoinTableRowRefs(changedProps map[string]bool)
-	RemoveJoinTable(jtName string)
 	GetTupleKey() model.TupleKey
-	GetRefTableIterator() HdlTblIterator
 }
 
 type RowIterator interface {
@@ -83,10 +75,10 @@ type HdlTblIterator interface {
 
 type JtService interface {
 	services.Service
-	GetOrCreateJoinTable(nw Network, rule model.Rule, conditionVar model.Condition, identifiers []model.TupleType) JoinTable
+	GetOrCreateJoinTable(nw Network, rule model.Rule, identifiers []model.TupleType, name string) JoinTable
 	GetJoinTable (name string) JoinTable
 	AddJoinTable(joinTable JoinTable)
-	RemoveJoinTable(joinTable JoinTable)
+	RemoveJoinTable(name string)
 }
 
 type HandleService interface {

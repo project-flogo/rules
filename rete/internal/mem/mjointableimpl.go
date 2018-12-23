@@ -13,12 +13,18 @@ type joinTableImpl struct {
 	name string
 }
 
+func newJoinTableImpl (nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
+	jt := joinTableImpl{}
+	jt.initJoinTableImpl(nw, rule, identifiers, name)
+	return &jt
+}
 
-func (jt *joinTableImpl) initJoinTableImpl(nw types.Network, rule model.Rule, identifiers []model.TupleType) {
+func (jt *joinTableImpl) initJoinTableImpl(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) {
 	jt.SetID(nw)
 	jt.idr = identifiers
 	jt.table = map[int]types.JoinTableRow{}
 	jt.rule = rule
+	jt.name = name
 }
 
 func (jt *joinTableImpl) AddRow(handles []types.ReteHandle) types.JoinTableRow {
@@ -28,7 +34,7 @@ func (jt *joinTableImpl) AddRow(handles []types.ReteHandle) types.JoinTableRow {
 	jt.table[row.GetID()] = row
 	for i := 0; i < len(row.GetHandles()); i++ {
 		handle := row.GetHandles()[i]
-		handle.AddJoinTableRowRef(row, jt)
+		jt.Nw.GetJtRefService().AddEntry(handle, jt.name, row.GetID())
 	}
 	return row
 }

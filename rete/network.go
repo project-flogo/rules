@@ -171,8 +171,8 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 			//case *classNodeImpl:
 			//case *ruleNodeImpl:
 			case *joinNodeImpl:
-				removeRefsFromReteHandles(nodeImpl.leftTable)
-				removeRefsFromReteHandles(nodeImpl.rightTable)
+				nw.removeRefsFromReteHandles(nodeImpl.leftTable)
+				nw.removeRefsFromReteHandles(nodeImpl.rightTable)
 			}
 		}
 	}
@@ -189,7 +189,7 @@ func (nw *reteNetworkImpl) GetRules() []model.Rule {
 	return rules
 }
 
-func removeRefsFromReteHandles(joinTableVar types.JoinTable) {
+func (nw *reteNetworkImpl) removeRefsFromReteHandles(joinTableVar types.JoinTable) {
 	if joinTableVar == nil {
 		return
 	}
@@ -197,7 +197,7 @@ func removeRefsFromReteHandles(joinTableVar types.JoinTable) {
 	for rIterator.HasNext() {
 		tableRow := rIterator.Next()
 		for _, handle := range tableRow.GetHandles() {
-			handle.RemoveJoinTable(joinTableVar.GetName())
+			nw.jtRefsService.RemoveEntry(handle, joinTableVar.GetName())
 		}
 	}
 }
@@ -638,18 +638,11 @@ func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) types.ReteHandle {
 	return h
 }
 
-func (nw *reteNetworkImpl) IncrementAndGetId() int {
-	return nw.idGen.GetNextID()
-}
-
 func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {
 	nw.txnHandler = txnHandler
 	nw.txnContext = txnContext
 }
-//
-//func (nw *reteNetworkImpl) GetJoinTable(joinTableID int) types.JoinTable {
-//	return nw.jtService.GetJoinTable(joinTableID)
-//}
+
 
 func (nw *reteNetworkImpl) GetConfigValue(key string) string {
 	val, _ := nw.config[key]
@@ -682,7 +675,7 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 	tuple := hdl.GetTuple()
 	alias := tuple.GetTupleType()
 
-	hdlTblIter := hdl.GetRefTableIterator()
+	hdlTblIter := nw.jtRefsService.GetIterator(hdl)
 
 	for hdlTblIter.HasNext() {
 		joinTableID, rowIDs := hdlTblIter.Next()
@@ -719,15 +712,18 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 				//Remove other refs recursively.
 				for _, otherHdl := range row.GetHandles() {
 					if otherHdl != nil {
-						nw.removeJoinTableRowRefs(otherHdl, nil)
+						//nw.removeJoinTableRowRefs(otherHdl, nil)
 					}
 				}
 			}
 		}
 
 		//Remove the reference to the table itself
-		hdl.RemoveJoinTable(joinTableID)
+		nw.GetJtService().RemoveJoinTable(joinTableID)
 	}
+}
+func (nw *reteNetworkImpl) GetIdGenService() types.IdGen {
+	return nw.idGen
 }
 
 func (nw *reteNetworkImpl) GetJtService() types.JtService {

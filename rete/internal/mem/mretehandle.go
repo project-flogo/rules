@@ -11,7 +11,6 @@ type reteHandleImpl struct {
 	types.NwElemIdImpl
 	tuple    model.Tuple
 	tupleKey model.TupleKey
-	//jtRefs   types.JtRefsService
 }
 
 func newReteHandleImpl(nw types.Network, tuple model.Tuple) types.ReteHandle {
@@ -46,9 +45,4 @@ func (hdl *reteHandleImpl) AddJoinTableRowRef(joinTableRowVar types.JoinTableRow
 //Used when a rule is deleted. See Network.RemoveRule
 func (hdl *reteHandleImpl) RemoveJoinTable(joinTableID string) {
 	hdl.Nw.GetJtRefService().RemoveEntry(hdl,joinTableID)
-}
-
-func (hdl *reteHandleImpl) GetRefTableIterator() types.HdlTblIterator {
-	refTblIterator := hdl.Nw.GetJtRefService().GetIterator(hdl)
-	return refTblIterator
 }
