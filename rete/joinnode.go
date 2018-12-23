@@ -42,8 +42,8 @@ func (jn *joinNodeImpl) initjoinNodeImplVar(nw *reteNetworkImpl, rule model.Rule
 	jn.leftIdrs = leftIdrs
 	jn.rightIdrs = rightIdrs
 	jn.conditionVar = conditionVar
-	jn.leftTable = nw.getFactory().getJoinTable(rule, conditionVar, leftIdrs)
-	jn.rightTable = nw.getFactory().getJoinTable(rule, conditionVar, rightIdrs)
+	jn.leftTable = nw.GetJtService().GetOrCreateJoinTable(nw, rule, conditionVar, leftIdrs)
+	jn.rightTable = nw.GetJtService().GetOrCreateJoinTable(nw, rule, conditionVar, rightIdrs)
 	jn.setJoinIdentifiers()
 }
 

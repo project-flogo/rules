@@ -68,7 +68,7 @@ func (nw *reteNetworkImpl) initReteNetwork(config string) {
 	nw.idGen = nw.factory.getIdGen()
 	nw.jtService = nw.factory.getJoinTableCollection()
 	nw.handleService = nw.factory.getHandleCollection()
-
+	nw.jtRefsService = nw.factory.getJoinTableRefs()
 	nw.initNwServices()
 }
 
@@ -197,7 +197,7 @@ func removeRefsFromReteHandles(joinTableVar types.JoinTable) {
 	for rIterator.HasNext() {
 		tableRow := rIterator.Next()
 		for _, handle := range tableRow.GetHandles() {
-			handle.RemoveJoinTable(joinTableVar.GetID())
+			handle.RemoveJoinTable(joinTableVar.GetName())
 		}
 	}
 }
@@ -646,10 +646,10 @@ func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTra
 	nw.txnHandler = txnHandler
 	nw.txnContext = txnContext
 }
-
-func (nw *reteNetworkImpl) GetJoinTable(joinTableID int) types.JoinTable {
-	return nw.jtService.GetJoinTable(joinTableID)
-}
+//
+//func (nw *reteNetworkImpl) GetJoinTable(joinTableID int) types.JoinTable {
+//	return nw.jtService.GetJoinTable(joinTableID)
+//}
 
 func (nw *reteNetworkImpl) GetConfigValue(key string) string {
 	val, _ := nw.config[key]
@@ -686,7 +686,7 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 
 	for hdlTblIter.HasNext() {
 		joinTableID, rowIDs := hdlTblIter.Next()
-		joinTable := nw.GetJoinTable(joinTableID)
+		joinTable := nw.jtService.GetJoinTable(joinTableID)
 		toDelete := false
 		if changedProps != nil {
 			rule := joinTable.GetRule()

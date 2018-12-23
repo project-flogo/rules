@@ -1,4 +1,4 @@
-package mem
+package redis
 
 import (
 	"github.com/project-flogo/rules/common/model"

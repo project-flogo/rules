@@ -3,8 +3,8 @@
     "store-ref" : "mem"
   },
   "rete": {
-    "jt": "redis",
-    "idgen" : "redis"
+    "jt": "mem",
+    "idgen" : "mem"
   },
   "store": [
     {

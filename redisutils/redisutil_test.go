@@ -8,8 +8,8 @@ import (
 )
 
 func Test_first(t *testing.T) {
-	InitService("")
-	//fmt.Printf("redisutils test...")
+
+	InitService(nil)
 	rd := GetRedisHdl()
 	pool := rd.GetPool()
 	conn := pool.Get()
