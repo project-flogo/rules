@@ -710,7 +710,7 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 			if row != nil {
 				//Remove this (table+row) link from other handle refs of this row!
 				for _, otherHdl := range row.GetHandles() {
-					if otherHdl != nil {
+					if otherHdl.GetTupleKey().String() != hdl.GetTupleKey().String() {
 						nw.jtRefsService.RemoveRowEntry(otherHdl, jtName, rowID)
 					}
 				}
