@@ -720,7 +720,6 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 	}
 }
 
-
 func (nw *reteNetworkImpl) GetIdGenService() types.IdGen {
 	return nw.idGen
 }

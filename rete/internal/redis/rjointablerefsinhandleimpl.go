@@ -49,7 +49,7 @@ func (h *joinTableRefsInHdlImpl) RemoveRowEntry(handle types.ReteHandle, jtName 
 	if found {
 		rowIDs, fnd := tblMap[jtName]
 		if fnd {
-			for e:= rowIDs.Front(); e != nil; e = e.Next() {
+			for e := rowIDs.Front(); e != nil; e = e.Next() {
 				rowIDInList := e.Value.(int)
 				if rowID == rowIDInList {
 					rowIDs.Remove(e)
