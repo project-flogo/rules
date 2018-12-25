@@ -1,8 +1,8 @@
 package redis
 
 import (
-	"github.com/project-flogo/rules/rete/internal/types"
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 type joinTableCollectionImpl struct {
@@ -36,5 +36,5 @@ func (jtc *joinTableCollectionImpl) AddJoinTable(joinTable types.JoinTable) {
 }
 
 func (jtc *joinTableCollectionImpl) RemoveJoinTable(jtName string) {
-	delete(jtc.allJoinTables,jtName)
+	delete(jtc.allJoinTables, jtName)
 }

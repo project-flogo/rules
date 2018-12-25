@@ -48,4 +48,3 @@ func (hc *handleCollectionImpl) GetOrCreateHandle(nw types.Network, tuple model.
 	}
 	return h
 }
-

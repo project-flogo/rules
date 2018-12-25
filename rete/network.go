@@ -42,7 +42,7 @@ type reteNetworkImpl struct {
 
 	jtRefsService types.JtRefsService
 
-	config        map[string]string
+	config map[string]string
 
 	factory    *TypeFactory
 	idGen      types.IdGen
@@ -584,7 +584,6 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, chang
 }
 
 func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) {
-
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -643,7 +642,6 @@ func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTra
 	nw.txnContext = txnContext
 }
 
-
 func (nw *reteNetworkImpl) GetConfigValue(key string) string {
 	val, _ := nw.config[key]
 	return val
@@ -671,15 +669,17 @@ func getOrCreateHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle 
 }
 
 func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedProps map[string]bool) {
-
 	tuple := hdl.GetTuple()
 	alias := tuple.GetTupleType()
 
 	hdlTblIter := nw.jtRefsService.GetIterator(hdl)
 
 	for hdlTblIter.HasNext() {
-		joinTableID, rowIDs := hdlTblIter.Next()
-		joinTable := nw.jtService.GetJoinTable(joinTableID)
+		jtName, rowIDs := hdlTblIter.Next()
+		joinTable := nw.jtService.GetJoinTable(jtName)
+		if joinTable == nil {
+			continue
+		}
 		toDelete := false
 		if changedProps != nil {
 			rule := joinTable.GetRule()
@@ -712,16 +712,15 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 				//Remove other refs recursively.
 				for _, otherHdl := range row.GetHandles() {
 					if otherHdl != nil {
-						//nw.removeJoinTableRowRefs(otherHdl, nil)
+						nw.jtRefsService.RemoveRowEntry(otherHdl, jtName, rowID)
 					}
 				}
 			}
 		}
-
-		//Remove the reference to the table itself
-		nw.GetJtService().RemoveJoinTable(joinTableID)
 	}
 }
+
+
 func (nw *reteNetworkImpl) GetIdGenService() types.IdGen {
 	return nw.idGen
 }

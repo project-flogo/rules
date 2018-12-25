@@ -217,13 +217,3 @@ func (rs *rulesessionImpl) GetAssertedTuple(key model.TupleKey) model.Tuple {
 func (rs *rulesessionImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {
 	rs.reteNetwork.RegisterRtcTransactionHandler(txnHandler, txnContext)
 }
-
-//
-//func (rs *rulesessionImpl) SetConfig(config map[string]string) {
-//	if rs.config == nil {
-//		rs.config = config
-//	}
-//	if rs.reteNetwork != nil && rs.reteNetwork.GetConfig() == nil {
-//		rs.reteNetwork.SetConfig(config)
-//	}
-//}

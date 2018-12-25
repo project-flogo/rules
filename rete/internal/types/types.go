@@ -3,8 +3,8 @@ package types
 import (
 	"container/list"
 	"github.com/project-flogo/rules/common/model"
-	"github.com/project-flogo/rules/rete/common"
 	"github.com/project-flogo/rules/common/services"
+	"github.com/project-flogo/rules/rete/common"
 )
 
 type Network interface {
@@ -64,6 +64,7 @@ type RowIterator interface {
 type JtRefsService interface {
 	services.Service
 	AddEntry(handle ReteHandle, jtName string, rowID int)
+	RemoveRowEntry(handle ReteHandle, jtName string, rowID int)
 	RemoveEntry(handle ReteHandle, jtName string)
 	GetIterator(handle ReteHandle) HdlTblIterator
 }
@@ -76,7 +77,7 @@ type HdlTblIterator interface {
 type JtService interface {
 	services.Service
 	GetOrCreateJoinTable(nw Network, rule model.Rule, identifiers []model.TupleType, name string) JoinTable
-	GetJoinTable (name string) JoinTable
+	GetJoinTable(name string) JoinTable
 	AddJoinTable(joinTable JoinTable)
 	RemoveJoinTable(name string)
 }

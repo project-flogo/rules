@@ -10,10 +10,10 @@ type joinTableImpl struct {
 	table map[int]types.JoinTableRow
 	idr   []model.TupleType
 	rule  model.Rule
-	name string
+	name  string
 }
 
-func newJoinTableImpl (nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
+func newJoinTableImpl(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
 	jt := joinTableImpl{}
 	jt.initJoinTableImpl(nw, rule, identifiers, name)
 	return &jt

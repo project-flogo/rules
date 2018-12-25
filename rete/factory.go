@@ -21,6 +21,7 @@ func NewFactory(nw *reteNetworkImpl, config string) *TypeFactory {
 
 	return &tf
 }
+
 //
 //func (f *TypeFactory) getJoinTable(rule model.Rule, conditionVar model.Condition, identifiers []model.TupleType) types.JoinTable {
 //	var jt types.JoinTable
