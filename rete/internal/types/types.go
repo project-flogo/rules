@@ -1,7 +1,6 @@
 package types
 
 import (
-	"container/list"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/common/services"
 	"github.com/project-flogo/rules/rete/common"
@@ -71,7 +70,7 @@ type JtRefsService interface {
 
 type HdlTblIterator interface {
 	HasNext() bool
-	Next() (string, *list.List)
+	Next() (string, map[int]int)
 }
 
 type JtService interface {

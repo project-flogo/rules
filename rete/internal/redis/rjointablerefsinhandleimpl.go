@@ -7,12 +7,12 @@ import (
 
 type joinTableRefsInHdlImpl struct {
 	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
-	tablesAndRows map[string]map[string]*list.List
+	tablesAndRows map[string]map[string]map[int]int
 }
 
 func NewJoinTableRefsInHdlImpl(config map[string]interface{}) types.JtRefsService {
 	hdlJt := joinTableRefsInHdlImpl{}
-	hdlJt.tablesAndRows = make(map[string]map[string]*list.List)
+	hdlJt.tablesAndRows = make(map[string]map[string]map[int]int)
 	return &hdlJt
 }
 
@@ -25,16 +25,16 @@ func (h *joinTableRefsInHdlImpl) AddEntry(handle types.ReteHandle, jtName string
 	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
 
 	if !found {
-		tblMap = make(map[string]*list.List)
+		tblMap = make(map[string]map[int]int)
 		h.tablesAndRows[handle.GetTupleKey().String()] = tblMap
 	}
 
 	rowsForJoinTable, found := tblMap[jtName]
 	if !found {
-		rowsForJoinTable = list.New()
+		rowsForJoinTable = make(map[int]int)
 		tblMap[jtName] = rowsForJoinTable
 	}
-	rowsForJoinTable.PushBack(rowID)
+	rowsForJoinTable[rowID] = rowID
 }
 
 func (h *joinTableRefsInHdlImpl) RemoveEntry(handle types.ReteHandle, jtName string) {
@@ -49,13 +49,7 @@ func (h *joinTableRefsInHdlImpl) RemoveRowEntry(handle types.ReteHandle, jtName 
 	if found {
 		rowIDs, fnd := tblMap[jtName]
 		if fnd {
-			for e := rowIDs.Front(); e != nil; e = e.Next() {
-				rowIDInList := e.Value.(int)
-				if rowID == rowIDInList {
-					rowIDs.Remove(e)
-					return
-				}
-			}
+			delete(rowIDs, rowID)
 		}
 	}
 }
@@ -77,7 +71,7 @@ func (h *joinTableRefsInHdlImpl) GetIterator(handle types.ReteHandle) types.HdlT
 }
 
 type hdlTblIteratorImpl struct {
-	tblMap map[string]*list.List
+	tblMap map[string]map[int]int
 	kList  list.List
 	curr   *list.Element
 }
@@ -86,7 +80,7 @@ func (ri *hdlTblIteratorImpl) HasNext() bool {
 	return ri.curr != nil
 }
 
-func (ri *hdlTblIteratorImpl) Next() (string, *list.List) {
+func (ri *hdlTblIteratorImpl) Next() (string, map[int]int) {
 	id := ri.curr.Value.(string)
 	lst := ri.tblMap[id]
 	ri.curr = ri.curr.Next()

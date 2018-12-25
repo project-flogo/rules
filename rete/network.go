@@ -705,11 +705,10 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 			continue
 		}
 		////Remove rows from corresponding join tables
-		for e := rowIDs.Front(); e != nil; e = e.Next() {
-			rowID := e.Value.(int)
+		for rowID, _ := range rowIDs {
 			row := joinTable.RemoveRow(rowID)
 			if row != nil {
-				//Remove other refs recursively.
+				//Remove this (table+row) link from other handle refs of this row!
 				for _, otherHdl := range row.GetHandles() {
 					if otherHdl != nil {
 						nw.jtRefsService.RemoveRowEntry(otherHdl, jtName, rowID)
