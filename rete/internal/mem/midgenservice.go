@@ -5,28 +5,28 @@ import (
 	"sync/atomic"
 )
 
-type idGenImpl struct {
+type idGenServiceImpl struct {
 	config    map[string]interface{}
 	currentId int32
 }
 
 func NewIdImpl(config map[string]interface{}) types.IdGen {
-	idg := idGenImpl{}
+	idg := idGenServiceImpl{}
 	idg.config = config
 	idg.currentId = 0
 	return &idg
 }
 
-func (id *idGenImpl) Init() {
+func (id *idGenServiceImpl) Init() {
 	id.currentId = int32(id.GetMaxID())
 }
 
-func (id *idGenImpl) GetNextID() int {
+func (id *idGenServiceImpl) GetNextID() int {
 	i := atomic.AddInt32(&id.currentId, 1)
 	return int(i)
 }
 
-func (id *idGenImpl) GetMaxID() int {
+func (id *idGenServiceImpl) GetMaxID() int {
 	i := atomic.LoadInt32(&id.currentId)
 	return int(i)
 }

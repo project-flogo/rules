@@ -5,24 +5,24 @@ import (
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
-type joinTableCollectionImpl struct {
+type jtServiceImpl struct {
 	allJoinTables map[string]types.JoinTable
 }
 
 func NewJoinTableCollection(config map[string]interface{}) types.JtService {
-	jtc := joinTableCollectionImpl{}
+	jtc := jtServiceImpl{}
 	jtc.allJoinTables = make(map[string]types.JoinTable)
 	return &jtc
 }
-func (jtc *joinTableCollectionImpl) Init() {
+func (jtc *jtServiceImpl) Init() {
 
 }
 
-func (jtc *joinTableCollectionImpl) GetJoinTable(joinTableName string) types.JoinTable {
+func (jtc *jtServiceImpl) GetJoinTable(joinTableName string) types.JoinTable {
 	return jtc.allJoinTables[joinTableName]
 }
 
-func (jtc *joinTableCollectionImpl) GetOrCreateJoinTable(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
+func (jtc *jtServiceImpl) GetOrCreateJoinTable(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
 	jT, found := jtc.allJoinTables[name]
 	if !found {
 		jT = newJoinTableImpl(nw, rule, identifiers, name)
@@ -31,10 +31,10 @@ func (jtc *joinTableCollectionImpl) GetOrCreateJoinTable(nw types.Network, rule 
 	return jT
 }
 
-func (jtc *joinTableCollectionImpl) AddJoinTable(joinTable types.JoinTable) {
+func (jtc *jtServiceImpl) AddJoinTable(joinTable types.JoinTable) {
 	jtc.allJoinTables[joinTable.GetName()] = joinTable
 }
 
-func (jtc *joinTableCollectionImpl) RemoveJoinTable(jtName string) {
+func (jtc *jtServiceImpl) RemoveJoinTable(jtName string) {
 	delete(jtc.allJoinTables, jtName)
 }

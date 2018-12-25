@@ -12,25 +12,25 @@ const (
 	hincrby = "HINCRBY"
 )
 
-type ridImpl struct {
+type idGenServiceImpl struct {
 	config map[string]interface{}
 	//current int
 	rh redisutils.RedisHdl
 }
 
 func NewIdImpl(config map[string]interface{}) types.IdGen {
-	r := ridImpl{}
+	r := idGenServiceImpl{}
 	r.config = config
 	return &r
 }
 
-func (ri *ridImpl) Init() {
+func (ri *idGenServiceImpl) Init() {
 	redisutils.InitService(ri.config)
 	j := ri.GetMaxID()
 	fmt.Printf("maxid : [%d]\n ", j)
 }
 
-func (ri *ridImpl) GetMaxID() int {
+func (ri *idGenServiceImpl) GetMaxID() int {
 	ri.rh = redisutils.GetRedisHdl()
 	c := ri.rh.GetPool().Get()
 	defer c.Close()
@@ -43,7 +43,7 @@ func (ri *ridImpl) GetMaxID() int {
 	return -1
 }
 
-func (ri *ridImpl) GetNextID() int {
+func (ri *idGenServiceImpl) GetNextID() int {
 	ri.rh = redisutils.GetRedisHdl()
 	c := ri.rh.GetPool().Get()
 	defer c.Close()

@@ -5,22 +5,22 @@ import (
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
-type joinTableRefsInHdlImpl struct {
+type jtRefsServiceImpl struct {
 	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
 	tablesAndRows map[string]map[string]map[int]int
 }
 
 func NewJoinTableRefsInHdlImpl(config map[string]interface{}) types.JtRefsService {
-	hdlJt := joinTableRefsInHdlImpl{}
+	hdlJt := jtRefsServiceImpl{}
 	hdlJt.tablesAndRows = make(map[string]map[string]map[int]int)
 	return &hdlJt
 }
 
-func (h *joinTableRefsInHdlImpl) Init() {
+func (h *jtRefsServiceImpl) Init() {
 
 }
 
-func (h *joinTableRefsInHdlImpl) AddEntry(handle types.ReteHandle, jtName string, rowID int) {
+func (h *jtRefsServiceImpl) AddEntry(handle types.ReteHandle, jtName string, rowID int) {
 
 	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
 
@@ -37,14 +37,14 @@ func (h *joinTableRefsInHdlImpl) AddEntry(handle types.ReteHandle, jtName string
 	rowsForJoinTable[rowID] = rowID
 }
 
-func (h *joinTableRefsInHdlImpl) RemoveEntry(handle types.ReteHandle, jtName string) {
+func (h *jtRefsServiceImpl) RemoveEntry(handle types.ReteHandle, jtName string) {
 	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
 	if found {
 		delete(tblMap, jtName)
 	}
 }
 
-func (h *joinTableRefsInHdlImpl) RemoveRowEntry(handle types.ReteHandle, jtName string, rowID int) {
+func (h *jtRefsServiceImpl) RemoveRowEntry(handle types.ReteHandle, jtName string, rowID int) {
 	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
 	if found {
 		rowIDs, fnd := tblMap[jtName]
@@ -54,7 +54,7 @@ func (h *joinTableRefsInHdlImpl) RemoveRowEntry(handle types.ReteHandle, jtName 
 	}
 }
 
-func (h *joinTableRefsInHdlImpl) GetIterator(handle types.ReteHandle) types.HdlTblIterator {
+func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIterator {
 	ri := hdlTblIteratorImpl{}
 	//ri.hdlJtImpl = h
 	ri.kList = list.List{}
