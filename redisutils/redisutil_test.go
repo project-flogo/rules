@@ -11,16 +11,16 @@ func Test_first(t *testing.T) {
 
 	InitService(nil)
 	rd := GetRedisHdl()
-	pool := rd.GetPool()
-	conn := pool.Get()
-	defer conn.Close()
-	//err := ping(conn)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
 
-	mset(conn)
-	mget(conn)
+	m := make(map[string]interface{})
+	m["k1"] = "v1"
+
+	rd.HSetAll("myhash", m)
+	x := rd.HGetAll("myhash")
+
+	for k, v := range x {
+		fmt.Printf("key=[%s], value=[%s]\n", k, v)
+	}
 }
 
 // ping tests connectivity for redisutils (PONG should be returned)
@@ -150,36 +150,4 @@ func getStruct(c redis.Conn) error {
 
 	return nil
 
-}
-
-func mset(c redis.Conn) error {
-
-	vals, error := c.Do("HMSET", "key1", "f1", 1, "f2", "Hi", "f3", 3.14, "f4", true)
-	if error != nil {
-		fmt.Printf("error [%v]\n", error)
-	} else {
-		fmt.Printf("ret: [%v]\n", vals)
-	}
-	return error
-}
-
-func mget(c redis.Conn) {
-
-	vals, error := c.Do("HGETALL", "key1")
-	if error != nil {
-		fmt.Printf("error [%v]\n", error)
-	} else {
-		vals, err2 := redis.Values(vals, error)
-		if err2 != nil {
-			fmt.Printf("error [%v]\n", err2)
-		} else {
-			for _, val := range vals {
-				ba := val.([]byte)
-				s := string(ba)
-				fmt.Printf("Value [%s]\n", s)
-			}
-		}
-
-	}
-	//return error
 }

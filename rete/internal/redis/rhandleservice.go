@@ -44,7 +44,8 @@ func (hc *handleServiceImpl) GetOrCreateHandle(nw types.Network, tuple model.Tup
 	h, found := hc.allHandles[tuple.GetKey().String()]
 	if !found {
 		h = newReteHandleImpl(nw, tuple)
-		hc.allHandles[tuple.GetKey().String()] = h //[tuple.GetKey().String()] = h
+		hc.allHandles[tuple.GetKey().String()] = h
 	}
+
 	return h
 }
