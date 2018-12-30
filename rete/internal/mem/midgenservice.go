@@ -6,14 +6,17 @@ import (
 )
 
 type idGenServiceImpl struct {
+	types.NwServiceImpl
 	config    map[string]interface{}
 	currentId int32
+
 }
 
-func NewIdImpl(config map[string]interface{}) types.IdGen {
+func NewIdGenImpl(nw types.Network, config map[string]interface{}) types.IdGen {
 	idg := idGenServiceImpl{}
 	idg.config = config
 	idg.currentId = 0
+	idg.Nw = nw
 	return &idg
 }
 

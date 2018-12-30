@@ -12,12 +12,14 @@ const (
 )
 
 type idGenServiceImpl struct {
+	types.NwServiceImpl
+
 	config map[string]interface{}
 	//current int
 	rh redisutils.RedisHdl
 }
 
-func NewIdImpl(config map[string]interface{}) types.IdGen {
+func NewIdGenImpl(config map[string]interface{}) types.IdGen {
 	r := idGenServiceImpl{}
 	r.config = config
 	return &r

@@ -6,6 +6,7 @@ import (
 )
 
 type handleServiceImpl struct {
+	types.NwServiceImpl
 	allHandles map[string]types.ReteHandle
 }
 
@@ -17,10 +18,6 @@ func NewHandleCollection(config map[string]interface{}) types.HandleService {
 
 func (hc *handleServiceImpl) Init() {
 
-}
-
-func (hc *handleServiceImpl) AddHandle(hdl types.ReteHandle) {
-	hc.allHandles[hdl.GetTupleKey().String()] = hdl
 }
 
 func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {

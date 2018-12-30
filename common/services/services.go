@@ -1,6 +1,8 @@
 package services
 
-import "github.com/project-flogo/rules/common/model"
+import (
+	"github.com/project-flogo/rules/common/model"
+)
 
 type Service interface {
 	Init()

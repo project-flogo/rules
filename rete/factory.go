@@ -100,7 +100,7 @@ func (f *TypeFactory) getHandleCollection() types.HandleService {
 func (f *TypeFactory) getIdGen() types.IdGen {
 	var idg types.IdGen
 	if f.parsedJson == nil {
-		idg = mem.NewIdImpl(f.parsedJson)
+		idg = mem.NewIdGenImpl(f.nw, f.parsedJson)
 		return idg
 	} else {
 		rete := f.parsedJson["rete"].(map[string]interface{})
@@ -108,9 +108,9 @@ func (f *TypeFactory) getIdGen() types.IdGen {
 
 			idgen := rete["idgen"].(string)
 			if idgen == "" || idgen == "mem" {
-				idg = mem.NewIdImpl(f.parsedJson)
+				idg = mem.NewIdGenImpl(f.nw, f.parsedJson)
 			} else if idgen == "redis" {
-				idg = redis.NewIdImpl(f.parsedJson)
+				idg = redis.NewIdGenImpl(f.parsedJson)
 			}
 		}
 	}

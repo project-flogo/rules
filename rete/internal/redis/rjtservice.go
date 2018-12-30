@@ -6,6 +6,8 @@ import (
 )
 
 type jtServiceImpl struct {
+	types.NwServiceImpl
+
 	allJoinTables map[string]types.JoinTable
 }
 

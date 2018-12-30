@@ -662,6 +662,9 @@ func (nw *reteNetworkImpl) AddToAllJoinTables(joinTable types.JoinTable) {
 func (nw *reteNetworkImpl) SetTupleStore(tupleStore services.TupleStore) {
 	nw.tupleStore = tupleStore
 }
+func (nw *reteNetworkImpl) GetTupleStore() services.TupleStore {
+	return nw.tupleStore
+}
 
 func getOrCreateHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle {
 	reteCtxVar := getReteCtx(ctx)

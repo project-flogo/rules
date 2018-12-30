@@ -3,12 +3,12 @@
     "store-ref" : "mem"
   },
   "rete": {
-    "jt": "mem",
+    "jt": "redis",
     "idgen" : "redis"
   },
   "store": [
     {
-      "name": "memory"
+      "name": "mem"
     },
     {
       "name": "redis",

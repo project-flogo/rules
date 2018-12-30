@@ -7,6 +7,7 @@ import (
 
 type jtRefsServiceImpl struct {
 	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
+	types.NwServiceImpl
 	tablesAndRows map[string]map[string]map[int]int
 }
 

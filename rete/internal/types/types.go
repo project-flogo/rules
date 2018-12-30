@@ -12,6 +12,7 @@ type Network interface {
 	GetJtService() JtService
 	GetHandleService() HandleService
 	GetJtRefService() JtRefsService
+	GetTupleStore() services.TupleStore
 }
 
 type NwElemId interface {
@@ -60,8 +61,13 @@ type RowIterator interface {
 	Next() JoinTableRow
 }
 
-type JtRefsService interface {
+type NwService interface {
 	services.Service
+	GetNw() Network
+}
+
+type JtRefsService interface {
+	NwService
 	AddEntry(handle ReteHandle, jtName string, rowID int)
 	RemoveRowEntry(handle ReteHandle, jtName string, rowID int)
 	RemoveEntry(handle ReteHandle, jtName string)
@@ -74,7 +80,7 @@ type HdlTblIterator interface {
 }
 
 type JtService interface {
-	services.Service
+	NwService
 	GetOrCreateJoinTable(nw Network, rule model.Rule, identifiers []model.TupleType, name string) JoinTable
 	GetJoinTable(name string) JoinTable
 	AddJoinTable(joinTable JoinTable)
@@ -82,8 +88,7 @@ type JtService interface {
 }
 
 type HandleService interface {
-	services.Service
-	AddHandle(hdl ReteHandle)
+	NwService
 	RemoveHandle(tuple model.Tuple) ReteHandle
 	GetHandle(tuple model.Tuple) ReteHandle
 	GetHandleByKey(key model.TupleKey) ReteHandle
@@ -91,7 +96,16 @@ type HandleService interface {
 }
 
 type IdGen interface {
-	services.Service
+	NwService
 	GetMaxID() int
 	GetNextID() int
+}
+
+
+type NwServiceImpl struct {
+	Nw Network
+}
+
+func (nws *NwServiceImpl) GetNw() Network {
+	return nws.Nw
 }
