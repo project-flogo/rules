@@ -18,7 +18,6 @@ func NewHandleCollection(nw types.Network, config map[string]interface{}) types.
 }
 
 func (hc *handleServiceImpl) Init() {
-
 }
 
 func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {

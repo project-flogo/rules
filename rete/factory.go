@@ -110,7 +110,7 @@ func (f *TypeFactory) getIdGen() types.IdGen {
 			if idgen == "" || idgen == "mem" {
 				idg = mem.NewIdGenImpl(f.nw, f.parsedJson)
 			} else if idgen == "redis" {
-				idg = redis.NewIdGenImpl(f.parsedJson)
+				idg = redis.NewIdGenImpl(f.nw, f.parsedJson)
 			}
 		}
 	}

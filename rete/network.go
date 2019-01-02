@@ -17,6 +17,10 @@ import (
 )
 
 type reteNetworkImpl struct {
+
+	//unique name of the network. used for namespacing in storage, etc
+	prefix string
+
 	//All rules in the network
 	allRules map[string]model.Rule //(Rule)
 
@@ -63,8 +67,13 @@ func (nw *reteNetworkImpl) initReteNetwork(config string) {
 	nw.ruleNameNodesOfRule = make(map[string]*list.List)
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
 
-	nw.factory = NewFactory(nw, config)
+	factory := NewFactory(nw, config)
+	nw.factory = factory
 
+	reteCfg := factory.parsedJson["rete"].(map[string]interface{})
+	prefix := reteCfg["prefix"].(string)
+
+	nw.prefix = prefix
 	nw.idGen = nw.factory.getIdGen()
 	nw.jtService = nw.factory.getJoinTableCollection()
 	nw.handleService = nw.factory.getHandleCollection()
@@ -736,4 +745,8 @@ func (nw *reteNetworkImpl) GetJtRefService() types.JtRefsService {
 
 func (nw *reteNetworkImpl) GetHandleService() types.HandleService {
 	return nw.handleService
+}
+
+func (nw *reteNetworkImpl) GetPrefix() string {
+	return nw.prefix
 }

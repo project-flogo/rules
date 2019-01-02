@@ -6,26 +6,29 @@ import (
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
-const (
-	hget    = "HGET"
-	hincrby = "HINCRBY"
-)
-
 type idGenServiceImpl struct {
 	types.NwServiceImpl
 
 	config map[string]interface{}
 	//current int
 	rh redisutils.RedisHdl
+
+	//key used to access idgen
+	key string
+
+	//redis field in key
+	fld string
 }
 
-func NewIdGenImpl(config map[string]interface{}) types.IdGen {
+func NewIdGenImpl(nw types.Network, config map[string]interface{}) types.IdGen {
 	r := idGenServiceImpl{}
+	r.Nw = nw
 	r.config = config
 	return &r
 }
 
 func (ri *idGenServiceImpl) Init() {
+	ri.key = ri.Nw.GetPrefix() + ":idgen"
 	redisutils.InitService(ri.config)
 	ri.rh = redisutils.GetRedisHdl()
 	j := ri.GetMaxID()
@@ -33,9 +36,9 @@ func (ri *idGenServiceImpl) Init() {
 }
 
 func (ri *idGenServiceImpl) GetMaxID() int {
-	return ri.rh.HGetAsInt("IDGEN", "ID")
+	return ri.rh.GetAsInt(ri.key)
 }
 
 func (ri *idGenServiceImpl) GetNextID() int {
-	return ri.rh.HIncrBy("IDGEN", "ID", 1)
+	return ri.rh.IncrBy(ri.key, 1)
 }

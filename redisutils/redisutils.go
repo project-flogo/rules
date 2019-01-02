@@ -106,10 +106,34 @@ func (rh *RedisHandle) HIncrBy(key string, field string, by int) int {
 	return current
 }
 
+func (rh *RedisHandle) IncrBy(key string, by int) int {
+	c := rh.getPool().Get()
+	defer c.Close()
+	i, err := c.Do("INCRBY", key, 1)
+
+	if err != nil {
+		fmt.Printf("error: [%s]", err)
+		return -1
+	}
+	current := int(i.(int64))
+	return current
+}
+
 func (rh *RedisHandle) HGetAsInt(key string, field string) int {
 	c := rh.getPool().Get()
 	defer c.Close()
 	i, err := c.Do("HGET", key, field)
+	j := -1
+	if err == nil {
+		j, _ = redis.Int(i, err)
+	}
+	return j
+}
+
+func (rh *RedisHandle) GetAsInt(key string) int {
+	c := rh.getPool().Get()
+	defer c.Close()
+	i, err := c.Do("GET", key)
 	j := -1
 	if err == nil {
 		j, _ = redis.Int(i, err)

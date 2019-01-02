@@ -10,6 +10,7 @@ import (
 type handleServiceImpl struct {
 	//allHandles map[string]types.ReteHandle
 	types.NwServiceImpl
+	prefix string
 }
 
 func NewHandleCollection(nw types.Network, config map[string]interface{}) types.HandleService {
@@ -20,7 +21,7 @@ func NewHandleCollection(nw types.Network, config map[string]interface{}) types.
 }
 
 func (hc *handleServiceImpl) Init() {
-
+	hc.prefix = hc.Nw.GetPrefix() + ":h:"
 }
 
 //func (hc *handleServiceImpl) AddHandle(hdl types.ReteHandle) {

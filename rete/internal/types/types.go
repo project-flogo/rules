@@ -8,6 +8,7 @@ import (
 
 type Network interface {
 	common.Network
+	GetPrefix() string
 	GetIdGenService() IdGen
 	GetJtService() JtService
 	GetHandleService() HandleService

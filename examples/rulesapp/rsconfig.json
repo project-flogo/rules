@@ -3,6 +3,7 @@
     "store-ref" : "mem"
   },
   "rete": {
+    "prefix" : "x",
     "jt": "redis",
     "idgen" : "redis"
   },
