@@ -11,8 +11,9 @@ type jtServiceImpl struct {
 	allJoinTables map[string]types.JoinTable
 }
 
-func NewJoinTableCollection(config map[string]interface{}) types.JtService {
+func NewJoinTableCollection(nw types.Network, config map[string]interface{}) types.JtService {
 	jtc := jtServiceImpl{}
+	jtc.Nw = nw
 	jtc.allJoinTables = make(map[string]types.JoinTable)
 	return &jtc
 }

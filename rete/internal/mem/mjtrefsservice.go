@@ -11,8 +11,9 @@ type jtRefsServiceImpl struct {
 	tablesAndRows map[string]map[string]map[int]int
 }
 
-func NewJoinTableRefsInHdlImpl(config map[string]interface{}) types.JtRefsService {
+func NewJoinTableRefsInHdlImpl(nw types.Network, config map[string]interface{}) types.JtRefsService {
 	hdlJt := jtRefsServiceImpl{}
+	hdlJt.Nw = nw
 	hdlJt.tablesAndRows = make(map[string]map[string]map[int]int)
 	return &hdlJt
 }

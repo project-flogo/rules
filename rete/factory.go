@@ -44,16 +44,16 @@ func NewFactory(nw *reteNetworkImpl, config string) *TypeFactory {
 func (f *TypeFactory) getJoinTableRefs() types.JtRefsService {
 	var jtRefs types.JtRefsService
 	if f.parsedJson == nil {
-		jtRefs = mem.NewJoinTableRefsInHdlImpl(f.parsedJson)
+		jtRefs = mem.NewJoinTableRefsInHdlImpl(f.nw, f.parsedJson)
 
 	} else {
 		rete := f.parsedJson["rete"].(map[string]interface{})
 		if rete != nil {
 			idgen := rete["jt"].(string)
 			if idgen == "" || idgen == "mem" {
-				jtRefs = mem.NewJoinTableRefsInHdlImpl(f.parsedJson)
+				jtRefs = mem.NewJoinTableRefsInHdlImpl(f.nw, f.parsedJson)
 			} else if idgen == "redis" {
-				jtRefs = redis.NewJoinTableRefsInHdlImpl(f.parsedJson)
+				jtRefs = redis.NewJoinTableRefsInHdlImpl(f.nw, f.parsedJson)
 			}
 		}
 	}
@@ -63,16 +63,16 @@ func (f *TypeFactory) getJoinTableRefs() types.JtRefsService {
 func (f *TypeFactory) getJoinTableCollection() types.JtService {
 	var allJt types.JtService
 	if f.parsedJson == nil {
-		allJt = mem.NewJoinTableCollection(f.parsedJson)
+		allJt = mem.NewJoinTableCollection(f.nw, f.parsedJson)
 
 	} else {
 		rete := f.parsedJson["rete"].(map[string]interface{})
 		if rete != nil {
 			idgen := rete["jt"].(string)
 			if idgen == "" || idgen == "mem" {
-				allJt = mem.NewJoinTableCollection(f.parsedJson)
+				allJt = mem.NewJoinTableCollection(f.nw, f.parsedJson)
 			} else if idgen == "redis" {
-				allJt = redis.NewJoinTableCollection(f.parsedJson)
+				allJt = redis.NewJoinTableCollection(f.nw, f.parsedJson)
 			}
 		}
 	}
@@ -82,15 +82,15 @@ func (f *TypeFactory) getJoinTableCollection() types.JtService {
 func (f *TypeFactory) getHandleCollection() types.HandleService {
 	var hc types.HandleService
 	if f.parsedJson == nil {
-		hc = mem.NewHandleCollection(f.parsedJson)
+		hc = mem.NewHandleCollection(f.nw, f.parsedJson)
 	} else {
 		rete := f.parsedJson["rete"].(map[string]interface{})
 		if rete != nil {
 			idgen := rete["jt"].(string)
 			if idgen == "" || idgen == "mem" {
-				hc = mem.NewHandleCollection(f.parsedJson)
+				hc = mem.NewHandleCollection(f.nw, f.parsedJson)
 			} else if idgen == "redis" {
-				hc = redis.NewHandleCollection(f.parsedJson)
+				hc = redis.NewHandleCollection(f.nw, f.parsedJson)
 			}
 		}
 	}

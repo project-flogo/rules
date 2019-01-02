@@ -9,7 +9,6 @@ type idGenServiceImpl struct {
 	types.NwServiceImpl
 	config    map[string]interface{}
 	currentId int32
-
 }
 
 func NewIdGenImpl(nw types.Network, config map[string]interface{}) types.IdGen {

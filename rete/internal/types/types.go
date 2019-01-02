@@ -101,7 +101,6 @@ type IdGen interface {
 	GetNextID() int
 }
 
-
 type NwServiceImpl struct {
 	Nw Network
 }

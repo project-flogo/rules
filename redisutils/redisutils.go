@@ -54,8 +54,8 @@ func (rh *RedisHandle) HSetAll(key string, kvs map[string]interface{}) error {
 	for f, v := range kvs {
 		args = append(args, f, v)
 	}
-	c := rd.getPool().Get()
-	//defer c.Close()
+	c := rh.getPool().Get()
+	defer c.Close()
 	_, error := c.Do("HMSET", args...)
 
 	return error
@@ -63,9 +63,9 @@ func (rh *RedisHandle) HSetAll(key string, kvs map[string]interface{}) error {
 
 func (rh *RedisHandle) HGetAll(key string) map[string]string {
 	hgetall := make(map[string]string)
-	c := rh.getPool()
-	//defer c.Close()
-	vals, error := c.Get().Do("HGETALL", key)
+	c := rh.getPool().Get()
+	defer c.Close()
+	vals, error := c.Do("HGETALL", key)
 	if error != nil {
 		fmt.Printf("error [%v]\n", error)
 	} else {
@@ -95,7 +95,7 @@ func (rh *RedisHandle) HGetAll(key string) map[string]string {
 
 func (rh *RedisHandle) HIncrBy(key string, field string, by int) int {
 	c := rh.getPool().Get()
-	//defer c.Close()
+	defer c.Close()
 	i, err := c.Do("HINCRBY", key, field, 1)
 
 	if err != nil {
@@ -119,7 +119,7 @@ func (rh *RedisHandle) HGetAsInt(key string, field string) int {
 
 func (rh *RedisHandle) Del(key string) int {
 	c := rh.getPool().Get()
-	//defer c.Close()
+	defer c.Close()
 	i, err := c.Do("DEL", key)
 	j := -1
 	if err == nil {

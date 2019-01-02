@@ -10,8 +10,9 @@ type handleServiceImpl struct {
 	allHandles map[string]types.ReteHandle
 }
 
-func NewHandleCollection(config map[string]interface{}) types.HandleService {
+func NewHandleCollection(nw types.Network, config map[string]interface{}) types.HandleService {
 	hc := handleServiceImpl{}
+	hc.Nw = nw
 	hc.allHandles = make(map[string]types.ReteHandle)
 	return &hc
 }

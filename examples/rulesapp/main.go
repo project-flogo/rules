@@ -68,9 +68,9 @@ func main() {
 	rs.Assert(nil, t3)
 
 	//Retract tuples
-	rs.Retract(nil, t1)
-	rs.Retract(nil, t2)
-	rs.Retract(nil, t3)
+	//rs.Retract(nil, t1)
+	//rs.Retract(nil, t2)
+	//rs.Retract(nil, t3)
 
 	//delete the rule
 	rs.DeleteRule(rule.GetName())
