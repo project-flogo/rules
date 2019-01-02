@@ -46,6 +46,8 @@ func main() {
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
+	//set a transaction handler
+	rs.RegisterRtcTransactionHandler(txHandler, nil)
 	//Start the rule session
 	rs.Start(nil)
 
@@ -128,4 +130,15 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 func getFileContent(filePath string) string {
 	absPath := common.GetAbsPathForResource(filePath)
 	return common.FileToString(absPath)
+}
+
+func txHandler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+
+	store := rs.GetStore()
+	store.SaveTuples(rtxn.GetRtcAdded())
+
+	store.SaveModifiedTuples(rtxn.GetRtcModified())
+
+	store.DeleteTuples(rtxn.GetRtcDeleted())
+
 }

@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 	//"github.com/project-flogo/rules/rete/common"
-	"github.com/project-flogo/rules/common/services"
 	"github.com/project-flogo/rules/rete/common"
 )
 
@@ -50,7 +49,7 @@ type reteNetworkImpl struct {
 
 	factory    *TypeFactory
 	idGen      types.IdGen
-	tupleStore services.TupleStore
+	tupleStore model.TupleStore
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -70,7 +69,7 @@ func (nw *reteNetworkImpl) initReteNetwork(config string) {
 	factory := NewFactory(nw, config)
 	nw.factory = factory
 
-	reteCfg := factory.parsedJson["rete"].(map[string]interface{})
+	reteCfg := factory.parsedJson["rs"].(map[string]interface{})
 	prefix := reteCfg["prefix"].(string)
 
 	nw.prefix = prefix
@@ -668,10 +667,10 @@ func (nw *reteNetworkImpl) AddToAllJoinTables(joinTable types.JoinTable) {
 	nw.jtService.AddJoinTable(joinTable)
 }
 
-func (nw *reteNetworkImpl) SetTupleStore(tupleStore services.TupleStore) {
+func (nw *reteNetworkImpl) SetTupleStore(tupleStore model.TupleStore) {
 	nw.tupleStore = tupleStore
 }
-func (nw *reteNetworkImpl) GetTupleStore() services.TupleStore {
+func (nw *reteNetworkImpl) GetTupleStore() model.TupleStore {
 	return nw.tupleStore
 }
 

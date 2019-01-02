@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/project-flogo/rules/common/model"
-	"github.com/project-flogo/rules/common/services"
 	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/rete"
 	"github.com/project-flogo/rules/rete/common"
 	"github.com/project-flogo/rules/ruleapi/internal/store/mem"
+	"github.com/project-flogo/rules/ruleapi/internal/store/redis"
 )
 
 var (
@@ -28,7 +28,7 @@ type rulesessionImpl struct {
 	startupFn  model.StartupRSFunction
 	started    bool
 	config     map[string]string
-	tupleStore services.TupleStore
+	tupleStore model.TupleStore
 	jsonConfig map[string]interface{}
 }
 
@@ -95,6 +95,7 @@ func (rs *rulesessionImpl) initRuleSessionWithConfig(name string, jsonConfig str
 
 	//TODO: Configure it from jconsonfig
 	rs.tupleStore = getTupleStore(rs.jsonConfig)
+	rs.tupleStore.Init()
 
 	rs.reteNetwork = rete.NewReteNetwork(jsonConfig)
 	rs.reteNetwork.SetTupleStore(rs.tupleStore)
@@ -103,15 +104,15 @@ func (rs *rulesessionImpl) initRuleSessionWithConfig(name string, jsonConfig str
 	return nil
 }
 
-func getTupleStore(jsonConfig map[string]interface{}) services.TupleStore {
+func getTupleStore(jsonConfig map[string]interface{}) model.TupleStore {
 	rsCfg := jsonConfig["rs"].(map[string]interface{})
 
 	storeRef := rsCfg["store-ref"].(string)
 
 	if storeRef == "" || storeRef == "mem" {
-		return mem.NewStore()
-	} else if storeRef == "redisutils" {
-		return mem.NewStore()
+		return mem.NewStore(jsonConfig)
+	} else if storeRef == "redis" {
+		return redis.NewStore(jsonConfig)
 	}
 	return nil
 }
@@ -216,4 +217,8 @@ func (rs *rulesessionImpl) GetAssertedTuple(key model.TupleKey) model.Tuple {
 
 func (rs *rulesessionImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {
 	rs.reteNetwork.RegisterRtcTransactionHandler(txnHandler, txnContext)
+}
+
+func (rs *rulesessionImpl) GetStore() model.TupleStore {
+	return rs.tupleStore
 }

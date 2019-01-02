@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"github.com/project-flogo/rules/common/model"
-	"github.com/project-flogo/rules/common/services"
 )
 
 type RtcOprn int
@@ -29,5 +28,5 @@ type Network interface {
 	//GetConfigValue(key string) string
 	//GetConfig() map[string]string
 
-	SetTupleStore(tupleStore services.TupleStore)
+	SetTupleStore(tupleStore model.TupleStore)
 }

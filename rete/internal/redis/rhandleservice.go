@@ -46,13 +46,13 @@ func (hc *handleServiceImpl) GetHandle(tuple model.Tuple) types.ReteHandle {
 }
 
 func (hc *handleServiceImpl) GetHandleByKey(key model.TupleKey) types.ReteHandle {
-	rkey := "h-" + key.String()
+	rkey := hc.prefix + key.String()
 
 	m := redisutils.GetRedisHdl().HGetAll(rkey)
 	if len(m) == 0 {
 		return nil
 	} else {
-		tuple := hc.Nw.GetTupleStore().GetTupleByStringKey(key.String())
+		tuple := hc.Nw.GetTupleStore().GetTupleByKey(key)
 		if tuple == nil {
 			//TODO: error handling
 			return nil
@@ -64,7 +64,7 @@ func (hc *handleServiceImpl) GetHandleByKey(key model.TupleKey) types.ReteHandle
 
 func (hc *handleServiceImpl) GetOrCreateHandle(nw types.Network, tuple model.Tuple) types.ReteHandle {
 
-	key := "h-" + tuple.GetKey().String()
+	key := hc.prefix + tuple.GetKey().String()
 
 	m := redisutils.GetRedisHdl().HGetAll(key)
 	if len(m) == 0 {

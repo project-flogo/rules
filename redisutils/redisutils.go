@@ -61,8 +61,8 @@ func (rh *RedisHandle) HSetAll(key string, kvs map[string]interface{}) error {
 	return error
 }
 
-func (rh *RedisHandle) HGetAll(key string) map[string]string {
-	hgetall := make(map[string]string)
+func (rh *RedisHandle) HGetAll(key string) map[string]interface{} {
+	hgetall := make(map[string]interface{})
 	c := rh.getPool().Get()
 	defer c.Close()
 	vals, error := c.Do("HGETALL", key)

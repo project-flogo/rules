@@ -2,7 +2,6 @@ package types
 
 import (
 	"github.com/project-flogo/rules/common/model"
-	"github.com/project-flogo/rules/common/services"
 	"github.com/project-flogo/rules/rete/common"
 )
 
@@ -13,7 +12,7 @@ type Network interface {
 	GetJtService() JtService
 	GetHandleService() HandleService
 	GetJtRefService() JtRefsService
-	GetTupleStore() services.TupleStore
+	GetTupleStore() model.TupleStore
 }
 
 type NwElemId interface {
@@ -63,7 +62,7 @@ type RowIterator interface {
 }
 
 type NwService interface {
-	services.Service
+	model.Service
 	GetNw() Network
 }
 

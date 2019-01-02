@@ -23,6 +23,7 @@ type Tuple interface {
 	GetBool(name string) (val bool, err error)
 	//GetDateTime(name string) time.Time
 	GetKey() TupleKey
+	ToMap() map[string]interface{}
 }
 
 //MutableTuple mutable part of the tuple
@@ -272,4 +273,13 @@ func (t *tupleImpl) isKeyProp(propName string) bool {
 		_, found = tki.keys[propName]
 	}
 	return found
+}
+
+func (t *tupleImpl) ToMap () map[string]interface{} {
+	m := make (map[string]interface{})
+	// Copy from the original map to the target map
+	for key, value := range t.tuples {
+		m[key] = value
+	}
+	return m
 }

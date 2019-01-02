@@ -2,29 +2,43 @@ package mem
 
 import (
 	"github.com/project-flogo/rules/common/model"
-	"github.com/project-flogo/rules/common/services"
 )
 
-type store struct {
+type storeImpl struct {
 	allTuples map[string]model.Tuple
 }
 
-func NewStore() services.TupleStore {
-	ms := store{}
+func NewStore(jsonConfig map[string]interface{}) model.TupleStore {
+	ms := storeImpl{}
+
 	ms.allTuples = make(map[string]model.Tuple)
 	return &ms
 }
 
-func (ms *store) Init() {
+func (ms *storeImpl) Init() {
 
 }
 
-func (ms *store) GetTupleByStringKey(key string) model.Tuple {
-	return ms.allTuples[key]
+func (ms *storeImpl) GetTupleByKey(key model.TupleKey) model.Tuple {
+	return ms.allTuples[key.String()]
 }
-func (ms *store) SaveTuple(tuple model.Tuple) {
+
+func (ms *storeImpl) SaveTuple(tuple model.Tuple) {
 	ms.allTuples[tuple.GetKey().String()] = tuple
 }
-func (ms *store) DeleteTupleByStringKey(key string) {
-	delete(ms.allTuples, key)
+
+func (ms *storeImpl) DeleteTupleByStringKey(key model.TupleKey) {
+	delete(ms.allTuples, key.String())
+}
+
+func (ms *storeImpl) SaveTuples(added map[string]map[string]model.Tuple) {
+
+}
+
+func (ms *storeImpl) SaveModifiedTuples(modified map[string]map[string]model.RtcModified) {
+
+}
+
+func (ms *storeImpl) DeleteTuples(deleted map[string]map[string]model.Tuple) {
+
 }

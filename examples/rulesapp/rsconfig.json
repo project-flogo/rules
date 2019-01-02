@@ -1,9 +1,9 @@
 {
   "rs" : {
-    "store-ref" : "mem"
+    "prefix" : "x",
+    "store-ref" : "redis"
   },
   "rete": {
-    "prefix" : "x",
     "jt": "redis",
     "idgen" : "redis"
   },
