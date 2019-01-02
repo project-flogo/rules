@@ -74,7 +74,6 @@ type RuleSession interface {
 
 	//SetStore
 	GetStore() TupleStore
-
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side

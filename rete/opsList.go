@@ -60,7 +60,7 @@ func newModifyEntry(tuple model.Tuple, changeProps map[string]bool) modifyEntry 
 func (me *modifyEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
 	reteCtx.getConflictResolver().deleteAgendaFor(ctx, me.tuple, me.changeProps)
-	reteCtx.getNetwork().Retract(ctx, me.tuple, me.changeProps, common.MODIFY)
+	reteCtx.getNetwork().Retract(ctx, reteCtx.getRuleSession(), me.tuple, me.changeProps, common.MODIFY)
 	reteCtx.getNetwork().Assert(ctx, reteCtx.getRuleSession(), me.tuple, me.changeProps, common.MODIFY)
 }
 

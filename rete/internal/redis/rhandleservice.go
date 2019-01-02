@@ -31,8 +31,8 @@ func (hc *handleServiceImpl) Init() {
 //}
 
 func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {
-
-	numDeleted := redisutils.GetRedisHdl().Del("h-" + tuple.GetKey().String())
+	rkey := hc.prefix + tuple.GetKey().String()
+	numDeleted := redisutils.GetRedisHdl().Del(rkey)
 	fmt.Printf("Deleted: [%d] keys\n", numDeleted)
 
 	//TODO: Dummy handle

@@ -55,24 +55,33 @@ func main() {
 	fmt.Println("Asserting n1 tuple with name=Tom")
 	t1, _ := model.NewTupleWithKeyValues("n1", "Tom")
 	t1.SetString(nil, "name", "Tom")
-	rs.Assert(nil, t1)
+	err = rs.Assert(nil, t1)
+	if err != nil {
+		fmt.Printf("Warn: [%s]\n", err)
+	}
 
 	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	t2, _ := model.NewTupleWithKeyValues("n1", "Bob")
 	t2.SetString(nil, "name", "Bob")
-	rs.Assert(nil, t2)
+	err = rs.Assert(nil, t2)
+	if err != nil {
+		fmt.Printf("Warn: [%s]\n", err)
+	}
 
 	//Now assert a "n2" tuple
 	fmt.Println("Asserting n2 tuple with name=Bob")
 	t3, _ := model.NewTupleWithKeyValues("n2", "Bob")
 	t3.SetString(nil, "name", "Bob")
-	rs.Assert(nil, t3)
+	err = rs.Assert(nil, t3)
+	if err != nil {
+		fmt.Printf("Warn: [%s]\n", err)
+	}
 
 	//Retract tuples
-	rs.Retract(nil, t1)
-	rs.Retract(nil, t2)
-	rs.Retract(nil, t3)
+	rs.Delete(nil, t1)
+	rs.Delete(nil, t2)
+	rs.Delete(nil, t3)
 
 	//delete the rule
 	rs.DeleteRule(rule.GetName())

@@ -275,8 +275,8 @@ func (t *tupleImpl) isKeyProp(propName string) bool {
 	return found
 }
 
-func (t *tupleImpl) ToMap () map[string]interface{} {
-	m := make (map[string]interface{})
+func (t *tupleImpl) ToMap() map[string]interface{} {
+	m := make(map[string]interface{})
 	// Copy from the original map to the target map
 	for key, value := range t.tuples {
 		m[key] = value

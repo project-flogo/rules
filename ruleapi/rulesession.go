@@ -148,11 +148,11 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err e
 }
 
 func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.Tuple) {
-	rs.reteNetwork.Retract(ctx, tuple, nil, common.RETRACT)
+	rs.reteNetwork.Retract(ctx, rs, tuple, nil, common.RETRACT)
 }
 
 func (rs *rulesessionImpl) Delete(ctx context.Context, tuple model.Tuple) {
-	rs.reteNetwork.Retract(ctx, tuple, nil, common.DELETE)
+	rs.reteNetwork.Retract(ctx, rs, tuple, nil, common.DELETE)
 }
 
 func (rs *rulesessionImpl) printNetwork() {

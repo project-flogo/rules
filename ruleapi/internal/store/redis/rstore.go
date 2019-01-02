@@ -1,13 +1,14 @@
 package redis
 
 import (
+	"fmt"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/redisutils"
 )
 
 type storeImpl struct {
 	//allTuples map[string]model.Tuple
-	prefix string
+	prefix     string
 	jsonConfig map[string]interface{}
 }
 
@@ -28,13 +29,12 @@ func (ms *storeImpl) Init() {
 func (ms *storeImpl) GetTupleByKey(key model.TupleKey) model.Tuple {
 	hdl := redisutils.GetRedisHdl()
 
-	strKey := ms.prefix + key.GetTupleDescriptor().Name + ":" + key.String()
+	strKey := ms.prefix + key.String()
 	vals := hdl.HGetAll(strKey)
-
 
 	tuple, err := model.NewTuple(model.TupleType(key.GetTupleDescriptor().Name), vals)
 
-	if err != nil {
+	if err == nil {
 		return tuple
 	}
 	return nil
@@ -43,27 +43,47 @@ func (ms *storeImpl) GetTupleByKey(key model.TupleKey) model.Tuple {
 func (ms *storeImpl) SaveTuple(tuple model.Tuple) {
 	m := tuple.ToMap()
 
-	strKey := ms.prefix + tuple.GetTupleDescriptor().Name + ":" + tuple.GetKey().String()
+	strKey := ms.prefix + tuple.GetKey().String()
 
 	hdl := redisutils.GetRedisHdl()
 	hdl.HSetAll(strKey, m)
 }
 
-func (ms *storeImpl) DeleteTupleByStringKey(key model.TupleKey) {
-	strKey := ms.prefix + key.GetTupleDescriptor().Name + ":" + key.String()
+func (ms *storeImpl) DeleteTuple(key model.TupleKey) {
+	strKey := ms.prefix + key.String()
 	hdl := redisutils.GetRedisHdl()
 	hdl.Del(strKey)
 }
 
 func (ms *storeImpl) SaveTuples(added map[string]map[string]model.Tuple) {
-
+	hdl := redisutils.GetRedisHdl()
+	for tupleType, tuples := range added {
+		for key, tuple := range tuples {
+			fmt.Printf("Saving tuple. Type [%s] Key [%s], Val [%v]\n", tupleType, key, tuple)
+			strKey := ms.prefix + key
+			hdl.HSetAll(strKey, tuple.ToMap())
+		}
+	}
 }
 
 func (ms *storeImpl) SaveModifiedTuples(modified map[string]map[string]model.RtcModified) {
-
+	hdl := redisutils.GetRedisHdl()
+	for tupleType, mmap := range modified {
+		for key, mdfd := range mmap {
+			fmt.Printf("Saving tuple. Type [%s] Key [%s], Val [%v]\n", tupleType, key, mdfd.GetTuple())
+			strKey := ms.prefix + key
+			hdl.HSetAll(strKey, mdfd.GetTuple().ToMap())
+		}
+	}
 }
 
 func (ms *storeImpl) DeleteTuples(deleted map[string]map[string]model.Tuple) {
-
+	hdl := redisutils.GetRedisHdl()
+	for tupleType, tuples := range deleted {
+		for key, tuple := range tuples {
+			fmt.Printf("Deleting tuple. Type [%s] Key [%s], Val [%v]\n", tupleType, key, tuple)
+			strKey := ms.prefix + key
+			hdl.Del(strKey)
+		}
+	}
 }
-

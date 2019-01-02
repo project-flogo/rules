@@ -1,6 +1,5 @@
 package model
 
-
 type Service interface {
 	Init()
 }
@@ -11,6 +10,6 @@ type TupleStore interface {
 	SaveTuple(tuple Tuple)
 	SaveTuples(added map[string]map[string]Tuple)
 	SaveModifiedTuples(modified map[string]map[string]RtcModified)
-	DeleteTupleByStringKey(key TupleKey)
+	DeleteTuple(key TupleKey)
 	DeleteTuples(deleted map[string]map[string]Tuple)
 }

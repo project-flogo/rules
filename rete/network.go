@@ -572,12 +572,12 @@ func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
 	}
 }
 
-func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) {
+func (nw *reteNetworkImpl) Retract(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) {
 
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	reteCtxVar, isRecursive, _ := getOrSetReteCtx(ctx, nw, nil)
+	reteCtxVar, isRecursive, ctx := getOrSetReteCtx(ctx, nw, rs)
 	if !isRecursive {
 		nw.crudLock.Lock()
 		defer nw.crudLock.Unlock()

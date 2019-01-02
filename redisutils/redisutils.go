@@ -151,3 +151,14 @@ func (rh *RedisHandle) Del(key string) int {
 	}
 	return j
 }
+
+func (rh *RedisHandle) HDel(key string) int {
+	c := rh.getPool().Get()
+	defer c.Close()
+	i, err := c.Do("HDEL", key)
+	j := -1
+	if err == nil {
+		j, _ = redis.Int(i, err)
+	}
+	return j
+}

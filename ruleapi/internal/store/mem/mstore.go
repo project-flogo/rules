@@ -1,6 +1,7 @@
 package mem
 
 import (
+	"fmt"
 	"github.com/project-flogo/rules/common/model"
 )
 
@@ -27,18 +28,33 @@ func (ms *storeImpl) SaveTuple(tuple model.Tuple) {
 	ms.allTuples[tuple.GetKey().String()] = tuple
 }
 
-func (ms *storeImpl) DeleteTupleByStringKey(key model.TupleKey) {
+func (ms *storeImpl) DeleteTuple(key model.TupleKey) {
 	delete(ms.allTuples, key.String())
 }
 
 func (ms *storeImpl) SaveTuples(added map[string]map[string]model.Tuple) {
-
+	for tupleType, tuples := range added {
+		for key, tuple := range tuples {
+			fmt.Printf("Saving tuple. Type [%s] Key [%s], Val [%v]\n", tupleType, key, tuple)
+			ms.SaveTuple(tuple)
+		}
+	}
 }
 
 func (ms *storeImpl) SaveModifiedTuples(modified map[string]map[string]model.RtcModified) {
-
+	for tupleType, mmap := range modified {
+		for key, mdfd := range mmap {
+			fmt.Printf("Saving tuple. Type [%s] Key [%s], Val [%v]\n", tupleType, key, mdfd.GetTuple())
+			ms.SaveTuple(mdfd.GetTuple())
+		}
+	}
 }
 
 func (ms *storeImpl) DeleteTuples(deleted map[string]map[string]model.Tuple) {
-
+	for tupleType, tuples := range deleted {
+		for key, tuple := range tuples {
+			fmt.Printf("Deleting tuple. Type [%s] Key [%s], Val [%v]\n", tupleType, key, tuple)
+			ms.DeleteTuple(tuple.GetKey())
+		}
+	}
 }
