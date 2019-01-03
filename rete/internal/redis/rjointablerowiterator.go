@@ -12,7 +12,7 @@ type rowIteratorImpl struct {
 }
 
 func newRowIterator(jTable types.JoinTable) types.RowIterator {
-	key := jTable.GetNw().GetPrefix() + "jt:" + jTable.GetName()
+	key := jTable.GetNw().GetPrefix() + ":jt:" + jTable.GetName()
 	ri := rowIteratorImpl{}
 	ri.iter = redisutils.GetRedisHdl().GetMapIterator(key)
 	ri.nw = jTable.GetNw()

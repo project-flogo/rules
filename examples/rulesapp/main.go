@@ -64,7 +64,7 @@ func main() {
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	t2, _ := model.NewTupleWithKeyValues("n1", "Bob")
 	t2.SetString(nil, "name", "Bob")
-	err = rs.Assert(nil, t2)
+	//err = rs.Assert(nil, t2)
 	if err != nil {
 		fmt.Printf("Warn: [%s]\n", err)
 	}
@@ -73,7 +73,7 @@ func main() {
 	fmt.Println("Asserting n2 tuple with name=Bob")
 	t3, _ := model.NewTupleWithKeyValues("n2", "Bob")
 	t3.SetString(nil, "name", "Bob")
-	//err = rs.Assert(nil, t3)
+	err = rs.Assert(nil, t3)
 	if err != nil {
 		fmt.Printf("Warn: [%s]\n", err)
 	}
