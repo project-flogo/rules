@@ -36,10 +36,10 @@ func (jtc *jtServiceImpl) GetOrCreateJoinTable(nw types.Network, rule model.Rule
 	return jT
 }
 
-func (jtc *jtServiceImpl) AddJoinTable(joinTable types.JoinTable) {
-	jtc.allJoinTables[joinTable.GetName()] = joinTable
-}
-
-func (jtc *jtServiceImpl) RemoveJoinTable(jtName string) {
-	delete(jtc.allJoinTables, jtName)
-}
+//func (jtc *jtServiceImpl) AddJoinTable(joinTable types.JoinTable) {
+//	jtc.allJoinTables[joinTable.GetName()] = joinTable
+//}
+//
+//func (jtc *jtServiceImpl) RemoveJoinTable(jtName string) {
+//	delete(jtc.allJoinTables, jtName)
+//}
