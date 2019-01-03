@@ -151,3 +151,44 @@ func getStruct(c redis.Conn) error {
 	return nil
 
 }
+
+
+func Test_three(t *testing.T) {
+
+	InitService(nil)
+
+	hdl := GetRedisHdl()
+
+	iter := hdl.GetListIterator("x:jt:L_c2")
+
+	for iter.HasNext() {
+		key := iter.Next()
+		fmt.Printf("KEY: [%s]\n", key)
+	}
+
+	miter := hdl.GetMapIterator("a")
+
+	for miter.HasNext() {
+		key, value := miter.Next()
+		fmt.Printf("KEY: [%s], Value=[%s]\n", key, value)
+	}
+	{
+
+		miter := hdl.GetMapIterator("x:jt:L_c2")
+
+		for miter.HasNext() {
+			key, value := miter.Next()
+			fmt.Printf("KEY: [%s], Value=[%s]\n", key, value)
+		}
+	}
+}
+
+func Test_four(t *testing.T) {
+	InitService(nil)
+
+	hdl := GetRedisHdl()
+
+	v := hdl.HGet("a", "b")
+	fmt.Printf("[%v]\n", v)
+
+}

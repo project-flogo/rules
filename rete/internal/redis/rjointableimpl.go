@@ -3,14 +3,16 @@ package redis
 import (
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/rete/internal/types"
+	"github.com/project-flogo/rules/redisutils"
 )
 
 type joinTableImpl struct {
 	types.NwElemIdImpl
-	table map[int]types.JoinTableRow
+	//table map[int]types.JoinTableRow
 	idr   []model.TupleType
 	rule  model.Rule
 	name  string
+	jtKey string
 }
 
 func newJoinTableImpl(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
@@ -22,16 +24,17 @@ func newJoinTableImpl(nw types.Network, rule model.Rule, identifiers []model.Tup
 func (jt *joinTableImpl) initJoinTableImpl(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) {
 	jt.SetID(nw)
 	jt.idr = identifiers
-	jt.table = map[int]types.JoinTableRow{}
+	//jt.table = map[int]types.JoinTableRow{}
 	jt.rule = rule
 	jt.name = name
+	jt.jtKey = nw.GetPrefix() + ":" + "jt:" + name
 }
 
 func (jt *joinTableImpl) AddRow(handles []types.ReteHandle) types.JoinTableRow {
 
-	row := newJoinTableRow(handles, jt.Nw)
+	row := newJoinTableRow(jt.name, handles, jt.Nw)
 
-	jt.table[row.GetID()] = row
+	//jt.table[row.GetID()] = row
 	for i := 0; i < len(row.GetHandles()); i++ {
 		handle := row.GetHandles()[i]
 		jt.Nw.GetJtRefService().AddEntry(handle, jt.name, row.GetID())
@@ -40,12 +43,16 @@ func (jt *joinTableImpl) AddRow(handles []types.ReteHandle) types.JoinTableRow {
 }
 
 func (jt *joinTableImpl) RemoveRow(rowID int) types.JoinTableRow {
-	row, found := jt.table[rowID]
-	if found {
-		delete(jt.table, rowID)
-		return row
-	}
-	return nil
+
+
+	hdl := newJoinTableRowLoadedFromStore ()
+
+	//row, found := jt.table[rowID]
+	//if found {
+	//	delete(jt.table, rowID)
+	//	return row
+	//}
+	//return nil
 }
 
 func (jt *joinTableImpl) GetRowCount() int {
@@ -57,7 +64,7 @@ func (jt *joinTableImpl) GetRule() model.Rule {
 }
 
 func (jt *joinTableImpl) GetRowIterator() types.RowIterator {
-	return newRowIterator(jt.table)
+	return newRowIterator(jt)
 }
 
 func (jt *joinTableImpl) GetRow(rowID int) types.JoinTableRow {
@@ -66,4 +73,15 @@ func (jt *joinTableImpl) GetRow(rowID int) types.JoinTableRow {
 
 func (jt *joinTableImpl) GetName() string {
 	return jt.name
+}
+
+func (jt *joinTableImpl) loadRowFromStore(rowID int) {
+
+
+	hdl := redisutils.GetRedisHdl()
+
+	row := hdl.HGetAll(jt.jtKey)
+
+
+
 }

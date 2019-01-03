@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"github.com/project-flogo/core/data/coerce"
+	"strings"
 )
 
 // TupleKey primary key of a tuple
@@ -117,4 +118,33 @@ func (tk *tupleKeyImpl) keysAsString() string {
 		}
 	}
 	return str
+}
+
+//TODO: Validations
+func FromStringKey (strTupleKey string) TupleKey {
+
+	keyComps := strings.Split(strTupleKey, ":")
+
+	tupleType := TupleType(keyComps[0])
+
+	key := ""
+
+	keyMap := make (map[string]interface{})
+
+	for i, v := range keyComps {
+		if i == 0 {
+			continue
+		} else if (i % 2 == 1) {
+			//this is a key
+			key = v
+		} else {
+			//this is a value
+			keyMap[key] = v
+		}
+	}
+
+	tupleKey, _:= NewTupleKeyWithKeyValues(tupleType, keyMap)
+
+	return tupleKey
+
 }

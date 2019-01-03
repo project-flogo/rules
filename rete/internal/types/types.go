@@ -18,6 +18,7 @@ type Network interface {
 type NwElemId interface {
 	SetID(nw Network)
 	GetID() int
+	GetNw() Network
 }
 type NwElemIdImpl struct {
 	ID int
@@ -30,6 +31,9 @@ func (ide *NwElemIdImpl) SetID(nw Network) {
 }
 func (ide *NwElemIdImpl) GetID() int {
 	return ide.ID
+}
+func (ide *NwElemIdImpl) GetNw() Network {
+	return ide.Nw
 }
 
 type JoinTable interface {
@@ -83,8 +87,8 @@ type JtService interface {
 	NwService
 	GetOrCreateJoinTable(nw Network, rule model.Rule, identifiers []model.TupleType, name string) JoinTable
 	GetJoinTable(name string) JoinTable
-	AddJoinTable(joinTable JoinTable)
-	RemoveJoinTable(name string)
+	//AddJoinTable(joinTable JoinTable)
+	//RemoveJoinTable(name string)
 }
 
 type HandleService interface {

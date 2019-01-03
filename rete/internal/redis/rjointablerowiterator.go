@@ -1,34 +1,51 @@
 package redis
 
 import (
-	"container/list"
 	"github.com/project-flogo/rules/rete/internal/types"
+	"github.com/project-flogo/rules/redisutils"
+	"strings"
+	"github.com/project-flogo/rules/common/model"
+	"strconv"
 )
 
 type rowIteratorImpl struct {
-	table map[int]types.JoinTableRow
-	kList list.List
-	curr  *list.Element
+	iter *redisutils.MapIterator
+	jtName string
+	nw types.Network
 }
 
-func newRowIterator(jTable map[int]types.JoinTableRow) types.RowIterator {
+func newRowIterator(jTable types.JoinTable) types.RowIterator {
+	key := jTable.GetNw().GetPrefix() + "jt:" + jTable.GetName()
 	ri := rowIteratorImpl{}
-	ri.table = jTable
-	ri.kList = list.List{}
-	for k, _ := range jTable {
-		ri.kList.PushBack(k)
-	}
-	ri.curr = ri.kList.Front()
+	ri.iter = redisutils.GetRedisHdl().GetMapIterator(key)
+	ri.nw = jTable.GetNw()
+	ri.jtName = jTable.GetName()
 	return &ri
 }
 
 func (ri *rowIteratorImpl) HasNext() bool {
-	return ri.curr != nil
+	return ri.iter.HasNext()
 }
 
 func (ri *rowIteratorImpl) Next() types.JoinTableRow {
-	id := ri.curr.Value.(int)
-	val := ri.table[id]
-	ri.curr = ri.curr.Next()
-	return val
+
+	rowId, value := ri.iter.Next()
+	rowID, _ := strconv.Atoi(rowId)
+
+	strval := value.(string)
+	values := strings.Split(strval, ",")
+
+
+	handles := []types.ReteHandle{}
+	for _, key := range values {
+		tupleKey := model.FromStringKey(key)
+		tuple := ri.nw.GetTupleStore().GetTupleByKey(tupleKey)
+		handle := newReteHandleImpl(ri.nw, tuple)
+		handles = append (handles, handle)
+	}
+
+	jtRow := newJoinTableRowLoadedFromStore(ri.jtName, rowID, handles, ri.nw)
+
+	return jtRow
+
 }

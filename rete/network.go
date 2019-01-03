@@ -663,9 +663,9 @@ func (nw *reteNetworkImpl) getFactory() *TypeFactory {
 	return nw.factory
 }
 
-func (nw *reteNetworkImpl) AddToAllJoinTables(joinTable types.JoinTable) {
-	nw.jtService.AddJoinTable(joinTable)
-}
+//func (nw *reteNetworkImpl) AddToAllJoinTables(joinTable types.JoinTable) {
+//	nw.jtService.AddJoinTable(joinTable)
+//}
 
 func (nw *reteNetworkImpl) SetTupleStore(tupleStore model.TupleStore) {
 	nw.tupleStore = tupleStore
