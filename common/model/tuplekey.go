@@ -121,7 +121,7 @@ func (tk *tupleKeyImpl) keysAsString() string {
 }
 
 //TODO: Validations
-func FromStringKey (strTupleKey string) TupleKey {
+func FromStringKey(strTupleKey string) TupleKey {
 
 	keyComps := strings.Split(strTupleKey, ":")
 
@@ -129,12 +129,12 @@ func FromStringKey (strTupleKey string) TupleKey {
 
 	key := ""
 
-	keyMap := make (map[string]interface{})
+	keyMap := make(map[string]interface{})
 
 	for i, v := range keyComps {
 		if i == 0 {
 			continue
-		} else if (i % 2 == 1) {
+		} else if i%2 == 1 {
 			//this is a key
 			key = v
 		} else {
@@ -143,7 +143,7 @@ func FromStringKey (strTupleKey string) TupleKey {
 		}
 	}
 
-	tupleKey, _:= NewTupleKeyWithKeyValues(tupleType, keyMap)
+	tupleKey, _ := NewTupleKeyWithKeyValues(tupleType, keyMap)
 
 	return tupleKey
 

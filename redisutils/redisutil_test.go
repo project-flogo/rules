@@ -152,7 +152,6 @@ func getStruct(c redis.Conn) error {
 
 }
 
-
 func Test_three(t *testing.T) {
 
 	InitService(nil)
@@ -188,7 +187,8 @@ func Test_four(t *testing.T) {
 
 	hdl := GetRedisHdl()
 
-	v := hdl.HGet("a", "b")
-	fmt.Printf("[%v]\n", v)
+	//v := hdl.HGet("a", "d")
+	len := hdl.HLen("a")
+	fmt.Printf("[%d]\n", len)
 
 }

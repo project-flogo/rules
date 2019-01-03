@@ -9,7 +9,7 @@ type jtServiceImpl struct {
 	types.NwServiceImpl
 
 	allJoinTables map[string]types.JoinTable
-	prefix string
+	prefix        string
 }
 
 func NewJoinTableCollection(nw types.Network, config map[string]interface{}) types.JtService {

@@ -100,14 +100,24 @@ func (rh *RedisHandle) HGet(key string, field string) interface{} {
 	if error != nil {
 		fmt.Printf("error [%v]\n", error)
 	} else {
-		vals2, err2 := redis.Values(vals, error)
-		if err2 != nil {
-			fmt.Printf("error [%v]\n", err2)
-			return nil
-		}
-		return vals2[0]
+		ba := vals.([]byte)
+		s := string(ba)
+		return s
 	}
 	return nil
+}
+
+func (rh *RedisHandle) HLen(key string) int {
+	c := rh.getPool().Get()
+	defer c.Close()
+	vals, error := c.Do("HLEN", key)
+	if error != nil {
+		fmt.Printf("error [%v]\n", error)
+	} else {
+		len, _ := redis.Int(vals, error)
+		return len
+	}
+	return 0
 }
 
 func (rh *RedisHandle) HIncrBy(key string, field string, by int) int {
@@ -169,10 +179,10 @@ func (rh *RedisHandle) Del(key string) int {
 	return j
 }
 
-func (rh *RedisHandle) HDel(key string) int {
+func (rh *RedisHandle) HDel(key string, field string) int {
 	c := rh.getPool().Get()
 	defer c.Close()
-	i, err := c.Do("HDEL", key)
+	i, err := c.Do("HDEL", key, field)
 	j := -1
 	if err == nil {
 		j, _ = redis.Int(i, err)
@@ -180,14 +190,13 @@ func (rh *RedisHandle) HDel(key string) int {
 	return j
 }
 
-
 type LIterator struct {
-	key string
-	scanIdx int //iterator index
-	keyIdx int //local array current index
-	keys []string //array of keys in the current call
+	key      string
+	scanIdx  int                    //iterator index
+	keyIdx   int                    //local array current index
+	keys     []string               //array of keys in the current call
 	valueMap map[string]interface{} //map of key/value of the current keys
-	rh RedisHdl
+	rh       RedisHdl
 }
 
 func (iter *LIterator) HasNext() bool {
@@ -226,7 +235,6 @@ func (iter *LIterator) Next() string {
 	return str
 }
 
-
 func (rh *RedisHandle) GetListIterator(key string) *LIterator {
 
 	iter := LIterator{}
@@ -257,12 +265,12 @@ func (iter *MapIterator) HasNext() bool {
 		if len(iter.keys) == 0 {
 			return false
 		} else {
-			if iter.keyIdx > len(iter.keys) - 2 {
+			if iter.keyIdx > len(iter.keys)-2 {
 				return false
 			}
 		}
 	} else {
-		if len(iter.keys) == 0 || iter.keyIdx >= len(iter.keys) - 1 {
+		if len(iter.keys) == 0 || iter.keyIdx >= len(iter.keys)-1 {
 			c := iter.rh.getPool().Get()
 			defer c.Close()
 			if arr, err := redis.Values(c.Do("HSCAN", iter.key, iter.scanIdx)); err != nil {
@@ -288,7 +296,6 @@ func (iter *MapIterator) Next() (string, interface{}) {
 	return str, value
 }
 
-
 func (rh *RedisHandle) GetMapIterator(key string) *MapIterator {
 
 	iter := MapIterator{}
@@ -308,4 +315,3 @@ func (rh *RedisHandle) GetMapIterator(key string) *MapIterator {
 
 	return &iter
 }
-
