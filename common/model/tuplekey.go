@@ -70,24 +70,42 @@ func NewTupleKeyWithKeyValues(tupleType TupleType, values ...interface{}) (tuple
 	tk.td = *td
 	tk.keys = make(map[string]interface{})
 
-	if len(values) != len(td.GetKeyProps()) {
-		return nil, fmt.Errorf("Wrong number of key values in type [%s]. Expecting [%d], got [%d]",
-			td.Name, len(td.GetKeyProps()), len(values))
+	switch vt := values[0].(type) {
+	case map[string]interface{}:
+		if len(vt) != len(td.GetKeyProps()) {
+			return nil, fmt.Errorf("Wrong number of key values in type [%s]. Expecting [%d], got [%d]",
+				td.Name, len(td.GetKeyProps()), len(vt))
+		}
+	default:
+		if len(values) != len(td.GetKeyProps()) {
+			return nil, fmt.Errorf("Wrong number of key values in type [%s]. Expecting [%d], got [%d]",
+				td.Name, len(td.GetKeyProps()), len(values))
+		}
 	}
 
-	i := 0
-	for _, keyProp := range td.GetKeyProps() {
+	for i, keyProp := range td.GetKeyProps() {
 		tdp := td.GetProperty(keyProp)
+<<<<<<< HEAD
 		val := values[i]
 		coerced, err := coerce.ToType(val, tdp.PropType)
+=======
+		var val interface{}
+		switch vt := values[0].(type) {
+		case map[string]interface{}:
+			val = vt[keyProp]
+		default:
+			val = values[i]
+		}
+		coerced, err := data.CoerceToValue(val, tdp.PropType)
+>>>>>>> wip redis impl for jointables
 		if err == nil {
 			tk.keys[keyProp] = coerced
 		} else {
 			return nil, fmt.Errorf("Type mismatch for field [%s] in type [%s] Expecting [%s], got [%v]",
 				keyProp, td.Name, tdp.PropType.String(), reflect.TypeOf(val))
 		}
-		i++
 	}
+
 	tk.keyAsStr = tk.keysAsString()
 	return &tk, err
 }
