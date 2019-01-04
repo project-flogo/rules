@@ -58,6 +58,7 @@ func (h *jtRefsServiceImpl) RemoveRowEntry(handle types.ReteHandle, jtName strin
 
 func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIterator {
 	ri := hdlTblIteratorImpl{}
+	ri.nw = h.Nw
 	//ri.hdlJtImpl = h
 	ri.kList = list.List{}
 
@@ -76,17 +77,18 @@ type hdlTblIteratorImpl struct {
 	tblMap map[string]map[int]int
 	kList  list.List
 	curr   *list.Element
+	nw     types.Network
 }
 
 func (ri *hdlTblIteratorImpl) HasNext() bool {
 	return ri.curr != nil
 }
 
-func (ri *hdlTblIteratorImpl) Next() (string, map[int]int) {
-	id := ri.curr.Value.(string)
-	lst := ri.tblMap[id]
+func (ri *hdlTblIteratorImpl) Next() types.JoinTable {
+	jtName := ri.curr.Value.(string)
+	jT := ri.nw.GetJtService().GetJoinTable(jtName)
 	ri.curr = ri.curr.Next()
-	return id, lst
+	return jT
 }
 
 type RowIDIteratorImpl struct {

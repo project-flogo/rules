@@ -1,22 +1,22 @@
 package redis
 
 import (
-	"container/list"
 	"github.com/project-flogo/rules/redisutils"
 	"github.com/project-flogo/rules/rete/internal/types"
+	"strconv"
 )
 
 type jtRefsServiceImpl struct {
 	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
 	types.NwServiceImpl
 
-	tablesAndRows map[string]map[string]map[int]int
+	//tablesAndRows map[string]map[string]map[int]int
 }
 
 func NewJoinTableRefsInHdlImpl(nw types.Network, config map[string]interface{}) types.JtRefsService {
 	hdlJt := jtRefsServiceImpl{}
 	hdlJt.Nw = nw
-	hdlJt.tablesAndRows = make(map[string]map[string]map[int]int)
+	//hdlJt.tablesAndRows = make(map[string]map[string]map[int]int)
 	return &hdlJt
 }
 
@@ -26,88 +26,94 @@ func (h *jtRefsServiceImpl) Init() {
 
 func (h *jtRefsServiceImpl) AddEntry(handle types.ReteHandle, jtName string, rowID int) {
 
-	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
+	//format: prefix:rtbls:tkey ==> {jtname=jtname, ...}
+	//format: prefix:rrows:tkey:jtname ==> {rowid=rowid, ...}
 
-	if !found {
-		tblMap = make(map[string]map[int]int)
-		h.tablesAndRows[handle.GetTupleKey().String()] = tblMap
-	}
+	key := h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
+	hdl := redisutils.GetRedisHdl()
+	valMap := make(map[string]interface{})
+	valMap[jtName] = jtName
+	hdl.HSetAll(key, valMap)
 
-	rowsForJoinTable, found := tblMap[jtName]
-	if !found {
-		rowsForJoinTable = make(map[int]int)
-		tblMap[jtName] = rowsForJoinTable
-	}
-	rowsForJoinTable[rowID] = rowID
+	rkey := h.Nw.GetPrefix() + ":rrows:" + handle.GetTupleKey().String() + ":" + jtName
+	rowMap := make(map[string]interface{})
+	rowIdStr := strconv.Itoa(rowID)
+	rowMap[rowIdStr] = rowIdStr
+	hdl.HSetAll(rkey, rowMap)
 }
 
 func (h *jtRefsServiceImpl) RemoveEntry(handle types.ReteHandle, jtName string) {
-	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
-	if found {
-		delete(tblMap, jtName)
-	}
+	key := h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
+	hdl := redisutils.GetRedisHdl()
+	hdl.HDel(key, jtName)
+
+	rkey := h.Nw.GetPrefix() + ":rrows:" + handle.GetTupleKey().String() + ":" + jtName
+	hdl.Del(rkey)
+
 }
 
 func (h *jtRefsServiceImpl) RemoveRowEntry(handle types.ReteHandle, jtName string, rowID int) {
-	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
-	if found {
-		rowIDs, fnd := tblMap[jtName]
-		if fnd {
-			delete(rowIDs, rowID)
-		}
-	}
+	rowKey := h.Nw.GetPrefix() + ":rrows:" + handle.GetTupleKey().String() + ":" + jtName
+	hdl := redisutils.GetRedisHdl()
+	rowIdStr := strconv.Itoa(rowID)
+	hdl.HDel(rowKey, rowIdStr)
+
+	//hkey := h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
+	//hdl.HDel(hkey, jtName)
 }
 
 func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIterator {
 	ri := hdlTblIteratorImpl{}
-	//ri.hdlJtImpl = h
-	ri.kList = list.List{}
-
-	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
-	if found {
-		ri.tblMap = tblMap
-		for k, _ := range tblMap {
-			ri.kList.PushBack(k)
-		}
-	}
-	ri.curr = ri.kList.Front()
+	//format: prefix:rtbls:tkey ==> {jtname=jtname, ...}
+	key := h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
+	hdl := redisutils.GetRedisHdl()
+	ri.iter = hdl.GetMapIterator(key)
 	return &ri
 }
 
 type hdlTblIteratorImpl struct {
-	tblMap map[string]map[int]int
-	kList  list.List
-	curr   *list.Element
+	iter *redisutils.MapIterator
+	nw   types.Network
 }
 
 func (ri *hdlTblIteratorImpl) HasNext() bool {
-	return ri.curr != nil
+	return ri.iter.HasNext()
 }
 
-func (ri *hdlTblIteratorImpl) Next() (string, map[int]int) {
-	id := ri.curr.Value.(string)
-	lst := ri.tblMap[id]
-	ri.curr = ri.curr.Next()
-	return id, lst
+func (ri *hdlTblIteratorImpl) Next() types.JoinTable {
+	jtName, _ := ri.iter.Next()
+	jT := ri.nw.GetJtService().GetJoinTable(jtName)
+	return jT
 }
 
 type RowIDIteratorImpl struct {
-	key  string
-	iter *redisutils.MapIterator
+	key    string
+	iter   *redisutils.MapIterator
+	nw     types.Network
+	jtName string
 }
 
 func (r *RowIDIteratorImpl) HasNext() bool {
-	return false
+	return r.iter.HasNext()
 }
 
 func (r *RowIDIteratorImpl) Next() types.JoinTableRow {
-	return nil
+	rowIdStr, _ := r.iter.Next()
+	rowID, _ := strconv.Atoi(rowIdStr)
+	jT := r.nw.GetJtService().GetJoinTable(r.jtName)
+	row := jT.GetRow(rowID)
+	return row
 }
+
+//format: prefix:rtbls:tkey ==> {jtname=jtname, ...}
+//format: prefix:rrows:tkey:jtname ==> {rowid=rowid, ...}
 
 func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle, jtName string) types.RowIterator {
 	r := RowIDIteratorImpl{}
-	//ex: a:rf:n1:a:b1:L_tbl
-	r.key = h.Nw.GetPrefix() + ":rf:" + handle.GetTupleKey().String() + ":" + jtName
+	r.nw = h.Nw
+	r.jtName = jtName
+	//ex: a:rrows:n1:a:b1:L_tbl
+	r.key = h.Nw.GetPrefix() + ":rrows:" + handle.GetTupleKey().String() + ":" + jtName
 	hdl := redisutils.GetRedisHdl()
 	r.iter = hdl.GetMapIterator(r.key)
 	return &r

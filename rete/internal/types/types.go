@@ -86,7 +86,7 @@ type JtRefsService interface {
 
 type HdlTblIterator interface {
 	HasNext() bool
-	Next() (string, map[int]int)
+	Next() JoinTable
 }
 
 type JtService interface {
