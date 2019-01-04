@@ -716,9 +716,9 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 		for rowIter.HasNext() {
 			row := rowIter.Next()
 			for _, otherHdl := range row.GetHandles() {
-				if otherHdl.GetTupleKey().String() != hdl.GetTupleKey().String() {
+				//if otherHdl.GetTupleKey().String() != hdl.GetTupleKey().String() {
 					nw.jtRefsService.RemoveRowEntry(otherHdl, joinTable.GetName(), row.GetID())
-				}
+				//}
 			}
 
 		}

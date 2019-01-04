@@ -64,6 +64,7 @@ func (h *jtRefsServiceImpl) RemoveRowEntry(handle types.ReteHandle, jtName strin
 
 func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIterator {
 	ri := hdlTblIteratorImpl{}
+	ri.nw = h.Nw
 	//format: prefix:rtbls:tkey ==> {jtname=jtname, ...}
 	key := h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
 	hdl := redisutils.GetRedisHdl()
