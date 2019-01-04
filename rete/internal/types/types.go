@@ -65,6 +65,11 @@ type RowIterator interface {
 	Next() JoinTableRow
 }
 
+type RowIDIterator interface {
+	HasNext() bool
+	Next() JoinTableRow
+}
+
 type NwService interface {
 	model.Service
 	GetNw() Network
@@ -76,6 +81,7 @@ type JtRefsService interface {
 	RemoveRowEntry(handle ReteHandle, jtName string, rowID int)
 	RemoveEntry(handle ReteHandle, jtName string)
 	GetIterator(handle ReteHandle) HdlTblIterator
+	GetRowIterator(handle ReteHandle, jtName string) RowIterator
 }
 
 type HdlTblIterator interface {

@@ -55,7 +55,7 @@ func main() {
 	fmt.Println("Asserting n1 tuple with name=Tom")
 	t1, _ := model.NewTupleWithKeyValues("n1", "Tom")
 	t1.SetString(nil, "name", "Tom")
-	//err = rs.Assert(nil, t1)
+	err = rs.Assert(nil, t1)
 	if err != nil {
 		fmt.Printf("Warn: [%s]\n", err)
 	}
@@ -64,7 +64,7 @@ func main() {
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	t2, _ := model.NewTupleWithKeyValues("n1", "Bob")
 	t2.SetString(nil, "name", "Bob")
-	//err = rs.Assert(nil, t2)
+	err = rs.Assert(nil, t2)
 	if err != nil {
 		fmt.Printf("Warn: [%s]\n", err)
 	}
@@ -79,15 +79,16 @@ func main() {
 	}
 
 	//Retract tuples
-	//rs.Delete(nil, t1)
-	//rs.Delete(nil, t2)
-	//rs.Delete(nil, t3)
+	rs.Retract(nil, t1)
+	rs.Retract(nil, t2)
+	rs.Retract(nil, t3)
 
 	//delete the rule
 	rs.DeleteRule(rule.GetName())
 
 	//unregister the session, i.e; cleanup
 	rs.Unregister()
+
 }
 
 func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {

@@ -16,7 +16,6 @@ import (
 )
 
 type reteNetworkImpl struct {
-
 	//unique name of the network. used for namespacing in storage, etc
 	prefix string
 
@@ -686,7 +685,7 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 	hdlTblIter := nw.jtRefsService.GetIterator(hdl)
 
 	for hdlTblIter.HasNext() {
-		jtName, rowIDs := hdlTblIter.Next()
+		jtName, _ := hdlTblIter.Next()
 		joinTable := nw.jtService.GetJoinTable(jtName)
 		if joinTable == nil {
 			continue
@@ -711,21 +710,18 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 		if !toDelete {
 			continue
 		}
-		//this can happen if some other handle removed a row as a result of retraction
-		if rowIDs == nil {
-			continue
-		}
+
+		rowIter := nw.jtRefsService.GetRowIterator(hdl, jtName)
+
 		////Remove rows from corresponding join tables
-		for rowID, _ := range rowIDs {
-			row := joinTable.RemoveRow(rowID)
-			if row != nil {
-				//Remove this (table+row) link from other handle refs of this row!
-				for _, otherHdl := range row.GetHandles() {
-					if otherHdl.GetTupleKey().String() != hdl.GetTupleKey().String() {
-						nw.jtRefsService.RemoveRowEntry(otherHdl, jtName, rowID)
-					}
+		for rowIter.HasNext() {
+			row := rowIter.Next()
+			for _, otherHdl := range row.GetHandles() {
+				if otherHdl.GetTupleKey().String() != hdl.GetTupleKey().String() {
+					nw.jtRefsService.RemoveRowEntry(otherHdl, jtName, row.GetID())
 				}
 			}
+
 		}
 	}
 }

@@ -315,3 +315,11 @@ func (rh *RedisHandle) GetMapIterator(key string) *MapIterator {
 
 	return &iter
 }
+
+func Shutdown() {
+	if rd != nil {
+
+		rd.pool.Close()
+		rd = nil
+	}
+}

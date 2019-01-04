@@ -2,6 +2,7 @@ package redis
 
 import (
 	"container/list"
+	"github.com/project-flogo/rules/redisutils"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
@@ -88,4 +89,26 @@ func (ri *hdlTblIteratorImpl) Next() (string, map[int]int) {
 	lst := ri.tblMap[id]
 	ri.curr = ri.curr.Next()
 	return id, lst
+}
+
+type RowIDIteratorImpl struct {
+	key  string
+	iter *redisutils.MapIterator
+}
+
+func (r *RowIDIteratorImpl) HasNext() bool {
+	return false
+}
+
+func (r *RowIDIteratorImpl) Next() types.JoinTableRow {
+	return nil
+}
+
+func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle, jtName string) types.RowIterator {
+	r := RowIDIteratorImpl{}
+	//ex: a:rf:n1:a:b1:L_tbl
+	r.key = h.Nw.GetPrefix() + ":rf:" + handle.GetTupleKey().String() + ":" + jtName
+	hdl := redisutils.GetRedisHdl()
+	r.iter = hdl.GetMapIterator(r.key)
+	return &r
 }

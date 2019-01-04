@@ -88,3 +88,45 @@ func (ri *hdlTblIteratorImpl) Next() (string, map[int]int) {
 	ri.curr = ri.curr.Next()
 	return id, lst
 }
+
+type RowIDIteratorImpl struct {
+	jtName   string
+	rowIdMap map[int]int
+	kList    list.List
+	curr     *list.Element
+	nw       types.Network
+}
+
+func (ri *RowIDIteratorImpl) HasNext() bool {
+	return ri.curr != nil
+}
+
+func (ri *RowIDIteratorImpl) Next() types.JoinTableRow {
+	rowID := ri.curr.Value.(int)
+	var jtRow types.JoinTableRow
+	jT := ri.nw.GetJtService().GetJoinTable(ri.jtName)
+	if jT != nil {
+		jtRow = jT.GetRow(rowID)
+	}
+	ri.curr = ri.curr.Next()
+	return jtRow
+}
+
+func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle, jtName string) types.RowIterator {
+	ri := RowIDIteratorImpl{}
+	ri.jtName = jtName
+	ri.kList = list.List{}
+	ri.nw = h.Nw
+	tblMap := h.tablesAndRows[handle.GetTupleKey().String()]
+	if tblMap != nil {
+		rowMap := tblMap[jtName]
+		if rowMap != nil {
+			ri.rowIdMap = rowMap
+			for k, _ := range ri.rowIdMap {
+				ri.kList.PushBack(k)
+			}
+		}
+	}
+	ri.curr = ri.kList.Front()
+	return &ri
+}
