@@ -79,12 +79,12 @@ func main() {
 	}
 
 	//Retract tuples
-	rs.Retract(nil, t1)
-	rs.Retract(nil, t2)
-	rs.Retract(nil, t3)
+	//rs.Retract(nil, t1)
+	rs.Delete(nil, t2)
+	rs.Delete(nil, t3)
 
 	//delete the rule
-	rs.DeleteRule(rule.GetName())
+	//rs.DeleteRule(rule.GetName())
 
 	//unregister the session, i.e; cleanup
 	rs.Unregister()

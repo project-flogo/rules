@@ -1,7 +1,6 @@
 package redis
 
 import (
-	"fmt"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/redisutils"
 	"github.com/project-flogo/rules/rete/internal/types"
@@ -32,8 +31,8 @@ func (hc *handleServiceImpl) Init() {
 
 func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {
 	rkey := hc.prefix + tuple.GetKey().String()
-	numDeleted := redisutils.GetRedisHdl().Del(rkey)
-	fmt.Printf("Deleted: [%d] keys\n", numDeleted)
+	redisutils.GetRedisHdl().Del(rkey)
+	//fmt.Printf("Deleted: [%d] keys\n", numDeleted)
 
 	//TODO: Dummy handle
 	h := newReteHandleImpl(hc.GetNw(), tuple)
@@ -74,7 +73,5 @@ func (hc *handleServiceImpl) GetOrCreateHandle(nw types.Network, tuple model.Tup
 	}
 
 	h := newReteHandleImpl(nw, tuple)
-	//hc.allHandles[tuple.GetKey().String()] = h
-
 	return h
 }

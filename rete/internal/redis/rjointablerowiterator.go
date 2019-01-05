@@ -9,6 +9,7 @@ type rowIteratorImpl struct {
 	iter   *redisutils.MapIterator
 	jtName string
 	nw     types.Network
+	curr types.JoinTableRow
 }
 
 func newRowIterator(jTable types.JoinTable) types.RowIterator {
@@ -27,5 +28,10 @@ func (ri *rowIteratorImpl) HasNext() bool {
 func (ri *rowIteratorImpl) Next() types.JoinTableRow {
 	rowId, key := ri.iter.Next()
 	tupleKeyStr := key.(string)
-	return createRow(ri.jtName, rowId, tupleKeyStr, ri.nw)
+	ri.curr = createRow(ri.jtName, rowId, tupleKeyStr, ri.nw)
+	return ri.curr
+}
+
+func (ri *rowIteratorImpl) Remove() {
+	ri.iter.Remove()
 }

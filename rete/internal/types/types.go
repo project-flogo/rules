@@ -63,6 +63,7 @@ type ReteHandle interface {
 type RowIterator interface {
 	HasNext() bool
 	Next() JoinTableRow
+	Remove() // remove underneath current element
 }
 
 type RowIDIterator interface {
@@ -87,6 +88,7 @@ type JtRefsService interface {
 type HdlTblIterator interface {
 	HasNext() bool
 	Next() JoinTable
+	Remove()
 }
 
 type JtService interface {

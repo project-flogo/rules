@@ -257,6 +257,8 @@ func (rh *RedisHandle) GetListIterator(key string) *LIterator {
 
 type MapIterator struct {
 	LIterator
+	currKey string
+	currValue interface{}
 }
 
 func (iter *MapIterator) HasNext() bool {
@@ -287,13 +289,17 @@ func (iter *MapIterator) HasNext() bool {
 	return true
 
 }
+func (iter *MapIterator) Remove() {
+	hdl := GetRedisHdl()
+	hdl.HDel(iter.key, iter.currKey)
+}
 
 func (iter *MapIterator) Next() (string, interface{}) {
-	str := iter.keys[iter.keyIdx]
-	value := iter.keys[iter.keyIdx+1]
+	iter.currKey = iter.keys[iter.keyIdx]
+	iter.currValue = iter.keys[iter.keyIdx+1]
 
 	iter.keyIdx += 2
-	return str, value
+	return iter.currKey, iter.currValue
 }
 
 func (rh *RedisHandle) GetMapIterator(key string) *MapIterator {

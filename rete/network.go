@@ -662,10 +662,6 @@ func (nw *reteNetworkImpl) getFactory() *TypeFactory {
 	return nw.factory
 }
 
-//func (nw *reteNetworkImpl) AddToAllJoinTables(joinTable types.JoinTable) {
-//	nw.jtService.AddJoinTable(joinTable)
-//}
-
 func (nw *reteNetworkImpl) SetTupleStore(tupleStore model.TupleStore) {
 	nw.tupleStore = tupleStore
 }
@@ -715,14 +711,19 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 		////Remove rows from corresponding join tables
 		for rowIter.HasNext() {
 			row := rowIter.Next()
+			//first, from jTable, remove row
+			joinTable.RemoveRow(row.GetID())
 			for _, otherHdl := range row.GetHandles() {
 				//if otherHdl.GetTupleKey().String() != hdl.GetTupleKey().String() {
 					nw.jtRefsService.RemoveRowEntry(otherHdl, joinTable.GetName(), row.GetID())
 				//}
 			}
-
+			//TODO: Delete the rowRef itself
+			rowIter.Remove()
 		}
 	}
+	//TODO: Remove the current entry from underneath
+	hdlTblIter.Remove()
 }
 
 func (nw *reteNetworkImpl) GetIdGenService() types.IdGen {

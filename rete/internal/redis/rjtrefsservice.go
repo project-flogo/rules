@@ -86,6 +86,9 @@ func (ri *hdlTblIteratorImpl) Next() types.JoinTable {
 	jT := ri.nw.GetJtService().GetJoinTable(jtName)
 	return jT
 }
+func (ri *hdlTblIteratorImpl) Remove() {
+	ri.iter.Remove()
+}
 
 type RowIDIteratorImpl struct {
 	key    string
@@ -106,6 +109,9 @@ func (r *RowIDIteratorImpl) Next() types.JoinTableRow {
 	return row
 }
 
+func (r *RowIDIteratorImpl) Remove() {
+	r.iter.Remove()
+}
 //format: prefix:rtbls:tkey ==> {jtname=jtname, ...}
 //format: prefix:rrows:tkey:jtname ==> {rowid=rowid, ...}
 
