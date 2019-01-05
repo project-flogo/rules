@@ -59,7 +59,7 @@ func (ms *storeImpl) SaveTuples(added map[string]map[string]model.Tuple) {
 	hdl := redisutils.GetRedisHdl()
 	for tupleType, tuples := range added {
 		for key, tuple := range tuples {
-			fmt.Printf("Saving tuple. Type [%s] Key [%s], Val [%v]\n", tupleType, key, tuple)
+			fmt.Printf("Saving tuple. Type [%s] Key [%s]\n", tupleType, key)
 			strKey := ms.prefix + key
 			hdl.HSetAll(strKey, tuple.ToMap())
 		}
@@ -70,7 +70,7 @@ func (ms *storeImpl) SaveModifiedTuples(modified map[string]map[string]model.Rtc
 	hdl := redisutils.GetRedisHdl()
 	for tupleType, mmap := range modified {
 		for key, mdfd := range mmap {
-			fmt.Printf("Saving tuple. Type [%s] Key [%s], Val [%v]\n", tupleType, key, mdfd.GetTuple())
+			fmt.Printf("Saving tuple. Type [%s] Key [%s]\n", tupleType, key)
 			strKey := ms.prefix + key
 			hdl.HSetAll(strKey, mdfd.GetTuple().ToMap())
 		}
@@ -80,8 +80,8 @@ func (ms *storeImpl) SaveModifiedTuples(modified map[string]map[string]model.Rtc
 func (ms *storeImpl) DeleteTuples(deleted map[string]map[string]model.Tuple) {
 	hdl := redisutils.GetRedisHdl()
 	for tupleType, tuples := range deleted {
-		for key, tuple := range tuples {
-			fmt.Printf("Deleting tuple. Type [%s] Key [%s], Val [%v]\n", tupleType, key, tuple)
+		for key, _ := range tuples {
+			fmt.Printf("Deleting tuple. Type [%s] Key [%s]\n", tupleType, key)
 			strKey := ms.prefix + key
 			hdl.Del(strKey)
 		}
