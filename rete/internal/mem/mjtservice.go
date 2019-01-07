@@ -24,14 +24,6 @@ func (jtc *jtServiceImpl) GetJoinTable(joinTableName string) types.JoinTable {
 	return jtc.allJoinTables[joinTableName]
 }
 
-//func (jtc *jtServiceImpl) AddJoinTable(joinTable types.JoinTable) {
-//	jtc.allJoinTables[joinTable.GetName()] = joinTable
-//}
-//
-//func (jtc *jtServiceImpl) RemoveJoinTable(jtName string) {
-//	delete(jtc.allJoinTables, jtName)
-//}
-
 func (jtc *jtServiceImpl) GetOrCreateJoinTable(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
 	jT, found := jtc.allJoinTables[name]
 	if !found {

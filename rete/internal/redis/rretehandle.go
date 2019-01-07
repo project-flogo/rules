@@ -50,7 +50,7 @@ func (hdl *reteHandleImpl) RemoveJoinTable(jtName string) {
 	hdl.Nw.GetJtRefService().RemoveEntry(hdl, jtName)
 }
 
-func (hdl *reteHandleImpl) GetRefTableIterator() types.HdlTblIterator {
-	refTblIterator := hdl.Nw.GetJtRefService().GetIterator(hdl)
+func (hdl *reteHandleImpl) GetRefTableIterator() types.JointableIterator {
+	refTblIterator := hdl.Nw.GetJtRefService().GetTableIterator(hdl)
 	return refTblIterator
 }

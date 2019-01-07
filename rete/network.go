@@ -680,7 +680,7 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 	tuple := hdl.GetTuple()
 	alias := tuple.GetTupleType()
 
-	hdlTblIter := nw.jtRefsService.GetIterator(hdl)
+	hdlTblIter := nw.jtRefsService.GetTableIterator(hdl)
 
 	for hdlTblIter.HasNext() {
 		joinTable := hdlTblIter.Next()

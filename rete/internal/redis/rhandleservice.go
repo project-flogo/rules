@@ -23,17 +23,9 @@ func (hc *handleServiceImpl) Init() {
 	hc.prefix = hc.Nw.GetPrefix() + ":h:"
 }
 
-//func (hc *handleServiceImpl) AddHandle(hdl types.ReteHandle) {
-//	//hc.allHandles[hdl.GetTupleKey().String()] = hdl
-//
-//	redisutils.GetRedisHdl().HSetAll(key, m)
-//}
-
 func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {
 	rkey := hc.prefix + tuple.GetKey().String()
 	redisutils.GetRedisHdl().Del(rkey)
-	//fmt.Printf("Deleted: [%d] keys\n", numDeleted)
-
 	//TODO: Dummy handle
 	h := newReteHandleImpl(hc.GetNw(), tuple)
 	return h

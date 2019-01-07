@@ -63,10 +63,9 @@ func (h *jtRefsServiceImpl) RemoveTableEntry(handle types.ReteHandle, jtName str
 	}
 }
 
-func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIterator {
-	ri := hdlTblIteratorImpl{}
+func (h *jtRefsServiceImpl) GetTableIterator(handle types.ReteHandle) types.JointableIterator {
+	ri := hdlRefsTableIterator{}
 	ri.nw = h.Nw
-	//ri.hdlJtImpl = h
 	ri.kList = list.List{}
 
 	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
@@ -80,7 +79,7 @@ func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIte
 	return &ri
 }
 
-type hdlTblIteratorImpl struct {
+type hdlRefsTableIterator struct {
 	tblMap     map[string]map[int]int
 	kList      list.List
 	currJtName string
@@ -88,22 +87,22 @@ type hdlTblIteratorImpl struct {
 	nw         types.Network
 }
 
-func (ri *hdlTblIteratorImpl) HasNext() bool {
+func (ri *hdlRefsTableIterator) HasNext() bool {
 	return ri.curr != nil
 }
 
-func (ri *hdlTblIteratorImpl) Next() types.JoinTable {
+func (ri *hdlRefsTableIterator) Next() types.JoinTable {
 	ri.currJtName = ri.curr.Value.(string)
 	jT := ri.nw.GetJtService().GetJoinTable(ri.currJtName)
 	ri.curr = ri.curr.Next()
 	return jT
 }
 
-func (ri *hdlTblIteratorImpl) Remove() {
+func (ri *hdlRefsTableIterator) Remove() {
 	delete(ri.tblMap, ri.currJtName)
 }
 
-type RowIDIteratorImpl struct {
+type hdlRefsRowIterator struct {
 	jtName    string
 	rowIdMap  map[int]int
 	kList     list.List
@@ -112,11 +111,11 @@ type RowIDIteratorImpl struct {
 	nw        types.Network
 }
 
-func (ri *RowIDIteratorImpl) HasNext() bool {
+func (ri *hdlRefsRowIterator) HasNext() bool {
 	return ri.curr != nil
 }
 
-func (ri *RowIDIteratorImpl) Next() types.JoinTableRow {
+func (ri *hdlRefsRowIterator) Next() types.JoinTableRow {
 	rowID := ri.curr.Value.(int)
 	ri.currRowId = rowID
 	var jtRow types.JoinTableRow
@@ -128,12 +127,12 @@ func (ri *RowIDIteratorImpl) Next() types.JoinTableRow {
 	return jtRow
 }
 
-func (ri *RowIDIteratorImpl) Remove() {
+func (ri *hdlRefsRowIterator) Remove() {
 	delete(ri.rowIdMap, ri.currRowId)
 }
 
-func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle, jtName string) types.RowIterator {
-	ri := RowIDIteratorImpl{}
+func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle, jtName string) types.JointableRowIterator {
+	ri := hdlRefsRowIterator{}
 	ri.jtName = jtName
 	ri.kList = list.List{}
 	ri.nw = h.Nw

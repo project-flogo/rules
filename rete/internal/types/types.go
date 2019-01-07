@@ -15,27 +15,6 @@ type Network interface {
 	GetTupleStore() model.TupleStore
 }
 
-type NwElemId interface {
-	SetID(nw Network)
-	GetID() int
-	GetNw() Network
-}
-type NwElemIdImpl struct {
-	ID int
-	Nw Network
-}
-
-func (ide *NwElemIdImpl) SetID(nw Network) {
-	ide.Nw = nw
-	ide.ID = nw.GetIdGenService().GetNextID()
-}
-func (ide *NwElemIdImpl) GetID() int {
-	return ide.ID
-}
-func (ide *NwElemIdImpl) GetNw() Network {
-	return ide.Nw
-}
-
 type JoinTable interface {
 	NwElemId
 	GetName() string
@@ -44,11 +23,12 @@ type JoinTable interface {
 	AddRow(handles []ReteHandle) JoinTableRow
 	RemoveRow(rowID int) JoinTableRow
 	GetRow(rowID int) JoinTableRow
-	GetRowIterator() RowIterator
+	GetRowIterator() JointableRowIterator
 
 	GetRowCount() int
 	RemoveAllRows() //used when join table needs to be deleted
 }
+
 type JoinTableRow interface {
 	NwElemId
 	GetHandles() []ReteHandle
@@ -61,44 +41,20 @@ type ReteHandle interface {
 	GetTupleKey() model.TupleKey
 }
 
-type RowIterator interface {
-	HasNext() bool
-	Next() JoinTableRow
-	Remove() // remove underneath current element
-}
-
-type RowIDIterator interface {
-	HasNext() bool
-	Next() JoinTableRow
-}
-
-type NwService interface {
-	model.Service
-	GetNw() Network
-}
-
 type JtRefsService interface {
 	NwService
 	AddEntry(handle ReteHandle, jtName string, rowID int)
 	RemoveRowEntry(handle ReteHandle, jtName string, rowID int)
 	RemoveTableEntry(handle ReteHandle, jtName string)
 	RemoveEntry(handle ReteHandle, jtName string)
-	GetIterator(handle ReteHandle) HdlTblIterator
-	GetRowIterator(handle ReteHandle, jtName string) RowIterator
-}
-
-type HdlTblIterator interface {
-	HasNext() bool
-	Next() JoinTable
-	Remove()
+	GetTableIterator(handle ReteHandle) JointableIterator
+	GetRowIterator(handle ReteHandle, jtName string) JointableRowIterator
 }
 
 type JtService interface {
 	NwService
 	GetOrCreateJoinTable(nw Network, rule model.Rule, identifiers []model.TupleType, name string) JoinTable
 	GetJoinTable(name string) JoinTable
-	//AddJoinTable(joinTable JoinTable)
-	//RemoveJoinTable(name string)
 }
 
 type HandleService interface {
@@ -115,10 +71,14 @@ type IdGen interface {
 	GetNextID() int
 }
 
-type NwServiceImpl struct {
-	Nw Network
+type JointableIterator interface {
+	HasNext() bool
+	Next() JoinTable
+	Remove()
 }
 
-func (nws *NwServiceImpl) GetNw() Network {
-	return nws.Nw
+type JointableRowIterator interface {
+	HasNext() bool
+	Next() JoinTableRow
+	Remove()
 }

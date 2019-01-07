@@ -74,8 +74,8 @@ func (h *jtRefsServiceImpl) RemoveTableEntry(handle types.ReteHandle, jtName str
 	hdl.HDel(hkey, jtName)
 }
 
-func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIterator {
-	ri := hdlTblIteratorImpl{}
+func (h *jtRefsServiceImpl) GetTableIterator(handle types.ReteHandle) types.JointableIterator {
+	ri := hdlRefsTableIteratorImpl{}
 	ri.nw = h.Nw
 	//format: prefix:rtbls:tkey ==> {jtname=jtname, ...}
 	key := h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
@@ -84,36 +84,36 @@ func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIte
 	return &ri
 }
 
-type hdlTblIteratorImpl struct {
+type hdlRefsTableIteratorImpl struct {
 	iter *redisutils.MapIterator
 	nw   types.Network
 }
 
-func (ri *hdlTblIteratorImpl) HasNext() bool {
+func (ri *hdlRefsTableIteratorImpl) HasNext() bool {
 	return ri.iter.HasNext()
 }
 
-func (ri *hdlTblIteratorImpl) Next() types.JoinTable {
+func (ri *hdlRefsTableIteratorImpl) Next() types.JoinTable {
 	jtName, _ := ri.iter.Next()
 	jT := ri.nw.GetJtService().GetJoinTable(jtName)
 	return jT
 }
-func (ri *hdlTblIteratorImpl) Remove() {
+func (ri *hdlRefsTableIteratorImpl) Remove() {
 	ri.iter.Remove()
 }
 
-type RowIDIteratorImpl struct {
+type hdlRefsRowIteratorImpl struct {
 	key    string
 	iter   *redisutils.MapIterator
 	nw     types.Network
 	jtName string
 }
 
-func (r *RowIDIteratorImpl) HasNext() bool {
+func (r *hdlRefsRowIteratorImpl) HasNext() bool {
 	return r.iter.HasNext()
 }
 
-func (r *RowIDIteratorImpl) Next() types.JoinTableRow {
+func (r *hdlRefsRowIteratorImpl) Next() types.JoinTableRow {
 	rowIdStr, _ := r.iter.Next()
 	rowID, _ := strconv.Atoi(rowIdStr)
 	jT := r.nw.GetJtService().GetJoinTable(r.jtName)
@@ -121,15 +121,15 @@ func (r *RowIDIteratorImpl) Next() types.JoinTableRow {
 	return row
 }
 
-func (r *RowIDIteratorImpl) Remove() {
+func (r *hdlRefsRowIteratorImpl) Remove() {
 	r.iter.Remove()
 }
 
 //format: prefix:rtbls:tkey ==> {jtname=jtname, ...}
 //format: prefix:rrows:tkey:jtname ==> {rowid=rowid, ...}
 
-func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle, jtName string) types.RowIterator {
-	r := RowIDIteratorImpl{}
+func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle, jtName string) types.JointableRowIterator {
+	r := hdlRefsRowIteratorImpl{}
 	r.nw = h.Nw
 	r.jtName = jtName
 	//ex: a:rrows:n1:a:b1:L_tbl
