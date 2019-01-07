@@ -62,6 +62,18 @@ func (h *jtRefsServiceImpl) RemoveRowEntry(handle types.ReteHandle, jtName strin
 	//hdl.HDel(hkey, jtName)
 }
 
+func (h *jtRefsServiceImpl) RemoveTableEntry(handle types.ReteHandle, jtName string) {
+
+	//Delete all row entry refs for this table
+	rowKey := h.Nw.GetPrefix() + ":rrows:" + handle.GetTupleKey().String() + ":" + jtName
+	hdl := redisutils.GetRedisHdl()
+	hdl.Del(rowKey)
+
+	//Delete the table entry for this key
+	hkey := h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
+	hdl.HDel(hkey, jtName)
+}
+
 func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIterator {
 	ri := hdlTblIteratorImpl{}
 	ri.nw = h.Nw
@@ -112,6 +124,7 @@ func (r *RowIDIteratorImpl) Next() types.JoinTableRow {
 func (r *RowIDIteratorImpl) Remove() {
 	r.iter.Remove()
 }
+
 //format: prefix:rtbls:tkey ==> {jtname=jtname, ...}
 //format: prefix:rrows:tkey:jtname ==> {rowid=rowid, ...}
 

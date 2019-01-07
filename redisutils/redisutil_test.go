@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gomodule/redigo/redis"
+	"strconv"
 	"testing"
 )
 
@@ -191,5 +192,18 @@ func Test_four(t *testing.T) {
 	//v := hdl.HGet("a", "d")
 	len := hdl.HLen("a")
 	fmt.Printf("[%d]\n", len)
+
+}
+
+func Test_five(t *testing.T) {
+	InitService(nil)
+
+	hdl := GetRedisHdl()
+
+	for i := 0; i < 10; i++ {
+		m := make(map[string]interface{})
+		m[""+strconv.Itoa(i)] = i
+		hdl.HSetAll("x", m)
+	}
 
 }

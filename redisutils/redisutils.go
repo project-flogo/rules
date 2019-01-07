@@ -196,7 +196,7 @@ type LIterator struct {
 	keyIdx   int                    //local array current index
 	keys     []string               //array of keys in the current call
 	valueMap map[string]interface{} //map of key/value of the current keys
-	rh       RedisHdl
+	rh       *RedisHandle
 }
 
 func (iter *LIterator) HasNext() bool {
@@ -257,7 +257,7 @@ func (rh *RedisHandle) GetListIterator(key string) *LIterator {
 
 type MapIterator struct {
 	LIterator
-	currKey string
+	currKey   string
 	currValue interface{}
 }
 

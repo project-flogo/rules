@@ -47,6 +47,7 @@ type JoinTable interface {
 	GetRowIterator() RowIterator
 
 	GetRowCount() int
+	RemoveAllRows() //used when join table needs to be deleted
 }
 type JoinTableRow interface {
 	NwElemId
@@ -80,6 +81,7 @@ type JtRefsService interface {
 	NwService
 	AddEntry(handle ReteHandle, jtName string, rowID int)
 	RemoveRowEntry(handle ReteHandle, jtName string, rowID int)
+	RemoveTableEntry(handle ReteHandle, jtName string)
 	RemoveEntry(handle ReteHandle, jtName string)
 	GetIterator(handle ReteHandle) HdlTblIterator
 	GetRowIterator(handle ReteHandle, jtName string) RowIterator

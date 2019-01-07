@@ -56,6 +56,13 @@ func (h *jtRefsServiceImpl) RemoveRowEntry(handle types.ReteHandle, jtName strin
 	}
 }
 
+func (h *jtRefsServiceImpl) RemoveTableEntry(handle types.ReteHandle, jtName string) {
+	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
+	if found {
+		delete(tblMap, jtName)
+	}
+}
+
 func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIterator {
 	ri := hdlTblIteratorImpl{}
 	ri.nw = h.Nw
@@ -74,11 +81,11 @@ func (h *jtRefsServiceImpl) GetIterator(handle types.ReteHandle) types.HdlTblIte
 }
 
 type hdlTblIteratorImpl struct {
-	tblMap map[string]map[int]int
-	kList  list.List
+	tblMap     map[string]map[int]int
+	kList      list.List
 	currJtName string
-	curr   *list.Element
-	nw     types.Network
+	curr       *list.Element
+	nw         types.Network
 }
 
 func (ri *hdlTblIteratorImpl) HasNext() bool {
@@ -97,12 +104,12 @@ func (ri *hdlTblIteratorImpl) Remove() {
 }
 
 type RowIDIteratorImpl struct {
-	jtName   string
-	rowIdMap map[int]int
-	kList    list.List
-	curr     *list.Element
+	jtName    string
+	rowIdMap  map[int]int
+	kList     list.List
+	curr      *list.Element
 	currRowId int
-	nw       types.Network
+	nw        types.Network
 }
 
 func (ri *RowIDIteratorImpl) HasNext() bool {
@@ -122,7 +129,7 @@ func (ri *RowIDIteratorImpl) Next() types.JoinTableRow {
 }
 
 func (ri *RowIDIteratorImpl) Remove() {
-	delete (ri.rowIdMap, ri.currRowId)
+	delete(ri.rowIdMap, ri.currRowId)
 }
 
 func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle, jtName string) types.RowIterator {

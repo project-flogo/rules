@@ -67,3 +67,17 @@ func (jt *joinTableImpl) GetRow(rowID int) types.JoinTableRow {
 func (jt *joinTableImpl) GetName() string {
 	return jt.name
 }
+
+func (jt *joinTableImpl) RemoveAllRows() {
+	rowIter := jt.GetRowIterator()
+	for rowIter.HasNext() {
+		row := rowIter.Next()
+		//first, from jTable, remove row
+		jt.RemoveRow(row.GetID())
+		for _, hdl := range row.GetHandles() {
+			jt.Nw.GetJtRefService().RemoveTableEntry(hdl, jt.GetName())
+		}
+		//Delete the rowRef itself
+		rowIter.Remove()
+	}
+}

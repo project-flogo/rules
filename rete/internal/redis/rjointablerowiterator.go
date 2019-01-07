@@ -9,7 +9,7 @@ type rowIteratorImpl struct {
 	iter   *redisutils.MapIterator
 	jtName string
 	nw     types.Network
-	curr types.JoinTableRow
+	curr   types.JoinTableRow
 }
 
 func newRowIterator(jTable types.JoinTable) types.RowIterator {

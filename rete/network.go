@@ -178,8 +178,10 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 			//case *classNodeImpl:
 			//case *ruleNodeImpl:
 			case *joinNodeImpl:
-				nw.removeRefsFromReteHandles(nodeImpl.leftTable)
-				nw.removeRefsFromReteHandles(nodeImpl.rightTable)
+				//nw.removeRefsFromReteHandles(nodeImpl.leftTable)
+				//nw.removeRefsFromReteHandles(nodeImpl.rightTable)
+				nodeImpl.leftTable.RemoveAllRows()
+				nodeImpl.rightTable.RemoveAllRows()
 			}
 		}
 	}
@@ -204,7 +206,7 @@ func (nw *reteNetworkImpl) removeRefsFromReteHandles(joinTableVar types.JoinTabl
 	for rIterator.HasNext() {
 		tableRow := rIterator.Next()
 		for _, handle := range tableRow.GetHandles() {
-			nw.jtRefsService.RemoveEntry(handle, joinTableVar.GetName())
+			nw.removeJoinTableRowRefs(handle, nil)
 		}
 	}
 }
@@ -706,24 +708,27 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 			continue
 		}
 
-		rowIter := nw.jtRefsService.GetRowIterator(hdl, joinTable.GetName())
-
-		////Remove rows from corresponding join tables
-		for rowIter.HasNext() {
-			row := rowIter.Next()
-			//first, from jTable, remove row
-			joinTable.RemoveRow(row.GetID())
-			for _, otherHdl := range row.GetHandles() {
-				//if otherHdl.GetTupleKey().String() != hdl.GetTupleKey().String() {
-					nw.jtRefsService.RemoveRowEntry(otherHdl, joinTable.GetName(), row.GetID())
-				//}
-			}
-			//TODO: Delete the rowRef itself
-			rowIter.Remove()
-		}
+		nw.removeJtRowsForTable(hdl, joinTable)
 	}
 	//TODO: Remove the current entry from underneath
 	hdlTblIter.Remove()
+}
+
+func (nw *reteNetworkImpl) removeJtRowsForTable(hdl types.ReteHandle, joinTable types.JoinTable) {
+	rowIter := nw.jtRefsService.GetRowIterator(hdl, joinTable.GetName())
+	////Remove rows from corresponding join tables
+	for rowIter.HasNext() {
+		row := rowIter.Next()
+		//first, from jTable, remove row
+		joinTable.RemoveRow(row.GetID())
+		for _, otherHdl := range row.GetHandles() {
+			//if otherHdl.GetTupleKey().String() != hdl.GetTupleKey().String() {
+			nw.jtRefsService.RemoveRowEntry(otherHdl, joinTable.GetName(), row.GetID())
+			//}
+		}
+		//TODO: Delete the rowRef itself
+		rowIter.Remove()
+	}
 }
 
 func (nw *reteNetworkImpl) GetIdGenService() types.IdGen {

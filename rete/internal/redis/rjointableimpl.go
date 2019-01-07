@@ -47,6 +47,20 @@ func (jt *joinTableImpl) RemoveRow(rowID int) types.JoinTableRow {
 	return row
 }
 
+func (jt *joinTableImpl) RemoveAllRows() {
+	rowIter := jt.GetRowIterator()
+	for rowIter.HasNext() {
+		row := rowIter.Next()
+		//first, from jTable, remove row
+		jt.RemoveRow(row.GetID())
+		for _, hdl := range row.GetHandles() {
+			jt.Nw.GetJtRefService().RemoveTableEntry(hdl, jt.GetName())
+		}
+		//Delete the rowRef itself
+		rowIter.Remove()
+	}
+}
+
 func (jt *joinTableImpl) GetRowCount() int {
 	hdl := redisutils.GetRedisHdl()
 	return hdl.HLen(jt.name)
