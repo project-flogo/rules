@@ -68,10 +68,11 @@ func (nw *reteNetworkImpl) initReteNetwork(config string) {
 	factory := NewFactory(nw, config)
 	nw.factory = factory
 
-	reteCfg := factory.parsedJson["rs"].(map[string]interface{})
-	prefix := reteCfg["prefix"].(string)
+	if factory.parsedJson != nil {
+		reteCfg := factory.parsedJson["rs"].(map[string]interface{})
+		nw.prefix = reteCfg["prefix"].(string)
+	}
 
-	nw.prefix = prefix
 	nw.idGen = nw.factory.getIdGen()
 	nw.jtService = nw.factory.getJoinTableCollection()
 	nw.handleService = nw.factory.getHandleCollection()
