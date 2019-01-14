@@ -22,7 +22,7 @@ To get started with the Flogo Rules you'll need to have a few things
 
 ### Install
 ```
-$ go get -u github.com/project-flogo/rules
+$ go get -u github.com/project-flogo/rules/...
 ```
 _Note that the -u parameter automatically updates rules if it exists_
 
