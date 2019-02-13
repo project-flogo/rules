@@ -7,7 +7,7 @@ import (
 	"github.com/project-flogo/rules/examples/ordermanagement/audittrail"
 	"github.com/project-flogo/rules/ruleapi"
 
-	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/project-flogo/core/support/log"
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 )
@@ -45,31 +45,31 @@ func main() {
 		RegionName: *awsRegion,
 	}
 
-	logger.Info("***** Order Management App *****")
+	log.RootLogger().Info("***** Order Management App *****")
 
-	logger.Info("--- Loading Tuple Schema ---")
+	log.RootLogger().Info("--- Loading Tuple Schema ---")
 	err = loadTupleSchema()
 	if err != nil {
 		panic(err)
 	}
 
-	logger.Info("--- Adding Rules ---")
+	log.RootLogger().Info("--- Adding Rules ---")
 	ruleSession, err = createAndLoadRuleSession()
 	if err != nil {
 		panic(err)
 	}
 
-	logger.Info("--- Starting Kinesis Publisher ---")
+	log.RootLogger().Info("--- Starting Kinesis Publisher ---")
 	audittrail.SetupKinesisPubSub(config, *awsStreamName)
 
-	logger.Info("--- Starting WebSocket Publisher ---")
+	log.RootLogger().Info("--- Starting WebSocket Publisher ---")
 	wsPublisher := audittrail.Create(8686, *awsStreamName)
 	go wsPublisher.Start()
 
-	logger.Info("--- Starting Rules Engine ---")
+	log.RootLogger().Info("--- Starting Rules Engine ---")
 	ruleSession.Start(nil)
 
-	logger.Info("--- Starting MQTT Subscriber ---")
+	log.RootLogger().Info("--- Starting MQTT Subscriber ---")
 	setupFlogoMQTTTriggers()
 }
 

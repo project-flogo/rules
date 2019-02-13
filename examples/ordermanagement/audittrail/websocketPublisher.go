@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/gorilla/websocket"
+	"github.com/project-flogo/core/support/log"
 )
 
 var upgrader = websocket.Upgrader{
@@ -38,7 +38,7 @@ func (wsp *webSocketPublisherImpl) Start() {
 
 	http.HandleFunc("/auditTrail", processAuditTrail)
 
-	logger.Infof("Started Websocket server on port [%s]", strconv.FormatInt(wsp.port, 10))
+	log.RootLogger().Infof("Started Websocket server on port [%s]", strconv.FormatInt(wsp.port, 10))
 	http.ListenAndServe(":"+strconv.FormatInt(wsp.port, 10), nil)
 }
 

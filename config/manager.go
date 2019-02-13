@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/app/resource"
+	"github.com/project-flogo/core/app/resource"
 )
 
 const (

@@ -6,15 +6,16 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/TIBCOSoftware/flogo-lib/app/resource"
-	"github.com/TIBCOSoftware/flogo-lib/core/action"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/core/trigger"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
+	"github.com/project-flogo/core/app/resource"
+	"github.com/project-flogo/core/action"
+	"github.com/project-flogo/core/data"
+	"github.com/project-flogo/core/trigger"
+	"github.com/project-flogo/core/support/log"
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
+	"github.com/project-flogo/core/data/coerce"
 )
 
 // Action ref to register the action factory
@@ -100,7 +101,7 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 		tupleDescAbsFileNm := common.GetAbsPathForResource(settings.TupleDescFile)
 		tupleDescriptor := common.FileToString(tupleDescAbsFileNm)
 
-		logger.Info("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
+		log.RootLogger().Info("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 
 		//First register the tuple descriptors
 		err := model.RegisterTupleDescriptors(tupleDescriptor)
@@ -149,10 +150,10 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Warnf("Unhandled Error executing rule action \n")
+			log.RootLogger().Warnf("Unhandled Error executing rule action \n")
 
 			// todo: useful for debugging
-			logger.Debugf("StackTrace: %s", debug.Stack())
+			log.RootLogger().Debugf("StackTrace: %s", debug.Stack())
 		}
 
 	}()
@@ -165,7 +166,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 	tupleType := model.TupleType(h.Name)
 	valAttr, exists := inputs[ivValues]
 	if !exists {
-		logger.Debugf("No values recieved")
+		log.RootLogger().Debugf("No values recieved")
 		//no input, should we return an error?
 		return nil, nil
 	}
@@ -174,7 +175,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 
 	td := model.GetTupleDescriptor(tupleType)
 	if td == nil {
-		logger.Warnf("Tuple descriptor for type [%s] not found\n", string(tupleType))
+		log.RootLogger().Warnf("Tuple descriptor for type [%s] not found\n", string(tupleType))
 		return nil, nil
 	}
 
@@ -187,7 +188,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 				if err == nil {
 					values[keyProp] = uid
 				} else {
-					logger.Warnf("Failed to generate a unique id, discarding event [%s]\n", string(tupleType))
+					log.RootLogger().Warnf("Failed to generate a unique id, discarding event [%s]\n", string(tupleType))
 					return nil, nil
 				}
 			}
@@ -208,7 +209,7 @@ func getSettings(config *action.Config) (*Settings, error) {
 
 	setting, exists := config.Settings[sRuleSession]
 	if exists {
-		val, err := data.CoerceToString(setting)
+		val, err := coerce.ToString(setting)
 		if err != nil {
 			return nil, err
 		}
@@ -219,7 +220,7 @@ func getSettings(config *action.Config) (*Settings, error) {
 
 	setting, exists = config.Settings[sTupleDescFile]
 	if exists {
-		val, err := data.CoerceToString(setting)
+		val, err := coerce.ToString(setting)
 		if err != nil {
 			return nil, err
 		}

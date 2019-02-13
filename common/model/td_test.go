@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/rules/common"
 )
 
@@ -16,7 +16,7 @@ func TestOne(t *testing.T) {
 	td1p1 := TuplePropertyDescriptor{}
 	td1p1.Name = "p1"
 	td1p1.KeyIndex = 3
-	td1p1.PropType = data.TypeDouble
+	td1p1.PropType = data.TypeFloat64
 	td1p2 := TuplePropertyDescriptor{}
 	td1p2.Name = "p2"
 	td1p2.KeyIndex = 31

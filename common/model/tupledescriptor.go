@@ -9,7 +9,7 @@ import (
 
 	"fmt"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/project-flogo/core/data"
 )
 
 var (
