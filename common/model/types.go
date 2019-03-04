@@ -26,16 +26,17 @@ type MutableRule interface {
 	SetAction(actionFn ActionFunction)
 	SetPriority(priority int)
 	SetContext(ctx RuleContext)
+	AddExprCondition (conditionName string, cExpr string, ctx RuleContext) (error)
 }
 
 //Condition interface to maintain/get various condition properties
 type Condition interface {
 	GetName() string
-	GetEvaluator() ConditionEvaluator
 	GetRule() Rule
 	GetIdentifiers() []TupleType
 	GetContext() RuleContext
 	String() string
+	Evaluate(string, string, map[TupleType]Tuple, RuleContext) (bool, error)
 }
 
 // RuleSession to maintain rules and assert tuples against those rules

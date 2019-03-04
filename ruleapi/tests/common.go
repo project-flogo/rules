@@ -33,6 +33,7 @@ func trueCondition(ruleName string, condName string, tuples map[model.TupleType]
 }
 
 func emptyAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+
 }
 
 func printTuples(t *testing.T, oprn string, tupleMap map[string]map[string]model.Tuple) {
@@ -58,3 +59,5 @@ type txnCtx struct {
 	Testing *testing.T
 	TxnCnt  int
 }
+
+type TestKey struct{}

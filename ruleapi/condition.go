@@ -34,9 +34,9 @@ func (cnd *conditionImpl) GetContext() model.RuleContext {
 	return cnd.ctx
 }
 
-func (cnd *conditionImpl) GetEvaluator() model.ConditionEvaluator {
-	return cnd.cfn
-}
+//func (cnd *conditionImpl) GetEvaluator() model.ConditionEvaluator {
+//	return cnd.cfn
+//}
 
 func (cnd *conditionImpl) String() string {
 	return "[Condition: name:" + cnd.name + ", idrs: TODO]"
@@ -51,4 +51,13 @@ func (cnd *conditionImpl) GetRule() model.Rule {
 }
 func (cnd *conditionImpl) GetTupleTypeAlias() []model.TupleType {
 	return cnd.identifiers
+}
+
+func (cnd *conditionImpl) Evaluate (condName string, ruleNm string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) (bool, error) {
+	result := false
+	if cnd.cfn != nil {
+		result = cnd.cfn (condName, ruleNm, tuples, ctx)
+	}
+
+	return result, nil
 }
