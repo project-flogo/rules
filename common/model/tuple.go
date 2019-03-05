@@ -23,6 +23,7 @@ type Tuple interface {
 	GetBool(name string) (val bool, err error)
 	//GetDateTime(name string) time.Time
 	GetKey() TupleKey
+	GetMap() map[string]interface{}
 }
 
 //MutableTuple mutable part of the tuple
@@ -210,7 +211,7 @@ func (t *tupleImpl) initTupleWithKeyValues(td *TupleDescriptor, values ...interf
 	t.key = tk
 	//populate the tuple key fields with the key values
 	for _, keyProp := range td.GetKeyProps() {
-		t.tuples [keyProp] = tk.GetValue(keyProp)
+		t.tuples[keyProp] = tk.GetValue(keyProp)
 	}
 	return err
 }
@@ -272,4 +273,8 @@ func (t *tupleImpl) isKeyProp(propName string) bool {
 		_, found = tki.keys[propName]
 	}
 	return found
+}
+
+func (t *tupleImpl) GetMap() map[string]interface{} {
+	return t.tuples
 }

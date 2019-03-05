@@ -2,11 +2,9 @@ package ruleapi
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/expr"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/funcexprtype"
 	"github.com/project-flogo/rules/common/model"
 )
 
@@ -207,17 +205,15 @@ func (rule *ruleImpl) GetDeps() map[model.TupleType]map[string]bool {
 
 func (rule *ruleImpl) AddExprCondition(conditionName string, cstr string, ctx model.RuleContext) error {
 
-	e, err := expression.ParseExpression(cstr)
-	if err != nil {
-		return err
-	}
-	exprn := e.(*expr.Expression)
-	refs, err := getRefs(exprn)
-	if err != nil {
-		return err
-	}
+	//e, err := expression.ParseExpression(cstr)
+	//if err != nil {
+	//	return err
+	//}
+	//exprn := e.(*expr.Expression)
+	//refs, err := getRefs(exprn)
+	refs := getRefs(cstr)
 
-	err = validateRefs(refs)
+	err := validateRefs(refs)
 	if err != nil {
 		return err
 	}
@@ -227,12 +223,13 @@ func (rule *ruleImpl) AddExprCondition(conditionName string, cstr string, ctx mo
 		return err
 	}
 	rule.addExprCond(conditionName, typeDeps, cstr, ctx)
-	return err
+	return nil
 
 }
 
-func validateRefs(refs []string) (error) {
+func validateRefs(refs []string) error {
 	for _, ref := range refs {
+		ref := strings.TrimPrefix(ref, "$.")
 		vals := strings.Split(ref, ".")
 		td := model.GetTupleDescriptor(model.TupleType(vals[0]))
 		if td == nil {
@@ -246,51 +243,62 @@ func validateRefs(refs []string) (error) {
 	return nil
 }
 
-func getRefs(e *expr.Expression) ([]string, error) {
-	refs := make(map[string]bool)
-	keys := []string{}
+//
+//func getRefs(e *expr.Expression) ([]string, error) {
+//	refs := make(map[string]bool)
+//	keys := []string{}
+//
+//	err := getRefRecursively(e, refs)
+//	if err != nil {
+//		return keys, err
+//	}
+//
+//	for key, _ := range refs {
+//		keys = append (keys, key)
+//	}
+//	return keys, err
+//}
+//
+//func getRefRecursively(e *expr.Expression, refs map[string]bool) error {
+//
+//	if e == nil {
+//		return nil
+//	}
+//	err := getRefsInternal(e.Left, refs)
+//	if err != nil {
+//		return err
+//	}
+//	err = getRefsInternal(e.Right, refs)
+//	if err != nil {
+//		return err
+//	}
+//	return nil
+//}
+//
+//func getRefsInternal(e *expr.Expression, refs map[string]bool) error {
+//	if e.Type == funcexprtype.EXPRESSION {
+//		getRefRecursively(e, refs)
+//	} else if e.Type == funcexprtype.REF || e.Type == funcexprtype.ARRAYREF {
+//		value := e.Value.(string)
+//		if strings.Index(value, "$") == 0 {
+//			value = value[1:len(value)]
+//			split := strings.Split(value, ".")
+//			if split != nil && len(split) != 2 {
+//				return fmt.Errorf("Invalid tokens [%s]", value)
+//			}
+//
+//			refs[value] = true
+//		}
+//	}
+//	return nil
+//}
 
-	err := getRefRecursively(e, refs)
-	if err != nil {
-		return keys, err
+func getRefs(cstr string) []string {
+	keys2 := []string{}
+	re := regexp.MustCompile(`\$\.(\w+\.\w+)`)
+	keys := re.FindAllStringSubmatch(cstr, -1)
+	for _, k := range keys {
+		keys2 = append(keys2, k[1])
 	}
-
-	for key, _ := range refs {
-		keys = append (keys, key)
-	}
-	return keys, err
-}
-
-func getRefRecursively(e *expr.Expression, refs map[string]bool) error {
-
-	if e == nil {
-		return nil
-	}
-	err := getRefsInternal(e.Left, refs)
-	if err != nil {
-		return err
-	}
-	err = getRefsInternal(e.Right, refs)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func getRefsInternal(e *expr.Expression, refs map[string]bool) error {
-	if e.Type == funcexprtype.EXPRESSION {
-		getRefRecursively(e, refs)
-	} else if e.Type == funcexprtype.REF || e.Type == funcexprtype.ARRAYREF {
-		value := e.Value.(string)
-		if strings.Index(value, "$") == 0 {
-			value = value[1:len(value)]
-			split := strings.Split(value, ".")
-			if split != nil && len(split) != 2 {
-				return fmt.Errorf("Invalid tokens [%s]", value)
-			}
-
-			refs[value] = true
-		}
-	}
-	return nil
+	return keys2
 }

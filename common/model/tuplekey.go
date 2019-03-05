@@ -2,8 +2,8 @@ package model
 
 import (
 	"fmt"
-	"reflect"
 	"github.com/project-flogo/core/data/coerce"
+	"reflect"
 )
 
 // TupleKey primary key of a tuple

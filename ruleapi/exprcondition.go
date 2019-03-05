@@ -1,13 +1,23 @@
 package ruleapi
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression"
-	"github.com/TIBCOSoftware/flogo-lib/core/mapper/exprmapper/expression/expr"
+	"github.com/project-flogo/core/data"
+	"github.com/project-flogo/core/data/expression"
+	"github.com/project-flogo/core/data/expression/script"
+	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/rules/common/model"
 	"reflect"
-	"strings"
 )
+
+var td tuplePropertyResolver
+var resolver resolve.CompositeResolver
+var factory expression.Factory
+
+func init() {
+	td = tuplePropertyResolver{}
+	resolver = resolve.NewCompositeResolver(map[string]resolve.Resolver{".": &td})
+	factory = script.NewExprFactory(resolver)
+}
 
 type exprConditionImpl struct {
 	name        string
@@ -60,14 +70,14 @@ func (cnd *exprConditionImpl) GetTupleTypeAlias() []model.TupleType {
 func (cnd *exprConditionImpl) Evaluate(condName string, ruleNm string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) (bool, error) {
 	result := false
 	if cnd.cExpr != "" {
-		e, err := expression.ParseExpression(cnd.cExpr)
-		exprn := e.(*expr.Expression)
+		//e, err := expression.ParseExpression(cnd.cExpr)
+		exprn, err := factory.NewExpr(cnd.cExpr)
 		if err != nil {
 			return result, err
 		}
-		td := tuplePropertyResolver{}
+
 		scope := tupleScope{tuples}
-		res, err := exprn.EvalWithData(tuples, &scope, &td)
+		res, err := exprn.Eval(&scope)
 		if err != nil {
 			return false, err
 		} else if reflect.TypeOf(res).Kind() == reflect.Bool {
@@ -83,8 +93,12 @@ type tupleScope struct {
 	tuples map[model.TupleType]model.Tuple
 }
 
-func (ts *tupleScope) GetAttr(name string) (attr *data.Attribute, exists bool) {
-	return nil, false
+func (ts *tupleScope) GetValue(name string) (value interface{}, exists bool) {
+	return false, true
+}
+
+func (ts *tupleScope) SetValue(name string, value interface{}) error {
+	return nil
 }
 
 // SetAttrValue sets the value of the specified attribute
@@ -96,31 +110,39 @@ func (ts *tupleScope) SetAttrValue(name string, value interface{}) error {
 type tuplePropertyResolver struct {
 }
 
-func (t *tuplePropertyResolver) Resolve(toResolve string, scope data.Scope) (value interface{}, err error) {
-
-	toResolve = toResolve[1:]
-	aliasAndProp := strings.Split(toResolve, ".")
-
+//func (t *tuplePropertyResolver) Resolve(toResolve string, scope data.Scope) (value interface{}, err error) {
+func (t *tuplePropertyResolver) Resolve(scope data.Scope, item string, field string) (interface{}, error) {
+	//toResolve = toResolve[1:]
+	//aliasAndProp := strings.Split(toResolve, ".")
+	//
+	//var v interface{}
+	//if ts != nil {
+	//	tuple := ts.tuples[model.TupleType(aliasAndProp[0])].(model.Tuple)
+	//	if tuple != nil {
+	//
+	//		p := tuple.GetTupleDescriptor().GetProperty(aliasAndProp[1])
+	//		switch p.PropType {
+	//		case data.TypeString:
+	//			v, err = tuple.GetString(aliasAndProp[1])
+	//		case data.TypeInteger:
+	//			v, err = tuple.GetInt(aliasAndProp[1])
+	//		case data.TypeLong:
+	//			v, err = tuple.GetLong(aliasAndProp[1])
+	//		case data.TypeDouble:
+	//			v, err = tuple.GetDouble(aliasAndProp[1])
+	//		case data.TypeBoolean:
+	//			v, err = tuple.GetBool(aliasAndProp[1])
+	//		}
+	//	}
+	//}
+	//return v, err
 	ts := scope.(*tupleScope)
-	var v interface{}
-	if ts != nil {
-		tuple := ts.tuples[model.TupleType(aliasAndProp[0])].(model.Tuple)
-		if tuple != nil {
+	tuple := ts.tuples[model.TupleType(field)]
+	m := tuple.GetMap()
+	return m, nil
 
-			p := tuple.GetTupleDescriptor().GetProperty(aliasAndProp[1])
-			switch p.PropType {
-			case data.TypeString:
-				v, err = tuple.GetString(aliasAndProp[1])
-			case data.TypeInteger:
-				v, err = tuple.GetInt(aliasAndProp[1])
-			case data.TypeLong:
-				v, err = tuple.GetLong(aliasAndProp[1])
-			case data.TypeDouble:
-				v, err = tuple.GetDouble(aliasAndProp[1])
-			case data.TypeBoolean:
-				v, err = tuple.GetBool(aliasAndProp[1])
-			}
-		}
-	}
-	return v, err
+}
+
+func (*tuplePropertyResolver) GetResolverInfo() *resolve.ResolverInfo {
+	return resolve.NewResolverInfo(false, false)
 }
