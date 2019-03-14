@@ -25,15 +25,15 @@ func NewResourceManager() *ResourceManager {
 	return manager
 }
 
-func (m *ResourceManager) LoadResource(resConfig *resource.Config) error {
+func (m *ResourceManager) LoadResource(resConfig *resource.Config) (*resource.Resource, error) {
 	var rsConfig *RuleSessionDescriptor
 	err := json.Unmarshal(resConfig.Data, &rsConfig)
 	if err != nil {
-		return fmt.Errorf("error unmarshalling rulesession resource with id '%s', %s", resConfig.ID, err.Error())
+		return nil, fmt.Errorf("error unmarshalling rulesession resource with id '%s', %s", resConfig.ID, err.Error())
 	}
 
 	m.configs[resConfig.ID] = rsConfig
-	return nil
+	return resource.New("rulesession", m.configs), nil
 }
 
 func (m *ResourceManager) GetResource(id string) interface{} {
