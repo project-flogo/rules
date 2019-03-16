@@ -47,6 +47,17 @@ func RegisterTupleDescriptors(jsonRegistry string) (err error) {
 	return nil
 }
 
+// RegisterTupleDescriptors registers the TupleDescriptors
+func RegisterTupleDescriptorsFromTds(tds []TupleDescriptor) (err error) {
+	if err != nil {
+		return err
+	}
+	for _, key := range tds {
+		typeRegistry.LoadOrStore(TupleType(key.Name), key)
+	}
+	return nil
+}
+
 // GetTupleDescriptor gets the TupleDescriptor based on the TupleType
 func GetTupleDescriptor(tupleType TupleType) *TupleDescriptor {
 	tdi, found := typeRegistry.Load(tupleType)

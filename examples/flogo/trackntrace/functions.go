@@ -1,4 +1,4 @@
-package trackntrace
+package main
 
 import (
 	"context"

@@ -20,7 +20,7 @@
     },
     {
       "name": "tds",
-      "type": "string"
+      "type": "object"
     }
   ],
   "input":  [

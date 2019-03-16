@@ -6,7 +6,7 @@
   "triggers": [
     {
       "id": "receive_http_message",
-      "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
       "name": "Receive HTTP Message",
       "settings": {
         "port": "7777"
@@ -39,7 +39,7 @@
       "id": "simple_rule",
       "ref": "github.com/project-flogo/rules/ruleaction",
       "settings": {
-        "rulesession": "res://rulesession:simple",
+        "ruleSessionURI": "res://rulesession:simple",
         "tds": [
           {
             "name": "package",

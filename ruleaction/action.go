@@ -20,36 +20,26 @@ import (
 const (
 	sRuleSession   = "rulesession"
 	sTupleDescFile = "tupleDescriptorFile"
-	ivValues = "values"
+	ivValues = "queryParams"
 )
 var actionMetadata = action.ToMetadata(&Settings{})
 var manager *config.ResourceManager
 
 type Settings struct {
-	RuleSessionURI string `md:"ruleSessionURI,required"`
-	TupleDescFile  string `md:"tupleDescriptorFile"`
-	Tds json.RawMessage `md:"tds"`
+	RuleSessionURI string `json:"ruleSessionURI"`
+	TupleDescFile  string `json:"tupleDescriptorFile"`
+	Tds []model.TupleDescriptor `json:"tds"`
 }
-type Input struct {
-	Data string `md:"data"`
-}
-
-//// ActionData maintains Tuple descriptor details
-//type ActionData struct {
-//	Tds json.RawMessage `json:"tds"`
-//}
 
 func init() {
 	action.Register(&RuleAction{}, &ActionFactory{})
 }
 
 type ActionFactory struct {
-	//resManager *resource.Manager
 }
 
 func (f *ActionFactory) Initialize(ctx action.InitContext) error {
 
-	//f.resManager = ctx.ResourceManager()
 	if manager != nil {
 		return nil
 	}
@@ -62,13 +52,15 @@ func (f *ActionFactory) Initialize(ctx action.InitContext) error {
 func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 
 	settings := &Settings{}
-	err := metadata.MapToStruct(cfg.Settings, settings, true)
-	if err != nil {
+
+	jsonSettings, err := json.Marshal(cfg.Settings)
+
+	er := json.Unmarshal(jsonSettings, settings)
+	if er != nil {
 		return nil, err
 	}
 
 	rsCfg, err := manager.GetRuleSessionDescriptor(settings.RuleSessionURI)
-
 	if err != nil {
 		return nil, err
 	}
@@ -90,14 +82,7 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 			return nil, fmt.Errorf("failed to register tuple descriptors : %s", err.Error())
 		}
 	} else if settings.Tds != nil {
-		//actionData := ActionData{}
-
-		//err := json.Unmarshal(cfg.Data, &actionData)
-		//if err != nil {
-		//	return nil, fmt.Errorf("failed to read rule action data '%s' error '%s'", cfg.Id, err.Error())
-		//}
-
-		err = model.RegisterTupleDescriptors(string(settings.Tds))
+		err = model.RegisterTupleDescriptorsFromTds(settings.Tds)
 		if err != nil {
 			return nil, fmt.Errorf("failed to register tuple descriptors : %s", err.Error())
 		}
@@ -129,7 +114,7 @@ func (a *RuleAction) IOMetadata() *metadata.IOMetadata {
 	return actionMetadata.IOMetadata
 }
 // Run implements action.Action.Run
-func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute) (map[string]*data.Attribute, error) {
+func (a *RuleAction) Run(ctx context.Context, inputs map[string]interface{}) (map[string]interface{}, error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -154,7 +139,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 		return nil, nil
 	}
 
-	values := valAttr.Value().(map[string]interface{})
+	strMap := valAttr.(map[string]string)
 
 	td := model.GetTupleDescriptor(tupleType)
 	if td == nil {
@@ -163,52 +148,31 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]*data.Attribute)
 	}
 
 	for _, keyProp := range td.GetKeyProps() {
-		_, found := values[keyProp]
+		_, found := strMap[keyProp]
 		if !found {
 			//set unique ids to string key properties, if not present in the payload
 			if td.GetProperty(keyProp).PropType == data.TypeString {
 				uid, err := common.GetUniqueId()
 				if err == nil {
-					values[keyProp] = uid
+					strMap[keyProp] = uid
 				} else {
 					log.RootLogger().Warnf("Failed to generate a unique id, discarding event [%s]\n", string(tupleType))
-					return nil, nil
+					return  nil, nil
 				}
 			}
 		}
 	}
 
-	tuple, _ := model.NewTuple(tupleType, values)
-	a.rs.Assert(ctx, tuple)
-	// does this return anything?
+	valuesMap := map[string]interface{}{}
+	for k, v := range strMap {
+		valuesMap[k] = v
+	}
 
-	//fmt.Printf("[%s]\n", "b")
+	tuple, _ := model.NewTuple(tupleType, valuesMap)
+	err := a.rs.Assert(ctx, tuple)
+	if err != nil {
+		return nil, err
+	}
 	return nil, nil
 }
-//
-//func getSettings(config *action.Config) (*Settings, error) {
-//
-//	settings := &Settings{}
-//
-//	setting, exists := config.Settings[sRuleSession]
-//	if exists {
-//		val, err := coerce.ToString(setting)
-//		if err != nil {
-//			return nil, err
-//		}
-//		settings.RuleSessionURI = val
-//	} else {
-//		return nil, fmt.Errorf("RuleSession not specified")
-//	}
-//
-//	setting, exists = config.Settings[sTupleDescFile]
-//	if exists {
-//		val, err := coerce.ToString(setting)
-//		if err != nil {
-//			return nil, err
-//		}
-//		settings.TupleDescFile = val
-//	}
-//
-//	return settings, nil
-//}
+
