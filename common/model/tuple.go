@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/project-flogo/core/data/coerce"
 )
 
 var reteCTXKEY = RetecontextKeyType{}
@@ -96,7 +96,7 @@ func (t *tupleImpl) GetString(name string) (val string, err error) {
 		return "", err
 	}
 	//try to coerce the tuple value to a string
-	v, err := data.CoerceToString(t.tuples[name])
+	v, err := coerce.ToString(t.tuples[name])
 
 	return v, err
 }
@@ -107,7 +107,7 @@ func (t *tupleImpl) GetInt(name string) (val int, err error) {
 		return 0, err
 	}
 	//try to coerce the tuple value to an integer
-	v, err := data.CoerceToInteger(t.tuples[name])
+	v, err := coerce.ToInt(t.tuples[name])
 
 	return v, err
 }
@@ -118,7 +118,7 @@ func (t *tupleImpl) GetLong(name string) (val int64, err error) {
 		return 0, err
 	}
 	//try to coerce the tuple value to a long
-	v, err := data.CoerceToLong(t.tuples[name])
+	v, err := coerce.ToInt64(t.tuples[name])
 
 	return v, err
 }
@@ -129,7 +129,7 @@ func (t *tupleImpl) GetDouble(name string) (val float64, err error) {
 		return 0, err
 	}
 	//try to coerce the tuple value to a double
-	v, err := data.CoerceToDouble(t.tuples[name])
+	v, err := coerce.ToFloat64(t.tuples[name])
 
 	return v, err
 }
@@ -140,7 +140,7 @@ func (t *tupleImpl) GetBool(name string) (val bool, err error) {
 		return false, err
 	}
 	//try to coerce tuple value to a boolean
-	v, err := data.CoerceToBoolean(t.tuples[name])
+	v, err := coerce.ToBool(t.tuples[name])
 
 	return v, err
 }
@@ -185,7 +185,7 @@ func (t *tupleImpl) initTuple(td *TupleDescriptor, values map[string]interface{}
 	for _, tdp := range td.Props {
 		val, found := values[tdp.Name]
 		if found {
-			coerced, err := data.CoerceToValue(val, tdp.PropType)
+			coerced, err := coerce.ToType(val, tdp.PropType)
 			if err == nil {
 				t.tuples[tdp.Name] = coerced
 			} else {
@@ -255,7 +255,7 @@ func (t *tupleImpl) validateNameValue(name string, value interface{}) (err error
 	p := t.td.GetProperty(name)
 
 	if p != nil {
-		_, err := data.CoerceToValue(value, p.PropType)
+		_, err := coerce.ToType(value, p.PropType)
 		if err != nil {
 			return err
 		}

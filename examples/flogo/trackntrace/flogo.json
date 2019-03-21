@@ -3,18 +3,17 @@
   "type": "flogo:app",
   "version": "0.0.1",
   "appModel": "1.0.0",
-
   "triggers": [
     {
       "id": "receive_http_message",
-      "ref": "github.com/TIBCOSoftware/flogo-contrib/trigger/rest",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
       "name": "Receive HTTP Message",
       "settings": {
         "port": "7777"
       },
       "handlers": [
         {
-          "name":"moveevent",
+          "name": "moveevent",
           "settings": {
             "method": "GET",
             "path": "/test/me"
@@ -24,7 +23,9 @@
             "mappings": {
               "input": [
                 {
-                  "mapTo": "values", "type": "assign", "value": "$.queryParams"
+                  "mapTo": "values",
+                  "type": "assign",
+                  "value": "$.queryParams"
                 }
               ]
             }
@@ -33,82 +34,77 @@
       ]
     }
   ],
-
   "actions": [
     {
       "id": "simple_rule",
       "ref": "github.com/project-flogo/rules/ruleaction",
       "settings": {
-        "rulesession": "res://rulesession:simple"
-      },
-      "data" : {
-        "tds" :
-          [
-            {
-              "name": "package",
-              "properties": [
-                {
-                  "name": "id",
-                  "type": "string",
-                  "pk-index": 0
-                },
-                {
-                  "name": "state",
-                  "type": "string"
-                }
-              ]
-            },
-            {
-              "name": "moveevent",
-              "ttl" : 0,
-              "properties": [
-                {
-                  "name": "id",
-                  "type": "string",
-                  "pk-index": 0
-                },
-                {
-                  "name": "packageid",
-                  "type": "string"
-                },
-                {
-                  "name": "sitting",
-                  "type": "double"
-                },
-                {
-                  "name": "moving",
-                  "type": "double"
-                },
-                {
-                  "name": "dropped",
-                  "type": "double"
-                }
-              ]
-            },
-            {
-              "name": "movetimeoutevent",
-              "ttl" : 0,
-              "properties": [
-                {
-                  "name": "id",
-                  "type": "string",
-                  "pk-index": 0
-                },
-                {
-                  "name": "packageid",
-                  "type": "string"
-                },
-                {
-                  "name": "timeoutinmillis",
-                  "type": "integer"
-                }
-              ]
-            }
-          ]
+        "ruleSessionURI": "res://rulesession:simple",
+        "tds": [
+          {
+            "name": "package",
+            "properties": [
+              {
+                "name": "id",
+                "type": "string",
+                "pk-index": 0
+              },
+              {
+                "name": "state",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "name": "moveevent",
+            "ttl": 0,
+            "properties": [
+              {
+                "name": "id",
+                "type": "string",
+                "pk-index": 0
+              },
+              {
+                "name": "packageid",
+                "type": "string"
+              },
+              {
+                "name": "sitting",
+                "type": "double"
+              },
+              {
+                "name": "moving",
+                "type": "double"
+              },
+              {
+                "name": "dropped",
+                "type": "double"
+              }
+            ]
+          },
+          {
+            "name": "movetimeoutevent",
+            "ttl": 0,
+            "properties": [
+              {
+                "name": "id",
+                "type": "string",
+                "pk-index": 0
+              },
+              {
+                "name": "packageid",
+                "type": "string"
+              },
+              {
+                "name": "timeoutinmillis",
+                "type": "integer"
+              }
+            ]
+          }
+        ]
       }
     }
   ],
-
   "resources": [
     {
       "id": "rulesession:simple",
@@ -127,7 +123,6 @@
             ],
             "actionFunction": "aPrintPackage"
           },
-
           {
             "name": "printMoveEventRule",
             "conditions": [
@@ -141,21 +136,20 @@
             ],
             "actionFunction": "aMoveEvent"
           },
-
           {
             "name": "joinMoveEventAndPackageEventRule",
             "conditions": [
               {
                 "name": "cJoinMoveEventAndPackage",
                 "identifiers": [
-                  "moveevent", "package"
+                  "moveevent",
+                  "package"
                 ],
                 "evaluator": "cJoinMoveEventAndPackage"
               }
             ],
             "actionFunction": "aJoinMoveEventAndPackage"
           },
-
           {
             "name": "aMoveTimeoutEventRule",
             "conditions": [
@@ -169,21 +163,20 @@
             ],
             "actionFunction": "aMoveTimeoutEvent"
           },
-
           {
             "name": "joinMoveTimeoutEventAndPackage",
             "conditions": [
               {
                 "name": "cJoinMoveTimeoutEventAndPackage",
                 "identifiers": [
-                  "movetimeoutevent", "package"
+                  "movetimeoutevent",
+                  "package"
                 ],
                 "evaluator": "cJoinMoveTimeoutEventAndPackage"
               }
             ],
             "actionFunction": "aJoinMoveTimeoutEventAndPackage"
           },
-
           {
             "name": "packageInSittingRule",
             "conditions": [
@@ -197,7 +190,6 @@
             ],
             "actionFunction": "aPackageInSitting"
           }
-
         ]
       }
     }

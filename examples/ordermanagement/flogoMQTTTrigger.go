@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt"
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
-	"github.com/TIBCOSoftware/flogo-lib/engine"
-	"github.com/TIBCOSoftware/flogo-lib/flogo"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
+	//"github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt"
+	"github.com/project-flogo/core/data"
+	"github.com/project-flogo/core/engine"
+	"github.com/project-flogo/core/api"
+	"github.com/project-flogo/core/support/log"
 	"github.com/project-flogo/rules/common/model"
 )
 
@@ -22,24 +22,24 @@ const (
 )
 
 func setupFlogoMQTTTriggers() {
-	app := flogo.NewApp()
+	app := api.NewApp()
 
-	mqttSettings := map[string]interface{}{
-		"topic":     baseTopic,
-		"broker":    broker,
-		"id":        "oms",
-		"qos":       "0",
-		"cleansess": "false",
-	}
-	trg := app.NewTrigger(&mqtt.MqttTrigger{}, mqttSettings)
-	trg.NewFuncHandler(map[string]interface{}{"topic": orderEventTopic}, HandleOrderEvent)
-	trg.NewFuncHandler(map[string]interface{}{"topic": itemEventTopic}, HandleItemEvent)
-	trg.NewFuncHandler(map[string]interface{}{"topic": orderShippedEventTopic}, HandleOrderShippedEvent)
+	//mqttSettings := map[string]interface{}{
+	//	"topic":     baseTopic,
+	//	"broker":    broker,
+	//	"id":        "oms",
+	//	"qos":       "0",
+	//	"cleansess": "false",
+	//}
+	//trg := app.NewTrigger(&mqtt.MqttTrigger{}, mqttSettings)
+	//trg.NewFuncHandler(map[string]interface{}{"topic": orderEventTopic}, HandleOrderEvent)
+	//trg.NewFuncHandler(map[string]interface{}{"topic": itemEventTopic}, HandleItemEvent)
+	//trg.NewFuncHandler(map[string]interface{}{"topic": orderShippedEventTopic}, HandleOrderShippedEvent)
 
-	e, err := flogo.NewEngine(app)
+	e, err := api.NewEngine(app)
 
 	if err != nil {
-		logger.Error(err)
+		log.RootLogger().Error(err)
 		return
 	}
 
@@ -68,7 +68,7 @@ func HandleOrderShippedEvent(ctx context.Context, inputs map[string]*data.Attrib
 func getValues(inputs map[string]*data.Attribute) string {
 	valAttr, exists := inputs[msgValueField]
 	if !exists {
-		logger.Debugf("No values recieved")
+		log.RootLogger().Debugf("No values recieved")
 		return ""
 	}
 	return valAttr.Value().(string)
@@ -84,7 +84,7 @@ func processMQTTEvent(topic string, payload string) error {
 
 	newTuple, err := model.NewTuple(tupleType, tupleData)
 	if err != nil {
-		logger.Errorf("Failed creating tuple of type [%s] with payload [%s] - %s", tupleType, payload, err.Error())
+		log.RootLogger().Errorf("Failed creating tuple of type [%s] with payload [%s] - %s", tupleType, payload, err.Error())
 		panic(err)
 	}
 

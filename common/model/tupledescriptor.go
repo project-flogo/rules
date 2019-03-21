@@ -9,7 +9,7 @@ import (
 
 	"fmt"
 
-	"github.com/TIBCOSoftware/flogo-lib/core/data"
+	"github.com/project-flogo/core/data"
 )
 
 var (
@@ -38,6 +38,17 @@ type TuplePropertyDescriptor struct {
 func RegisterTupleDescriptors(jsonRegistry string) (err error) {
 	tds := []TupleDescriptor{}
 	err = json.Unmarshal([]byte(jsonRegistry), &tds)
+	if err != nil {
+		return err
+	}
+	for _, key := range tds {
+		typeRegistry.LoadOrStore(TupleType(key.Name), key)
+	}
+	return nil
+}
+
+// RegisterTupleDescriptors registers the TupleDescriptors
+func RegisterTupleDescriptorsFromTds(tds []TupleDescriptor) (err error) {
 	if err != nil {
 		return err
 	}

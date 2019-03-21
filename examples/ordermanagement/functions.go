@@ -7,9 +7,9 @@ import (
 
 	"github.com/project-flogo/rules/examples/ordermanagement/audittrail"
 
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
+	"github.com/project-flogo/core/support/log"
 )
 
 func init() {
@@ -58,7 +58,7 @@ func ordereventAction(ctx context.Context, rs model.RuleSession, ruleName string
 	itemTimeout, _ := orderEvent.GetInt("itemTimeout")
 	shippingTimeout, _ := orderEvent.GetInt("shippingTimeout")
 
-	logger.Infof("Received a new order, processing order with id[%s]", orderID)
+	log.RootLogger().Infof("Received a new order, processing order with id[%s]", orderID)
 
 	//assert a order
 	order, _ := model.NewTupleWithKeyValues(model.TupleType("order"), orderID)
@@ -116,7 +116,7 @@ func itemeventAction(ctx context.Context, rs model.RuleSession, ruleName string,
 	invoice, _ := order.GetDouble("invoice")
 	order.SetDouble(ctx, "invoice", invoice+(float64(itemQty)*currentItem.pricePerItem))
 
-	logger.Infof("Received a new item id[%s] of type[%s] for order id[%s]", itemID, itemType, orderID)
+	log.RootLogger().Infof("Received a new item id[%s] of type[%s] for order id[%s]", itemID, itemType, orderID)
 
 	audittrail.PublishAuditTrailItem(*awsStreamName, orderID, "created", ruleName, fmt.Sprintf("Item[%s] received", itemID))
 }
@@ -134,7 +134,7 @@ func orderAction(ctx context.Context, rs model.RuleSession, ruleName string, tup
 	order := tuples["order"].(model.MutableTuple)
 	receivedItems, _ := order.GetInt("receivedItems")
 	orderID, _ := order.GetString("orderId")
-	logger.Infof("Received a all items[%d] for order id[%s]. Handing over to shipping", receivedItems, orderID)
+	log.RootLogger().Infof("Received a all items[%d] for order id[%s]. Handing over to shipping", receivedItems, orderID)
 	rs.CancelScheduledAssert(ctx, orderID)
 
 	order.SetString(ctx, "status", "inshipping")
@@ -169,7 +169,7 @@ func ordertimeouteventAction(ctx context.Context, rs model.RuleSession, ruleName
 	expectedItems, _ := order.GetInt("expectedItems")
 	receivedItems, _ := order.GetInt("receivedItems")
 
-	logger.Infof("Order[%s] timed out, received only [%d] order items, expected [%d] items. Cancelling Order !!", orderID, receivedItems, expectedItems)
+	log.RootLogger().Infof("Order[%s] timed out, received only [%d] order items, expected [%d] items. Cancelling Order !!", orderID, receivedItems, expectedItems)
 	order.SetString(ctx, "status", "cancelled")
 	order.SetString(ctx, "statusMessage", fmt.Sprintf("Received only [%d] order items, expected [%d] items", receivedItems, expectedItems))
 
@@ -194,7 +194,7 @@ func ordershippedAction(ctx context.Context, rs model.RuleSession, ruleName stri
 
 	rs.CancelScheduledAssert(ctx, "shipping_"+orderID)
 
-	logger.Infof("Order[%s] has been shipped", orderID)
+	log.RootLogger().Infof("Order[%s] has been shipped", orderID)
 
 	audittrail.PublishAuditTrailItem(*awsStreamName, orderID, "shipped", ruleName, fmt.Sprintf("Order[%s] shipped", orderID))
 }
@@ -211,7 +211,7 @@ func ordercancelledAction(ctx context.Context, rs model.RuleSession, ruleName st
 	orderID, _ := order.GetString("orderId")
 	orderMessage, _ := order.GetString("statusMessage")
 
-	logger.Infof("Order id[%s] has been cancelled. Reason - %s", orderID, orderMessage)
+	log.RootLogger().Infof("Order id[%s] has been cancelled. Reason - %s", orderID, orderMessage)
 	rs.Retract(ctx, order)
 
 	audittrail.PublishAuditTrailItem(*awsStreamName, orderID, "cancelled", ruleName, fmt.Sprintf("Order[%s] has been cancelled. Reason - %s", orderID, orderMessage))
@@ -232,7 +232,7 @@ func shippingtimeouteventAction(ctx context.Context, rs model.RuleSession, ruleN
 	order := tuples["order"].(model.MutableTuple)
 	orderID, _ := order.GetString("orderId")
 
-	logger.Infof("Shipping of Order[%s] timed out. Cancelling Order !!", orderID)
+	log.RootLogger().Infof("Shipping of Order[%s] timed out. Cancelling Order !!", orderID)
 	order.SetString(ctx, "status", "cancelled")
 	order.SetString(ctx, "statusMessage", fmt.Sprint("Shipping timed out"))
 
@@ -258,7 +258,7 @@ func orderinvoiceAction(ctx context.Context, rs model.RuleSession, ruleName stri
 	}
 	discountedInvoice := invoice - ((discountApplied / 100.00) * invoice)
 
-	logger.Infof("Order [%s] completed. Invoice submitted,\n\tOrginal invoice - $%.2f\n\t'%s' level discount - %.2f%%\n\tFinal invoice - $%.2f", orderID, invoice, level, discountApplied, discountedInvoice)
+	log.RootLogger().Infof("Order [%s] completed. Invoice submitted,\n\tOrginal invoice - $%.2f\n\t'%s' level discount - %.2f%%\n\tFinal invoice - $%.2f", orderID, invoice, level, discountApplied, discountedInvoice)
 	order.SetString(ctx, "status", "complete")
 	rs.Retract(ctx, order)
 
