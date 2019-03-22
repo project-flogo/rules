@@ -14,7 +14,7 @@
 </p>
 
 ## Steps to configure and build a Rules based Flogo App
-Below the `flogo.json` file used in this example application. We will use this example to explain the configuration and setup of a Flogo/Rules App
+Below is the `flogo.json` file used in this example application. We will use this example to explain the configuration and setup of a Flogo/Rules App
 ```
 {
   "name": "simplerules",
