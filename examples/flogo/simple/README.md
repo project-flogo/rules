@@ -162,7 +162,7 @@ First configure the top level `actions` section. Here, the tags `id`, `ruleSessi
 
 ##Resources configuration
 Under the top level `resources` section, `id` must reference a rule session configured in the actions
-configuration above. Since the name of the rulessesion being referneced is `simple`, `id` takes
+configuration above. Since the name of the rulessesion being referenced is `simple`, `id` takes
 the value `rulesession:simple`
 
 Under the `rules` section, declare all your rules.
@@ -170,14 +170,14 @@ Under the `rules` section, declare all your rules.
 
 The `conditions` are your rule's conditions. Each condition has a `name`, a list of types being used in the condition
 under `identifiers`. These identifiers should be one of `tds/names` defined in the `actions` section. The value of `evaluator` should
-be an unique string. This string will be bound to a Go function at runtime (explained later)
+be an unique string. This string will bind to a Go function at runtime (explained later)
 Note how you can have multiple conditions (See the second condition in the example above)
 
 The `actionFunction` is your rule's action. It means that when the `evaluator` condition is met, invoke this function
-Again, this is a unique string whose value is bound to a Go function at runtime (explained later)
+Again, this is a unique string whose value binds to a Go function at runtime (explained later)
 
 ## Configure the trigger handler
-Flogo App users are familiar to the trigger configuration. For rules, you have to additionally configure the `name` and 
+Flogo users are perhaps already familiar with the trigger configurations. For rules, you have to additionally configure the `name` and 
 `action` of the handler
 In this example, we configured two handlers. In the first, we have `handler`/`name` as `n1` and `path` as`/test/n1`
 In the second, we have we have `handler`/`name` as `n2` and `path` as`/test/n2`
