@@ -139,6 +139,8 @@ $ go install
 $ ./$GOPATH/bin/rulesapp
 
 ```
+## Running Rules in a Flogo App
+To use the Rules API in a Flogo App, refer to `examples/flogo/simple/README`
 
 ## Connect with us
 
