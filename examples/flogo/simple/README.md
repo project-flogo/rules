@@ -30,8 +30,7 @@ Below is the `flogo.json` file used in this example application. We will use thi
         "port": "7777"
       },
       "handlers": [
-        {
-          "name": "n1",
+        {   
           "settings": {
             "method": "GET",
             "path": "/test/n1"
@@ -39,20 +38,14 @@ Below is the `flogo.json` file used in this example application. We will use thi
           "actions": [
             {
               "id": "simple_rule",
-              "mappings": {
-                "input": [
-                  {
-                    "mapTo": "values",
-                    "type": "assign",
-                    "value": "$.queryParams"
-                  }
-                ]
+              "input": {
+                "tupletype": "n1",
+                "values": "=$.queryParams"
               }
             }
           ]
         },
         {
-          "name": "n2",
           "settings": {
             "method": "GET",
             "path": "/test/n2"
@@ -60,14 +53,9 @@ Below is the `flogo.json` file used in this example application. We will use thi
           "actions": [
             {
               "id": "simple_rule",
-              "mappings": {
-                "input": [
-                  {
-                    "mapTo": "values",
-                    "type": "assign",
-                    "value": "$.queryParams"
-                  }
-                ]
+              "input": {
+                "tupletype": "n2",
+                "values": "=$.queryParams"
               }
             }
           ]
@@ -110,6 +98,24 @@ Below is the `flogo.json` file used in this example application. We will use thi
     {
       "id": "rulesession:simple",
       "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+             {
+               "name": "outputData",
+               "type": "any"
+             }
+          ]
+        },
         "rules": [
           {
             "name": "n1.name == Bob",
@@ -177,18 +183,17 @@ The `actionFunction` is your rule's action. It means that when the `evaluator` c
 Again, this is a unique string whose value binds to a Go function at runtime (explained later)
 
 ## Configure the trigger handler
-Flogo users are perhaps already familiar with the trigger configurations. For rules, you have to additionally configure the `name` and 
-`action` of the handler
-In this example, we configured two handlers. In the first, we have `handler`/`name` as `n1` and `path` as`/test/n1`
-In the second, we have we have `handler`/`name` as `n2` and `path` as`/test/n2`
+Flogo users are perhaps already familiar with the trigger configurations. 
+In this example, we configured two handlers. In the first, we have `tupletype` as `n1` and `path` as`/test/n1`
+In the second, we have we have `tupletype` as `n2` and `path` as`/test/n2`
 What this means is that when data arrives on URI `test/n1` we map its data to tuple type `n1` and 
-when it arrives on `/test/n2` we map its data to tuple type `n2` Note that the handler names should be one of the tuple type names as defined in the `tds` section
+when it arrives on `/test/n2` we map its data to tuple type `n2`. Note that the `tupletype` should be one of the tuple type names defined in the `tds` section
 
 ##Mapping data from the handler to tuples
-To do that, we simply configure the `actions/mappings/input/values` to `$.queryParams`
+To do that, we simply configure the `actions/input/values` to `$.queryParams`
 
 ##How it all comes together
-When data arrives on a trigger/handler, a new `Tuple` of type=handler's name is created
+When data arrives on a trigger/handler, a new `Tuple` of `handlers/actions/input/tupletype` is created
 The tuple values are initialized with the HTTP query parameters and the tuple is asserted to the rules session
 
 ##Binding Go functions for actions and conditions to the string tokens defined in the descriptor
@@ -252,7 +257,7 @@ First, inspect the `flogo.json` and the `functions.go` to understand the rules/c
 For our test app `simplerules`, from the command line,
 `simplerules/bin/simplerules`
 Then from another command line, send a curl request
-`curl localhost:7777/test/n2?name=Bob`
+`curl localhost:7777/test/n1?name=Bob`
 You should see this o/p on the console
 ```
 Rule fired: [n1.name == Bob]

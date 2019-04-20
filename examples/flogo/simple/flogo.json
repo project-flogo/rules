@@ -12,8 +12,7 @@
         "port": "7777"
       },
       "handlers": [
-        {
-          "name": "n1",
+        {   
           "settings": {
             "method": "GET",
             "path": "/test/n1"
@@ -21,20 +20,14 @@
           "actions": [
             {
               "id": "simple_rule",
-              "mappings": {
-                "input": [
-                  {
-                    "mapTo": "values",
-                    "type": "assign",
-                    "value": "$.queryParams"
-                  }
-                ]
+              "input": {
+                "tupletype": "n1",
+							  "values": "=$.queryParams"
               }
             }
           ]
         },
         {
-          "name": "n2",
           "settings": {
             "method": "GET",
             "path": "/test/n2"
@@ -42,14 +35,9 @@
           "actions": [
             {
               "id": "simple_rule",
-              "mappings": {
-                "input": [
-                  {
-                    "mapTo": "values",
-                    "type": "assign",
-                    "value": "$.queryParams"
-                  }
-                ]
+              "input": {
+                "tupletype": "n2",
+							  "values": "=$.queryParams"
               }
             }
           ]
@@ -92,6 +80,24 @@
     {
       "id": "rulesession:simple",
       "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+             {
+               "name": "outputData",
+               "type": "any"
+             }
+          ]
+        },
         "rules": [
           {
             "name": "n1.name == Bob",
