@@ -4,31 +4,36 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/project-flogo/core/data/metadata"
 	"runtime/debug"
 
-	"github.com/project-flogo/core/app/resource"
+	"github.com/project-flogo/core/data/metadata"
+
 	"github.com/project-flogo/core/action"
+	"github.com/project-flogo/core/app/resource"
 	"github.com/project-flogo/core/data"
-	"github.com/project-flogo/core/trigger"
 	"github.com/project-flogo/core/support/log"
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
 )
+
 const (
 	sRuleSession   = "rulesession"
 	sTupleDescFile = "tupleDescriptorFile"
-	ivValues = "queryParams"
+	ivValues       = "values"
 )
+
 var actionMetadata = action.ToMetadata(&Settings{})
+
 var manager *config.ResourceManager
 
+//var resManager *config.ResManager
+
 type Settings struct {
-	RuleSessionURI string `json:"ruleSessionURI"`
-	TupleDescFile  string `json:"tupleDescriptorFile"`
-	Tds []model.TupleDescriptor `json:"tds"`
+	RuleSessionURI string                  `json:"ruleSessionURI"`
+	TupleDescFile  string                  `json:"tupleDescriptorFile"`
+	Tds            []model.TupleDescriptor `json:"tds"`
 }
 
 func init() {
@@ -43,8 +48,10 @@ func (f *ActionFactory) Initialize(ctx action.InitContext) error {
 	if manager != nil {
 		return nil
 	}
+
 	manager = config.NewResourceManager()
 	resource.RegisterLoader(config.RESTYPE_RULESESSION, manager)
+
 	return nil
 }
 
@@ -60,7 +67,7 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 		return nil, err
 	}
 
-	rsCfg, err := manager.GetRuleSessionDescriptor(settings.RuleSessionURI)
+	rsCfg, err := manager.GetRuleActionDescriptor(settings.RuleSessionURI)
 	if err != nil {
 		return nil, err
 	}
@@ -89,11 +96,22 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	}
 
 	ruleAction := &RuleAction{}
-	ruleCollectionJSON, err := json.Marshal(rsCfg)
+	ruleSessionDescriptor, err := manager.GetRuleSessionDescriptor(settings.RuleSessionURI)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get RuleSessionDescriptor for %s\n%s", settings.RuleSessionURI, err.Error())
+	}
+	ruleCollectionJSON, err := json.Marshal(ruleSessionDescriptor)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshall RuleSessionDescriptor : %s", err.Error())
 	}
-	ruleAction.rs, _ = ruleapi.GetOrCreateRuleSessionFromConfig(settings.RuleSessionURI, string(ruleCollectionJSON))
+	ruleAction.rs, err = ruleapi.GetOrCreateRuleSessionFromConfig(settings.RuleSessionURI, string(ruleCollectionJSON))
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create rulesession for %s\n %s", settings.RuleSessionURI, err.Error())
+	}
+
+	ruleAction.ioMetadata = rsCfg.IOMetadata
 
 	//start the rule session here, calls the startup rule function
 	err = ruleAction.rs.Start(nil)
@@ -103,7 +121,8 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 
 // RuleAction wraps RuleSession
 type RuleAction struct {
-	rs model.RuleSession
+	rs         model.RuleSession
+	ioMetadata *metadata.IOMetadata
 }
 
 func (a *RuleAction) Metadata() *action.Metadata {
@@ -111,8 +130,9 @@ func (a *RuleAction) Metadata() *action.Metadata {
 }
 
 func (a *RuleAction) IOMetadata() *metadata.IOMetadata {
-	return actionMetadata.IOMetadata
+	return a.ioMetadata
 }
+
 // Run implements action.Action.Run
 func (a *RuleAction) Run(ctx context.Context, inputs map[string]interface{}) (map[string]interface{}, error) {
 
@@ -126,20 +146,34 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]interface{}) (ma
 
 	}()
 
-	h, _ok := trigger.HandlerFromContext(ctx)
-	if !_ok {
+	tupleTypeData, exists := inputs["tupletype"]
+
+	if !exists {
+		log.RootLogger().Debugf("No tuple name recieved")
+		//no input, should we return an error?
 		return nil, nil
 	}
 
-	tupleType := model.TupleType(h.Name)
+	str, _ := tupleTypeData.(string)
+	tupleType := model.TupleType(str)
 	valAttr, exists := inputs[ivValues]
+
 	if !exists {
 		log.RootLogger().Debugf("No values recieved")
 		//no input, should we return an error?
 		return nil, nil
 	}
 
-	strMap := valAttr.(map[string]string)
+	val, _ := valAttr.(string)
+	valuesMap := make(map[string]interface{})
+
+	//metadata section allows receiving 'values' string as json format. (i.e. 'name=Bob' as '{"Name":"Box"}')
+	err := json.Unmarshal([]byte(val), &valuesMap)
+
+	if err != nil {
+		log.RootLogger().Warnf("values for [%s] are malformed:\n %v\n", string(tupleType), val)
+		return nil, nil
+	}
 
 	td := model.GetTupleDescriptor(tupleType)
 	if td == nil {
@@ -148,31 +182,25 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]interface{}) (ma
 	}
 
 	for _, keyProp := range td.GetKeyProps() {
-		_, found := strMap[keyProp]
+		_, found := valuesMap[keyProp]
 		if !found {
 			//set unique ids to string key properties, if not present in the payload
 			if td.GetProperty(keyProp).PropType == data.TypeString {
 				uid, err := common.GetUniqueId()
 				if err == nil {
-					strMap[keyProp] = uid
+					valuesMap[keyProp] = uid
 				} else {
 					log.RootLogger().Warnf("Failed to generate a unique id, discarding event [%s]\n", string(tupleType))
-					return  nil, nil
+					return nil, nil
 				}
 			}
 		}
 	}
 
-	valuesMap := map[string]interface{}{}
-	for k, v := range strMap {
-		valuesMap[k] = v
-	}
-
 	tuple, _ := model.NewTuple(tupleType, valuesMap)
-	err := a.rs.Assert(ctx, tuple)
+	err = a.rs.Assert(ctx, tuple)
 	if err != nil {
 		return nil, err
 	}
 	return nil, nil
 }
-
