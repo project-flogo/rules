@@ -16,18 +16,13 @@
           "name": "moveevent",
           "settings": {
             "method": "GET",
-            "path": "/test/me"
+            "path": "/test/:tupleType"
           },
           "action": {
             "id": "simple_rule",
-            "mappings": {
-              "input": [
-                {
-                  "mapTo": "values",
-                  "type": "assign",
-                  "value": "$.queryParams"
-                }
-              ]
+            "input": {
+              "tupletype": "=$.pathParams.tupleType",
+              "values": "=$.queryParams"
             }
           }
         }
@@ -109,6 +104,24 @@
     {
       "id": "rulesession:simple",
       "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+             {
+               "name": "outputData",
+               "type": "any"
+             }
+          ]
+        },
         "rules": [
           {
             "name": "printPackageRule",
@@ -134,7 +147,7 @@
                 "evaluator": "cMoveEvent"
               }
             ],
-            "actionFunction": "aMoveEvent"
+            "actionFunction": "aPrintMoveEvent"
           },
           {
             "name": "joinMoveEventAndPackageEventRule",
