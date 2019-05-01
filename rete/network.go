@@ -601,6 +601,7 @@ func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tupl
 		if mode == DELETE {
 			rCtx.addToRtcDeleted(tuple)
 		}
+		delete (nw.allHandles, tuple.GetKey().String())
 	}
 }
 
