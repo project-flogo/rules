@@ -263,7 +263,7 @@ func (nw *reteNetworkImpl) buildNetwork(rule model.Rule, nodesOfRule *list.List,
 				}
 				//Yoohoo! We have a Rule!!
 				ruleNode := newRuleNode(rule)
-				newNodeLink(nw, node, ruleNode, false)
+				newNodeLink(nw, lastNode, ruleNode, false)
 				nodesOfRule.PushBack(ruleNode)
 			} else {
 				idrs := SecondMinusFirst(node.getIdentifiers(), rule.GetIdentifiers())
