@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-//no-identifier condition
+//no-identifier condition with single-assertion
 func Test_T8_1(t *testing.T) {
 
 	rs, _ := createRuleSession()
@@ -29,6 +29,8 @@ func Test_T8_1(t *testing.T) {
 	rs.Unregister()
 
 }
+
+//no-identifier condition with multi-assertion
 func Test_T8_2(t *testing.T) {
 
 	rs, _ := createRuleSession()
