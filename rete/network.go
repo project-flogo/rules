@@ -36,8 +36,8 @@ type reteNetworkImpl struct {
 
 	assertLock sync.Mutex
 	crudLock   sync.Mutex
-	txnHandler model.RtcTransactionHandler
-	txnContext interface{}
+	txnHandler[] model.RtcTransactionHandler
+	txnContext[] interface{}
 
 	//jtService map[int]types.JoinTable
 	jtService types.JtService
@@ -52,32 +52,38 @@ type reteNetworkImpl struct {
 }
 
 //NewReteNetwork ... creates a new rete network
-func NewReteNetwork(jsonConfig string) types.Network {
+func NewReteNetwork(sessionName string, jsonConfig string) types.Network {
 	reteNetworkImpl := reteNetworkImpl{}
-	reteNetworkImpl.initReteNetwork(jsonConfig)
+	reteNetworkImpl.initReteNetwork(sessionName, jsonConfig)
 	return &reteNetworkImpl
 }
 
-func (nw *reteNetworkImpl) initReteNetwork(config string) {
+func (nw *reteNetworkImpl) initReteNetwork(sessionName string, config string) error {
 	//nw.currentId = 0
 	nw.allRules = make(map[string]model.Rule)
 	nw.allClassNodes = make(map[string]classNode)
 	nw.ruleNameNodesOfRule = make(map[string]*list.List)
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
+	nw.txnHandler = []model.RtcTransactionHandler{}
 
-	factory := NewFactory(nw, config)
-	nw.factory = factory
-
-	if factory.parsedJson != nil {
-		reteCfg := factory.parsedJson["rs"].(map[string]interface{})
-		nw.prefix = reteCfg["prefix"].(string)
+	factory, err := NewFactory(nw, config)
+	if err != nil {
+		return err
 	}
+	//nw.factory = factory
 
-	nw.idGen = nw.factory.getIdGen()
-	nw.jtService = nw.factory.getJoinTableCollection()
-	nw.handleService = nw.factory.getHandleCollection()
-	nw.jtRefsService = nw.factory.getJoinTableRefs()
+	//if factory.parsedJson != nil {
+	//	reteCfg := factory.parsedJson["rs"].(map[string]interface{})
+	//	nw.prefix = reteCfg["prefix"].(string)
+	//}
+	nw.prefix = sessionName
+	nw.idGen = factory.getIdGen()
+	nw.jtService = factory.getJoinTableCollection()
+	nw.handleService = factory.getHandleCollection()
+	nw.jtRefsService = factory.getJoinTableRefs()
 	nw.initNwServices()
+	return nil
+
 }
 
 func (nw *reteNetworkImpl) initNwServices() {
@@ -560,7 +566,9 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 		}
 		if nw.txnHandler != nil {
 			rtcTxn := newRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
-			nw.txnHandler(ctx, rs, rtcTxn, nw.txnContext)
+			for i, txnHandler := range nw.txnHandler {
+				txnHandler(newCtx, rs, rtcTxn, nw.txnContext[i])
+			}
 		}
 	} else {
 		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple, changedProps, mode))
@@ -586,7 +594,9 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, rs model.RuleSession, tu
 		nw.retractInternal(ctx, tuple, changedProps, mode)
 		if nw.txnHandler != nil && mode == common.DELETE {
 			rtcTxn := newRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
-			nw.txnHandler(ctx, reteCtxVar.getRuleSession(), rtcTxn, nw.txnContext)
+			for i, txnHandler := range nw.txnHandler {
+				txnHandler(ctx, rs, rtcTxn, nw.txnContext[i])
+			}
 		}
 	} else {
 		reteCtxVar.getOpsList().PushBack(newDeleteEntry(tuple, mode, changedProps))
@@ -648,8 +658,8 @@ func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) types.ReteHandle {
 }
 
 func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {
-	nw.txnHandler = txnHandler
-	nw.txnContext = txnContext
+	nw.txnHandler = append(nw.txnHandler, txnHandler)
+	nw.txnContext = append(nw.txnContext, txnContext)
 }
 
 func (nw *reteNetworkImpl) GetConfigValue(key string) string {

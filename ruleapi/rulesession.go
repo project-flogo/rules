@@ -77,7 +77,7 @@ func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.Rul
 }
 
 func (rs *rulesessionImpl) initRuleSession(name string) {
-	rs.reteNetwork = rete.NewReteNetwork("")
+	rs.reteNetwork = rete.NewReteNetwork(name, "{}")
 	rs.name = name
 	rs.timers = make(map[interface{}]*time.Timer)
 	rs.started = false
@@ -96,25 +96,29 @@ func (rs *rulesessionImpl) initRuleSessionWithConfig(name string, jsonConfig str
 	//TODO: Configure it from jconsonfig
 	rs.tupleStore = getTupleStore(rs.jsonConfig)
 	rs.tupleStore.Init()
-
-	rs.reteNetwork = rete.NewReteNetwork(jsonConfig)
-	rs.reteNetwork.SetTupleStore(rs.tupleStore)
-
+	rs.reteNetwork = rete.NewReteNetwork(rs.name, jsonConfig)
+	//TODO: Configure it from jconsonfig
+	tupleStore := getTupleStore(rs.jsonConfig)
+	if tupleStore != nil {
+		tupleStore.Init()
+		rs.SetStore(tupleStore)
+	}
 	rs.started = false
 	return nil
 }
 
 func getTupleStore(jsonConfig map[string]interface{}) model.TupleStore {
-	rsCfg := jsonConfig["rs"].(map[string]interface{})
-
-	storeRef := rsCfg["store-ref"].(string)
-
-	if storeRef == "" || storeRef == "mem" {
-		return mem.NewStore(jsonConfig)
-	} else if storeRef == "redis" {
-		return redis.NewStore(jsonConfig)
+	if rsCfg, found := jsonConfig["rs"].(map[string]interface{}); found {
+		if storeRef, found2 := rsCfg["store-ref"].(string); found2 {
+			if storeRef == "" || storeRef == "mem" {
+				return mem.NewStore(jsonConfig)
+			} else if storeRef == "redis" {
+				return redis.NewStore(jsonConfig)
+			}
+		}
 	}
-	return nil
+	//default to in-mem
+	return mem.NewStore(jsonConfig)
 }
 
 func (rs *rulesessionImpl) AddRule(rule model.Rule) (err error) {
@@ -221,4 +225,27 @@ func (rs *rulesessionImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTra
 
 func (rs *rulesessionImpl) GetStore() model.TupleStore {
 	return rs.tupleStore
+}
+
+func (rs *rulesessionImpl) SetStore(store model.TupleStore) error {
+	if store == nil {
+		return fmt.Errorf("Cannot set nil store")
+	}
+	if rs.tupleStore != nil {
+		return fmt.Errorf("TupleStore already set")
+	}
+	if rs.started {
+		return fmt.Errorf("RuleSession already started")
+	}
+	rs.tupleStore = store
+	rs.reteNetwork.RegisterRtcTransactionHandler(internalTxnHandler, nil)
+	return nil
+}
+
+
+func internalTxnHandler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	store := rs.GetStore()
+	store.DeleteTuples(rtxn.GetRtcDeleted())
+	store.SaveTuples(rtxn.GetRtcAdded())
+	store.SaveModifiedTuples(rtxn.GetRtcModified())
 }
