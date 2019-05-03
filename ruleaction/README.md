@@ -64,12 +64,12 @@ Upon a configuration of flogo.json containing ruleaction configuration and creat
 ```
 flogo create -f flogo.json myrules
 cp functions.go myrules/src
-cd myrules/src
+cd myrules
 flogo build
 ```
 To run the flogo rules binary,
 ```
-../bin/myrules
+bin/myrules
 ```
 
 
