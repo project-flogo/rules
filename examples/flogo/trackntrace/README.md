@@ -1,4 +1,4 @@
-This recipe demonstrates the capability of rules to track and trace for a flogo app. Here three tuples used, tuples description is shown below.
+This example demonstrates the capability of rules to track and trace for a flogo app. In this example three tuples used, tuples description is shown below.
 
 ```json
 {
@@ -63,25 +63,41 @@ This recipe demonstrates the capability of rules to track and trace for a flogo 
 }
 ```
 
-`package` tuple is always stored in network, while the others `moveevent` and `movetimeoutevent` are removed immediate after its usage as `ttl` given as 0. By default during startup `PACKAGE1` is stored. 
+`package` tuple is always stored in network, while the other tuples `moveevent` and `movetimeoutevent` are removed immediate after its usage as `ttl` given `0`. During startup `PACKAGE1` is asserted into network.
+
+### Actions used here
+
+`aJoinMoveEventAndPackage` : Performs check on sitting value. If value is more than 0.5 then package is scheduled to movetimeoutevent only once.<br>
+`aPrintMoveEvent`: Prints received moveevents.<br>
+`aMoveTimeoutEvent`: Prints received movetimeoutevent.<br>
+`aJoinMoveTimeoutEventAndPackage`: All packages with state as normal are modified to sitting state.<br>
+`aPackageInSitting`: Prints package as sitting.
+
+## Usage
+Get the repo build/run rule app.
+```sh
+cd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/trackntrace
+go build
+./trackntrace
+```
 
 ## Move event test
-Perform below mentioned steps to check the result.
+Run below command to check moveevent action on PACKAGE1.
 ```sh
 curl http://localhost:7777/test/moveevent?id=PACKAGE1\&packageid=pkgid1\&sitting=0.4
 ```
-Above command results in executing two actions one is `aJoinMoveEventAndPackage` and the other is `aPrintMoveEvent`.<br>
+Above command results in executing two actions one is `aJoinMoveEventAndPackage` and the other is `aPrintMoveEvent`.<br><br>
 Expected output:
 ```
 Joining a 'moveevent' with packageid [pkgid1] to package [PACKAGE1], sitting [0.400000], moving [0.000000], dropped [0.000000]
 Received a 'moveevent' [PACKAGE1] sitting [0.400000], moving [0.000000], dropped [0.000000]
 ```
 
-If sitting value is given more than 0.5 then package is moved with timeout.
+If sitting value is given more than 0.5 then movetimeoutevent gets invoked.
 ```sh
 curl http://localhost:7777/test/moveevent?id=PACKAGE1\&packageid=pkgid1\&sitting=0.6
 ```
-Above commands results in executing action `aJoinMoveTimeoutEventAndPackage` from action `aJoinMoveEventAndPackage`. The action `aJoinMoveTimeoutEventAndPackage` results in changing state of PACKAGE1 to sitting this will trigger another action `aPackageInSitting`. So chain of actions getting executed.<br>
+Above commands results in executing action `aJoinMoveTimeoutEventAndPackage` from `aJoinMoveEventAndPackage`. Action `aJoinMoveTimeoutEventAndPackage` results in changing state of PACKAGE1 to sitting this will trigger another action `aPackageInSitting`. So chain of actions getting executed.<br><br>
 Expected output:
 ```
 Joining a 'moveevent' with packageid [pkgid1] to package [PACKAGE1], sitting [0.600000], moving [0.000000], dropped [0.000000]
