@@ -74,11 +74,23 @@ This example demonstrates the capability of rules to track and trace for a flogo
 `aPackageInSitting`: Prints package as sitting.
 
 ## Usage
-Get the repo build/run rule app.
+Get the repo and in this example `main.go`, `functions.go` both are available we can directly build and run the app or create flogo rule app and run it.
+
+### Direct build and run
 ```sh
 cd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/trackntrace
 go build
 ./trackntrace
+```
+
+### Create app using flogo cli
+```sh
+cd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/trackntrace
+flogo create -f flogo.json trackNTraceApp
+cp functions.go trackNTraceApp/src
+cd trackNTraceApp
+flogo build
+./bin/trackNTraceApp
 ```
 
 ## Move event test
