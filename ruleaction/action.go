@@ -149,9 +149,9 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]interface{}) (ma
 	tupleTypeData, exists := inputs["tupletype"]
 
 	if !exists {
-		log.RootLogger().Debugf("No tuple name recieved")
-		//no input, should we return an error?
-		return nil, nil
+		err := fmt.Errorf("No tuple name recieved")
+		log.RootLogger().Debugf(err.Error())
+		return nil, err
 	}
 
 	str, _ := tupleTypeData.(string)
@@ -159,9 +159,9 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]interface{}) (ma
 	valAttr, exists := inputs[ivValues]
 
 	if !exists {
-		log.RootLogger().Debugf("No values recieved")
-		//no input, should we return an error?
-		return nil, nil
+		err := fmt.Errorf("No values recieved")
+		log.RootLogger().Debugf(err.Error())
+		return nil, err
 	}
 
 	val, _ := valAttr.(string)
@@ -171,14 +171,16 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]interface{}) (ma
 	err := json.Unmarshal([]byte(val), &valuesMap)
 
 	if err != nil {
-		log.RootLogger().Warnf("values for [%s] are malformed:\n %v\n", string(tupleType), val)
-		return nil, nil
+		err := fmt.Errorf("values for [%s] are malformed:\n %v", string(tupleType), val)
+		log.RootLogger().Warnf(err.Error())
+		return nil, err
 	}
 
 	td := model.GetTupleDescriptor(tupleType)
 	if td == nil {
-		log.RootLogger().Warnf("Tuple descriptor for type [%s] not found\n", string(tupleType))
-		return nil, nil
+		err := fmt.Errorf("Tuple descriptor for type [%s] not found", string(tupleType))
+		log.RootLogger().Warnf(err.Error())
+		return nil, err
 	}
 
 	for _, keyProp := range td.GetKeyProps() {
@@ -190,8 +192,9 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]interface{}) (ma
 				if err == nil {
 					valuesMap[keyProp] = uid
 				} else {
-					log.RootLogger().Warnf("Failed to generate a unique id, discarding event [%s]\n", string(tupleType))
-					return nil, nil
+					err := fmt.Errorf("Failed to generate a unique id, discarding event [%s]", string(tupleType))
+					log.RootLogger().Warnf(err.Error())
+					return nil, err
 				}
 			}
 		}
