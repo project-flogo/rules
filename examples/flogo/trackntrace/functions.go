@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
@@ -24,19 +25,19 @@ func init() {
 	config.RegisterActionFunction("aPrintPackage", aPrintPackage)
 
 	//rule printMoveEvent
-	config.RegisterConditionEvaluator("cMoveEvent", cTruecondition)
+	config.RegisterConditionEvaluator("cMoveEvent", cMoveEvent)
 	config.RegisterActionFunction("aPrintMoveEvent", aPrintMoveEvent)
 
 	//rule joinMoveEventAndPackage
-	config.RegisterConditionEvaluator("cJoinMoveEventAndPackage", cTruecondition)
+	config.RegisterConditionEvaluator("cJoinMoveEventAndPackage", cMoveEvent)
 	config.RegisterActionFunction("aJoinMoveEventAndPackage", aJoinMoveEventAndPackage)
 
 	//rule timeoutSitting
-	config.RegisterConditionEvaluator("cMoveTimeoutEvent", cTruecondition)
+	config.RegisterConditionEvaluator("cMoveTimeoutEvent", cMoveTimeoutEvent)
 	config.RegisterActionFunction("aMoveTimeoutEvent", aMoveTimeoutEvent)
 
 	//rule joinMoveTimeoutEventAndPackage
-	config.RegisterConditionEvaluator("cJoinMoveTimeoutEventAndPackage", cTruecondition)
+	config.RegisterConditionEvaluator("cJoinMoveTimeoutEventAndPackage", cMoveTimeoutEvent)
 	config.RegisterActionFunction("aJoinMoveTimeoutEventAndPackage", aJoinMoveTimeoutEventAndPackage)
 
 	//rule packageInSitting
@@ -155,4 +156,34 @@ func aPackageInSitting(ctx context.Context, rs model.RuleSession, ruleName strin
 		pkgid, _ := pkg.GetString("id")
 		fmt.Printf("PACKAGE [%s] is STTTING\n", pkgid)
 	}
+}
+
+func cMoveEvent(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	mpkg := tuples["moveevent"]
+	pkg := tuples["package"]
+	if mpkg != nil {
+		if pkg != nil {
+			pkgid, _ := pkg.GetString("id")
+			mpkgid, _ := mpkg.GetString("packageid")
+			if strings.Compare(pkgid, mpkgid) == 0 {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func cMoveTimeoutEvent(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	mpkg := tuples["movetimeoutevent"]
+	pkg := tuples["package"]
+	if mpkg != nil {
+		if pkg != nil {
+			pkgid, _ := pkg.GetString("id")
+			mpkgid, _ := mpkg.GetString("packageid")
+			if strings.Compare(pkgid, mpkgid) == 0 {
+				return true
+			}
+		}
+	}
+	return false
 }
