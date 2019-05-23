@@ -43,6 +43,27 @@
         "type":"string"
       }
     ]
+  },
+  {
+    "name":"t3",
+    "properties":[
+      {
+        "name":"id",
+        "type":"string",
+        "pk-index":0
+      },
+      {
+        "name":"p1",
+        "type":"int"
+      },
+      {
+        "name":"p2",
+        "type":"double"
+      },
+      {
+        "name":"p3",
+        "type":"string"
+      }
+    ]
   }
-
 ]
