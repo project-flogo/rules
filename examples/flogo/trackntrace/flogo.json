@@ -16,12 +16,26 @@
           "name": "moveevent",
           "settings": {
             "method": "GET",
-            "path": "/test/:tupleType"
+            "path": "/moveevent"
           },
           "action": {
             "id": "simple_rule",
             "input": {
-              "tupletype": "=$.pathParams.tupleType",
+              "tupletype": "moveevent",
+              "values": "=$.queryParams"
+            }
+          }
+        },
+        {
+          "name": "package",
+          "settings": {
+            "method": "GET",
+            "path": "/package"
+          },
+          "action": {
+            "id": "simple_rule",
+            "input": {
+              "tupletype": "package",
               "values": "=$.queryParams"
             }
           }
@@ -123,6 +137,63 @@
           ]
         },
         "rules": [
+          
+          {
+            "name": "packageInSittingRule",
+            "conditions": [
+              {
+                "name": "cPackageInSitting",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInSitting"
+              }
+            ],
+            "actionFunction": "aPackageInSitting",
+            "priority":1
+          },
+          {
+            "name": "packageInDelayedRule",
+            "conditions": [
+              {
+                "name": "cPackageInDelayed",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInDelayed"
+              }
+            ],
+            "actionFunction": "aPackageInDelayed",
+            "priority":1
+          },
+          {
+            "name": "packageInMovingRule",
+            "conditions": [
+              {
+                "name": "cPackageInMoving",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInMoving"
+              }
+            ],
+            "actionFunction": "aPackageInMoving",
+            "priority":1
+          },
+          {
+            "name": "packageInDroppedRule",
+            "conditions": [
+              {
+                "name": "cPackageInDropped",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInDropped"
+              }
+            ],
+            "actionFunction": "aPackageInDropped",
+            "priority":1
+          },
           {
             "name": "printPackageRule",
             "conditions": [
@@ -161,7 +232,8 @@
                 "evaluator": "cJoinMoveEventAndPackage"
               }
             ],
-            "actionFunction": "aJoinMoveEventAndPackage"
+            "actionFunction": "aJoinMoveEventAndPackage",
+            "priority":2
           },
           {
             "name": "aMoveTimeoutEventRule",
@@ -189,19 +261,6 @@
               }
             ],
             "actionFunction": "aJoinMoveTimeoutEventAndPackage"
-          },
-          {
-            "name": "packageInSittingRule",
-            "conditions": [
-              {
-                "name": "cPackageInSitting",
-                "identifiers": [
-                  "package.state"
-                ],
-                "evaluator": "cPackageInSitting"
-              }
-            ],
-            "actionFunction": "aPackageInSitting"
           }
         ]
       }

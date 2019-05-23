@@ -21,7 +21,7 @@ func init() {
 	config.RegisterStartupRSFunction("res://rulesession:simple", AssertThisPackage)
 
 	//rule printPackage
-	config.RegisterConditionEvaluator("cPackageEvent", cTruecondition)
+	config.RegisterConditionEvaluator("cPackageEvent", cPackageEvent)
 	config.RegisterActionFunction("aPrintPackage", aPrintPackage)
 
 	//rule printMoveEvent
@@ -29,20 +29,32 @@ func init() {
 	config.RegisterActionFunction("aPrintMoveEvent", aPrintMoveEvent)
 
 	//rule joinMoveEventAndPackage
-	config.RegisterConditionEvaluator("cJoinMoveEventAndPackage", cMoveEvent)
+	config.RegisterConditionEvaluator("cJoinMoveEventAndPackage", cMoveEventPkg)
 	config.RegisterActionFunction("aJoinMoveEventAndPackage", aJoinMoveEventAndPackage)
 
-	//rule timeoutSitting
+	//rule timeoutDelayed
 	config.RegisterConditionEvaluator("cMoveTimeoutEvent", cMoveTimeoutEvent)
 	config.RegisterActionFunction("aMoveTimeoutEvent", aMoveTimeoutEvent)
 
 	//rule joinMoveTimeoutEventAndPackage
-	config.RegisterConditionEvaluator("cJoinMoveTimeoutEventAndPackage", cMoveTimeoutEvent)
+	config.RegisterConditionEvaluator("cJoinMoveTimeoutEventAndPackage", cMoveTimeoutEventPkg)
 	config.RegisterActionFunction("aJoinMoveTimeoutEventAndPackage", aJoinMoveTimeoutEventAndPackage)
 
 	//rule packageInSitting
 	config.RegisterConditionEvaluator("cPackageInSitting", cPackageInSitting)
 	config.RegisterActionFunction("aPackageInSitting", aPackageInSitting)
+
+	//rule packageInDelayed
+	config.RegisterConditionEvaluator("cPackageInDelayed", cPackageInDelayed)
+	config.RegisterActionFunction("aPackageInDelayed", aPackageInDelayed)
+
+	//rule packageInMoving
+	config.RegisterConditionEvaluator("cPackageInMoving", cPackageInMoving)
+	config.RegisterActionFunction("aPackageInMoving", aPackageInMoving)
+
+	//rule packageInDropped
+	config.RegisterConditionEvaluator("cPackageInDropped", cPackageInDropped)
+	config.RegisterActionFunction("aPackageInDropped", aPackageInDropped)
 
 	lastEventType = "none"
 	currentEventType = "none"
@@ -56,8 +68,9 @@ func AssertThisPackage(ctx context.Context, rs model.RuleSession, startupCtx map
 	return nil
 }
 
-func cTruecondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-	return true
+func cPackageEvent(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	pkg := tuples["package"]
+	return pkg != nil
 }
 
 func aPrintPackage(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
@@ -73,8 +86,7 @@ func aPrintMoveEvent(ctx context.Context, rs model.RuleSession, ruleName string,
 	m, _ := me.GetDouble("moving")
 	d, _ := me.GetDouble("dropped")
 
-	fmt.Printf("Received a 'moveevent' [%s] sitting [%f], moving [%f], dropped [%f]\n",
-		meid, s, m, d)
+	fmt.Printf("Received a 'moveevent' [%s] sitting [%f], moving [%f], dropped [%f]\n", meid, s, m, d)
 }
 
 func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
@@ -87,27 +99,39 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 	pkg := tuples["package"]
 	pkgid, _ := pkg.GetString("id")
 
-	fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], sitting [%f], moving [%f], dropped [%f]\n",
-		mepkgid, pkgid, s, m, d)
+	fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], sitting [%f], moving [%f], dropped [%f]\n", mepkgid, pkgid, s, m, d)
 
-	if s > 0.5 {
+	if s > 0 {
 		currentEventType = "sitting"
 	} else {
 		currentEventType = "notsitting"
 	}
 
 	if currentEventType == "sitting" {
+
+		//change the package's state to "sitting"
+		pkgMutable := pkg.(model.MutableTuple)
+		pkgMutable.SetString(ctx, "state", "sitting")
+
 		if lastEventType != "sitting" {
 			//very first sitting event since the last notsitting event.
 			id, _ := common.GetUniqueId()
 			timeoutEvent, _ := model.NewTupleWithKeyValues("movetimeoutevent", id)
 			timeoutEvent.SetString(ctx, "packageid", pkgid)
-			timeoutEvent.SetInt(ctx, "timeoutinmillis", 15000)
-			fmt.Printf("Starting a 15s timer.. [%s]\n", pkgid)
-			rs.ScheduleAssert(ctx, 15000, pkgid, timeoutEvent)
+			timeoutEvent.SetInt(ctx, "timeoutinmillis", 10000)
+			fmt.Printf("Starting a 10s timer.. [%s]\n", pkgid)
+			rs.ScheduleAssert(ctx, 10000, pkgid, timeoutEvent)
 		}
 	} else { //a non-sitting event, cancel a previous timer
 		rs.CancelScheduledAssert(ctx, pkgid)
+
+		pkgMutable := pkg.(model.MutableTuple)
+		if m > 0 {
+			pkgMutable.SetString(ctx, "state", "moving")
+		} else if d > 0 {
+			pkgMutable.SetString(ctx, "state", "dropped")
+		}
+
 	}
 	lastEventType = currentEventType
 }
@@ -119,8 +143,7 @@ func aMoveTimeoutEvent(ctx context.Context, rs model.RuleSession, ruleName strin
 	tomillis, _ := t1.GetInt("timeoutinmillis")
 
 	if t1 != nil {
-		fmt.Printf("'movetimeoutevent' id [%s], packageid [%s], timeoutinmillis [%d]\n",
-			id, pkgid, tomillis)
+		fmt.Printf("Received a 'movetimeoutevent' id [%s], packageid [%s], timeoutinmillis [%d]\n", id, pkgid, tomillis)
 	}
 }
 
@@ -133,11 +156,10 @@ func aJoinMoveTimeoutEventAndPackage(ctx context.Context, rs model.RuleSession, 
 	pkg := tuples["package"].(model.MutableTuple)
 	pkgid, _ := pkg.GetString("id")
 
-	fmt.Printf("Joining a 'movetimeoutevent' [%s] to package [%s], timeout [%d]\n",
-		epkgid, pkgid, toms)
+	fmt.Printf("Joining a 'movetimeoutevent' [%s] to package [%s], timeout [%d]\n", epkgid, pkgid, toms)
 
-	//change the package's state to "sitting"
-	pkg.SetString(ctx, "state", "sitting")
+	//change the package's state to "delayed"
+	pkg.SetString(ctx, "state", "delayed")
 }
 
 func cPackageInSitting(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
@@ -154,36 +176,108 @@ func aPackageInSitting(ctx context.Context, rs model.RuleSession, ruleName strin
 	pkg := tuples["package"]
 	if pkg != nil {
 		pkgid, _ := pkg.GetString("id")
-		fmt.Printf("PACKAGE [%s] is STTTING\n", pkgid)
+		fmt.Printf("PACKAGE [%s] is Sitting\n", pkgid)
 	}
 }
 
 func cMoveEvent(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	mpkg := tuples["moveevent"]
-	pkg := tuples["package"]
 	if mpkg != nil {
-		if pkg != nil {
-			pkgid, _ := pkg.GetString("id")
-			mpkgid, _ := mpkg.GetString("packageid")
-			if strings.Compare(pkgid, mpkgid) == 0 {
-				return true
-			}
-		}
+		mpkgid, _ := mpkg.GetString("packageid")
+		return len(mpkgid) != 0
 	}
 	return false
 }
 
 func cMoveTimeoutEvent(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	mpkg := tuples["movetimeoutevent"]
+	if mpkg != nil {
+		mpkgid, _ := mpkg.GetString("packageid")
+		return len(mpkgid) != 0
+	}
+	return false
+}
+
+func cMoveTimeoutEventPkg(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	mpkg := tuples["movetimeoutevent"]
 	pkg := tuples["package"]
 	if mpkg != nil {
 		if pkg != nil {
 			pkgid, _ := pkg.GetString("id")
 			mpkgid, _ := mpkg.GetString("packageid")
-			if strings.Compare(pkgid, mpkgid) == 0 {
-				return true
-			}
+			return strings.Compare(pkgid, mpkgid) == 0
 		}
 	}
 	return false
+}
+
+func cMoveEventPkg(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	mpkg := tuples["moveevent"]
+	pkg := tuples["package"]
+	if mpkg != nil {
+		if pkg != nil {
+			pkgid, _ := pkg.GetString("id")
+			mpkgid, _ := mpkg.GetString("packageid")
+			return strings.Compare(pkgid, mpkgid) == 0
+		}
+	}
+	return false
+}
+
+func cPackageInDelayed(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	pkg := tuples["package"]
+	if pkg != nil {
+		//pkgid, _ := pkg.GetString("id")
+		state, _ := pkg.GetString("state")
+		return state == "delayed"
+	}
+	return false
+}
+
+func aPackageInDelayed(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+	pkg := tuples["package"]
+	if pkg != nil {
+		pkgid, _ := pkg.GetString("id")
+		fmt.Printf("PACKAGE [%s] is Delayed\n", pkgid)
+		rs.Retract(ctx, pkg)
+		rs.Delete(ctx, pkg)
+	}
+}
+
+func cPackageInMoving(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	pkg := tuples["package"]
+	if pkg != nil {
+		//pkgid, _ := pkg.GetString("id")
+		state, _ := pkg.GetString("state")
+		return state == "moving"
+	}
+	return false
+}
+
+func aPackageInMoving(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+	pkg := tuples["package"]
+	if pkg != nil {
+		pkgid, _ := pkg.GetString("id")
+		fmt.Printf("PACKAGE [%s] is Moving\n", pkgid)
+	}
+}
+
+func cPackageInDropped(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	pkg := tuples["package"]
+	if pkg != nil {
+		//pkgid, _ := pkg.GetString("id")
+		state, _ := pkg.GetString("state")
+		return state == "dropped"
+	}
+	return false
+}
+
+func aPackageInDropped(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+	pkg := tuples["package"]
+	if pkg != nil {
+		pkgid, _ := pkg.GetString("id")
+		fmt.Printf("PACKAGE [%s] is Dropped\n", pkgid)
+		rs.Retract(ctx, pkg)
+		rs.Delete(ctx, pkg)
+	}
 }
