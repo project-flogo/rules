@@ -1,0 +1,190 @@
+{
+  "name": "cardapp",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "Sample Flogo App",
+  "appModel": "1.0.0",
+  "triggers": [
+    {
+      "id": "receive_http_message",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
+      "settings": {
+        "port": "7777"
+      },
+      "handlers": [
+        {   
+          "settings": {
+            "method": "PUT",
+            "path": "/applicant"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "n1",
+							  "values": "=$.content"
+              }
+            }
+          ]
+        },
+        {   
+          "settings": {
+            "method": "PUT",
+            "path": "/cibildata"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "n2",
+							  "values": "=$.content"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "ref": "github.com/project-flogo/rules/ruleaction",
+      "settings": {
+        "ruleSessionURI": "res://rulesession:simple",
+        "tds": [
+          {
+            "name": "n1",
+            "properties": [
+              {
+                "name": "name",
+                "type": "string",
+                "pk-index": 0
+              },
+              {
+                "name": "age",
+                "type": "int",
+                "pk-index": 1
+              },
+              {
+                "name": "address",
+                "type": "string",
+                "pk-index": 2
+              },
+              {
+                "name": "id",
+                "type": "int",
+                "pk-index": 3
+              },
+              {
+                "name": "salary",
+                "type": "int",
+                "pk-index": 4
+              }
+            ]
+          },
+          {
+            "name": "n2",
+            "properties": [
+              {
+                "name": "name",
+                "type": "string",
+                "pk-index": 0
+              },
+              {
+                "name": "creditScore",
+                "type": "int",
+                "pk-index": 1
+              },
+              {
+                "name": "id",
+                "type": "int",
+                "pk-index": 2
+              }
+            ]
+          }
+        ]
+      },
+      "id": "simple_rule"
+    }
+  ],
+  "resources": [
+    {
+      "id": "rulesession:simple",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+             {
+               "name": "outputData",
+               "type": "any"
+             }
+          ]
+        },
+        "rules": [
+          {
+            "name": "Applicatant data",
+            "conditions": [
+              {
+                "name": "c1",
+                "identifiers": [
+                  "n1"
+                ],
+                "evaluator": "checkForAddress"
+              },
+              {
+                "name": "c2",
+                "identifiers": [
+                  "n1"
+                ],
+                "evaluator": "checkForAge"
+              }
+            ],
+            "actionFunction": "checkForApplicationdata"
+          },
+          {
+            "name": "Application status",
+            "conditions": [
+              {
+                "name": "c1",
+                "identifiers": [
+                  "n1","n2"
+                ],
+                "evaluator": "checkForIdMatch"
+              },
+              {
+                "name": "c2",
+                "identifiers": [
+                  "n1","n2"
+                ],
+                "evaluator": "checkForNameMatch"
+              },
+              {
+                "name": "c3",
+                "identifiers": [
+                  "n2"
+                ],
+                "evaluator": "checkForCibil"
+              },
+              {
+                "name": "c2",
+                "identifiers": [
+                  "n1","n2"
+                ],
+                "evaluator": "checkForEligibleCreditlimit"
+              }
+            ],
+            "actionFunction": "checkForApplicationStatus"
+          }
+        ]
+      }
+    }
+  ]
+}
