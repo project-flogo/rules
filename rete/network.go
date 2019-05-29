@@ -582,7 +582,7 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, chang
 			nw.txnHandler(ctx, reteCtxVar.getRuleSession(), rtcTxn, nw.txnContext)
 		}
 	} else {
-		reteCtxVar.getOpsList().PushBack(newDeleteEntry(tuple, mode))
+		reteCtxVar.getOpsList().PushBack(newDeleteEntry(tuple, mode, changedProps))
 	}
 }
 
@@ -601,7 +601,7 @@ func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tupl
 		if mode == DELETE {
 			rCtx.addToRtcDeleted(tuple)
 		}
-		delete (nw.allHandles, tuple.GetKey().String())
+		delete(nw.allHandles, tuple.GetKey().String())
 	}
 }
 
