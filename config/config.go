@@ -12,9 +12,10 @@ import (
 // RuleSessionDescriptor is a collection of rules to be loaded
 
 type RuleActionDescriptor struct {
-	Name       string               `json:"name"`
-	IOMetadata *metadata.IOMetadata `json:"metadata"`
-	Rules      []*RuleDescriptor    `json:"rules"`
+	Name        string               `json:"name"`
+	IOMetadata  *metadata.IOMetadata `json:"metadata"`
+	Rules       []*RuleDescriptor    `json:"rules"`
+	CacheConfig *CacheConfig         `json:"cache"`
 }
 
 type RuleSessionDescriptor struct {
@@ -34,6 +35,14 @@ type ConditionDescriptor struct {
 	Name        string
 	Identifiers []string
 	Evaluator   model.ConditionEvaluator
+}
+
+type CacheConfig struct {
+	Name       string `json:"name"`
+	ServerType string `json:"servertype"`
+	Address    string `json:"address"`
+	Password   string `json:"password"`
+	DB         int    `json:"databaseId"`
 }
 
 func (c *RuleDescriptor) UnmarshalJSON(d []byte) error {

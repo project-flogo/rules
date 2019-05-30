@@ -12,6 +12,7 @@ import (
 	"github.com/project-flogo/core/app/resource"
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/support/log"
+	rulecache "github.com/project-flogo/rules/cache"
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
@@ -116,6 +117,24 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	//start the rule session here, calls the startup rule function
 	err = ruleAction.rs.Start(nil)
 
+	//Initialize CacheManager
+	var rcm *rulecache.RedisCacheManager = &rulecache.RedisCacheManager{}
+
+	if rsCfg.CacheConfig != nil {
+		rcm.Init(*rsCfg.CacheConfig)
+
+		//Load tuples from cache
+		tds := model.GetAllTupleDescriptors()
+		for _, td := range tds {
+			if model.OMModeMap[td.PersistMode] == model.ReadOnlyCache {
+				err = rcm.LoadTuples(context.TODO(), &td, ruleAction.rs)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+
 	return ruleAction, err
 }
 
@@ -167,7 +186,7 @@ func (a *RuleAction) Run(ctx context.Context, inputs map[string]interface{}) (ma
 	val, _ := valAttr.(string)
 	valuesMap := make(map[string]interface{})
 
-	//metadata section allows receiving 'values' string as json format. (i.e. 'name=Bob' as '{"Name":"Box"}')
+	//metadata section allows receiving 'values' string as json format. (i.e. 'name=Bob' as '{"Name":"Bob"}')
 	err := json.Unmarshal([]byte(val), &valuesMap)
 
 	if err != nil {

@@ -1,0 +1,122 @@
+{
+  "name": "solarRule",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "Sample Flogo App",
+  "appModel": "1.0.0",
+  "triggers": [
+    {
+      "id": "receive_http_message",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
+      "settings": {
+        "port": "7766"
+      },
+      "handlers": [
+        {   
+          "settings": {
+            "method": "GET",
+            "path": "/solar/eligible"
+          },
+          "actions": [
+            {
+              "id": "solar_rule",
+              "input": {
+                "tupletype": "solar",
+							  "values": "=$.queryParams"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "ref": "github.com/project-flogo/rules/ruleaction",
+      "settings": {
+        "ruleSessionURI": "res://rulesession:solar",
+        "tds": [
+          {
+            "name":"house",
+            "ttl" : -1,
+            "properties":[
+              {
+                "name":"parcel",
+                "type":"string",
+                "pk-index":0
+              },
+              {
+                "name":"is_solar",
+                "type":"bool"
+              }
+            ],
+            "persistMode": "ReadOnlyCache"
+          },
+          {
+            "name":"solar",
+            "ttl" : 0,
+            "properties":[
+              {
+                "name":"parcel",
+                "type":"string",
+                "pk-index":0
+              },
+              {
+                "name":"bill",
+                "type":"double"
+              }
+            ]
+          }
+        ]
+      },
+      "id": "solar_rule"
+    }
+  ],
+  "resources": [
+    {
+      "id": "rulesession:solar",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+             {
+               "name": "outputData",
+               "type": "any"
+             }
+          ]
+        },
+        "cache": {
+          "name": "redis",
+          "servertype": "redis",
+          "address": "localhost:6379",
+          "password": "",
+          "databaseId": 0
+        },
+        "rules": [
+          {
+            "name": "solarRule",
+            "conditions": [
+              {
+                "name": "solarCond",
+                "identifiers": [
+                  "house", "solar"
+                ],
+                "evaluator": "solarEval"
+              }
+            ],
+            "actionFunction": "solarAction"
+          }
+        ]
+      }
+    }
+  ]
+}

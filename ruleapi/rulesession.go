@@ -99,6 +99,7 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err e
 	if ctx == nil {
 		ctx = context.Context(context.Background())
 	}
+
 	rs.reteNetwork.Assert(ctx, rs, tuple, nil, rete.ADD)
 	return nil
 }

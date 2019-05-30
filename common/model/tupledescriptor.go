@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"sort"
 	"strconv"
-	"sync"
 
 	"fmt"
 
@@ -13,7 +12,8 @@ import (
 )
 
 var (
-	typeRegistry sync.Map
+	//typeRegistry sync.Map
+	typeRegistry = make(map[string]interface{})
 )
 
 //TupleType Each tuple is of a certain type, described by TypeDescriptor
@@ -25,6 +25,7 @@ type TupleDescriptor struct {
 	TTLInSeconds int                       `json:"ttl"`
 	Props        []TuplePropertyDescriptor `json:"properties"`
 	keyProps     []string
+	PersistMode  string `json:"persistMode"`
 }
 
 // TuplePropertyDescriptor defines the actual property, its type, key index
@@ -42,7 +43,11 @@ func RegisterTupleDescriptors(jsonRegistry string) (err error) {
 		return err
 	}
 	for _, key := range tds {
-		typeRegistry.LoadOrStore(TupleType(key.Name), key)
+		//typeRegistry.LoadOrStore(TupleType(key.Name), key)
+		if typeRegistry[key.Name] != nil {
+			return fmt.Errorf("TupleDescriptor already exists for [%s]", key.Name)
+		}
+		typeRegistry[key.Name] = key
 	}
 	return nil
 }
@@ -53,20 +58,42 @@ func RegisterTupleDescriptorsFromTds(tds []TupleDescriptor) (err error) {
 		return err
 	}
 	for _, key := range tds {
-		typeRegistry.LoadOrStore(TupleType(key.Name), key)
+		//typeRegistry.LoadOrStore(TupleType(key.Name), key)
+		if typeRegistry[key.Name] != nil {
+			return fmt.Errorf("TupleDescriptor already exists for [%s]", key.Name)
+		}
+		typeRegistry[key.Name] = key
 	}
 	return nil
 }
 
 // GetTupleDescriptor gets the TupleDescriptor based on the TupleType
 func GetTupleDescriptor(tupleType TupleType) *TupleDescriptor {
-	tdi, found := typeRegistry.Load(tupleType)
-	if found {
-		td := tdi.(TupleDescriptor)
-		return &td
+	/*
+		tdi, found := typeRegistry.Load(tupleType)
+		if found {
+			td := tdi.(TupleDescriptor)
+			return &td
+		}
+
+		return nil
+	*/
+	td := typeRegistry[string(tupleType)].(TupleDescriptor)
+
+	return &td
+}
+
+func GetAllTupleDescriptors() []TupleDescriptor {
+
+	tds := make([]TupleDescriptor, len(typeRegistry))
+	idx := 0
+	for _, val := range typeRegistry {
+		//tds = append(tds, val.(TupleDescriptor))
+		tds[idx] = val.(TupleDescriptor)
+		idx++
 	}
 
-	return nil
+	return tds
 }
 
 // MarshalJSON allows to hook & customize TupleDescriptor to JSON conversion
@@ -99,6 +126,12 @@ func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
 	ttl, ok := val["ttl"]
 	if ok {
 		td.TTLInSeconds = int(ttl.(float64))
+	}
+
+	td.PersistMode = "InMemory"
+	pm, ok := val["persistMode"]
+	if ok {
+		td.PersistMode = pm.(string)
 	}
 
 	jsonProps := val["properties"].([]interface{})

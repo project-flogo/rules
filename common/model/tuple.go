@@ -10,6 +10,18 @@ import (
 
 var reteCTXKEY = RetecontextKeyType{}
 
+//OMMode is uuple's object management mode. 2 modes are supported currently.
+//ToDo: should this be moved to tupledescriptor?
+type OMMode int
+
+//Tuple's object management mode. For now, only 2 are supported.
+const (
+	InMemory OMMode = iota
+	ReadOnlyCache
+)
+
+var OMModeMap = map[string]OMMode{"InMemory": InMemory, "ReadOnlyCache": ReadOnlyCache}
+
 //Tuple is a runtime representation of a data tuple
 type Tuple interface {
 	GetTupleType() TupleType
@@ -23,6 +35,7 @@ type Tuple interface {
 	GetBool(name string) (val bool, err error)
 	//GetDateTime(name string) time.Time
 	GetKey() TupleKey
+	GetValues() map[string]interface{}
 }
 
 //MutableTuple mutable part of the tuple
@@ -80,6 +93,10 @@ func (t *tupleImpl) GetTupleType() TupleType {
 
 func (t *tupleImpl) GetTupleDescriptor() *TupleDescriptor {
 	return t.td
+}
+
+func (t *tupleImpl) GetValues() map[string]interface{} {
+	return t.tuples
 }
 
 func (t *tupleImpl) GetProperties() []string {
@@ -144,6 +161,7 @@ func (t *tupleImpl) GetBool(name string) (val bool, err error) {
 
 	return v, err
 }
+
 func (t *tupleImpl) SetString(ctx context.Context, name string, value string) (err error) {
 	return t.validateAndCallListener(ctx, name, value)
 }
@@ -210,7 +228,7 @@ func (t *tupleImpl) initTupleWithKeyValues(td *TupleDescriptor, values ...interf
 	t.key = tk
 	//populate the tuple key fields with the key values
 	for _, keyProp := range td.GetKeyProps() {
-		t.tuples [keyProp] = tk.GetValue(keyProp)
+		t.tuples[keyProp] = tk.GetValue(keyProp)
 	}
 	return err
 }
