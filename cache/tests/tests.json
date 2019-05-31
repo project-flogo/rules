@@ -1,0 +1,33 @@
+[
+  {
+    "name":"house",
+    "ttl" : -1,
+    "properties":[
+      {
+        "name":"parcel",
+        "type":"string",
+        "pk-index":0
+      },
+      {
+        "name":"is_solar",
+        "type":"bool"
+      }
+    ],
+    "persistMode": "ReadOnlyCache"
+  },
+  {
+    "name":"solar",
+    "ttl" : 0,
+    "properties":[
+      {
+        "name":"parcel",
+        "type":"string",
+        "pk-index":0
+      },
+      {
+        "name":"bill",
+        "type":"double"
+      }
+    ]
+  }
+]

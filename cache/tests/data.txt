@@ -1,0 +1,4 @@
+HMSET house:parcel:0001 parcel 0001 is_solar true
+SADD house house:parcel:0001
+HMSET house:parcel:0002 parcel 0002 is_solar false
+SADD house house:parcel:0002
