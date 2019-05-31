@@ -100,11 +100,11 @@ Above commands results in executing action `aJoinMoveTimeoutEventAndPackage` fro
 Expected output:
 ```
 Received a 'moveevent' [01DC6XBXHMBGH043ZJQVSTS60A] change state to [sitting]
-Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], chnage state to [sitting]
+Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], change state to [sitting]
 Starting a 10s timer.. [PACKAGE1]
 PACKAGE [PACKAGE1] is Sitting
 Received package [PACKAGE1]
-Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], chnage state to [sitting]
+Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], change state to [sitting]
 Received a 'movetimeoutevent' id [01DC6XBXHMY4E5JNEFZMPS1PZG], packageid [PACKAGE1], timeoutinmillis [10000]
 Joining a 'movetimeoutevent' [PACKAGE1] to package [PACKAGE1], timeout [10000]
 PACKAGE [PACKAGE1] is Delayed
@@ -118,17 +118,17 @@ curl http://localhost:7777/moveevent?packageid=PACKAGE1&changeStateTo=moving
 Expected output:
 ```
 Received a 'moveevent' [01DC6YYQBCHPP0VDQNA99ZDD86] change state to [sitting]
-Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], chnage state to [sitting]
+Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], change state to [sitting]
 Starting a 10s timer.. [PACKAGE1]
 PACKAGE [PACKAGE1] is Sitting
 Received package [PACKAGE1]
-Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], chnage state to [sitting]
+Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], change state to [sitting]
 Received a 'moveevent' [01DC6YYV4VZGHWWBS0YKZCXPVB] change state to [moving]
-Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], chnage state to [moving]
+Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], change state to [moving]
 Cancelling timer attached to key [PACKAGE1]
 PACKAGE [PACKAGE1] is Moving
 Received package [PACKAGE1]
-Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], chnage state to [moving]
+Joining a 'moveevent' with packageid [PACKAGE1] to package [PACKAGE1], change state to [moving]
 ```
 ## Package test
 Execute below command to store `package2`

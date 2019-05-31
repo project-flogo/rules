@@ -15,7 +15,6 @@ var (
 	currentEventType string
 )
 
-//add this sample file to your flogo project
 func init() {
 
 	config.RegisterStartupRSFunction("res://rulesession:simple", AssertThisPackage)
@@ -95,7 +94,7 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 	pkg := tuples["package"]
 	pkgid, _ := pkg.GetString("id")
 
-	fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], chnage state to [%s]\n", mepkgid, pkgid, s)
+	fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
 
 	if strings.Compare("sitting", s) == 0 {
 		currentEventType = "sitting"
