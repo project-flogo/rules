@@ -125,7 +125,6 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	} else {
 		return nil, fmt.Errorf("cache server type [%s] not supported", rsCfg.CacheConfig.ServerType)
 	}
-	//var rcm *rulecache.RedisCacheManager = &rulecache.RedisCacheManager{}
 
 	if rsCfg.CacheConfig != nil {
 		cm.Init(*rsCfg.CacheConfig)
