@@ -117,17 +117,24 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	//start the rule session here, calls the startup rule function
 	err = ruleAction.rs.Start(nil)
 
+	var cm rulecache.CacheManager
+
 	//Initialize CacheManager
-	var rcm *rulecache.RedisCacheManager = &rulecache.RedisCacheManager{}
+	if rsCfg.CacheConfig.ServerType == "redis" {
+		cm = &rulecache.RedisCacheManager{}
+	} else {
+		return nil, fmt.Errorf("cache server type [%s] not supported", rsCfg.CacheConfig.ServerType)
+	}
+	//var rcm *rulecache.RedisCacheManager = &rulecache.RedisCacheManager{}
 
 	if rsCfg.CacheConfig != nil {
-		rcm.Init(*rsCfg.CacheConfig)
+		cm.Init(*rsCfg.CacheConfig)
 
 		//Load tuples from cache
 		tds := model.GetAllTupleDescriptors()
 		for _, td := range tds {
 			if model.OMModeMap[td.PersistMode] == model.ReadOnlyCache {
-				err = rcm.LoadTuples(context.TODO(), &td, ruleAction.rs)
+				err = cm.LoadTuples(context.TODO(), &td, ruleAction.rs)
 				if err != nil {
 					return nil, err
 				}
