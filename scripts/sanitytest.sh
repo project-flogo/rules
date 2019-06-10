@@ -1,7 +1,7 @@
 #!/bin/bash
 
 RULESPATH=$GOPATH/src/github.com/project-flogo/rules
-FILENAME="RulesSanityReport.html"
+export FILENAME="RulesSanityReport.html"
 HTML="<!DOCTYPE html>
 <html><head><style>table {font-family: arial, sans-serif;border-collapse: collapse;margin: auto;}td,th {border: 1px solid #dddddd;text-align: left;padding: 8px;}th {background: #003399;text-align: center;color: #fff;}body {padding-right: 15px;padding-left: 15px;margin-right: auto;margin-left: auto;}label {font-weight: bold;}.test-report h1 {color: #003399;}.summary,.test-report {text-align: center;}.success {background-color: #79d279;}.error {background-color: #ff3300;}.summary-tbl {font-weight: bold;}.summary-tbl td {border: none;}</style></head><body>    <section class=test-report><h1>Rules Sanity Report</h1></section><section class=summary><h2>Summary</h2><table class="summary-tbl"><tr><td>Number of test cases passed </td> <td> </td></tr><tr><td>Number of test cases failed </td> <td> </td></tr><td>Total test cases</td><td> </td></tr></tr></table></section><section class=test-report><table><tr><th>Recipe</th><th> Testcase </th><th>Status</th><tr></tr> </table></html>"
 
