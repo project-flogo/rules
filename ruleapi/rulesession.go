@@ -77,10 +77,7 @@ func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.Rul
 }
 
 func (rs *rulesessionImpl) initRuleSession(name string) {
-	rs.reteNetwork = rete.NewReteNetwork(name, "{}")
-	rs.name = name
-	rs.timers = make(map[interface{}]*time.Timer)
-	rs.started = false
+	rs.initRuleSessionWithConfig(name, "{}")
 }
 
 func (rs *rulesessionImpl) initRuleSessionWithConfig(name string, jsonConfig string) error {
