@@ -29,7 +29,12 @@ func NewIdGenImpl(nw types.Network, config map[string]interface{}) types.IdGen {
 
 func (ri *idGenServiceImpl) Init() {
 	ri.key = ri.Nw.GetPrefix() + ":idgen"
-	redisutils.InitService(ri.config)
+	reteCfg := ri.config["rete"].(map[string]interface{})
+	idgenRef := reteCfg["idgen-ref"].(string)
+	idGens := ri.config["idgens"].(map[string]interface{})
+	redisCfg := idGens[idgenRef].(map[string]interface{})
+	redisutils.InitService(redisCfg)
+
 	ri.rh = redisutils.GetRedisHdl()
 	j := ri.GetMaxID()
 	fmt.Printf("maxid : [%d]\n ", j)

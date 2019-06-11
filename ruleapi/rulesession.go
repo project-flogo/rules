@@ -92,11 +92,8 @@ func (rs *rulesessionImpl) initRuleSessionWithConfig(name string, jsonConfig str
 
 	rs.name = name
 	rs.timers = make(map[interface{}]*time.Timer)
-
-	//TODO: Configure it from jconsonfig
-	rs.tupleStore = getTupleStore(rs.jsonConfig)
-	rs.tupleStore.Init()
 	rs.reteNetwork = rete.NewReteNetwork(rs.name, jsonConfig)
+
 	//TODO: Configure it from jconsonfig
 	tupleStore := getTupleStore(rs.jsonConfig)
 	if tupleStore != nil {
@@ -241,7 +238,6 @@ func (rs *rulesessionImpl) SetStore(store model.TupleStore) error {
 	rs.reteNetwork.RegisterRtcTransactionHandler(internalTxnHandler, nil)
 	return nil
 }
-
 
 func internalTxnHandler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
 	store := rs.GetStore()

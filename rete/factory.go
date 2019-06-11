@@ -17,7 +17,7 @@ func NewFactory(nw *reteNetworkImpl, config string) (*TypeFactory, error) {
 	tf := TypeFactory{}
 	tf.config = config
 	err := json.Unmarshal([]byte(config), &tf.parsedJson)
-	if err !=  nil {
+	if err != nil {
 		return nil, err
 	}
 	tf.nw = nw
@@ -79,7 +79,7 @@ func (f *TypeFactory) getHandleCollection() types.HandleService {
 	} else {
 		if rete, found := f.parsedJson["rete"].(map[string]interface{}); found {
 			if rete != nil {
-				if idgen, found2 := rete["jt"].(string); found2 {
+				if idgen, found2 := rete["jt-ref"].(string); found2 {
 					if idgen == "" || idgen == "mem" {
 						hc = mem.NewHandleCollection(f.nw, f.parsedJson)
 					} else if idgen == "redis" {
@@ -102,7 +102,7 @@ func (f *TypeFactory) getIdGen() types.IdGen {
 	} else {
 		if rete, found := f.parsedJson["rete"].(map[string]interface{}); found {
 			if rete != nil {
-				if idgen, found2 := rete["idgen"].(string); found2 {
+				if idgen, found2 := rete["idgen-ref"].(string); found2 {
 					if idgen == "" || idgen == "mem" {
 						idg = mem.NewIdGenImpl(f.nw, f.parsedJson)
 					} else if idgen == "redis" {

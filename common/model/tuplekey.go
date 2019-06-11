@@ -2,8 +2,8 @@ package model
 
 import (
 	"fmt"
-	"reflect"
 	"github.com/project-flogo/core/data/coerce"
+	"reflect"
 	"strings"
 )
 
@@ -85,19 +85,9 @@ func NewTupleKeyWithKeyValues(tupleType TupleType, values ...interface{}) (tuple
 
 	for i, keyProp := range td.GetKeyProps() {
 		tdp := td.GetProperty(keyProp)
-<<<<<<< HEAD
 		val := values[i]
 		coerced, err := coerce.ToType(val, tdp.PropType)
-=======
-		var val interface{}
-		switch vt := values[0].(type) {
-		case map[string]interface{}:
-			val = vt[keyProp]
-		default:
-			val = values[i]
-		}
-		coerced, err := data.CoerceToValue(val, tdp.PropType)
->>>>>>> wip redis impl for jointables
+
 		if err == nil {
 			tk.keys[keyProp] = coerced
 		} else {

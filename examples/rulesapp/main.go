@@ -60,6 +60,10 @@ func main() {
 		fmt.Printf("Warn: [%s]\n", err)
 	}
 
+	t11 := rs.GetStore().GetTupleByKey(t1.GetKey())
+	if t11 != nil {
+		fmt.Printf("Warn: Tuple already in store[%s]\n", t11.GetKey())
+	}
 	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	t2, _ := model.NewTupleWithKeyValues("n1", "Bob")

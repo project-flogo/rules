@@ -10,17 +10,24 @@ type handleServiceImpl struct {
 	//allHandles map[string]types.ReteHandle
 	types.NwServiceImpl
 	prefix string
+	config map[string]interface{}
 }
 
 func NewHandleCollection(nw types.Network, config map[string]interface{}) types.HandleService {
 	hc := handleServiceImpl{}
 	hc.Nw = nw
+	hc.config = config
 	//hc.allHandles = make(map[string]types.ReteHandle)
 	return &hc
 }
 
 func (hc *handleServiceImpl) Init() {
 	hc.prefix = hc.Nw.GetPrefix() + ":h:"
+	reteCfg := hc.config["rete"].(map[string]interface{})
+	jtRef := reteCfg["jt-ref"].(string)
+	jts := hc.config["jts"].(map[string]interface{})
+	redisCfg := jts[jtRef].(map[string]interface{})
+	redisutils.InitService(redisCfg)
 }
 
 func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {

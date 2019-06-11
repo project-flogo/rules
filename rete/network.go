@@ -36,8 +36,8 @@ type reteNetworkImpl struct {
 
 	assertLock sync.Mutex
 	crudLock   sync.Mutex
-	txnHandler[] model.RtcTransactionHandler
-	txnContext[] interface{}
+	txnHandler []model.RtcTransactionHandler
+	txnContext []interface{}
 
 	//jtService map[int]types.JoinTable
 	jtService types.JtService
@@ -617,7 +617,6 @@ func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tupl
 		if mode == common.DELETE {
 			rCtx.addToRtcDeleted(tuple)
 		}
-		delete(nw.allHandles, tuple.GetKey().String())
 	}
 }
 

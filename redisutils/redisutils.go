@@ -10,15 +10,24 @@ var rd RedisHdl
 type RedisHdl = *RedisHandle
 
 type RedisHandle struct {
-	config map[string]interface{}
-	pool   *redis.Pool
+	config  map[string]interface{}
+	pool    *redis.Pool
+	network string
+	address string
 }
 
 func InitService(config map[string]interface{}) {
 	if rd == nil {
 		rd = &RedisHandle{}
 		rd.config = config
-		rd.newPool("tcp", ":6379")
+		if config != nil {
+			rd.network = rd.config["network"].(string)
+			rd.address = rd.config["address"].(string)
+		} else {
+			rd.network = "tcp"
+			rd.address = ":6379"
+		}
+		rd.newPool(rd.network, rd.address)
 	}
 }
 

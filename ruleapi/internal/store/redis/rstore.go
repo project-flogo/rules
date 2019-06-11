@@ -19,11 +19,11 @@ func NewStore(jsonConfig map[string]interface{}) model.TupleStore {
 }
 
 func (ms *storeImpl) Init() {
-	//ms.allTuples = make(map[string]model.Tuple)
 	reteCfg := ms.jsonConfig["rs"].(map[string]interface{})
-	ms.prefix = reteCfg["prefix"].(string)
-	ms.prefix = ms.prefix + ":" + "s:"
-
+	storeRef := reteCfg["store-ref"].(string)
+	storeCfg := ms.jsonConfig["stores"].(map[string]interface{})
+	redisCfg := storeCfg[storeRef].(map[string]interface{})
+	redisutils.InitService(redisCfg)
 }
 
 func (ms *storeImpl) GetTupleByKey(key model.TupleKey) model.Tuple {
