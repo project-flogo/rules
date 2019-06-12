@@ -5,6 +5,7 @@ function get_test_cases {
     echo "${my_list[@]}"
 }
 
+# Test cases performs credit card application status as approved if Creditscore > 750
 function testcase1 {
 pushd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/creditcard/json
 flogo create -f flogo.json
@@ -29,6 +30,7 @@ rm -rf cardapp
 popd
 }
 
+# Test cases performs credit card application status rejected if Creditscore < 750
 function testcase2 {
 pushd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/creditcard/json
 flogo create -f flogo.json
@@ -53,6 +55,7 @@ rm -rf cardapp
 popd
 }
 
+# Test cases performs credit card application status as approved if Creditscore > 750
 function testcase3 {
 pushd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/creditcard/api
 go run main.go > /tmp/testcase3.log 2>&1
