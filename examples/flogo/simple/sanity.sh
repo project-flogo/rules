@@ -4,6 +4,8 @@ function get_test_cases {
     local my_list=( testcase1 )
     echo "${my_list[@]}"
 }
+
+# This Testcase creates flogo rules binary and checks for name bob
 function testcase1 {
 pushd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/simple
 flogo create -f flogo.json

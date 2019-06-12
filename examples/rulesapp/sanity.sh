@@ -4,6 +4,8 @@ function get_test_cases {
     local my_list=( testcase1 )
     echo "${my_list[@]}"
 }
+
+# This testcase checks for name bob
 function testcase1 {
 pushd $GOPATH/src/github.com/project-flogo/rules/examples/rulesapp
 rm -rf /tmp/testcase1.log
