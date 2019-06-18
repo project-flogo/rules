@@ -3,29 +3,25 @@
     "name": "n1",
     "properties": [
       {
-        "name": "name",
-        "type": "string",
+        "name": "id",
+        "type": "int",
         "pk-index": 0
       },
       {
+        "name": "name",
+        "type": "string"
+      },
+      {
         "name": "age",
-        "type": "int",
-        "pk-index": 1
+        "type": "int"
       },
       {
         "name": "address",
-        "type": "string",
-        "pk-index": 2
-      },
-      {
-        "name": "id",
-        "type": "int",
-        "pk-index": 3
+        "type": "string"
       },
       {
         "name": "salary",
-        "type": "int",
-        "pk-index": 4
+        "type": "int"
       }
     ]
   },
@@ -33,19 +29,17 @@
     "name": "n2",
     "properties": [
       {
-        "name": "name",
-        "type": "string",
+        "name": "id",
+        "type": "int",
         "pk-index": 0
       },
       {
-        "name": "creditScore",
-        "type": "int",
-        "pk-index": 1
+        "name": "name",
+        "type": "string"
       },
       {
-        "name": "id",
-        "type": "int",
-        "pk-index": 2
+        "name": "creditScore",
+        "type": "int"
       }
     ]
   }

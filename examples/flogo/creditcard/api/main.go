@@ -52,26 +52,23 @@ func main() {
 
 	//Now assert a "n1" tuple
 	fmt.Println("Input user data")
-	t1, _ := model.NewTupleWithKeyValues("n1", "Tom", 20, "SFO", 1, 50000)
+	t1, _ := model.NewTupleWithKeyValues("n1", 1)
 	t1.SetString(nil, "name", "Tom")
 	t1.SetInt(nil, "age", 20)
 	t1.SetString(nil, "address", "SFO")
-	t1.SetInt(nil, "id", 1)
 	t1.SetInt(nil, "salary", 51000)
 	rs.Assert(nil, t1)
 
 	//Now assert a "n2" tuple
 	fmt.Println("\nInput cibil data")
-	t2, _ := model.NewTupleWithKeyValues("n2", "Tom", 751, 1)
+	t2, _ := model.NewTupleWithKeyValues("n2", 1)
 	t2.SetString(nil, "name", "Bob")
-	t2.SetInt(nil, "creditscore", 751)
-	t2.SetInt(nil, "id", 1)
+	t2.SetInt(nil, "creditScore", 751)
 	rs.Assert(nil, t2)
 
 	//Retract tuples
 	rs.Retract(nil, t1)
 	rs.Retract(nil, t2)
-	// rs.Retract(nil, t3)
 
 	//delete the rule
 	rs.DeleteRule(rule.GetName())
@@ -167,11 +164,11 @@ func checkForEligibleCreditlimit(ruleName string, condName string, tuples map[mo
 	if age >= 18 {
 		if cibil >= 750 && sal >= 20000 && sal < 50000 {
 			var approvedlimit = 2500
-			fmt.Println("Credit card applicant eligile with credit limit",approvedlimit);
+			fmt.Println("Credit card applicant eligible with credit limit",approvedlimit);
 			return true;
 		}else if cibil >= 750 && sal >= 50000 {
 			var approvedlimit = 2*sal
-			fmt.Println("Credit card applicant eligile with credit limit",approvedlimit);
+			fmt.Println("Credit card applicant eligible with credit limit",approvedlimit);
 			return true;
 		}else if cibil >= 750 && sal < 20000 {
 			fmt.Println("Credit card application cannot be processed");
