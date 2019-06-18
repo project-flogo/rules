@@ -12,7 +12,6 @@ import (
 
 var (
 	currentEventType string
-	lastPkgID        string
 )
 
 func init() {
@@ -70,12 +69,6 @@ func cPackageEvent(ruleName string, condName string, tuples map[model.TupleType]
 	pkg := tuples["package"]
 	if pkg != nil {
 		state, _ := pkg.GetString("state")
-		id, _ := pkg.GetString("id")
-
-		// reset lastpkg id if it is inserted again after delayed/dropped state
-		if lastPkgID == id {
-			lastPkgID = ""
-		}
 		return state == "normal"
 	}
 	return false
@@ -124,25 +117,21 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 	}
 
 	if currentEventType == "sitting" {
-		if lastPkgID != pkgid {
-			if pkgState == "normal" {
-				fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], target state [%s]\n", mepkgid, pkgid, s)
 
-				//change the package's state to "sitting"
-				pkgMutable := pkg.(model.MutableTuple)
-				pkgMutable.SetString(ctx, "state", "sitting")
+		if pkgState == "normal" {
+			fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], target state [%s]\n", mepkgid, pkgid, s)
 
-				//very first sitting event since the last notsitting event.
-				id, _ := common.GetUniqueId()
-				timeoutEvent, _ := model.NewTupleWithKeyValues("movetimeoutevent", id)
-				timeoutEvent.SetString(ctx, "packageid", pkgid)
-				timeoutEvent.SetInt(ctx, "timeoutinmillis", 10000)
-				fmt.Printf("Starting a 10s timer.. [%s]\n", pkgid)
-				rs.ScheduleAssert(ctx, 10000, pkgid, timeoutEvent)
+			//change the package's state to "sitting"
+			pkgMutable := pkg.(model.MutableTuple)
+			pkgMutable.SetString(ctx, "state", "sitting")
 
-				// assigning default values for next event flow
-				lastPkgID = pkgid
-			}
+			//very first sitting event since the last notsitting event.
+			id, _ := common.GetUniqueId()
+			timeoutEvent, _ := model.NewTupleWithKeyValues("movetimeoutevent", id)
+			timeoutEvent.SetString(ctx, "packageid", pkgid)
+			timeoutEvent.SetInt(ctx, "timeoutinmillis", 10000)
+			fmt.Printf("Starting a 10s timer.. [%s]\n", pkgid)
+			rs.ScheduleAssert(ctx, 10000, pkgid, timeoutEvent)
 		}
 	} else {
 		if strings.Compare("moving", s) == 0 && pkgState == "sitting" {

@@ -65,7 +65,7 @@ Consider system having incoming packages. In order to move packages from source 
   <img src ="./trackntrace.png" />
 </p>
 
-In detail above image represents state change for a given package. If sitting event is triggered a 10 seconds time is created to trigger delayed event. In between moving event is received the delayed event timer gets canceled and state is changed to moving. If dropped event occurs then package state is changed to dropped. If package state is dropped or delayed package is retracted from network.
+In detail above image represents state change for a given package. Consider insert package event this will insert a package into cluster with state as `normal`. This package now accepts only `sitting` event, If `sitting` event is triggered a 10 seconds timer is created to trigger `delayed` event, within 10s only `moving` event can cancel the timer and state is changed to `moving` otherwise `delayed` event gets triggered. If `dropped` event occurs then package state is changed to `dropped`. Any package with state as `dropped` or `delayed` package is retracted from network. You have to re-insert the package again to use.
 
 ### Actions used here
 
@@ -98,7 +98,7 @@ flogo build
 ./bin/trackNTraceApp
 ```
 
-## Move event test
+## Moveevent test
 Run below command to check moveevent action on PACKAGE1.
 ```sh
 curl http://localhost:7777/moveevent?packageid=PACKAGE1\&targetstate=sitting
@@ -115,7 +115,7 @@ Received a 'movetimeoutevent' id [01DDMW3RMD03JAJGQ35VZB1QP8], packageid [PACKAG
 Joining a 'movetimeoutevent' [PACKAGE1] to package [PACKAGE1], timeout [10000]
 PACKAGE [PACKAGE1] is Delayed
 ```
-Above we can see `PACKAGE1` is went into delayed as no operation is done in scheduled 10s interval. Restart the rules app and run below command.
+Above we can see `PACKAGE1` is went into delayed as moving event is not done in scheduled 10s interval. Restart the rules app and run below command.
 
 ```sh
 curl http://localhost:7777/moveevent?packageid=PACKAGE1\&targetstate=sitting
