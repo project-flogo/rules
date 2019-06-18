@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	lastEventType    string
 	currentEventType string
+	lastPkgID        string
 )
 
 func init() {
@@ -55,7 +55,6 @@ func init() {
 	config.RegisterConditionEvaluator("cPackageInDropped", cPackageInDropped)
 	config.RegisterActionFunction("aPackageInDropped", aPackageInDropped)
 
-	lastEventType = "none"
 	currentEventType = "none"
 }
 
@@ -69,7 +68,11 @@ func AssertThisPackage(ctx context.Context, rs model.RuleSession, startupCtx map
 
 func cPackageEvent(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	pkg := tuples["package"]
-	return pkg != nil
+	if pkg != nil {
+		state, _ := pkg.GetString("state")
+		return state == "normal"
+	}
+	return false
 }
 
 func aPrintPackage(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
@@ -94,14 +97,14 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 	pkg := tuples["package"]
 	pkgid, _ := pkg.GetString("id")
 
-	fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
-
 	if strings.Compare("sitting", s) == 0 {
 		currentEventType = "sitting"
 	}
 
 	if currentEventType == "sitting" {
-		if lastEventType != "sitting" {
+		if lastPkgID != pkgid {
+
+			fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
 
 			//change the package's state to "sitting"
 			pkgMutable := pkg.(model.MutableTuple)
@@ -116,6 +119,8 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 			rs.ScheduleAssert(ctx, 10000, pkgid, timeoutEvent)
 		}
 	} else {
+
+		fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
 		//a non-sitting event, cancel a previous timer
 		rs.CancelScheduledAssert(ctx, pkgid)
 
@@ -128,8 +133,8 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 		}
 
 	}
-	lastEventType = currentEventType
-	currentEventType = "notsitting"
+	currentEventType = ""
+	lastPkgID = pkgid
 }
 
 func aMoveTimeoutEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {

@@ -93,7 +93,7 @@ flogo build
 ## Move event test
 Run below command to check moveevent action on PACKAGE1.
 ```sh
-curl http://localhost:7777/moveevent?packageid=PACKAGE1&changeStateTo=sitting
+curl http://localhost:7777/moveevent?packageid=PACKAGE1\&changeStateTo=sitting
 ```
 
 Above commands results in executing action `aJoinMoveTimeoutEventAndPackage` from `aJoinMoveEventAndPackage`. Action `aJoinMoveTimeoutEventAndPackage` results in changing state of PACKAGE1 to sitting this will trigger another action `aPackageInSitting`. So chain of actions getting executed.<br><br>
@@ -112,8 +112,8 @@ PACKAGE [PACKAGE1] is Delayed
 Above we can see `PACKAGE1` is went into delayed as no operation is done in scheduled 10s interval. Restart the rules app and run below command.
 
 ```sh
-curl http://localhost:7777/moveevent?packageid=PACKAGE1&changeStateTo=sitting
-curl http://localhost:7777/moveevent?packageid=PACKAGE1&changeStateTo=moving
+curl http://localhost:7777/moveevent?packageid=PACKAGE1\&changeStateTo=sitting
+curl http://localhost:7777/moveevent?packageid=PACKAGE1\&changeStateTo=moving
 ```
 Expected output:
 ```
