@@ -67,7 +67,7 @@ Consider system having incoming packages. In order to move packages from source 
   <img src ="./trackntrace.png" />
 </p>
 
-In detail, above image represents state change for a given package. Consider insert package event this will insert a package into cluster with state as `normal`. This package now accepts only `sitting` event. When `sitting` event is triggered, a 10 seconds timer is created to trigger `delayed` event, within 10s only `moving` event can cancel the timer and state is changed to `moving` otherwise `delayed` event gets triggered. If `dropped` event occurs on a package with `moving` state, then package state is changed to `dropped`. Any package with state as `dropped` or `delayed` is retracted from network. You have to insert the package again to use.
+In detail, above image represents state change for a given package. Consider insert package event this will insert a package into network with state as `normal`. This package now accepts only `sitting` event. When `sitting` event is triggered, a 10 seconds timer is created to trigger `delayed` event, within 10s only `moving` event can cancel the timer and state is changed to `moving` otherwise `delayed` event gets triggered. If `dropped` event occurs on a package with `moving` state, then package state is changed to `dropped`. Any package with state as `dropped` or `delayed` is retracted from network. You have to insert the package again to use.
 
 ### Actions used here
 
