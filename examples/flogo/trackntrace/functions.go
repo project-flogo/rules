@@ -90,15 +90,28 @@ func aPrintPackage(ctx context.Context, rs model.RuleSession, ruleName string, t
 func aPrintMoveEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	me := tuples["moveevent"]
 	meid, _ := me.GetString("id")
-	s, _ := me.GetString("changeStateTo")
+	s, _ := me.GetString("targetstate")
+	pkgID, _ := me.GetString("packageid")
 
-	fmt.Printf("Received a 'moveevent' [%s] change state to [%s]\n", meid, s)
+	fmt.Printf("Received a 'moveevent' [%s] target state [%s]\n", meid, s)
+
+	if s == "normal" {
+		pkg, _ := model.NewTupleWithKeyValues("package", pkgID)
+		pkg.SetString(nil, "state", "normal")
+		err := rs.Assert(ctx, pkg)
+		if err != nil {
+			fmt.Println("Tuple already inserted: ", pkgID)
+		} else {
+			fmt.Println("Tuple inserted successfully: ", pkgID)
+		}
+	}
+
 }
 
 func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	me := tuples["moveevent"]
 	mepkgid, _ := me.GetString("packageid")
-	s, _ := me.GetString("changeStateTo")
+	s, _ := me.GetString("targetstate")
 
 	pkg := tuples["package"]
 	pkgid, _ := pkg.GetString("id")
@@ -106,12 +119,14 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 
 	if strings.Compare("sitting", s) == 0 {
 		currentEventType = "sitting"
+	} else {
+		currentEventType = ""
 	}
 
 	if currentEventType == "sitting" {
 		if lastPkgID != pkgid {
 			if pkgState == "normal" {
-				fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
+				fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], target state [%s]\n", mepkgid, pkgid, s)
 
 				//change the package's state to "sitting"
 				pkgMutable := pkg.(model.MutableTuple)
@@ -124,13 +139,15 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 				timeoutEvent.SetInt(ctx, "timeoutinmillis", 10000)
 				fmt.Printf("Starting a 10s timer.. [%s]\n", pkgid)
 				rs.ScheduleAssert(ctx, 10000, pkgid, timeoutEvent)
+
+				// assigning default values for next event flow
+				lastPkgID = pkgid
 			}
 		}
 	} else {
-		fmt.Println("@@@@@@@@@@", pkgState)
 		if strings.Compare("moving", s) == 0 && pkgState == "sitting" {
 
-			fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
+			fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], target state [%s]\n", mepkgid, pkgid, s)
 
 			//a non-sitting event, cancel a previous timer
 			rs.CancelScheduledAssert(ctx, pkgid)
@@ -140,7 +157,7 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 
 		} else if strings.Compare("dropped", s) == 0 && pkgState == "moving" {
 
-			fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
+			fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], target state [%s]\n", mepkgid, pkgid, s)
 
 			pkgMutable := pkg.(model.MutableTuple)
 			pkgMutable.SetString(ctx, "state", "dropped")
@@ -148,10 +165,6 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 		}
 
 	}
-
-	// assigning default values for next event flow
-	currentEventType = ""
-	lastPkgID = pkgid
 
 }
 
@@ -237,8 +250,6 @@ func cMoveEventPkg(ruleName string, condName string, tuples map[model.TupleType]
 		if pkg != nil {
 			pkgid, _ := pkg.GetString("id")
 			mpkgid, _ := mpkg.GetString("packageid")
-
-			fmt.Println("@@@@@@@", pkgid == mpkgid)
 			return pkgid == mpkgid
 		}
 	}
