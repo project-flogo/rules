@@ -70,6 +70,12 @@ func cPackageEvent(ruleName string, condName string, tuples map[model.TupleType]
 	pkg := tuples["package"]
 	if pkg != nil {
 		state, _ := pkg.GetString("state")
+		id, _ := pkg.GetString("id")
+
+		// reset lastpkg id if it is inserted again after delayed/dropped state
+		if lastPkgID == id {
+			lastPkgID = ""
+		}
 		return state == "normal"
 	}
 	return false
@@ -96,6 +102,7 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 
 	pkg := tuples["package"]
 	pkgid, _ := pkg.GetString("id")
+	pkgState, _ := pkg.GetString("state")
 
 	if strings.Compare("sitting", s) == 0 {
 		currentEventType = "sitting"
@@ -103,38 +110,49 @@ func aJoinMoveEventAndPackage(ctx context.Context, rs model.RuleSession, ruleNam
 
 	if currentEventType == "sitting" {
 		if lastPkgID != pkgid {
+			if pkgState == "normal" {
+				fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
+
+				//change the package's state to "sitting"
+				pkgMutable := pkg.(model.MutableTuple)
+				pkgMutable.SetString(ctx, "state", "sitting")
+
+				//very first sitting event since the last notsitting event.
+				id, _ := common.GetUniqueId()
+				timeoutEvent, _ := model.NewTupleWithKeyValues("movetimeoutevent", id)
+				timeoutEvent.SetString(ctx, "packageid", pkgid)
+				timeoutEvent.SetInt(ctx, "timeoutinmillis", 10000)
+				fmt.Printf("Starting a 10s timer.. [%s]\n", pkgid)
+				rs.ScheduleAssert(ctx, 10000, pkgid, timeoutEvent)
+			}
+		}
+	} else {
+		fmt.Println("@@@@@@@@@@", pkgState)
+		if strings.Compare("moving", s) == 0 && pkgState == "sitting" {
 
 			fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
 
-			//change the package's state to "sitting"
-			pkgMutable := pkg.(model.MutableTuple)
-			pkgMutable.SetString(ctx, "state", "sitting")
+			//a non-sitting event, cancel a previous timer
+			rs.CancelScheduledAssert(ctx, pkgid)
 
-			//very first sitting event since the last notsitting event.
-			id, _ := common.GetUniqueId()
-			timeoutEvent, _ := model.NewTupleWithKeyValues("movetimeoutevent", id)
-			timeoutEvent.SetString(ctx, "packageid", pkgid)
-			timeoutEvent.SetInt(ctx, "timeoutinmillis", 10000)
-			fmt.Printf("Starting a 10s timer.. [%s]\n", pkgid)
-			rs.ScheduleAssert(ctx, 10000, pkgid, timeoutEvent)
-		}
-	} else {
-
-		fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
-		//a non-sitting event, cancel a previous timer
-		rs.CancelScheduledAssert(ctx, pkgid)
-
-		if strings.Compare("moving", s) == 0 {
 			pkgMutable := pkg.(model.MutableTuple)
 			pkgMutable.SetString(ctx, "state", "moving")
-		} else if strings.Compare("dropped", s) == 0 {
+
+		} else if strings.Compare("dropped", s) == 0 && pkgState == "moving" {
+
+			fmt.Printf("Joining a 'moveevent' with packageid [%s] to package [%s], change state to [%s]\n", mepkgid, pkgid, s)
+
 			pkgMutable := pkg.(model.MutableTuple)
 			pkgMutable.SetString(ctx, "state", "dropped")
+
 		}
 
 	}
+
+	// assigning default values for next event flow
 	currentEventType = ""
 	lastPkgID = pkgid
+
 }
 
 func aMoveTimeoutEvent(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
@@ -206,7 +224,7 @@ func cMoveTimeoutEventPkg(ruleName string, condName string, tuples map[model.Tup
 		if pkg != nil {
 			pkgid, _ := pkg.GetString("id")
 			mpkgid, _ := mpkg.GetString("packageid")
-			return strings.Compare(pkgid, mpkgid) == 0
+			return pkgid == mpkgid
 		}
 	}
 	return false
@@ -219,7 +237,9 @@ func cMoveEventPkg(ruleName string, condName string, tuples map[model.TupleType]
 		if pkg != nil {
 			pkgid, _ := pkg.GetString("id")
 			mpkgid, _ := mpkg.GetString("packageid")
-			return strings.Compare(pkgid, mpkgid) == 0
+
+			fmt.Println("@@@@@@@", pkgid == mpkgid)
+			return pkgid == mpkgid
 		}
 	}
 	return false
@@ -240,7 +260,7 @@ func aPackageInDelayed(ctx context.Context, rs model.RuleSession, ruleName strin
 	if pkg != nil {
 		pkgid, _ := pkg.GetString("id")
 		fmt.Printf("PACKAGE [%s] is Delayed\n", pkgid)
-		rs.Delete(ctx, pkg)
+		rs.Retract(ctx, pkg)
 	}
 }
 
@@ -277,6 +297,6 @@ func aPackageInDropped(ctx context.Context, rs model.RuleSession, ruleName strin
 	if pkg != nil {
 		pkgid, _ := pkg.GetString("id")
 		fmt.Printf("PACKAGE [%s] is Dropped\n", pkgid)
-		rs.Delete(ctx, pkg)
+		rs.Retract(ctx, pkg)
 	}
 }
