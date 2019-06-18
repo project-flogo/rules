@@ -16,18 +16,13 @@
           "name": "moveevent",
           "settings": {
             "method": "GET",
-            "path": "/test/me"
+            "path": "/moveevent"
           },
           "action": {
             "id": "simple_rule",
-            "mappings": {
-              "input": [
-                {
-                  "mapTo": "values",
-                  "type": "assign",
-                  "value": "$.queryParams"
-                }
-              ]
+            "input": {
+              "tupletype": "moveevent",
+              "values": "=$.queryParams"
             }
           }
         }
@@ -69,16 +64,8 @@
                 "type": "string"
               },
               {
-                "name": "sitting",
-                "type": "double"
-              },
-              {
-                "name": "moving",
-                "type": "double"
-              },
-              {
-                "name": "dropped",
-                "type": "double"
+                "name": "targetstate",
+                "type": "string"
               }
             ]
           },
@@ -109,7 +96,82 @@
     {
       "id": "rulesession:simple",
       "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+             {
+               "name": "outputData",
+               "type": "any"
+             }
+          ]
+        },
         "rules": [
+          
+          {
+            "name": "packageInSittingRule",
+            "conditions": [
+              {
+                "name": "cPackageInSitting",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInSitting"
+              }
+            ],
+            "actionFunction": "aPackageInSitting",
+            "priority":1
+          },
+          {
+            "name": "packageInDelayedRule",
+            "conditions": [
+              {
+                "name": "cPackageInDelayed",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInDelayed"
+              }
+            ],
+            "actionFunction": "aPackageInDelayed",
+            "priority":1
+          },
+          {
+            "name": "packageInMovingRule",
+            "conditions": [
+              {
+                "name": "cPackageInMoving",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInMoving"
+              }
+            ],
+            "actionFunction": "aPackageInMoving",
+            "priority":1
+          },
+          {
+            "name": "packageInDroppedRule",
+            "conditions": [
+              {
+                "name": "cPackageInDropped",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInDropped"
+              }
+            ],
+            "actionFunction": "aPackageInDropped",
+            "priority":1
+          },
           {
             "name": "printPackageRule",
             "conditions": [
@@ -121,7 +183,8 @@
                 "evaluator": "cPackageEvent"
               }
             ],
-            "actionFunction": "aPrintPackage"
+            "actionFunction": "aPrintPackage",
+            "priority":2
           },
           {
             "name": "printMoveEventRule",
@@ -134,7 +197,8 @@
                 "evaluator": "cMoveEvent"
               }
             ],
-            "actionFunction": "aMoveEvent"
+            "actionFunction": "aPrintMoveEvent",
+            "priority":3
           },
           {
             "name": "joinMoveEventAndPackageEventRule",
@@ -148,7 +212,8 @@
                 "evaluator": "cJoinMoveEventAndPackage"
               }
             ],
-            "actionFunction": "aJoinMoveEventAndPackage"
+            "actionFunction": "aJoinMoveEventAndPackage",
+            "priority":4
           },
           {
             "name": "aMoveTimeoutEventRule",
@@ -161,7 +226,8 @@
                 "evaluator": "cMoveTimeoutEvent"
               }
             ],
-            "actionFunction": "aMoveTimeoutEvent"
+            "actionFunction": "aMoveTimeoutEvent",
+            "priority":5
           },
           {
             "name": "joinMoveTimeoutEventAndPackage",
@@ -175,20 +241,8 @@
                 "evaluator": "cJoinMoveTimeoutEventAndPackage"
               }
             ],
-            "actionFunction": "aJoinMoveTimeoutEventAndPackage"
-          },
-          {
-            "name": "packageInSittingRule",
-            "conditions": [
-              {
-                "name": "cPackageInSitting",
-                "identifiers": [
-                  "package.state"
-                ],
-                "evaluator": "cPackageInSitting"
-              }
-            ],
-            "actionFunction": "aPackageInSitting"
+            "actionFunction": "aJoinMoveTimeoutEventAndPackage",
+            "priority":6
           }
         ]
       }
