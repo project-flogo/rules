@@ -21,6 +21,7 @@ type Tuple interface {
 	GetLong(name string) (val int64, err error)
 	GetDouble(name string) (val float64, err error)
 	GetBool(name string) (val bool, err error)
+	GetObject(name string) (val map[string]interface{}, err error)
 	//GetDateTime(name string) time.Time
 	GetKey() TupleKey
 }
@@ -33,6 +34,7 @@ type MutableTuple interface {
 	SetLong(ctx context.Context, name string, value int64) (err error)
 	SetDouble(ctx context.Context, name string, value float64) (err error)
 	SetBool(ctx context.Context, name string, value bool) (err error)
+	SetObject(ctx context.Context, name string, value map[string]interface{}) (err error)
 	//SetDatetime(ctx context.Context, name string, value time.Time) (err error)
 
 	//will try to coerce value to the named property's type
@@ -101,6 +103,17 @@ func (t *tupleImpl) GetString(name string) (val string, err error) {
 	return v, err
 }
 
+func (t *tupleImpl) GetObject(name string) (val map[string]interface{}, err error) {
+	err = t.chkProp(name)
+	if err != nil {
+		return nil, err
+	}
+	//try to coerce the tuple value to an object
+	v, err := coerce.ToObject(t.tuples[name])
+
+	return v, err
+}
+
 func (t *tupleImpl) GetInt(name string) (val int, err error) {
 	err = t.chkProp(name)
 	if err != nil {
@@ -157,6 +170,9 @@ func (t *tupleImpl) SetDouble(ctx context.Context, name string, value float64) (
 	return t.validateAndCallListener(ctx, name, value)
 }
 func (t *tupleImpl) SetBool(ctx context.Context, name string, value bool) (err error) {
+	return t.validateAndCallListener(ctx, name, value)
+}
+func (t *tupleImpl) SetObject(ctx context.Context, name string, value map[string]interface{}) (err error) {
 	return t.validateAndCallListener(ctx, name, value)
 }
 

@@ -133,6 +133,10 @@ func (td *TupleDescriptor) UnmarshalJSON(b []byte) error {
 				tdp.KeyIndex = idx
 			}
 		}
+		if tdp.KeyIndex >= 0 && tdp.PropType == data.TypeObject {
+			return fmt.Errorf("Property [%s] is a mutable object and cannot be defined as a key for type [%s]",
+				idxProp[tdp.KeyIndex], nm)
+		}
 		td.Props = append(td.Props, tdp)
 	}
 
