@@ -168,8 +168,8 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 	delete(nw.ruleNameNodesOfRule, ruleName)
 	if nodesOfRuleItem != nil {
 		for e := nodesOfRuleItem.Front(); e != nil; e = e.Next() {
-			node := e.Value.(abstractNode)
-			switch nodeImpl := node.(type) {
+			n := e.Value.(abstractNode)
+			switch nodeImpl := n.(type) {
 			//Only interested in joinnodes
 			//case *filterNodeImpl:
 			//case *classNodeImpl:
@@ -236,8 +236,8 @@ func removeFromList(listVar *list.List, val interface{}) {
 func contains(nodeSet *list.List, identifierVar model.TupleType) bool {
 	identifiers := []model.TupleType{identifierVar}
 	for e := nodeSet.Front(); e != nil; e = e.Next() {
-		node := e.Value.(node)
-		if ContainedByFirst(node.getIdentifiers(), identifiers) {
+		n := e.Value.(node)
+		if ContainedByFirst(n.getIdentifiers(), identifiers) {
 			return true
 		}
 	}
@@ -248,15 +248,15 @@ func (nw *reteNetworkImpl) buildNetwork(rule model.Rule, nodesOfRule *list.List,
 	conditionSet *list.List, nodeSet *list.List, conditionSetNoIdr *list.List) {
 	if conditionSet.Len() == 0 {
 		if nodeSet.Len() == 1 {
-			node := nodeSet.Front().Value.(node)
-			if ContainedByFirst(node.getIdentifiers(), rule.GetIdentifiers()) {
+			n := nodeSet.Front().Value.(node)
+			if ContainedByFirst(n.getIdentifiers(), rule.GetIdentifiers()) {
 				//TODO: Re evaluate set later..
 
-				lastNode := node
+				lastNode := n
 				//check conditions with no identifierVar
 				for e := conditionSetNoIdr.Front(); e != nil; e = e.Next() {
 					conditionVar := e.Value.(model.Condition)
-					fNode := newFilterNode(nw, rule, node.getIdentifiers(), conditionVar)
+					fNode := newFilterNode(nw, rule, n.getIdentifiers(), conditionVar)
 					nodesOfRule.PushBack(fNode)
 					newNodeLink(nw, lastNode, fNode, false)
 					lastNode = fNode
@@ -266,9 +266,9 @@ func (nw *reteNetworkImpl) buildNetwork(rule model.Rule, nodesOfRule *list.List,
 				newNodeLink(nw, lastNode, ruleNode, false)
 				nodesOfRule.PushBack(ruleNode)
 			} else {
-				idrs := SecondMinusFirst(node.getIdentifiers(), rule.GetIdentifiers())
+				idrs := SecondMinusFirst(n.getIdentifiers(), rule.GetIdentifiers())
 				fNode := nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, idrs[0], nil, nodeSet)
-				nw.createJoinNode(rule, nodesOfRule, node, fNode, nil, conditionSet, nodeSet)
+				nw.createJoinNode(rule, nodesOfRule, n, fNode, nil, conditionSet, nodeSet)
 				nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
 			}
 		} else {
@@ -295,14 +295,15 @@ func (nw *reteNetworkImpl) createFilterNode(rule model.Rule, nodesOfRule *list.L
 	for e := conditionSet.Front(); e != nil; e = e.Next() {
 		conditionVar := e.Value.(model.Condition)
 		for f := nodeSet.Front(); f != nil; f = f.Next() {
-			node := f.Value.(node)
-			if ContainedByFirst(node.getIdentifiers(), conditionVar.GetIdentifiers()) {
+			n := f.Value.(node)
+			if ContainedByFirst(n.getIdentifiers(), conditionVar.GetIdentifiers()) {
 				//TODO
-				filterNode := newFilterNode(nw, rule, nil, conditionVar)
-				newNodeLink(nw, node, filterNode, false)
-				removeFromList(nodeSet, node)
+				filterNode := newFilterNode(nw, rule, conditionVar.GetIdentifiers(), conditionVar)
+				newNodeLink(nw, n, filterNode, false)
+				removeFromList(nodeSet, n)
 				nodeSet.PushBack(filterNode)
 				nodesOfRule.PushBack(filterNode)
+				conditionSet.Remove(e)
 				return true
 			}
 		}
@@ -432,14 +433,14 @@ func findBestNode(nodeSet *list.List, matchIdentifiers []model.TupleType, notThi
 	foundIdr := 0
 
 	for e := nodeSet.Front(); e != nil; e = e.Next() {
-		node := e.Value.(node)
-		if node == notThis {
+		n := e.Value.(node)
+		if n == notThis {
 			continue
 		}
-		foundMatch := len(IntersectionIdentifiers(node.getIdentifiers(), matchIdentifiers))
+		foundMatch := len(IntersectionIdentifiers(n.getIdentifiers(), matchIdentifiers))
 		if foundMatch > foundIdr {
 			foundIdr = foundMatch
-			foundNode = node
+			foundNode = n
 		}
 	}
 	return foundNode
@@ -498,8 +499,8 @@ func (nw *reteNetworkImpl) PrintRule(rule model.Rule) string {
 	nodesOfRule := nw.ruleNameNodesOfRule[rule.GetName()]
 
 	for e := nodesOfRule.Front(); e != nil; e = e.Next() {
-		node := e.Value.(abstractNode)
-		switch nodeImpl := node.(type) {
+		n := e.Value.(abstractNode)
+		switch nodeImpl := n.(type) {
 		case *filterNodeImpl:
 			str += nodeImpl.String()
 		case *joinNodeImpl:
