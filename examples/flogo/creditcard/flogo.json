@@ -1,0 +1,315 @@
+{
+  "name": "cardapp",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "Sample Flogo App",
+  "appModel": "1.0.0",
+  "imports": [
+    "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/rules/ruleaction",
+    "github.com/project-flogo/legacybridge"
+  ],
+  "triggers": [
+    {
+      "id": "receive_http_message",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
+      "settings": {
+        "port": "7777"
+      },
+      "handlers": [
+        {
+          "settings": {
+            "method": "PUT",
+            "path": "/users"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "UserAccount",
+                "values": "=$.content"
+              }
+            }
+          ]
+        },
+        {
+          "settings": {
+            "method": "PUT",
+            "path": "/newaccount"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "NewAccount",
+                "values": "=$.content"
+              }
+            }
+          ]
+        },
+        {
+          "settings": {
+            "method": "PUT",
+            "path": "/credit"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "UpdateCibil",
+                "values": "=$.content"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "rulesession:simple",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+            {
+              "name": "outputData",
+              "type": "any"
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "UserData",
+            "conditions": [
+              {
+                "name": "cUserData",
+                "identifiers": [
+                  "UserAccount"
+                ],
+                "evaluator": "cUserData"
+              }
+            ],
+            "actionFunction": "aUserData"
+          },
+          {
+            "name": "NewUser",
+            "conditions": [
+              {
+                "name": "cNewUser",
+                "identifiers": [
+                  "NewAccount"
+                ],
+                "evaluator": "cNewUser"
+              }
+            ],
+            "actionFunction": "aNewUser"
+          },
+          {
+            "name": "NewUser1",
+            "conditions": [
+              {
+                "name": "cNewUserId",
+                "identifiers": [
+                  "NewAccount",
+                  "UserAccount"
+                ],
+                "evaluator": "cNewUserId"
+              },
+              {
+                "name": "cNewUserAge",
+                "identifiers": [
+                  "NewAccount",
+                  "UserAccount"
+                ],
+                "evaluator": "cNewUserAge"
+              },
+              {
+                "name": "cNewUserCibil",
+                "identifiers": [
+                  "UpdateCibil"
+                ],
+                "evaluator": "cNewUserCibil"
+              }
+            ],
+            "actionFunction": "aNewUserApprove"
+          },
+          {
+            "name": "cNewUserId",
+            "conditions": [
+              {
+                "name": "cNewUserId",
+                "identifiers": [
+                  "NewAccount",
+                  "UserAccount"
+                ],
+                "evaluator": "cNewUserId"
+              },
+              {
+                "name": "cNewUserAge",
+                "identifiers": [
+                  "NewAccount",
+                  "UserAccount"
+                ],
+                "evaluator": "cNewUserAge"
+              },
+              {
+                "name": "cNewUserLowCibil",
+                "identifiers": [
+                  "UpdateCibil"
+                ],
+                "evaluator": "cNewUserLowCibil"
+              }
+            ],
+            "actionFunction": "aNewUserReject"
+          },
+          {
+            "name": "NewUser3",
+            "conditions": [
+              {
+                "name": "cNewUserId",
+                "identifiers": [
+                  "NewAccount",
+                  "UserAccount"
+                ],
+                "evaluator": "cNewUserId"
+              },
+              {
+                "name": "cNewUserAge",
+                "identifiers": [
+                  "NewAccount",
+                  "UserAccount"
+                ],
+                "evaluator": "cNewUserAge"
+              },
+              {
+                "name": "cNewUserHighCibil",
+                "identifiers": [
+                  "UpdateCibil"
+                ],
+                "evaluator": "cNewUserHighCibil"
+              }
+            ],
+            "actionFunction": "aNewUserApprove1"
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "ref": "github.com/project-flogo/rules/ruleaction",
+      "settings": {
+        "ruleSessionURI": "res://rulesession:simple",
+        "tds": [
+          {
+            "name": "UserAccount",
+            "properties": [
+              {
+                "name": "Id",
+                "pk-index": 0,
+                "type": "int"
+              },
+              {
+                "name": "Name",
+                "type": "string"
+              },
+              {
+                "name": "Gender",
+                "type": "string"
+              },
+              {
+                "name": "Age",
+                "type": "int"
+              },
+              {
+                "name": "Address",
+                "type": "string"
+              },
+              {
+                "name": "Income",
+                "type": "int"
+              },
+              {
+                "name": "maritalStatus",
+                "type": "string"
+              },
+              {
+                "name": "creditScore",
+                "type": "int"
+              },
+              {
+                "name": "approvedLimit",
+                "type": "int"
+              },
+              {
+                "name": "appStatus",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "name": "NewAccount",
+            "ttl":30,
+            "properties": [
+              {
+                "name": "Id",
+                "pk-index": 0,
+                "type": "int"
+              },
+              {
+                "name": "Name",
+                "type": "string"
+              },
+              {
+                "name": "Gender",
+                "type": "string"
+              },
+              {
+                "name": "Age",
+                "type": "int"
+              },
+              {
+                "name": "Address",
+                "type": "string"
+              },
+              {
+                "name": "Income",
+                "type": "int"
+              },
+              {
+                "name": "maritalStatus",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "name": "UpdateCibil",
+            "properties": [
+              {
+                "name": "Id",
+                "pk-index": 0,
+                "type": "int"
+              },
+              {
+                "name": "creditScore",
+                "type": "int"
+              }
+            ],
+            "ttl": 0
+          }
+        ]
+      },
+      "id": "simple_rule"
+    }
+  ]
+}
