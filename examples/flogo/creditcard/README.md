@@ -4,8 +4,8 @@
 This example demonstrates rule based processing of credit card application. In this example three tuples are used, tuples description is given below.
 
 
-* `UserAccount` tuple is always stored in network, while the other tuples `NewAccount` and `UpdateCibil` are removed after usage as ttl is given as 30secs and 0. 
-* During startup Name Tom is asserted into network.
+* `UserAccount` tuple is always stored in network, while the other tuples `NewAccount` and `UpdateCibil` are removed after usage as ttl is given as 0. 
+
 
 ## Usage
 
@@ -14,21 +14,20 @@ Get the repo and in this example main.go, functions.go both are available. We ca
 #### Conditions 
 
 ```
-cUserData : Check tuple not empty
-cNewUser : Check for new user input data - checks if age <17 and >=45, empty address and salary less than 10k
-cNewUserId : Check for id match from 'UserAccount' and 'NewAccount' tuples
-cNewUserAge : Check for age >=18 and <= 44 
-cNewUserCibil : Check for cibil >= 750 && < 820 
-cNewUserLowCibil : Check for cibil <750
-cNewUserHighCibil : Check for cibil >= 820 &&  <= 900
+cBadUser : Check for new user input data - checks if age <18 and >=45, empty address and salary less than 10k
+cNewUser : Check for new user input data - checks if age >=18 and <= 44, address and salary >= 10k
+cUserIdMatch : Check for id match from 'UserAccount' and 'UpdateCibil' tuples
+cUserCibil : Check for cibil >= 750 && < 820 
+cUserLowCibil : Check for cibil < 750
+cUserHighCibil : Check for cibil >= 820 &&  <= 900
 ```
 #### Actions 
 ```
-aUserData : Executes when Proper Input details provided
-aNewUser : When required values for addrees, age, salay not matching with pre-requisites and retracts NewAccount tuple
-aNewUserApprove : Provides credit card application status approved with prescribed credit limit
-aNewUserApprove1 : Provides credit card application status approved with prescribed credit limitt tuple
-aNewUserReject : Rejects when lower cibil score provided and retracts NewAccount
+aBadUser : Executes when age - < 18 and >=45, address empty, salaray less than 10k
+aNewUser : Add the newuser info to userAccount tuple
+aUserApprove : Provides credit card application status approved with prescribed credit limit
+aUserApprove1 : Provides credit card application status approved with prescribed credit limit
+aUserReject : Rejects when lower cibil score provided and retracts NewAccount
 ```
 ### Direct build and run
 ```
@@ -46,12 +45,7 @@ flogo build
 ./bin/creditcard
 ```
 
-* Input user details - Stored in network
-
-```
-$ curl -X PUT http://localhost:7777/users -H 'Content-Type: application/json' -d '{"Id":"12312","Name":"Tom1","Age":19,"Addres":"TEST","Gender":"male","maritalStatus":"single","appStatus":""}'
-```
-* Input new user details - Stored in network for 30 secs
+* Input new user details
 
 ```
 $ curl -X PUT http://localhost:7777/newaccount -H 'Content-Type: application/json' -d '{"Name":"Test","Age":"26","Income":"60100","Address":"TEt","Id":"12312","Gener":"male","maritalStatus":"single"}'

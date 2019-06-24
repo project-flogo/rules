@@ -20,21 +20,6 @@
         {
           "settings": {
             "method": "PUT",
-            "path": "/users"
-          },
-          "actions": [
-            {
-              "id": "simple_rule",
-              "input": {
-                "tupletype": "UserAccount",
-                "values": "=$.content"
-              }
-            }
-          ]
-        },
-        {
-          "settings": {
-            "method": "PUT",
             "path": "/newaccount"
           },
           "actions": [
@@ -92,14 +77,14 @@
             "name": "UserData",
             "conditions": [
               {
-                "name": "cUserData",
+                "name": "cBadUser",
                 "identifiers": [
-                  "UserAccount"
+                  "NewAccount"
                 ],
-                "evaluator": "cUserData"
+                "evaluator": "cBadUser"
               }
             ],
-            "actionFunction": "aUserData"
+            "actionFunction": "aBadUser"
           },
           {
             "name": "NewUser",
@@ -118,88 +103,64 @@
             "name": "NewUser1",
             "conditions": [
               {
-                "name": "cNewUserId",
+                "name": "cUserIdMatch",
                 "identifiers": [
-                  "NewAccount",
+                  "UpdateCibil",
                   "UserAccount"
                 ],
-                "evaluator": "cNewUserId"
+                "evaluator": "cUserIdMatch"
               },
               {
-                "name": "cNewUserAge",
-                "identifiers": [
-                  "NewAccount",
-                  "UserAccount"
-                ],
-                "evaluator": "cNewUserAge"
-              },
-              {
-                "name": "cNewUserCibil",
+                "name": "cUserCibil",
                 "identifiers": [
                   "UpdateCibil"
                 ],
-                "evaluator": "cNewUserCibil"
+                "evaluator": "cUserCibil"
               }
             ],
-            "actionFunction": "aNewUserApprove"
+            "actionFunction": "aUserApprove"
           },
           {
-            "name": "cNewUserId",
+            "name": "NewUser2",
             "conditions": [
               {
-                "name": "cNewUserId",
+                "name": "cUserIdMatch",
                 "identifiers": [
-                  "NewAccount",
+                  "UpdateCibil",
                   "UserAccount"
                 ],
-                "evaluator": "cNewUserId"
+                "evaluator": "cUserIdMatch"
               },
               {
-                "name": "cNewUserAge",
-                "identifiers": [
-                  "NewAccount",
-                  "UserAccount"
-                ],
-                "evaluator": "cNewUserAge"
-              },
-              {
-                "name": "cNewUserLowCibil",
+                "name": "cUserCibil",
                 "identifiers": [
                   "UpdateCibil"
                 ],
-                "evaluator": "cNewUserLowCibil"
+                "evaluator": "cUserHighCibil"
               }
             ],
-            "actionFunction": "aNewUserReject"
+            "actionFunction": "aUserApprove1"
           },
           {
-            "name": "NewUser3",
+            "name": "Rejected",
             "conditions": [
               {
-                "name": "cNewUserId",
+                "name": "cUserIdMatch",
                 "identifiers": [
-                  "NewAccount",
+                  "UpdateCibil",
                   "UserAccount"
                 ],
-                "evaluator": "cNewUserId"
+                "evaluator": "cUserIdMatch"
               },
               {
-                "name": "cNewUserAge",
-                "identifiers": [
-                  "NewAccount",
-                  "UserAccount"
-                ],
-                "evaluator": "cNewUserAge"
-              },
-              {
-                "name": "cNewUserHighCibil",
+                "name": "cUserCibil",
                 "identifiers": [
                   "UpdateCibil"
                 ],
-                "evaluator": "cNewUserHighCibil"
+                "evaluator": "cUserLowCibil"
               }
             ],
-            "actionFunction": "aNewUserApprove1"
+            "actionFunction": "aUserReject"
           }
         ]
       }
@@ -259,7 +220,7 @@
           },
           {
             "name": "NewAccount",
-            "ttl":30,
+            "ttl": 0,
             "properties": [
               {
                 "name": "Id",
