@@ -10,7 +10,7 @@ import (
 type conflictRes interface {
 	addAgendaItem(rule model.Rule, tupleMap map[model.TupleType]model.Tuple)
 	resolveConflict(ctx context.Context)
-	deleteAgendaFor(ctx context.Context, tuple model.Tuple)
+	deleteAgendaFor(ctx context.Context, tuple model.Tuple, changeProps map[string]bool)
 }
 
 type conflictResImpl struct {
@@ -81,14 +81,13 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 		front = cr.agendaList.Front()
 	}
 
-
 	reteCtxV := getReteCtx(ctx)
 	reteCtxV.normalize()
 	//reteCtxV.printRtcChangeList()
 
 }
 
-func (cr *conflictResImpl) deleteAgendaFor(ctx context.Context, modifiedTuple model.Tuple) {
+func (cr *conflictResImpl) deleteAgendaFor(ctx context.Context, modifiedTuple model.Tuple, changeProps map[string]bool) {
 
 	hdlModified := getOrCreateHandle(ctx, modifiedTuple)
 
@@ -98,8 +97,28 @@ func (cr *conflictResImpl) deleteAgendaFor(ctx context.Context, modifiedTuple mo
 		for _, tuple := range item.getTuples() {
 			hdl := getOrCreateHandle(ctx, tuple)
 			if hdl == hdlModified { //this agendaitem has the modified tuple, remove the agenda item!
-				cr.agendaList.Remove(e)
-				break
+				toRemove := true
+				//check if the rule depends on this change prop
+				if changeProps != nil {
+					if depProps, found := item.getRule().GetDeps()[tuple.GetTupleType()]; found {
+						if len(depProps) > 0 {
+							for prop, _ := range depProps {
+								if _, fnd := changeProps[prop]; fnd {
+									toRemove = true
+									break
+								}
+							}
+						} else {
+							toRemove = false
+						}
+					} else {
+						toRemove = false
+					}
+				}
+				if toRemove {
+					cr.agendaList.Remove(e)
+					break
+				}
 			}
 		}
 		e = next

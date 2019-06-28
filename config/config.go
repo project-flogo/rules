@@ -5,10 +5,18 @@ import (
 	"encoding/json"
 	"strconv"
 
+	"github.com/project-flogo/core/data/metadata"
 	"github.com/project-flogo/rules/common/model"
 )
 
 // RuleSessionDescriptor is a collection of rules to be loaded
+
+type RuleActionDescriptor struct {
+	Name       string               `json:"name"`
+	IOMetadata *metadata.IOMetadata `json:"metadata"`
+	Rules      []*RuleDescriptor    `json:"rules"`
+}
+
 type RuleSessionDescriptor struct {
 	Rules []*RuleDescriptor `json:"rules"`
 }
@@ -101,4 +109,11 @@ func (c *ConditionDescriptor) MarshalJSON() ([]byte, error) {
 	buffer.WriteString("\"evaluator\":\"" + conditionEvaluatorID + "\"}")
 
 	return buffer.Bytes(), nil
+}
+
+//metadata support
+type DefinitionConfig struct {
+	Name     string               `json:"name"`
+	Metadata *metadata.IOMetadata `json:"metadata"`
+	Rules    []*RuleDescriptor    `json:"rules"`
 }

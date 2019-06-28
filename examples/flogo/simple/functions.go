@@ -1,11 +1,11 @@
-package simple
+package main
 
 import (
 	"context"
 	"fmt"
+	"github.com/project-flogo/rules/config"
 
 	"github.com/project-flogo/rules/common/model"
-	"github.com/project-flogo/rules/config"
 )
 
 //add this sample file to your flogo project

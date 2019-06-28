@@ -24,17 +24,17 @@ const (
 func setupFlogoMQTTTriggers() {
 	app := api.NewApp()
 
-	mqttSettings := map[string]interface{}{
-		"topic":     baseTopic,
-		"broker":    broker,
-		"id":        "oms",
-		"qos":       "0",
-		"cleansess": "false",
-	}
-	trg := app.NewTrigger(&mqtt.MqttTrigger{}, mqttSettings)
-	trg.NewFuncHandler(map[string]interface{}{"topic": orderEventTopic}, HandleOrderEvent)
-	trg.NewFuncHandler(map[string]interface{}{"topic": itemEventTopic}, HandleItemEvent)
-	trg.NewFuncHandler(map[string]interface{}{"topic": orderShippedEventTopic}, HandleOrderShippedEvent)
+	//mqttSettings := map[string]interface{}{
+	//	"topic":     baseTopic,
+	//	"broker":    broker,
+	//	"id":        "oms",
+	//	"qos":       "0",
+	//	"cleansess": "false",
+	//}
+	//trg := app.NewTrigger(&mqtt.MqttTrigger{}, mqttSettings)
+	//trg.NewFuncHandler(map[string]interface{}{"topic": orderEventTopic}, HandleOrderEvent)
+	//trg.NewFuncHandler(map[string]interface{}{"topic": itemEventTopic}, HandleItemEvent)
+	//trg.NewFuncHandler(map[string]interface{}{"topic": orderShippedEventTopic}, HandleOrderShippedEvent)
 
 	e, err := api.NewEngine(app)
 

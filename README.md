@@ -22,7 +22,7 @@ To get started with the Flogo Rules you'll need to have a few things
 
 ### Install
 ```
-$ go get -u github.com/project-flogo/rules
+$ go get -u github.com/project-flogo/rules/...
 ```
 _Note that the -u parameter automatically updates rules if it exists_
 
@@ -139,6 +139,8 @@ $ go install
 $ ./$GOPATH/bin/rulesapp
 
 ```
+## Running Rules in a Flogo App
+To use the Rules action in your Flogo App, refer to `examples/flogo/simple/README`
 
 ## Connect with us
 

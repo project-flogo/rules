@@ -17,12 +17,20 @@
     {
       "name": "tupleDescriptorFile",
       "type": "string"
+    },
+    {
+      "name": "tds",
+      "type": "object"
     }
   ],
   "input":  [
     {
-      "name": "data",
-      "type": "object"
+      "name": "tupletype",
+      "type": "string"
+    },
+    {
+      "name": "values",
+      "type": "string"
     }
   ]
 }
