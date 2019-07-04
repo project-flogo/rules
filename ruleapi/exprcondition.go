@@ -133,7 +133,7 @@ func (t *tuplePropertyResolver) Resolve(scope data.Scope, item string, field str
 	//		case data.TypeBoolean:
 	//			v, err = tuple.GetBool(aliasAndProp[1])
 	//		}
-	//	}
+	//	}`
 	//}
 	//return v, err
 	ts := scope.(*tupleScope)

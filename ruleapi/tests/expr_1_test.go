@@ -1,9 +1,9 @@
 package tests
 
 import (
+	"context"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"golang.org/x/net/context"
 	"testing"
 )
 
