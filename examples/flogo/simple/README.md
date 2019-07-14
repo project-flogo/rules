@@ -237,6 +237,7 @@ Place `flogo.json` in a folder of your choice, then run
 `flogo create -f flogo.json`
 this will pull the required dependencies and create a folder with the name as defined in the top level `name` in `flogo.json`
 
+Add `functions.go` to the `src` folder, next to `main.go`
 
 From the `simplerules` folder, run `flogo build`
 If everything goes well, you should have an executable (in this example) at `simplerules/bin/simplerules` 
