@@ -9,22 +9,22 @@ import (
 )
 
 //Forward chain-Data change in r13_action triggers rule1 and its corresponding action r132_action.
-func Test_T13(t *testing.T) {
+func Test_Three(t *testing.T) {
 
 	rs, _ := createRuleSession()
 
 	actionMap := make(map[string]string)
 
-	rule := ruleapi.NewRule("R13")
-	rule.AddCondition("R13_c1", []string{"t1.id"}, r13_Condition, nil)
-	rule.SetAction(r13_action)
+	rule := ruleapi.NewRule("R3")
+	rule.AddCondition("R3c1", []string{"t1.id"}, r3Condition, nil)
+	rule.SetAction(r3action)
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
-	rule1 := ruleapi.NewRule("R132")
-	rule1.AddCondition("R132_c1", []string{"t1.p1"}, r132_Condition, nil)
-	rule1.SetAction(r132_action)
+	rule1 := ruleapi.NewRule("R32")
+	rule1.AddCondition("R32c1", []string{"t1.p1"}, r32Condition, nil)
+	rule1.SetAction(r32action)
 	rule1.SetPriority(1)
 	rule1.SetContext(actionMap)
 	rs.AddRule(rule1)
@@ -41,7 +41,7 @@ func Test_T13(t *testing.T) {
 	rs.Assert(context.TODO(), t2)
 
 	if len(actionMap) != 1 {
-		t.Errorf("Expecting [3] actions, got [%d]", len(actionMap))
+		t.Errorf("Expecting [1] actions, got [%d]", len(actionMap))
 		t.FailNow()
 	}
 
@@ -49,11 +49,11 @@ func Test_T13(t *testing.T) {
 
 }
 
-func r13_Condition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+func r3Condition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	return true
 }
 
-func r132_Condition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+func r32Condition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	t1 := tuples[model.TupleType("t1")].(model.MutableTuple)
 	p1, _ := t1.GetInt("p1")
 	if p1 < 1000 {
@@ -64,7 +64,7 @@ func r132_Condition(ruleName string, condName string, tuples map[model.TupleType
 
 }
 
-func r13_action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+func r3action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	//fmt.Println("r13_action triggered")
 	t1 := tuples[model.TupleType("t1")].(model.MutableTuple)
 	id, _ := t1.GetString("id")
@@ -76,7 +76,7 @@ func r13_action(ctx context.Context, rs model.RuleSession, ruleName string, tupl
 	}
 }
 
-func r132_action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+func r32action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	//fmt.Println("r132_action triggered")
 	firedMap := ruleCtx.(map[string]string)
 	firedMap["A"] = "Fired"
