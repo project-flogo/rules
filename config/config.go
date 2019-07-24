@@ -15,6 +15,7 @@ type RuleActionDescriptor struct {
 	Name       string               `json:"name"`
 	IOMetadata *metadata.IOMetadata `json:"metadata"`
 	Rules      []*RuleDescriptor    `json:"rules"`
+	Services   []*Service           `json:"services,omitempty"`
 }
 
 type RuleSessionDescriptor struct {
@@ -23,10 +24,11 @@ type RuleSessionDescriptor struct {
 
 // RuleDescriptor defines a rule
 type RuleDescriptor struct {
-	Name       string
-	Conditions []*ConditionDescriptor
-	ActionFunc model.ActionFunction
-	Priority   int
+	Name          string
+	Conditions    []*ConditionDescriptor
+	ActionFunc    model.ActionFunction
+	ActionService *ActionServiceDescriptor
+	Priority      int
 }
 
 // ConditionDescriptor defines a condition in a rule
@@ -36,12 +38,28 @@ type ConditionDescriptor struct {
 	Evaluator   model.ConditionEvaluator
 }
 
+// ActionServiceDescriptor defines rule action service
+type ActionServiceDescriptor struct {
+	Service string                 `json:"service"`
+	Input   map[string]interface{} `json:"input,omitempty"`
+}
+
+// Service defines a functional target that may be invoked by a rule
+type Service struct {
+	Name        string                 `json:"name"`
+	Ref         string                 `json:"ref"`
+	Description string                 `json:"description,omitempty"`
+	Settings    map[string]interface{} `json:"settings,omitempty"`
+}
+
+// UnmarshalJSON unmarshals JSON into struct RuleDescriptor
 func (c *RuleDescriptor) UnmarshalJSON(d []byte) error {
 	ser := &struct {
-		Name         string                 `json:"name"`
-		Conditions   []*ConditionDescriptor `json:"conditions"`
-		ActionFuncId string                 `json:"actionFunction"`
-		Priority     int                    `json:"priority"`
+		Name          string                   `json:"name"`
+		Conditions    []*ConditionDescriptor   `json:"conditions"`
+		ActionFuncId  string                   `json:"actionFunction"`
+		ActionService *ActionServiceDescriptor `json:"actionService,omitempty"`
+		Priority      int                      `json:"priority"`
 	}{}
 
 	if err := json.Unmarshal(d, ser); err != nil {
@@ -51,11 +69,13 @@ func (c *RuleDescriptor) UnmarshalJSON(d []byte) error {
 	c.Name = ser.Name
 	c.Conditions = ser.Conditions
 	c.ActionFunc = GetActionFunction(ser.ActionFuncId)
+	c.ActionService = ser.ActionService
 	c.Priority = ser.Priority
 
 	return nil
 }
 
+// MarshalJSON returns JSON encoding of RuleDescriptor
 func (c *RuleDescriptor) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString("{")
 	buffer.WriteString("\"name\":" + "\"" + c.Name + "\",")
@@ -72,11 +92,16 @@ func (c *RuleDescriptor) MarshalJSON() ([]byte, error) {
 
 	actionFunctionID := GetActionFunctionID(c.ActionFunc)
 	buffer.WriteString("\"actionFunction\":\"" + actionFunctionID + "\",")
+	jsonActionService, err := json.Marshal(c.ActionService)
+	if err == nil {
+		buffer.WriteString("\"actionService\":" + string(jsonActionService) + ",")
+	}
 	buffer.WriteString("\"priority\":" + strconv.Itoa(c.Priority) + "}")
 
 	return buffer.Bytes(), nil
 }
 
+// UnmarshalJSON unmarshals JSON into struct ConditionDescriptor
 func (c *ConditionDescriptor) UnmarshalJSON(d []byte) error {
 	ser := &struct {
 		Name        string   `json:"name"`
@@ -95,6 +120,7 @@ func (c *ConditionDescriptor) UnmarshalJSON(d []byte) error {
 	return nil
 }
 
+// MarshalJSON returns JSON encoding of ConditionDescriptor
 func (c *ConditionDescriptor) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString("{")
 	buffer.WriteString("\"name\":" + "\"" + c.Name + "\",")
