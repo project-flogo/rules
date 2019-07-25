@@ -58,7 +58,7 @@ func Test_I2(t *testing.T) {
 	rs.Assert(context.TODO(), t2)
 
 	if cnt != 1 {
-		t.Errorf("Expecting [5] actions, got [%d]", count)
+		t.Errorf("Expecting [1] actions, got [%d]", cnt)
 		t.FailNow()
 	}
 
@@ -66,7 +66,7 @@ func Test_I2(t *testing.T) {
 	rs.Assert(context.TODO(), t3)
 
 	if cnt != 2 {
-		t.Errorf("Expecting [5] actions, got [%d]", count)
+		t.Errorf("Expecting [2] actions, got [%d]", cnt)
 		t.FailNow()
 	}
 
@@ -74,7 +74,7 @@ func Test_I2(t *testing.T) {
 	rs.Assert(context.TODO(), t4)
 
 	if cnt != 5 {
-		t.Errorf("Expecting [5] actions, got [%d]", count)
+		t.Errorf("Expecting [5] actions, got [%d]", cnt)
 		t.FailNow()
 	}
 

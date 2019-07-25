@@ -106,14 +106,14 @@ func t13Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, ha
 			tuples, _ := rtxn.GetRtcDeleted()["t1"]
 			if tuples != nil {
 				if len(tuples) != 1 {
-					t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 1, len(tuples))
+					t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 1, len(tuples))
 					printTuples(t, "Deleted", rtxn.GetRtcDeleted())
 				}
 			}
 			tuples3, _ := rtxn.GetRtcDeleted()["t3"]
 			if tuples3 != nil {
 				if len(tuples3) != 1 {
-					t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 1, len(tuples3))
+					t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 1, len(tuples3))
 					printTuples(t, "Deleted", rtxn.GetRtcDeleted())
 				}
 			}

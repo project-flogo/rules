@@ -108,7 +108,7 @@ func t14Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, ha
 		}
 		lD := len(rtxn.GetRtcDeleted())
 		if lD != 0 {
-			t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 2, lD)
+			t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 0, lD)
 			printTuples(t, "Deleted", rtxn.GetRtcDeleted())
 		}
 	}
@@ -135,7 +135,7 @@ func t14Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, ha
 		}
 		lM := len(rtxn.GetRtcModified())
 		if lM != 0 {
-			t.Errorf("RtcModified: Expected [%d], got [%d]\n", 1, lM)
+			t.Errorf("RtcModified: Expected [%d], got [%d]\n", 0, lM)
 			printModified(t, rtxn.GetRtcModified())
 		}
 		lD := len(rtxn.GetRtcDeleted())

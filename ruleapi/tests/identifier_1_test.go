@@ -15,13 +15,10 @@ func Test_I1(t *testing.T) {
 
 	rs, _ := createRuleSession()
 
-	//actionMap := make(map[string]string)
-
 	rule := ruleapi.NewRule("I1")
 	rule.AddCondition("I1_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
 	rule.SetAction(i1_action)
 	rule.SetPriority(1)
-	//rule.SetContext(actionMap)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
