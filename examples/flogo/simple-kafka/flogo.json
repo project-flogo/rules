@@ -1,0 +1,123 @@
+{
+  "name": "simplerules",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "Sample Flogo App",
+  "appModel": "1.0.0",
+  "triggers": [
+    {
+      "id": "receive_kafka_message",
+      "ref": "github.com/project-flogo/contrib/trigger/kafka",
+      "settings": {
+        "brokerUrls" : "localhost:9092"
+      },
+      "handlers": [
+        {   
+          "settings": {
+            "topic": "orderinfo"
+          },
+          "actions": [
+            {
+              "id": "order_rule",
+              "input": {
+                "tupletype": "order",
+							  "values": "=$.message"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "ref": "github.com/project-flogo/rules/ruleaction",
+      "settings": {
+        "ruleSessionURI": "res://rulesession:simple",
+        "tds": [
+          {
+            "name": "order",
+            "ttl": 0,
+            "properties": [
+              {
+                "name": "id",
+                "type": "string",
+                "pk-index": 0
+              },
+              {
+                "name":"type",
+                "type":"string"
+              },
+              {
+                "name":"details",
+                "type":"string"
+              },
+              {
+                "name":"quantity",
+                "type":"integer"
+              },
+              {
+                "name":"totalPrice",
+                "type":"double"
+              }
+            ]
+          }
+        ]
+      },
+      "id": "order_rule"
+    }
+  ],
+  "resources": [
+    {
+      "id": "rulesession:simple",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+             {
+               "name": "outputData",
+               "type": "any"
+             }
+          ]
+        },
+        "rules": [
+          {
+            "name": "groceryCheckRule",
+            "conditions": [
+              {
+                "name": "c1",
+                "identifiers": [
+                  "order"
+                ],
+                "evaluator": "checkForGrocery"
+              }
+            ],
+            "actionFunction": "groceryAction"
+          },
+          {
+            "name": "furnitureCheckRule",
+            "conditions": [
+              {
+                "name": "c1",
+                "identifiers": [
+                  "order"
+                ],
+                "evaluator": "checkForFurniture"
+              }
+            ],
+            "actionFunction": "furnitureAction"
+          }
+        ]
+      }
+    }
+  ]
+}
