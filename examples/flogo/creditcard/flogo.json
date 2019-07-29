@@ -118,7 +118,7 @@
                 "evaluator": "cUserCibil"
               }
             ],
-            "actionFunction": "aUserApprove"
+            "actionFunction": "aApproveWithLowerLimit"
           },
           {
             "name": "NewUser2",
@@ -139,7 +139,7 @@
                 "evaluator": "cUserHighCibil"
               }
             ],
-            "actionFunction": "aUserApprove1"
+            "actionFunction": "aApproveWithHigherLimit"
           },
           {
             "name": "Rejected",

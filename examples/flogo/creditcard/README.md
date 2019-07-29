@@ -25,7 +25,7 @@ cUserHighCibil : Check for cibil >= 820 &&  <= 900
 ```
 aBadUser : Executes when age - < 18 and >=45, address empty, salary less than 10k
 aNewUser : Add the newuser info to userAccount tuple
-aApproveWithLowLimit : Provides credit card application status approved with lower credit limit
+aApproveWithLowerLimit : Provides credit card application status approved with lower credit limit
 aApproveWithHigherLimit : Provides credit card application status approved with higher credit limit
 aUserReject : Rejects when lower cibil score provided and retracts NewAccount
 ```
