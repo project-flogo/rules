@@ -48,7 +48,7 @@ flogo build
 * Input new user details
 
 ```
-$ curl -X PUT http://localhost:7777/newaccount -H 'Content-Type: application/json' -d '{"Name":"Test","Age":"26","Income":"60100","Address":"TEt","Id":"12312","Gener":"male","maritalStatus":"single"}'
+$ curl -X PUT http://localhost:7777/newaccount -H 'Content-Type: application/json' -d '{"Name":"Test","Age":"26","Income":"60100","Address":"TEt","Id":"12312","Gender":"male","maritalStatus":"single"}'
 ```
 * Update credit score details of the user
 
