@@ -14,8 +14,8 @@ Get the repo and in this example main.go, functions.go both are available. We ca
 #### Conditions 
 
 ```
-cBadUser : Check for new user input data - checks if age <18 and >=45, empty address and salary less than 10k
-cNewUser : Check for new user input data - checks if age >=18 and <= 44, address and salary >= 10k
+cBadUser : Check for new user input data - check if age <18 and >=45, empty address and salary less than 10k
+cNewUser : Check for new user input data - check if age >=18 and <= 44, address and salary >= 10k
 cUserIdMatch : Check for id match from 'UserAccount' and 'UpdateCibil' tuples
 cUserCibil : Check for cibil >= 750 && < 820 
 cUserLowCibil : Check for cibil < 750
@@ -23,7 +23,7 @@ cUserHighCibil : Check for cibil >= 820 &&  <= 900
 ```
 #### Actions 
 ```
-aBadUser : Executes when age - < 18 and >=45, address empty, salaray less than 10k
+aBadUser : Executes when age - < 18 and >=45, address empty, salary less than 10k
 aNewUser : Add the newuser info to userAccount tuple
 aUserApprove : Provides credit card application status approved with prescribed credit limit
 aUserApprove1 : Provides credit card application status approved with prescribed credit limit

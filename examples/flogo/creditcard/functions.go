@@ -64,7 +64,7 @@ func aNewUser(ctx context.Context, rs model.RuleSession, ruleName string, tuples
 	userInfo.SetInt(ctx, "Income", income)
 	fmt.Println(userInfo)
 	rs.Assert(ctx, userInfo)
-	fmt.Println("User information recevied")
+	fmt.Println("User information received")
 
 }
 
