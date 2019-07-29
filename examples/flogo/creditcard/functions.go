@@ -23,7 +23,7 @@ func init() {
 	// rule NewUserApprove
 	config.RegisterConditionEvaluator("cUserIdMatch", cUserIdMatch)
 	config.RegisterConditionEvaluator("cUserCibil", cUserCibil)
-	config.RegisterActionFunction("aUserApprove", aUserApprove)
+	config.RegisterActionFunction("aApproveWithLowLimit", aApproveWithLowLimit)
 
 	// // rule NewUserReject
 	config.RegisterConditionEvaluator("cUserIdMatch", cUserIdMatch)
@@ -33,7 +33,7 @@ func init() {
 	// // rule NewUserApprove1
 	config.RegisterConditionEvaluator("cUserIdMatch", cUserIdMatch)
 	config.RegisterConditionEvaluator("cUserHighCibil", cUserHighCibil)
-	config.RegisterActionFunction("aUserApprove1", aUserApprove1)
+	config.RegisterActionFunction("aApproveWithHigherLimit", aApproveWithHigherLimit)
 }
 
 func cNewUser(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
@@ -139,7 +139,7 @@ func cUserHighCibil(ruleName string, condName string, tuples map[model.TupleType
 	return false
 }
 
-func aUserApprove(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+func aApproveWithLowLimit(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Println("Rule fired:", ruleName)
 	userInfo := tuples["UserAccount"]
 	updateScore := tuples["UpdateCibil"]
@@ -153,7 +153,7 @@ func aUserApprove(ctx context.Context, rs model.RuleSession, ruleName string, tu
 	fmt.Println(userInfo)
 }
 
-func aUserApprove1(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+func aApproveWithHigherLimit(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Println("Rule fired:", ruleName)
 	userInfo := tuples["UserAccount"]
 	updateScore := tuples["UpdateCibil"]
