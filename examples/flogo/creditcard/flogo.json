@@ -41,7 +41,7 @@
             {
               "id": "simple_rule",
               "input": {
-                "tupletype": "UpdateCibil",
+                "tupletype": "UpdateCreditScore",
                 "values": "=$.content"
               }
             }
@@ -105,17 +105,17 @@
               {
                 "name": "cUserIdMatch",
                 "identifiers": [
-                  "UpdateCibil",
+                  "UpdateCreditScore",
                   "UserAccount"
                 ],
                 "evaluator": "cUserIdMatch"
               },
               {
-                "name": "cUserCibil",
+                "name": "cUserCreditScore",
                 "identifiers": [
-                  "UpdateCibil"
+                  "UpdateCreditScore"
                 ],
-                "evaluator": "cUserCibil"
+                "evaluator": "cUserCreditScore"
               }
             ],
             "actionFunction": "aApproveWithLowerLimit"
@@ -126,17 +126,17 @@
               {
                 "name": "cUserIdMatch",
                 "identifiers": [
-                  "UpdateCibil",
+                  "UpdateCreditScore",
                   "UserAccount"
                 ],
                 "evaluator": "cUserIdMatch"
               },
               {
-                "name": "cUserCibil",
+                "name": "cUserCreditScore",
                 "identifiers": [
-                  "UpdateCibil"
+                  "UpdateCreditScore"
                 ],
-                "evaluator": "cUserHighCibil"
+                "evaluator": "cUserHighCreditScore"
               }
             ],
             "actionFunction": "aApproveWithHigherLimit"
@@ -147,17 +147,17 @@
               {
                 "name": "cUserIdMatch",
                 "identifiers": [
-                  "UpdateCibil",
+                  "UpdateCreditScore",
                   "UserAccount"
                 ],
                 "evaluator": "cUserIdMatch"
               },
               {
-                "name": "cUserCibil",
+                "name": "cUserCreditScore",
                 "identifiers": [
-                  "UpdateCibil"
+                  "UpdateCreditScore"
                 ],
-                "evaluator": "cUserLowCibil"
+                "evaluator": "cUserLowCreditScore"
               }
             ],
             "actionFunction": "aUserReject"
@@ -254,7 +254,7 @@
             ]
           },
           {
-            "name": "UpdateCibil",
+            "name": "UpdateCreditScore",
             "properties": [
               {
                 "name": "Id",

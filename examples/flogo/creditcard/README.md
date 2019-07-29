@@ -4,7 +4,7 @@
 This example demonstrates rule based processing of credit card application. In this example three tuples are used, tuples description is given below.
 
 
-* `UserAccount` tuple is always stored in network, while the other tuples `NewAccount` and `UpdateCibil` are removed after usage as ttl is given as 0. 
+* `UserAccount` tuple is always stored in network, while the other tuples `NewAccount` and `UpdateCreditScore` are removed after usage as ttl is given as 0. 
 
 
 ## Usage
@@ -16,10 +16,10 @@ Get the repo and in this example main.go, functions.go both are available. We ca
 ```
 cBadUser : Check for new user input data - check if age <18 and >=45, empty address and salary less than 10k
 cNewUser : Check for new user input data - check if age >=18 and <= 44, address and salary >= 10k
-cUserIdMatch : Check for id match from 'UserAccount' and 'UpdateCibil' tuples
-cUserCibil : Check for cibil >= 750 && < 820 
-cUserLowCibil : Check for cibil < 750
-cUserHighCibil : Check for cibil >= 820 &&  <= 900
+cUserIdMatch : Check for id match from 'UserAccount' and 'UpdateCreditScore' tuples
+cUserCreditScore : Check for CreditScore >= 750 && < 820 
+cUserLowCreditScore : Check for CreditScore < 750
+cUserHighCreditScore : Check for CreditScore >= 820 &&  <= 900
 ```
 #### Actions 
 ```
@@ -27,7 +27,7 @@ aBadUser : Executes when age - < 18 and >=45, address empty, salary less than 10
 aNewUser : Add the newuser info to userAccount tuple
 aApproveWithLowerLimit : Provides credit card application status approved with lower credit limit
 aApproveWithHigherLimit : Provides credit card application status approved with higher credit limit
-aUserReject : Rejects when lower cibil score provided and retracts NewAccount
+aUserReject : Rejects when lower Credit score provided and retracts NewAccount
 ```
 ### Direct build and run
 ```

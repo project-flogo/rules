@@ -22,17 +22,17 @@ func init() {
 
 	// rule NewUserApprove
 	config.RegisterConditionEvaluator("cUserIdMatch", cUserIdMatch)
-	config.RegisterConditionEvaluator("cUserCibil", cUserCibil)
+	config.RegisterConditionEvaluator("cUserCreditScore", cUserCreditScore)
 	config.RegisterActionFunction("aApproveWithLowLimit", aApproveWithLowLimit)
 
 	// // rule NewUserReject
 	config.RegisterConditionEvaluator("cUserIdMatch", cUserIdMatch)
-	config.RegisterConditionEvaluator("cUserLowCibil", cUserLowCibil)
+	config.RegisterConditionEvaluator("cUserLowCreditScore", cUserLowCreditScore)
 	config.RegisterActionFunction("aUserReject", aUserReject)
 
 	// // rule NewUserApprove1
 	config.RegisterConditionEvaluator("cUserIdMatch", cUserIdMatch)
-	config.RegisterConditionEvaluator("cUserHighCibil", cUserHighCibil)
+	config.RegisterConditionEvaluator("cUserHighCreditScore", cUserHighCreditScore)
 	config.RegisterActionFunction("aApproveWithHigherLimit", aApproveWithHigherLimit)
 }
 
@@ -91,7 +91,7 @@ func aBadUser(ctx context.Context, rs model.RuleSession, ruleName string, tuples
 
 func cUserIdMatch(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	userInfo := tuples["UserAccount"]
-	updateScore := tuples["UpdateCibil"]
+	updateScore := tuples["UpdateCreditScore"]
 	if userInfo != nil || updateScore != nil {
 		userId, _ := userInfo.GetInt("Id")
 		newUserId, _ := updateScore.GetInt("Id")
@@ -103,36 +103,36 @@ func cUserIdMatch(ruleName string, condName string, tuples map[model.TupleType]m
 	return false
 }
 
-func cUserCibil(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-	updateScore := tuples["UpdateCibil"]
+func cUserCreditScore(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	updateScore := tuples["UpdateCreditScore"]
 	if updateScore != nil {
-		cibil, _ := updateScore.GetInt("creditScore")
-		if cibil >= 750 && cibil < 820 {
-			fmt.Println("cUserCibil")
+		CreditScore, _ := updateScore.GetInt("creditScore")
+		if CreditScore >= 750 && CreditScore < 820 {
+			fmt.Println("cUserCreditScore")
 			return true
 		}
 	}
 	return false
 }
 
-func cUserLowCibil(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-	updateScore := tuples["UpdateCibil"]
+func cUserLowCreditScore(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	updateScore := tuples["UpdateCreditScore"]
 	if updateScore != nil {
-		cibil, _ := updateScore.GetInt("creditScore")
-		if cibil < 750 {
-			fmt.Println("cUserLowCibil")
+		CreditScore, _ := updateScore.GetInt("creditScore")
+		if CreditScore < 750 {
+			fmt.Println("cUserLowCreditScore")
 			return true
 		}
 	}
 	return false
 }
 
-func cUserHighCibil(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-	updateScore := tuples["UpdateCibil"]
+func cUserHighCreditScore(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	updateScore := tuples["UpdateCreditScore"]
 	if updateScore != nil {
-		cibil, _ := updateScore.GetInt("creditScore")
-		if cibil >= 820 && cibil <= 900 {
-			fmt.Println("cUserHighCibil")
+		CreditScore, _ := updateScore.GetInt("creditScore")
+		if CreditScore >= 820 && CreditScore <= 900 {
+			fmt.Println("cUserHighCreditScore")
 			return true
 		}
 	}
@@ -142,12 +142,12 @@ func cUserHighCibil(ruleName string, condName string, tuples map[model.TupleType
 func aApproveWithLowLimit(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Println("Rule fired:", ruleName)
 	userInfo := tuples["UserAccount"]
-	updateScore := tuples["UpdateCibil"]
-	cibil, _ := updateScore.GetInt("creditScore")
+	updateScore := tuples["UpdateCreditScore"]
+	CreditScore, _ := updateScore.GetInt("creditScore")
 	income, _ := userInfo.GetInt("Income")
 	var limit = 2 * income
 	userInfoMutable := userInfo.(model.MutableTuple)
-	userInfoMutable.SetInt(ctx, "creditScore", cibil)
+	userInfoMutable.SetInt(ctx, "creditScore", CreditScore)
 	userInfoMutable.SetString(ctx, "appStatus", "Approved")
 	userInfoMutable.SetInt(ctx, "approvedLimit", limit)
 	fmt.Println(userInfo)
@@ -156,12 +156,12 @@ func aApproveWithLowLimit(ctx context.Context, rs model.RuleSession, ruleName st
 func aApproveWithHigherLimit(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Println("Rule fired:", ruleName)
 	userInfo := tuples["UserAccount"]
-	updateScore := tuples["UpdateCibil"]
-	cibil, _ := updateScore.GetInt("creditScore")
+	updateScore := tuples["UpdateCreditScore"]
+	CreditScore, _ := updateScore.GetInt("creditScore")
 	income, _ := userInfo.GetInt("Income")
 	var limit = 3 * income
 	userInfoMutable := userInfo.(model.MutableTuple)
-	userInfoMutable.SetInt(ctx, "creditScore", cibil)
+	userInfoMutable.SetInt(ctx, "creditScore", CreditScore)
 	userInfoMutable.SetString(ctx, "appStatus", "Approved")
 	userInfoMutable.SetInt(ctx, "approvedLimit", limit)
 	fmt.Println(userInfo)
@@ -170,10 +170,10 @@ func aApproveWithHigherLimit(ctx context.Context, rs model.RuleSession, ruleName
 func aUserReject(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Println("Rule fired:", ruleName)
 	userInfo := tuples["UserAccount"]
-	updateScore := tuples["UpdateCibil"]
-	cibil, _ := updateScore.GetInt("creditScore")
+	updateScore := tuples["UpdateCreditScore"]
+	CreditScore, _ := updateScore.GetInt("creditScore")
 	userInfoMutable := userInfo.(model.MutableTuple)
-	userInfoMutable.SetInt(ctx, "creditScore", cibil)
+	userInfoMutable.SetInt(ctx, "creditScore", CreditScore)
 	userInfoMutable.SetString(ctx, "appStatus", "Rejected")
 	userInfoMutable.SetInt(ctx, "approvedLimit", 0)
 	fmt.Println(userInfo)
