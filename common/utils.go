@@ -5,7 +5,6 @@ import (
 	"io"
 	"time"
 
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -45,7 +44,7 @@ func generateRandomBytes(n int) (io.Reader, error) {
 // GetAbsPathForResource gets the absolute resource path off $GOPATH
 func GetAbsPathForResource(resourcepath string) string {
 	GOPATH := os.Getenv("GOPATH")
-	fmt.Printf("GOPATH - [%s]\n", GOPATH)
+	// fmt.Printf("GOPATH - [%s]\n", GOPATH)
 	paths := strings.Split(GOPATH, ":")
 	for _, path := range paths {
 		// fmt.Printf("path[%s]\n", path)
