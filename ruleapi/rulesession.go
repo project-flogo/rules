@@ -36,7 +36,7 @@ func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
 	return rs1.(*rulesessionImpl), nil
 }
 
-func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.RuleSession, error) {
+func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string, aServices map[string]*model.ActionService) (model.RuleSession, error) {
 	rs, err := GetOrCreateRuleSession(name)
 
 	if err != nil {
@@ -53,6 +53,13 @@ func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.Rul
 		rule := NewRule(ruleCfg.Name)
 		rule.SetContext("This is a test of context")
 		rule.SetAction(ruleCfg.ActionFunc)
+		// set action service to rule, if exist
+		if ruleCfg.ActionService != nil {
+			aService, found := aServices[ruleCfg.ActionService.Service]
+			if found {
+				rule.SetActionService(aService)
+			}
+		}
 		rule.SetPriority(ruleCfg.Priority)
 
 		for _, condCfg := range ruleCfg.Conditions {

@@ -1,0 +1,123 @@
+{
+  "name": "invokeactivity",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "Sample Flogo App",
+  "appModel": "1.0.0",
+  "imports" : [
+    "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/rules/ruleaction",
+    "github.com/project-flogo/contrib/activity/log"
+  ],
+  "triggers": [
+    {
+      "id": "receive_http_message",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
+      "settings": {
+        "port": "7777"
+      },
+      "handlers": [
+        {   
+          "settings": {
+            "method": "GET",
+            "path": "/test/n1"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "n1",
+							  "values": "=$.queryParams"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "ref": "github.com/project-flogo/rules/ruleaction",
+      "settings": {
+        "ruleSessionURI": "res://rulesession:simple",
+        "tds": [
+          {
+            "name": "n1",
+            "ttl":0,
+            "properties": [
+              {
+                "name": "name",
+                "type": "string",
+                "pk-index": 0
+              }
+            ]
+          },
+          {
+            "name": "n2",
+            "properties": [
+              {
+                "name": "name",
+                "type": "string",
+                "pk-index": 0
+              }
+            ]
+          }
+        ]
+      },
+      "id": "simple_rule"
+    }
+  ],
+  "resources": [
+    {
+      "id": "rulesession:simple",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+             {
+               "name": "outputData",
+               "type": "any"
+             }
+          ]
+        },
+        "rules": [
+          {
+            "name": "n1.name == Bob",
+            "conditions": [
+              {
+                "name": "c1",
+                "identifiers": [
+                  "n1"
+                ],
+                "evaluator": "checkForBob"
+              }
+            ],
+            "actionFunction": "checkForBobAction",
+            "actionService": {
+              "service": "LogService",
+              "input": {
+                "message": "=$n1.name"
+              }
+            }
+          }
+        ],
+        "services": [
+          {
+            "name": "LogService",
+            "description": "Logs message",
+            "ref": "github.com/project-flogo/contrib/activity/log"
+          }
+        ]
+      }
+    }
+  ]
+}

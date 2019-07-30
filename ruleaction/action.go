@@ -96,6 +96,18 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	}
 
 	ruleAction := &RuleAction{}
+	// inflate action services
+	ruleAction.aServices = make(map[string]*model.ActionService)
+	for _, s := range rsCfg.Services {
+		aService, err := ruleapi.NewActionService(s)
+		if err != nil {
+			fmt.Println("not able create rule action service", err)
+			return nil, err
+		}
+		ruleAction.aServices[s.Name] = aService
+	}
+
+	// create rule session
 	ruleSessionDescriptor, err := manager.GetRuleSessionDescriptor(settings.RuleSessionURI)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get RuleSessionDescriptor for %s\n%s", settings.RuleSessionURI, err.Error())
@@ -105,7 +117,7 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshall RuleSessionDescriptor : %s", err.Error())
 	}
-	ruleAction.rs, err = ruleapi.GetOrCreateRuleSessionFromConfig(settings.RuleSessionURI, string(ruleCollectionJSON))
+	ruleAction.rs, err = ruleapi.GetOrCreateRuleSessionFromConfig(settings.RuleSessionURI, string(ruleCollectionJSON), ruleAction.aServices)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to create rulesession for %s\n %s", settings.RuleSessionURI, err.Error())
@@ -123,6 +135,7 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 type RuleAction struct {
 	rs         model.RuleSession
 	ioMetadata *metadata.IOMetadata
+	aServices  map[string]*model.ActionService
 }
 
 func (a *RuleAction) Metadata() *action.Metadata {

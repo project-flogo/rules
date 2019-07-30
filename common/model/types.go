@@ -2,6 +2,8 @@ package model
 
 import (
 	"context"
+
+	"github.com/project-flogo/core/activity"
 )
 
 // RuleContext associated with every rule
@@ -13,6 +15,7 @@ type Rule interface {
 	GetIdentifiers() []TupleType
 	GetConditions() []Condition
 	GetActionFn() ActionFunction
+	GetActionService() *ActionService
 	String() string
 	GetPriority() int
 	GetDeps() map[TupleType]map[string]bool
@@ -24,6 +27,7 @@ type MutableRule interface {
 	Rule
 	AddCondition(conditionName string, idrs []string, cFn ConditionEvaluator, ctx RuleContext) (err error)
 	SetAction(actionFn ActionFunction)
+	SetActionService(*ActionService)
 	SetPriority(priority int)
 	SetContext(ctx RuleContext)
 }
@@ -71,7 +75,6 @@ type RuleSession interface {
 
 	//RtcTransactionHandler
 	RegisterRtcTransactionHandler(txnHandler RtcTransactionHandler, handlerCtx interface{})
-
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side
@@ -81,6 +84,12 @@ type ConditionEvaluator func(string, string, map[TupleType]Tuple, RuleContext) b
 //ActionFunction is a function pointer for handling action callbacks on the server side
 //i.e part of the server side API
 type ActionFunction func(context.Context, RuleSession, string, map[TupleType]Tuple, RuleContext)
+
+// ActionService action service
+type ActionService struct {
+	Name string
+	Act  activity.Activity
+}
 
 //StartupRSFunction is called once after creation of a RuleSession
 type StartupRSFunction func(ctx context.Context, rs RuleSession, sessionCtx map[string]interface{}) (err error)
@@ -92,10 +101,9 @@ type ValueChangeListener interface {
 
 type RtcTxn interface {
 	//map of type and map of key/tuple
-	GetRtcAdded () map[string]map[string]Tuple
+	GetRtcAdded() map[string]map[string]Tuple
 	GetRtcModified() map[string]map[string]RtcModified
 	GetRtcDeleted() map[string]map[string]Tuple
-
 }
 
 type RtcModified interface {
@@ -103,5 +111,4 @@ type RtcModified interface {
 	GetModifiedProps() map[string]bool
 }
 
-type RtcTransactionHandler func (ctx context.Context, rs RuleSession, txn RtcTxn, txnContext interface{})
-
+type RtcTransactionHandler func(ctx context.Context, rs RuleSession, txn RtcTxn, txnContext interface{})
