@@ -237,16 +237,6 @@ Place `flogo.json` in a folder of your choice, then run
 `flogo create -f flogo.json`
 this will pull the required dependencies and create a folder with the name as defined in the top level `name` in `flogo.json`
 
-Now `cd` into that folder, say `simplerules`
-
-Run the following command:
-`flogo install github/project-flogo/core`
-
-Then in the `main.go` that gets created in `src`, add these lines to the import section
-```
-_ "github.com/project-flogo/contrib/trigger/rest"
-_ "github.com/project-flogo/rules/ruleaction"
-```
 Add `functions.go` to the `src` folder, next to `main.go`
 
 From the `simplerules` folder, run `flogo build`
