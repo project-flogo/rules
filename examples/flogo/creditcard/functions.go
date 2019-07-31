@@ -23,7 +23,7 @@ func init() {
 	// rule NewUserApprove
 	config.RegisterConditionEvaluator("cUserIdMatch", cUserIdMatch)
 	config.RegisterConditionEvaluator("cUserCreditScore", cUserCreditScore)
-	config.RegisterActionFunction("aApproveWithLowLimit", aApproveWithLowLimit)
+	config.RegisterActionFunction("aApproveWithLowerLimit", aApproveWithLowerLimit)
 
 	// // rule NewUserReject
 	config.RegisterConditionEvaluator("cUserIdMatch", cUserIdMatch)
@@ -42,7 +42,7 @@ func cNewUser(ruleName string, condName string, tuples map[model.TupleType]model
 		address, _ := newaccount.GetString("Address")
 		age, _ := newaccount.GetInt("Age")
 		income, _ := newaccount.GetInt("Income")
-		if address != "" || age >= 18 || income >= 10000 || age <= 44 {
+		if address != "" && age >= 18 && income >= 10000 && age <= 44 {
 			return true
 		}
 	}
@@ -83,9 +83,6 @@ func cBadUser(ruleName string, condName string, tuples map[model.TupleType]model
 
 func aBadUser(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Println("Rule fired:", ruleName)
-	newaccount := tuples["NewAccount"]
-	// rs.Retract(ctx, newaccount)
-	fmt.Println(newaccount)
 	fmt.Println("Applicant is not eligible to apply for creditcard")
 }
 
@@ -139,7 +136,7 @@ func cUserHighCreditScore(ruleName string, condName string, tuples map[model.Tup
 	return false
 }
 
-func aApproveWithLowLimit(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+func aApproveWithLowerLimit(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	fmt.Println("Rule fired:", ruleName)
 	userInfo := tuples["UserAccount"]
 	updateScore := tuples["UpdateCreditScore"]
