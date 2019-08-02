@@ -10,10 +10,13 @@ import (
 //1 condition, 1 expression
 func Test_1_Expr(t *testing.T) {
 
+	actionCount := map[string]int{"count": 0}
 	rs, _ := createRuleSession()
 	r1 := ruleapi.NewRule("r1")
 	r1.AddExprCondition("c1", "$.t2.p2 > $.t1.p1", nil)
 	r1.SetAction(a1)
+	r1.SetContext(actionCount)
+
 	rs.AddRule(r1)
 
 	rs.Start(nil)
@@ -36,60 +39,16 @@ func Test_1_Expr(t *testing.T) {
 	ctx = context.WithValue(context.TODO(), TestKey{}, t)
 	rs.Assert(ctx, t2)
 	rs.Unregister()
+	count := actionCount["count"]
+	if count != 1 {
+		t.Errorf("expected [%d], got [%d]\n", 1, count)
+	}
 }
 
 func a1(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	t := ctx.Value(TestKey{}).(*testing.T)
 	t.Logf("Test_1_Expr executed!")
+	actionCount := ruleCtx.(map[string]int)
+	count := actionCount["count"]
+	actionCount["count"] = count + 1
 }
-
-//
-// These standalone tests are not relevant anymore as the expression API has changed
-//
-//func Test_Eval (t *testing.T) {
-//	expr, _ := expression.ParseExpression("1 == 1.23")
-//	i, err := expr.Eval()
-//	if err != nil {
-//		t.Fatalf("error %s\n", err)
-//	}
-//	res := i.(bool)
-//	if res {
-//		t.Errorf("Expected false, got : %t\n ", res)
-//	}
-//}
-//
-//func Test_Eval2 (t *testing.T) {
-//	expr, _ := expression.ParseExpression("1 < 1.23")
-//	i, err := expr.Eval()
-//	if err != nil {
-//		t.Fatalf("error %s\n", err)
-//	}
-//	res := i.(bool)
-//	if !res {
-//		t.Errorf("Expected true, got : %t\n ", res)
-//	}
-//}
-//
-//func Test_Eval3 (t *testing.T) {
-//	expr, _ := expression.ParseExpression("1.23 == 1")
-//	i, err := expr.Eval()
-//	if err != nil {
-//		t.Fatalf("error %s\n", err)
-//	}
-//	res := i.(bool)
-//	if res {
-//		t.Errorf("Expected false, got : %t\n ", res)
-//	}
-//}
-//
-//func Test_Eval4 (t *testing.T) {
-//	expr, _ := expression.ParseExpression("1.23 > 1")
-//	i, err := expr.Eval()
-//	if err != nil {
-//		t.Fatalf("error %s\n", err)
-//	}
-//	res := i.(bool)
-//	if !res {
-//		t.Errorf("Expected true, got : %t\n ", res)
-//	}
-//}

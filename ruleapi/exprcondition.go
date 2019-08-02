@@ -7,6 +7,7 @@ import (
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/rules/common/model"
 	"reflect"
+	"strconv"
 )
 
 var td tuplePropertyResolver
@@ -15,7 +16,13 @@ var factory expression.Factory
 
 func init() {
 	td = tuplePropertyResolver{}
-	resolver = resolve.NewCompositeResolver(map[string]resolve.Resolver{".": &td})
+	//resolver = resolve.NewCompositeResolver(map[string]resolve.Resolver{".": &td})
+	resolver = resolve.NewCompositeResolver(map[string]resolve.Resolver{
+		".":        &td,
+		"env":      &resolve.EnvResolver{},
+		"property": &resolve.PropertyResolver{},
+		"loop":     &resolve.LoopResolver{},
+	})
 	factory = script.NewExprFactory(resolver)
 }
 
@@ -34,6 +41,10 @@ func newExprCondition(name string, rule model.Rule, identifiers []model.TupleTyp
 }
 
 func (cnd *exprConditionImpl) initExprConditionImpl(name string, rule model.Rule, identifiers []model.TupleType, cExpr string, ctx model.RuleContext) {
+	if name == "" {
+		cndIdx := len(rule.GetConditions()) + 1
+		name = "c_" + strconv.Itoa(cndIdx)
+	}
 	cnd.name = name
 	cnd.rule = rule
 	cnd.identifiers = append(cnd.identifiers, identifiers...)

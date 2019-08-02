@@ -74,6 +74,30 @@ func (rule *ruleImpl) addCond(conditionName string, idrs []model.TupleType, cfn 
 	}
 
 }
+
+func (rule *ruleImpl) AddIdrsToRule(idrs []model.TupleType) {
+	for _, cidr := range idrs {
+		//TODO: configure the rulesession
+		if model.GetTupleDescriptor(cidr) == nil {
+			return
+		}
+		if len(rule.identifiers) == 0 {
+			rule.identifiers = append(rule.identifiers, cidr)
+		} else {
+			found := false
+			for _, ridr := range rule.identifiers {
+				if cidr == ridr {
+					found = true
+					break
+				}
+			}
+			if !found {
+				rule.identifiers = append(rule.identifiers, cidr)
+			}
+		}
+	}
+}
+
 func (rule *ruleImpl) addExprCond(conditionName string, idrs []model.TupleType, cExpr string, ctx model.RuleContext) {
 	condition := newExprCondition(conditionName, rule, idrs, cExpr, ctx)
 	rule.conditions = append(rule.conditions, condition)
