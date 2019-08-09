@@ -3,10 +3,7 @@ package rete
 import (
 	"container/list"
 	"context"
-	"fmt"
 
-	"github.com/project-flogo/contrib/activity/log"
-	"github.com/project-flogo/core/support/test"
 	"github.com/project-flogo/rules/common/model"
 )
 
@@ -64,14 +61,8 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 			// invoke rule action service if exist
 			aService := item.getRule().GetActionService()
 			if aService != nil {
-				// TODO: create activity context and make use of inputs to pass down the scope (tuples, etc...) to activity
-				// Note: below code only works for #log activity
-				tc := test.NewActivityContext(aService.Act.Metadata())
-				msg := fmt.Sprintf("rule[%s] condition evaluated to TRUE. Invoking rule action service[%s]", item.getRule().GetName(), item.getRule().GetActionService().Name)
-				in := &log.Input{Message: msg}
-				tc.SetInputObject(in)
-
-				aService.Act.Eval(tc)
+				reteCtxV := getReteCtx(ctx)
+				aService.Execute(ctx, reteCtxV.getRuleSession(), item.getRule().GetName(), actionTuples, item.getRule().GetContext())
 			}
 		}
 

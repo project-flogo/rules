@@ -2,8 +2,6 @@ package model
 
 import (
 	"context"
-
-	"github.com/project-flogo/core/activity"
 )
 
 // RuleContext associated with every rule
@@ -15,7 +13,7 @@ type Rule interface {
 	GetIdentifiers() []TupleType
 	GetConditions() []Condition
 	GetActionFn() ActionFunction
-	GetActionService() *ActionService
+	GetActionService() ActionService
 	String() string
 	GetPriority() int
 	GetDeps() map[TupleType]map[string]bool
@@ -27,7 +25,7 @@ type MutableRule interface {
 	Rule
 	AddCondition(conditionName string, idrs []string, cFn ConditionEvaluator, ctx RuleContext) (err error)
 	SetAction(actionFn ActionFunction)
-	SetActionService(*ActionService)
+	SetActionService(actionService ActionService)
 	SetPriority(priority int)
 	SetContext(ctx RuleContext)
 }
@@ -86,9 +84,9 @@ type ConditionEvaluator func(string, string, map[TupleType]Tuple, RuleContext) b
 type ActionFunction func(context.Context, RuleSession, string, map[TupleType]Tuple, RuleContext)
 
 // ActionService action service
-type ActionService struct {
-	Name string
-	Act  activity.Activity
+type ActionService interface {
+	SetInput(input map[string]interface{})
+	Execute(context.Context, RuleSession, string, map[TupleType]Tuple, RuleContext) (done bool, err error)
 }
 
 //StartupRSFunction is called once after creation of a RuleSession

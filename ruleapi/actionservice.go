@@ -1,13 +1,16 @@
 package ruleapi
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/project-flogo/core/activity"
+	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/mapper"
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/core/support"
 	logger "github.com/project-flogo/core/support/log"
+	"github.com/project-flogo/core/support/test"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 )
@@ -39,8 +42,15 @@ func (i *initContext) Logger() logger.Logger {
 	return i.logger
 }
 
+// rule action service
+type ruleActionService struct {
+	Name  string
+	Act   activity.Activity
+	Input map[string]interface{}
+}
+
 // NewActionService creates new action service
-func NewActionService(config *config.Service) (*model.ActionService, error) {
+func NewActionService(config *config.Service) (model.ActionService, error) {
 
 	if config.Ref == "" {
 		return nil, fmt.Errorf("activity not specified for action service")
@@ -71,9 +81,47 @@ func NewActionService(config *config.Service) (*model.ActionService, error) {
 		act = pa
 	}
 
-	aService := &model.ActionService{}
+	aService := &ruleActionService{}
 	aService.Name = config.Name
 	aService.Act = act
+	aService.Input = make(map[string]interface{})
 
 	return aService, nil
+}
+
+// SetInput sets input
+func (raService *ruleActionService) SetInput(input map[string]interface{}) {
+	for k, v := range input {
+		raService.Input[k] = v
+	}
+}
+
+// Execute execute rule action service
+func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSession, rName string, tuples map[model.TupleType]model.Tuple, rCtx model.RuleContext) (done bool, err error) {
+	// resolve inputs from tuple scope
+	mFactory := mapper.NewFactory(resolve.GetBasicResolver())
+	mapper, err := mFactory.NewMapper(raService.Input)
+	if err != nil {
+		return false, err
+	}
+
+	toupleScope := make(map[string]interface{})
+	for tk, t := range tuples {
+		toupleScope[string(tk)] = t.GetMap()
+	}
+
+	scope := data.NewSimpleScope(toupleScope, nil)
+	resolvedInputs, err := mapper.Apply(scope)
+	if err != nil {
+		return false, err
+	}
+
+	// create activity context and set resolved inputs
+	// TODO: implement context specific to rules instead of test package
+	tc := test.NewActivityContext(raService.Act.Metadata())
+	for k, v := range resolvedInputs {
+		tc.SetInput(k, v)
+	}
+
+	return raService.Act.Eval(tc)
 }

@@ -97,7 +97,7 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 
 	ruleAction := &RuleAction{}
 	// inflate action services
-	ruleAction.aServices = make(map[string]*model.ActionService)
+	ruleAction.aServices = make(map[string]model.ActionService)
 	for _, s := range rsCfg.Services {
 		aService, err := ruleapi.NewActionService(s)
 		if err != nil {
@@ -135,7 +135,7 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 type RuleAction struct {
 	rs         model.RuleSession
 	ioMetadata *metadata.IOMetadata
-	aServices  map[string]*model.ActionService
+	aServices  map[string]model.ActionService
 }
 
 func (a *RuleAction) Metadata() *action.Metadata {

@@ -12,7 +12,7 @@ type ruleImpl struct {
 	identifiers   []model.TupleType
 	conditions    []model.Condition
 	actionFn      model.ActionFunction
-	actionService *model.ActionService
+	actionService model.ActionService
 	priority      int
 	deps          map[model.TupleType]map[string]bool
 	ctx           model.RuleContext
@@ -48,7 +48,7 @@ func (rule *ruleImpl) GetActionFn() model.ActionFunction {
 	return rule.actionFn
 }
 
-func (rule *ruleImpl) GetActionService() *model.ActionService {
+func (rule *ruleImpl) GetActionService() model.ActionService {
 	return rule.actionService
 }
 
@@ -60,7 +60,7 @@ func (rule *ruleImpl) SetActionFn(actionFn model.ActionFunction) {
 	rule.actionFn = actionFn
 }
 
-func (rule *ruleImpl) SetActionService(actionService *model.ActionService) {
+func (rule *ruleImpl) SetActionService(actionService model.ActionService) {
 	rule.actionService = actionService
 }
 
