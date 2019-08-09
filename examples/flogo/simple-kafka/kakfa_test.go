@@ -57,9 +57,9 @@ func testApplication(t *testing.T, e engine.Engine) {
 	err := e.Start()
 	assert.Nil(t, err)
 	defer func() {
-		tests.Command("docker", "rm", "-f", "$(docker ps -aq)")
 		err := e.Stop()
 		assert.Nil(t, err)
+		tests.Command("docker-compose", "down")
 	}()
 	tests.Pour("9092")
 
