@@ -1,10 +1,19 @@
 package tests
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"net"
+	"os"
+	"os/exec"
+	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
@@ -59,4 +68,67 @@ func printModified(t *testing.T, modified map[string]map[string]model.RtcModifie
 type txnCtx struct {
 	Testing *testing.T
 	TxnCnt  int
+}
+
+func CaptureOutput(f func()) string {
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		panic(err)
+	}
+	stdout := os.Stdout
+	stderr := os.Stderr
+	defer func() {
+		os.Stdout = stdout
+		os.Stderr = stderr
+		log.SetOutput(os.Stderr)
+	}()
+	os.Stdout = writer
+	os.Stderr = writer
+	log.SetOutput(writer)
+	out := make(chan string)
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		var buf bytes.Buffer
+		wg.Done()
+		io.Copy(&buf, reader)
+		out <- buf.String()
+	}()
+	wg.Wait()
+	f()
+	writer.Close()
+	return <-out
+}
+
+func Command(name string, arg ...string) {
+	fmt.Printf("%s %v\n", name, arg)
+	output, err := exec.Command(name, arg...).CombinedOutput()
+	if err != nil {
+		os.Stderr.WriteString(err.Error())
+	}
+	if len(output) > 0 {
+		fmt.Printf("%s", string(output))
+	}
+}
+
+func Drain(port string) {
+	for {
+		conn, err := net.DialTimeout("tcp", net.JoinHostPort("", port), time.Second)
+		if conn != nil {
+			conn.Close()
+		}
+		if err != nil && strings.Contains(err.Error(), "connect: connection refused") {
+			break
+		}
+	}
+}
+
+func Pour(port string) {
+	for {
+		conn, _ := net.Dial("tcp", net.JoinHostPort("", port))
+		if conn != nil {
+			conn.Close()
+			break
+		}
+	}
 }
