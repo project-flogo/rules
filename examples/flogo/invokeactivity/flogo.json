@@ -91,6 +91,24 @@
         },
         "rules": [
           {
+            "name": "n1.name == Tom",
+            "conditions": [
+              {
+                "name": "c1",
+                "identifiers": [
+                  "n1"
+                ],
+                "evaluator": "checkForTom"
+              }
+            ],
+            "actionService": {
+              "service": "LogActivityService",
+              "input": {
+                "message": "=$.n1.name"
+              }
+            }
+          },
+          {
             "name": "n1.name == Bob",
             "conditions": [
               {
@@ -101,20 +119,21 @@
                 "evaluator": "checkForBob"
               }
             ],
-            "actionFunction": "checkForBobAction",
             "actionService": {
-              "service": "LogService",
-              "input": {
-                "message": "=$.n1.name"
-              }
+              "service": "FunctionService"
             }
           }
         ],
         "services": [
           {
-            "name": "LogService",
-            "description": "Logs message",
+            "name": "LogActivityService",
+            "description": "log activity service",
             "ref": "github.com/project-flogo/contrib/activity/log"
+          },
+          {
+            "name": "FunctionService",
+            "description": "function service",
+            "function": "checkForBobAction"
           }
         ]
       }

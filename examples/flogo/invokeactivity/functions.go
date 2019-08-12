@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"github.com/project-flogo/rules/config"
 
 	"github.com/project-flogo/rules/common/model"
@@ -13,9 +14,21 @@ func init() {
 	config.RegisterActionFunction("checkForBobAction", checkForBobAction)
 	config.RegisterActionFunction("checkSameNamesAction", checkSameNamesAction)
 
+	config.RegisterConditionEvaluator("checkForTom", checkForTom)
 	config.RegisterConditionEvaluator("checkForBob", checkForBob)
 	config.RegisterConditionEvaluator("checkSameNamesCondition", checkSameNamesCondition)
 	config.RegisterStartupRSFunction("simple", StartupRSFunction)
+}
+
+func checkForTom(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	//This conditions filters on name="Tom"
+	t1 := tuples["n1"]
+	if t1 == nil {
+		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
+		return false
+	}
+	name, _ := t1.GetString("name")
+	return name == "Tom"
 }
 
 func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
@@ -30,8 +43,7 @@ func checkForBob(ruleName string, condName string, tuples map[model.TupleType]mo
 }
 
 func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	fmt.Printf("Rule fired: [%s]\n", ruleName)
-	fmt.Printf("Context is [%s]\n", ruleCtx)
+	fmt.Printf("Rule[%s] fired. checkForBobAction() function got invoked. \n", ruleName)
 	t1 := tuples["n1"]
 	if t1 == nil {
 		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")

@@ -18,8 +18,21 @@ flogo build
 cd bin
 ./invokeactivity
 ```
+### Testing
 
-Then from another command line, send a curl request
+#### Invoke activity based service
+Snd a curl request
+`curl localhost:7777/test/n1?name=Tom`
+You should see following output:
+```sh
+2019-08-12T16:06:03.828+0530	INFO	[flogo.test] -	Tom
+```
+
+#### Invoke function based service
+
+Snd a curl request
 `curl localhost:7777/test/n1?name=Bob`
-You should see this o/p on the console
-
+You should see following output:
+```sh
+Rule[n1.name == Bob] fired. checkForBobAction() function got invoked.
+```

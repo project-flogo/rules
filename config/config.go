@@ -15,7 +15,7 @@ type RuleActionDescriptor struct {
 	Name       string               `json:"name"`
 	IOMetadata *metadata.IOMetadata `json:"metadata"`
 	Rules      []*RuleDescriptor    `json:"rules"`
-	Services   []*Service           `json:"services,omitempty"`
+	Services   []*ServiceDescriptor `json:"services,omitempty"`
 }
 
 type RuleSessionDescriptor struct {
@@ -44,12 +44,13 @@ type ActionServiceDescriptor struct {
 	Input   map[string]interface{} `json:"input,omitempty"`
 }
 
-// Service defines a functional target that may be invoked by a rule
-type Service struct {
-	Name        string                 `json:"name"`
-	Ref         string                 `json:"ref"`
-	Description string                 `json:"description,omitempty"`
-	Settings    map[string]interface{} `json:"settings,omitempty"`
+// ServiceDescriptor defines a functional target that may be invoked by a rule
+type ServiceDescriptor struct {
+	Name        string
+	Description string
+	Function    model.ActionFunction
+	Ref         string
+	Settings    map[string]interface{}
 }
 
 // UnmarshalJSON unmarshals JSON into struct RuleDescriptor
@@ -133,6 +134,45 @@ func (c *ConditionDescriptor) MarshalJSON() ([]byte, error) {
 
 	conditionEvaluatorID := GetConditionEvaluatorID(c.Evaluator)
 	buffer.WriteString("\"evaluator\":\"" + conditionEvaluatorID + "\"}")
+
+	return buffer.Bytes(), nil
+}
+
+// UnmarshalJSON unmarshals JSON into struct ServiceDescriptor
+func (sd *ServiceDescriptor) UnmarshalJSON(d []byte) error {
+	ser := &struct {
+		Name        string                 `json:"name"`
+		Description string                 `json:"description,omitempty"`
+		FunctionID  string                 `json:"function,omitempty"`
+		Ref         string                 `json:"ref"`
+		Settings    map[string]interface{} `json:"settings,omitempty"`
+	}{}
+
+	if err := json.Unmarshal(d, ser); err != nil {
+		return err
+	}
+
+	sd.Name = ser.Name
+	sd.Description = ser.Description
+	sd.Function = GetActionFunction(ser.FunctionID)
+	sd.Ref = ser.Ref
+	sd.Settings = ser.Settings
+
+	return nil
+}
+
+// MarshalJSON returns JSON encoding of ServiceDescriptor
+func (sd *ServiceDescriptor) MarshalJSON() ([]byte, error) {
+	buffer := bytes.NewBufferString("{")
+	buffer.WriteString("\"name\":" + "\"" + sd.Name + "\",")
+	buffer.WriteString("\"description\":" + "\"" + sd.Description + "\",")
+	functionID := GetActionFunctionID(sd.Function)
+	buffer.WriteString("\"function\":" + "\"" + functionID + "\",")
+	buffer.WriteString("\"ref\":" + "\"" + sd.Ref + "\",")
+	jsonSettings, err := json.Marshal(sd.Settings)
+	if err == nil {
+		buffer.WriteString("\"settings\":" + string(jsonSettings) + "}")
+	}
 
 	return buffer.Bytes(), nil
 }

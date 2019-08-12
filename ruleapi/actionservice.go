@@ -44,18 +44,30 @@ func (i *initContext) Logger() logger.Logger {
 
 // rule action service
 type ruleActionService struct {
-	Name  string
-	Act   activity.Activity
-	Input map[string]interface{}
+	Name     string
+	Function model.ActionFunction
+	Act      activity.Activity
+	Input    map[string]interface{}
 }
 
 // NewActionService creates new rule action service
-func NewActionService(config *config.Service) (model.ActionService, error) {
+func NewActionService(config *config.ServiceDescriptor) (model.ActionService, error) {
 
-	if config.Ref == "" {
-		return nil, fmt.Errorf("activity not specified for action service")
+	if config.Function == nil && config.Ref == "" {
+		return nil, fmt.Errorf("both service function & ref can not be empty")
 	}
 
+	raService := &ruleActionService{
+		Name:  config.Name,
+		Input: make(map[string]interface{}),
+	}
+
+	if config.Function != nil {
+		raService.Function = config.Function
+		return raService, nil
+	}
+
+	// inflate activity from ref
 	if config.Ref[0] == '#' {
 		var ok bool
 		activityRef := config.Ref
@@ -81,12 +93,9 @@ func NewActionService(config *config.Service) (model.ActionService, error) {
 		act = pa
 	}
 
-	aService := &ruleActionService{}
-	aService.Name = config.Name
-	aService.Act = act
-	aService.Input = make(map[string]interface{})
+	raService.Act = act
 
-	return aService, nil
+	return raService, nil
 }
 
 // SetInput sets input
@@ -98,6 +107,12 @@ func (raService *ruleActionService) SetInput(input map[string]interface{}) {
 
 // Execute execute rule action service
 func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSession, rName string, tuples map[model.TupleType]model.Tuple, rCtx model.RuleContext) (done bool, err error) {
+	// invoke function and return, if available
+	if raService.Function != nil {
+		raService.Function(ctx, rs, rName, tuples, rCtx)
+		return true, nil
+	}
+
 	// resolve inputs from tuple scope
 	mFactory := mapper.NewFactory(resolve.GetBasicResolver())
 	mapper, err := mFactory.NewMapper(raService.Input)

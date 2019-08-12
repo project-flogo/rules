@@ -53,12 +53,7 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 		if val != nil {
 			item = val.(agendaItem)
 			actionTuples := item.getTuples()
-			actionFn := item.getRule().GetActionFn()
-			if actionFn != nil {
-				reteCtxV := getReteCtx(ctx)
-				actionFn(ctx, reteCtxV.getRuleSession(), item.getRule().GetName(), actionTuples, item.getRule().GetContext())
-			}
-			// invoke rule action service if exist
+			// execute rule action service
 			aService := item.getRule().GetActionService()
 			if aService != nil {
 				reteCtxV := getReteCtx(ctx)
