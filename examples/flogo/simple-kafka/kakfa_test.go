@@ -74,7 +74,6 @@ func testApplication(t *testing.T, e engine.Engine) {
 	}
 	outpt := tests.CaptureOutput(request)
 
-	fmt.Println("********************", outpt, "888888888888888888888")
 	var result string
 	if strings.Contains(outpt, "Rule fired") {
 		result = "success"
@@ -86,9 +85,8 @@ func testApplication(t *testing.T, e engine.Engine) {
 }
 
 func TestSimpleKafkaJSON(t *testing.T) {
-	cmd := exec.Command("docker-compose")
-	err := cmd.Run()
-	if err == nil {
+	_, err := exec.LookPath("docker-compose")
+	if err != nil {
 		t.Skip("skipping test - docker-compose not found")
 	}
 
