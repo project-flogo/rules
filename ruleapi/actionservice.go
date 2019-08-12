@@ -49,7 +49,7 @@ type ruleActionService struct {
 	Input map[string]interface{}
 }
 
-// NewActionService creates new action service
+// NewActionService creates new rule action service
 func NewActionService(config *config.Service) (model.ActionService, error) {
 
 	if config.Ref == "" {
@@ -73,10 +73,10 @@ func NewActionService(config *config.Service) (model.ActionService, error) {
 	f := activity.GetFactory(config.Ref)
 
 	if f != nil {
-		initCtx := newInitContext(config.Name, config.Settings, logger.ChildLogger(logger.RootLogger(), "ACTIONSERVICE"))
+		initCtx := newInitContext(config.Name, config.Settings, logger.ChildLogger(logger.RootLogger(), "ruleaction"))
 		pa, err := f(initCtx)
 		if err != nil {
-			return nil, fmt.Errorf("unable to create stage '%s' : %s", config.Ref, err.Error())
+			return nil, fmt.Errorf("unable to create rule action service '%s' : %s", config.Name, err.Error())
 		}
 		act = pa
 	}
