@@ -120,12 +120,12 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 		return false, err
 	}
 
-	toupleScope := make(map[string]interface{})
+	tupleScope := make(map[string]interface{})
 	for tk, t := range tuples {
-		toupleScope[string(tk)] = t.GetMap()
+		tupleScope[string(tk)] = t.GetMap()
 	}
 
-	scope := data.NewSimpleScope(toupleScope, nil)
+	scope := data.NewSimpleScope(tupleScope, nil)
 	resolvedInputs, err := mapper.Apply(scope)
 	if err != nil {
 		return false, err
