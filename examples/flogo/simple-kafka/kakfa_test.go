@@ -72,7 +72,7 @@ func testApplication(t *testing.T, e engine.Engine) {
 	request := func() {
 		publish(`{"type":"grocery","totalPrice":"2001.0"}`, producer)
 	}
-	outpt := tests.CaptureOutput(request)
+	outpt := tests.CaptureStdOutput(request)
 
 	var result string
 	if strings.Contains(outpt, "Rule fired") {

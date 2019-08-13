@@ -41,7 +41,7 @@ func testApplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 	}
 
-	outpt := tests.CaptureOutput(request)
+	outpt := tests.CaptureStdOutput(request)
 
 	var result string
 	if strings.Contains(outpt, "Rule fired") {
@@ -61,7 +61,7 @@ func testApplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 	}
 
-	outpt = tests.CaptureOutput(request1)
+	outpt = tests.CaptureStdOutput(request1)
 	if strings.Contains(outpt, "Rule fired") {
 		result = "success"
 	}
@@ -79,7 +79,7 @@ func testApplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 	}
 
-	outpt = tests.CaptureOutput(request2)
+	outpt = tests.CaptureStdOutput(request2)
 	if !strings.Contains(outpt, "Rule fired") {
 		result = "success"
 	}

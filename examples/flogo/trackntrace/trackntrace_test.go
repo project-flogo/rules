@@ -40,7 +40,7 @@ func testApplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 	}
 
-	outpt := tests.CaptureOutput(request)
+	outpt := tests.CaptureStdOutput(request)
 	var result string
 	if strings.Contains(outpt, "target state [sitting]") {
 		result = "success"
@@ -58,7 +58,7 @@ func testApplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 	}
 
-	outpt = tests.CaptureOutput(request1)
+	outpt = tests.CaptureStdOutput(request1)
 	if strings.Contains(outpt, "target state [sitting]") {
 		result = "success"
 	}
@@ -75,7 +75,7 @@ func testApplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 	}
 
-	outpt = tests.CaptureOutput(request2)
+	outpt = tests.CaptureStdOutput(request2)
 	if strings.Contains(outpt, "target state [moving]") {
 		result = "success"
 	}
@@ -92,7 +92,7 @@ func testApplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 	}
 
-	outpt = tests.CaptureOutput(request3)
+	outpt = tests.CaptureStdOutput(request3)
 	if strings.Contains(outpt, "Tuple inserted successfully") {
 		result = "success"
 	}

@@ -151,7 +151,7 @@ func testapplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 		assert.Nil(t, err)
 	}
-	outpt := tests.CaptureOutput(request)
+	outpt := tests.CaptureStdOutput(request)
 	var result string
 	if strings.Contains(outpt, "Rule fired") {
 		result = "success"
@@ -172,7 +172,7 @@ func testapplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 		assert.Nil(t, err)
 	}
-	outpt = tests.CaptureOutput(request1)
+	outpt = tests.CaptureStdOutput(request1)
 	if strings.Contains(outpt, "Rule fired") {
 		result = "success"
 	}
@@ -192,7 +192,7 @@ func testapplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 		assert.Nil(t, err)
 	}
-	outpt = tests.CaptureOutput(request2)
+	outpt = tests.CaptureStdOutput(request2)
 	if strings.Contains(outpt, "Applicant is not eligible to apply for creditcard") {
 		result = "success"
 	}
@@ -212,7 +212,7 @@ func testapplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 		assert.Nil(t, err)
 	}
-	outpt = tests.CaptureOutput(request3)
+	outpt = tests.CaptureStdOutput(request3)
 	if strings.Contains(outpt, "Applicant is not eligible to apply for creditcard") {
 		result = "success"
 	}
@@ -232,7 +232,7 @@ func testapplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 		assert.Nil(t, err)
 	}
-	outpt = tests.CaptureOutput(request4)
+	outpt = tests.CaptureStdOutput(request4)
 	if strings.Contains(outpt, "Applicant is not eligible to apply for creditcard") {
 		result = "success"
 	}
@@ -251,7 +251,7 @@ func testapplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 		assert.Nil(t, err)
 	}
-	outpt = tests.CaptureOutput(request5)
+	outpt = tests.CaptureStdOutput(request5)
 	if strings.Contains(outpt, "Rule fired") {
 		result = "success"
 	}
@@ -271,7 +271,7 @@ func testapplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 		assert.Nil(t, err)
 	}
-	outpt = tests.CaptureOutput(request6)
+	outpt = tests.CaptureStdOutput(request6)
 	if strings.Contains(outpt, "Rule fired") {
 		result = "success"
 	}
@@ -290,7 +290,7 @@ func testapplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 		assert.Nil(t, err)
 	}
-	outpt = tests.CaptureOutput(request7)
+	outpt = tests.CaptureStdOutput(request7)
 	if strings.Contains(outpt, "Rule fired") {
 		result = "success"
 	}
@@ -310,7 +310,7 @@ func testapplication(t *testing.T, e engine.Engine) {
 		response.Body.Close()
 		assert.Nil(t, err)
 	}
-	outpt = tests.CaptureOutput(request8)
+	outpt = tests.CaptureStdOutput(request8)
 	if strings.Contains(outpt, "Rule fired: Rejected") {
 		result = "success"
 	}

@@ -70,7 +70,7 @@ type txnCtx struct {
 	TxnCnt  int
 }
 
-func CaptureOutput(f func()) string {
+func CaptureStdOutput(f func()) string {
 	reader, writer, err := os.Pipe()
 	if err != nil {
 		panic(err)
