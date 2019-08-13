@@ -35,7 +35,7 @@ func Test_Two(t *testing.T) {
 	rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
 	rule.AddCondition("c2", []string{"n1"}, checkForName, nil)
 
-	rule.SetAction(checkForBobAction)
+	rule.SetActionService(createActionServiceFromFunction(t, checkForBobAction))
 	rule.SetContext(actionFireCount)
 	rs.AddRule(rule)
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())

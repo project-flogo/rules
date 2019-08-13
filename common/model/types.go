@@ -12,7 +12,6 @@ type Rule interface {
 	GetName() string
 	GetIdentifiers() []TupleType
 	GetConditions() []Condition
-	GetActionFn() ActionFunction
 	GetActionService() ActionService
 	String() string
 	GetPriority() int
@@ -24,7 +23,6 @@ type Rule interface {
 type MutableRule interface {
 	Rule
 	AddCondition(conditionName string, idrs []string, cFn ConditionEvaluator, ctx RuleContext) (err error)
-	SetAction(actionFn ActionFunction)
 	SetActionService(actionService ActionService)
 	SetPriority(priority int)
 	SetContext(ctx RuleContext)

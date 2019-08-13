@@ -43,7 +43,8 @@ func (m *ResourceManager) GetResource(id string) interface{} {
 func (m *ResourceManager) GetRuleSessionDescriptor(uri string) (*RuleSessionDescriptor, error) {
 
 	if strings.HasPrefix(uri, uriSchemeRes) {
-		return &RuleSessionDescriptor{m.configs[uri[len(uriSchemeRes):]].Rules}, nil
+		id := uri[len(uriSchemeRes):]
+		return &RuleSessionDescriptor{Rules: m.configs[id].Rules, Services: m.configs[id].Services}, nil
 	}
 
 	return nil, errors.New("cannot find RuleSession: " + uri)

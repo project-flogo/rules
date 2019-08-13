@@ -4,11 +4,15 @@ import (
 	"context"
 	"io/ioutil"
 	"log"
+	"reflect"
+	"runtime"
 	"testing"
 
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
+	"github.com/stretchr/testify/assert"
 )
 
 func createRuleSession() (model.RuleSession, error) {
@@ -59,4 +63,17 @@ func printModified(t *testing.T, modified map[string]map[string]model.RtcModifie
 type txnCtx struct {
 	Testing *testing.T
 	TxnCnt  int
+}
+
+func createActionServiceFromFunction(t *testing.T, actionFunction model.ActionFunction) model.ActionService {
+	fname := runtime.FuncForPC(reflect.ValueOf(actionFunction).Pointer()).Name()
+	cfg := &config.ServiceDescriptor{
+		Name:        fname,
+		Description: fname,
+		Function:    actionFunction,
+	}
+	aService, err := ruleapi.NewActionService(cfg)
+	assert.Nil(t, err)
+	assert.NotNil(t, aService)
+	return aService
 }

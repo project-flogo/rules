@@ -19,14 +19,14 @@ type RuleActionDescriptor struct {
 }
 
 type RuleSessionDescriptor struct {
-	Rules []*RuleDescriptor `json:"rules"`
+	Rules    []*RuleDescriptor    `json:"rules"`
+	Services []*ServiceDescriptor `json:"services,omitempty"`
 }
 
 // RuleDescriptor defines a rule
 type RuleDescriptor struct {
 	Name          string
 	Conditions    []*ConditionDescriptor
-	ActionFunc    model.ActionFunction
 	ActionService *ActionServiceDescriptor
 	Priority      int
 }
@@ -58,7 +58,6 @@ func (c *RuleDescriptor) UnmarshalJSON(d []byte) error {
 	ser := &struct {
 		Name          string                   `json:"name"`
 		Conditions    []*ConditionDescriptor   `json:"conditions"`
-		ActionFuncId  string                   `json:"actionFunction"`
 		ActionService *ActionServiceDescriptor `json:"actionService,omitempty"`
 		Priority      int                      `json:"priority"`
 	}{}
@@ -69,7 +68,6 @@ func (c *RuleDescriptor) UnmarshalJSON(d []byte) error {
 
 	c.Name = ser.Name
 	c.Conditions = ser.Conditions
-	c.ActionFunc = GetActionFunction(ser.ActionFuncId)
 	c.ActionService = ser.ActionService
 	c.Priority = ser.Priority
 
@@ -91,8 +89,6 @@ func (c *RuleDescriptor) MarshalJSON() ([]byte, error) {
 	buffer.Truncate(buffer.Len() - 1)
 	buffer.WriteString("],")
 
-	actionFunctionID := GetActionFunctionID(c.ActionFunc)
-	buffer.WriteString("\"actionFunction\":\"" + actionFunctionID + "\",")
 	jsonActionService, err := json.Marshal(c.ActionService)
 	if err == nil {
 		buffer.WriteString("\"actionService\":" + string(jsonActionService) + ",")

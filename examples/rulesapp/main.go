@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/project-flogo/rules/common/model"
-	"github.com/project-flogo/rules/ruleapi"
 	"github.com/project-flogo/rules/common"
+	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/config"
+	"github.com/project-flogo/rules/ruleapi"
 )
 
 func main() {
@@ -31,7 +32,12 @@ func main() {
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")
 	rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
-	rule.SetAction(checkForBobAction)
+	serviceCfg := &config.ServiceDescriptor{
+		Name:     "checkForBobAction",
+		Function: checkForBobAction,
+	}
+	aService, _ := ruleapi.NewActionService(serviceCfg)
+	rule.SetActionService(aService)
 	rule.SetContext("This is a test of context")
 	rs.AddRule(rule)
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
@@ -41,7 +47,12 @@ func main() {
 	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
 	rule2.AddCondition("c1", []string{"n1"}, checkForBob, nil)
 	rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, nil)
-	rule2.SetAction(checkSameNamesAction)
+	serviceCfg2 := &config.ServiceDescriptor{
+		Name:     "checkSameNamesAction",
+		Function: checkSameNamesAction,
+	}
+	aService2, _ := ruleapi.NewActionService(serviceCfg2)
+	rule.SetActionService(aService2)
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
