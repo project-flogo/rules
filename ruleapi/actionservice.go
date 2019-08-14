@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/project-flogo/core/action"
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/mapper"
@@ -45,55 +46,81 @@ func (i *initContext) Logger() logger.Logger {
 // rule action service
 type ruleActionService struct {
 	Name     string
+	Type     string
 	Function model.ActionFunction
 	Act      activity.Activity
+	Action   action.Action
 	Input    map[string]interface{}
 }
 
 // NewActionService creates new rule action service
-func NewActionService(config *config.ServiceDescriptor) (model.ActionService, error) {
-
-	if config.Function == nil && config.Ref == "" {
-		return nil, fmt.Errorf("both service function & ref can not be empty")
-	}
+func NewActionService(serviceCfg *config.ServiceDescriptor) (model.ActionService, error) {
 
 	raService := &ruleActionService{
-		Name:  config.Name,
+		Name:  serviceCfg.Name,
+		Type:  serviceCfg.Type,
 		Input: make(map[string]interface{}),
 	}
 
-	if config.Function != nil {
-		raService.Function = config.Function
-		return raService, nil
-	}
-
-	// inflate activity from ref
-	if config.Ref[0] == '#' {
-		var ok bool
-		activityRef := config.Ref
-		config.Ref, ok = support.GetAliasRef("activity", activityRef)
-		if !ok {
-			return nil, fmt.Errorf("activity '%s' not imported", activityRef)
+	switch serviceCfg.Type {
+	default:
+		return nil, fmt.Errorf("type[%s] not supported for the service[%s]", serviceCfg.Type, serviceCfg.Name)
+	case config.TypeServiceFunction:
+		if serviceCfg.Function == nil {
+			return nil, fmt.Errorf("service[%s] function can't empty", serviceCfg.Name)
 		}
-	}
+		raService.Function = serviceCfg.Function
+	case config.TypeServiceActivity:
+		// inflate activity from ref
+		if serviceCfg.Ref[0] == '#' {
+			var ok bool
+			activityRef := serviceCfg.Ref
+			serviceCfg.Ref, ok = support.GetAliasRef("activity", activityRef)
+			if !ok {
+				return nil, fmt.Errorf("activity '%s' not imported", activityRef)
+			}
+		}
 
-	act := activity.Get(config.Ref)
-	if act == nil {
-		return nil, fmt.Errorf("unsupported Activity:" + config.Ref)
-	}
+		act := activity.Get(serviceCfg.Ref)
+		if act == nil {
+			return nil, fmt.Errorf("unsupported Activity:" + serviceCfg.Ref)
+		}
 
-	f := activity.GetFactory(config.Ref)
+		f := activity.GetFactory(serviceCfg.Ref)
 
-	if f != nil {
-		initCtx := newInitContext(config.Name, config.Settings, logger.ChildLogger(logger.RootLogger(), "ruleaction"))
-		pa, err := f(initCtx)
+		if f != nil {
+			initCtx := newInitContext(serviceCfg.Name, serviceCfg.Settings, logger.ChildLogger(logger.RootLogger(), "ruleaction"))
+			pa, err := f(initCtx)
+			if err != nil {
+				return nil, fmt.Errorf("unable to create rule action service '%s' : %s", serviceCfg.Name, err.Error())
+			}
+			act = pa
+		}
+
+		raService.Act = act
+
+	case config.TypeServiceAction:
+		if serviceCfg.Ref[0] == '#' {
+			var ok bool
+			actionRef := serviceCfg.Ref
+			serviceCfg.Ref, ok = support.GetAliasRef("action", actionRef)
+			if !ok {
+				return nil, fmt.Errorf("action[%s] not imported", actionRef)
+			}
+		}
+
+		actionFactory := action.GetFactory(serviceCfg.Ref)
+		if actionFactory == nil {
+			return nil, fmt.Errorf("factory not found for the action[%s]", serviceCfg.Ref)
+		}
+
+		actionCfg := &action.Config{Settings: serviceCfg.Settings}
+		var err error
+		raService.Action, err = actionFactory.New(actionCfg)
 		if err != nil {
-			return nil, fmt.Errorf("unable to create rule action service '%s' : %s", config.Name, err.Error())
+			return nil, fmt.Errorf("not able create action[%s] - %s", serviceCfg.Ref, err)
 		}
-		act = pa
 	}
-
-	raService.Act = act
 
 	return raService, nil
 }
@@ -131,12 +158,25 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 		return false, err
 	}
 
-	// create activity context and set resolved inputs
-	// TODO: implement context specific to rules instead of test package
-	tc := test.NewActivityContext(raService.Act.Metadata())
-	for k, v := range resolvedInputs {
-		tc.SetInput(k, v)
-	}
+	if raService.Type == config.TypeServiceActivity {
+		// create activity context and set resolved inputs
+		// TODO: implement context specific to rules instead of test package
+		tc := test.NewActivityContext(raService.Act.Metadata())
+		for k, v := range resolvedInputs {
+			tc.SetInput(k, v)
+		}
 
-	return raService.Act.Eval(tc)
+		return raService.Act.Eval(tc)
+	} else if raService.Type == config.TypeServiceAction {
+		act, ok := raService.Action.(action.SyncAction)
+		if !ok {
+			return false, fmt.Errorf("error while running the action service[%s]", raService.Name)
+		}
+		results, err := act.Run(ctx, resolvedInputs)
+		if err != nil {
+			return false, fmt.Errorf("error while running the action service[%s] - %s", raService.Name, err)
+		}
+		fmt.Printf("service outputs: %s \n", results)
+	}
+	return true, nil
 }

@@ -6,6 +6,7 @@
   "appModel": "1.0.0",
   "imports" : [
     "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/core/examples/action",
     "github.com/project-flogo/rules/ruleaction",
     "github.com/project-flogo/contrib/activity/log"
   ],
@@ -65,6 +66,13 @@
         ]
       },
       "id": "simple_rule"
+    },
+    {
+      "ref": "github.com/project-flogo/core/examples/action",
+      "settings": {
+        "aSetting":"test setting"
+      },
+      "id":"test_action"
     }
   ],
   "resources": [
@@ -120,7 +128,10 @@
               }
             ],
             "actionService": {
-              "service": "FunctionService"
+              "service": "FlowActionService",
+              "input": {
+                "anInput": "=$.n1.name"
+              }
             }
           }
         ],
@@ -128,12 +139,23 @@
           {
             "name": "LogActivityService",
             "description": "log activity service",
+            "type": "activity",
             "ref": "github.com/project-flogo/contrib/activity/log"
           },
           {
             "name": "FunctionService",
             "description": "function service",
+            "type": "function",
             "function": "checkForBobAction"
+          },
+          {
+            "name": "FlowActionService",
+            "description": "flow action service",
+            "type": "action",
+            "ref": "github.com/project-flogo/core/examples/action",
+            "settings" : {
+              "aSetting": "test setting"
+            }
           }
         ]
       }

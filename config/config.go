@@ -3,10 +3,20 @@ package config
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/project-flogo/core/data/metadata"
 	"github.com/project-flogo/rules/common/model"
+)
+
+const (
+	// TypeServiceFunction function based rule service
+	TypeServiceFunction = "function"
+	// TypeServiceActivity activity based rule service
+	TypeServiceActivity = "activity"
+	// TypeServiceAction action based rule service
+	TypeServiceAction = "action"
 )
 
 // RuleSessionDescriptor is a collection of rules to be loaded
@@ -48,6 +58,7 @@ type ActionServiceDescriptor struct {
 type ServiceDescriptor struct {
 	Name        string
 	Description string
+	Type        string
 	Function    model.ActionFunction
 	Ref         string
 	Settings    map[string]interface{}
@@ -139,6 +150,7 @@ func (sd *ServiceDescriptor) UnmarshalJSON(d []byte) error {
 	ser := &struct {
 		Name        string                 `json:"name"`
 		Description string                 `json:"description,omitempty"`
+		Type        string                 `json:"type"`
 		FunctionID  string                 `json:"function,omitempty"`
 		Ref         string                 `json:"ref"`
 		Settings    map[string]interface{} `json:"settings,omitempty"`
@@ -150,7 +162,18 @@ func (sd *ServiceDescriptor) UnmarshalJSON(d []byte) error {
 
 	sd.Name = ser.Name
 	sd.Description = ser.Description
-	sd.Function = GetActionFunction(ser.FunctionID)
+	if ser.Type == TypeServiceFunction || ser.Type == TypeServiceActivity || ser.Type == TypeServiceAction {
+		sd.Type = ser.Type
+	} else {
+		return fmt.Errorf("type[%s] not supported for the service[%s]", ser.Type, ser.Name)
+	}
+	if ser.FunctionID != "" {
+		fn := GetActionFunction(ser.FunctionID)
+		if fn == nil {
+			return fmt.Errorf("function[%s] not found", ser.FunctionID)
+		}
+		sd.Function = fn
+	}
 	sd.Ref = ser.Ref
 	sd.Settings = ser.Settings
 
@@ -162,6 +185,7 @@ func (sd *ServiceDescriptor) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString("{")
 	buffer.WriteString("\"name\":" + "\"" + sd.Name + "\",")
 	buffer.WriteString("\"description\":" + "\"" + sd.Description + "\",")
+	buffer.WriteString("\"type\":" + "\"" + sd.Type + "\",")
 	functionID := GetActionFunctionID(sd.Function)
 	buffer.WriteString("\"function\":" + "\"" + functionID + "\",")
 	buffer.WriteString("\"ref\":" + "\"" + sd.Ref + "\",")
