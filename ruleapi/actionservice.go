@@ -168,15 +168,39 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 
 		return raService.Act.Eval(tc)
 	} else if raService.Type == config.TypeServiceAction {
-		act, ok := raService.Action.(action.SyncAction)
-		if !ok {
-			return false, fmt.Errorf("error while running the action service[%s]", raService.Name)
+		syncAction, syncOk := raService.Action.(action.SyncAction)
+		if syncOk && syncAction != nil {
+			// sync action
+			results, err := syncAction.Run(ctx, resolvedInputs)
+			if err != nil {
+				return false, fmt.Errorf("error while running the action service[%s] - %s", raService.Name, err)
+			}
+			fmt.Printf("service[%s] executed successfully. Service outputs: %s \n", raService.Name, results)
+			return true, nil
 		}
-		results, err := act.Run(ctx, resolvedInputs)
-		if err != nil {
-			return false, fmt.Errorf("error while running the action service[%s] - %s", raService.Name, err)
+
+		asyncAction, asyncOk := raService.Action.(action.AsyncAction)
+		if asyncOk && asyncAction != nil {
+			err := asyncAction.Run(ctx, resolvedInputs, &actionResultHandler{name: raService.Name})
+			if err != nil {
+				return false, fmt.Errorf("error while running the action service[%s] - %s", raService.Name, err)
+			}
+			return true, nil
 		}
-		fmt.Printf("service outputs: %s \n", results)
 	}
 	return true, nil
+}
+
+type actionResultHandler struct {
+	name string
+}
+
+// HandleResult is invoked when there are results available
+func (arh *actionResultHandler) HandleResult(results map[string]interface{}, err error) {
+	fmt.Printf("service[%s] outputs: %s \n", arh.name, results)
+}
+
+// Done indicates that the action has completed
+func (arh *actionResultHandler) Done() {
+	fmt.Printf("service[%s] executed successfully asynchronously\n", arh.name)
 }
