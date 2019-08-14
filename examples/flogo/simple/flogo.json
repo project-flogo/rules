@@ -110,7 +110,9 @@
                 "evaluator": "checkForBob"
               }
             ],
-            "actionFunction": "checkForBobAction"
+            "actionService": {
+              "service": "FunctionService"
+            }
           },
           {
             "name": "n1.name == Bob \u0026\u0026 n1.name == n2.name",
@@ -131,7 +133,21 @@
                 "evaluator": "checkSameNamesCondition"
               }
             ],
-            "actionFunction": "checkSameNamesAction"
+            "actionService": {
+              "service": "FunctionService1"
+            }
+          }
+        ],
+        "services": [
+          {
+            "name": "FunctionService",
+            "description": "function service for checkForBobAction",
+            "function": "checkForBobAction"
+          },
+          {
+            "name": "FunctionService1",
+            "description": "function service for checkSameNamesAction",
+            "function": "checkSameNamesAction"
           }
         ]
       }
