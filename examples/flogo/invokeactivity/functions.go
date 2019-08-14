@@ -16,6 +16,8 @@ func init() {
 
 	config.RegisterConditionEvaluator("checkForTom", checkForTom)
 	config.RegisterConditionEvaluator("checkForBob", checkForBob)
+	config.RegisterConditionEvaluator("checkForRobert", checkForRobert)
+	config.RegisterConditionEvaluator("checkForMichael", checkForMichael)
 	config.RegisterConditionEvaluator("checkSameNamesCondition", checkSameNamesCondition)
 	config.RegisterStartupRSFunction("simple", StartupRSFunction)
 }
@@ -40,6 +42,28 @@ func checkForBob(ruleName string, condName string, tuples map[model.TupleType]mo
 	}
 	name, _ := t1.GetString("name")
 	return name == "Bob"
+}
+
+func checkForRobert(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	//This conditions filters on name="Tom"
+	t1 := tuples["n1"]
+	if t1 == nil {
+		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
+		return false
+	}
+	name, _ := t1.GetString("name")
+	return name == "Robert"
+}
+
+func checkForMichael(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
+	//This conditions filters on name="Michael"
+	t1 := tuples["n1"]
+	if t1 == nil {
+		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
+		return false
+	}
+	name, _ := t1.GetString("name")
+	return name == "Michael"
 }
 
 func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
