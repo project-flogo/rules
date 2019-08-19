@@ -232,6 +232,7 @@ func (rs *rulesessionImpl) SetStore(store model.TupleStore) error {
 		return fmt.Errorf("RuleSession already started")
 	}
 	rs.tupleStore = store
+	rs.reteNetwork.SetTupleStore(store)
 	rs.reteNetwork.RegisterRtcTransactionHandler(internalTxnHandler, nil)
 	return nil
 }

@@ -4,8 +4,9 @@
     "store-ref": "redis"
   },
   "rete": {
-    "jt-ref": "mem",
-    "idgen-ref": "mem"
+    "jt-ref": "redis",
+    "idgen-ref": "redis",
+    "jt":"redis"
   },
   "stores": {
     "mem": {

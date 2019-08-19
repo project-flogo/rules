@@ -25,8 +25,8 @@ func main() {
 		return
 	}
 
-	//content := getFileContent("src/github.com/project-flogo/rules/examples/rulesapp/rsconfig.json")
-	rs, _ := ruleapi.GetOrCreateRuleSessionFromConfig("asession", "{}")
+	content := getFileContent("src/github.com/project-flogo/rules/examples/rulesapp/rsconfig.json")
+	rs, _ := ruleapi.GetOrCreateRuleSessionFromConfig("asession", content)
 	//Create a RuleSession
 
 	//// check for name "Bob" in n1

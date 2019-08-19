@@ -1,11 +1,12 @@
 package redis
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/redisutils"
 	"github.com/project-flogo/rules/rete/internal/types"
-	"strconv"
-	"strings"
 )
 
 type joinTableRowImpl struct {
@@ -65,8 +66,6 @@ func createRow(jtKey string, rowID string, key string, nw types.Network) types.J
 	for _, key := range values {
 		tupleKey := model.FromStringKey(key)
 		tuple := nw.GetTupleStore().GetTupleByKey(tupleKey)
-		//ks := tupleKey.String()
-		//fmt.Printf(ks)
 		handle := newReteHandleImpl(nw, tuple)
 		handles = append(handles, handle)
 	}

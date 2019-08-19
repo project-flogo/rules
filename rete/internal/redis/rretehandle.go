@@ -22,7 +22,7 @@ func newReteHandleImpl(nw types.Network, tuple model.Tuple) types.ReteHandle {
 
 func (hdl *reteHandleImpl) SetTuple(tuple model.Tuple) {
 	hdl.tuple = tuple
-	if tuple == nil {
+	if tuple != nil {
 		hdl.tupleKey = tuple.GetKey()
 	}
 }

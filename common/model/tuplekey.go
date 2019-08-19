@@ -2,9 +2,10 @@ package model
 
 import (
 	"fmt"
-	"github.com/project-flogo/core/data/coerce"
 	"reflect"
 	"strings"
+
+	"github.com/project-flogo/core/data/coerce"
 )
 
 // TupleKey primary key of a tuple
@@ -86,6 +87,12 @@ func NewTupleKeyWithKeyValues(tupleType TupleType, values ...interface{}) (tuple
 	for i, keyProp := range td.GetKeyProps() {
 		tdp := td.GetProperty(keyProp)
 		val := values[i]
+
+		switch typ := val.(type) {
+		case map[string]interface{}:
+			val = typ[keyProp]
+		}
+
 		coerced, err := coerce.ToType(val, tdp.PropType)
 
 		if err == nil {
