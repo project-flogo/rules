@@ -9,8 +9,7 @@
     "github.com/project-flogo/core/examples/action",
     "github.com/project-flogo/rules/ruleaction",
     "github.com/project-flogo/contrib/activity/log",
-    "github.com/project-flogo/flow",
-    "github.com/project-flogo/legacybridge"
+    "github.com/project-flogo/flow"
   ],
   "triggers": [
     {
@@ -129,7 +128,7 @@
             "actionService": {
               "service": "ServiceFlowAction",
               "input": {
-                "arguments": "=$.n1.name"
+                "message": "=$.n1.name"
               }
             }
           }
@@ -175,8 +174,8 @@
         "metadata": {
           "input": [
             {
-              "name": "arguments",
-              "type": "object"
+              "name": "message",
+              "type": "string"
             }
           ]
         },
@@ -188,7 +187,7 @@
             "activity": {
               "ref": "#log",
               "input": {
-                "message": "=$flow.arguments"
+                "message": "=$flow.message"
               }
             }
           }
@@ -226,20 +225,6 @@
         ]
       },
       "id": "simple_rule"
-    },
-    {
-      "ref": "#flow",
-      "settings": {
-        "flowURI": "res://flow:sample_flow"
-      },
-      "id": "test_flow_action"
-    },
-    {
-      "ref": "github.com/project-flogo/core/examples/action",
-      "settings": {
-        "aSetting": "test setting"
-      },
-      "id": "test_core_action"
     }
   ]
 }
