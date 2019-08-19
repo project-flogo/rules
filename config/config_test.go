@@ -49,12 +49,14 @@ var testRuleSessionDescriptorJson = `{
 		"services": [
 			{
 				"name": "checkForBobService",
-            	"description": "service checkForBobService",
+				"description": "service checkForBobService",
+				"type": "function",
             	"function": "checkForBobAction"
 			},
 			{
 				"name": "checkSameNamesService",
-            	"description": "service checkSameNamesService",
+				"description": "service checkSameNamesService",
+				"type": "function",
             	"function": "checkSameNamesAction"
 			}
         ]

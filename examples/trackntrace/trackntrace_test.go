@@ -402,6 +402,7 @@ func createActionServiceFromFunction(t *testing.T, actionFunction model.ActionFu
 	cfg := &config.ServiceDescriptor{
 		Name:        fname,
 		Description: fname,
+		Type:        config.TypeServiceFunction,
 		Function:    actionFunction,
 	}
 	aService, err := ruleapi.NewActionService(cfg)

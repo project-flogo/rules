@@ -64,10 +64,12 @@ func NewActionService(serviceCfg *config.ServiceDescriptor) (model.ActionService
 
 	switch serviceCfg.Type {
 	default:
-		return nil, fmt.Errorf("type[%s] not supported for the service[%s]", serviceCfg.Type, serviceCfg.Name)
+		return nil, fmt.Errorf("service type - '%s' is not supported", serviceCfg.Type)
+	case "":
+		return nil, fmt.Errorf("service type can't be empty")
 	case config.TypeServiceFunction:
 		if serviceCfg.Function == nil {
-			return nil, fmt.Errorf("service[%s] function can't empty", serviceCfg.Name)
+			return nil, fmt.Errorf("service function can't empty")
 		}
 		raService.Function = serviceCfg.Function
 	case config.TypeServiceActivity:
@@ -105,20 +107,20 @@ func NewActionService(serviceCfg *config.ServiceDescriptor) (model.ActionService
 			actionRef := serviceCfg.Ref
 			serviceCfg.Ref, ok = support.GetAliasRef("action", actionRef)
 			if !ok {
-				return nil, fmt.Errorf("action[%s] not imported", actionRef)
+				return nil, fmt.Errorf("action - '%s' not imported", actionRef)
 			}
 		}
 
 		actionFactory := action.GetFactory(serviceCfg.Ref)
 		if actionFactory == nil {
-			return nil, fmt.Errorf("factory not found for the action[%s]", serviceCfg.Ref)
+			return nil, fmt.Errorf("factory not found for the action - '%s'", serviceCfg.Ref)
 		}
 
 		actionCfg := &action.Config{Settings: serviceCfg.Settings}
 		var err error
 		raService.Action, err = actionFactory.New(actionCfg)
 		if err != nil {
-			return nil, fmt.Errorf("not able create action[%s] - %s", serviceCfg.Ref, err)
+			return nil, fmt.Errorf("not able create action - %s", err)
 		}
 	}
 

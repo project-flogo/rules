@@ -17,11 +17,18 @@ func TestNewActionService(t *testing.T) {
 	}
 	aService, err := NewActionService(cfg)
 	assert.NotNil(t, err)
-	assert.Equal(t, "both service function & ref can not be empty", err.Error())
+	assert.Equal(t, "service type can't be empty", err.Error())
 	assert.Nil(t, aService)
+
+	// unsupported service type
+	cfg.Type = "unknowntype"
+	aService, err = NewActionService(cfg)
+	assert.NotNil(t, err)
+	assert.Equal(t, "service type - 'unknowntype' is not supported", err.Error())
 
 	// action service with function
 	cfg.Function = emptyAction
+	cfg.Type = config.TypeServiceFunction
 	aService, err = NewActionService(cfg)
 	assert.Nil(t, err)
 	assert.NotNil(t, aService)
@@ -29,6 +36,7 @@ func TestNewActionService(t *testing.T) {
 
 	// action service with activity
 	cfg.Ref = "github.com/project-flogo/contrib/activity/log"
+	cfg.Type = config.TypeServiceActivity
 	aService, err = NewActionService(cfg)
 	assert.Nil(t, err)
 	assert.NotNil(t, aService)

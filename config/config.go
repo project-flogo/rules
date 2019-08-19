@@ -165,12 +165,12 @@ func (sd *ServiceDescriptor) UnmarshalJSON(d []byte) error {
 	if ser.Type == TypeServiceFunction || ser.Type == TypeServiceActivity || ser.Type == TypeServiceAction {
 		sd.Type = ser.Type
 	} else {
-		return fmt.Errorf("type[%s] not supported for the service[%s]", ser.Type, ser.Name)
+		return fmt.Errorf("unsupported type - '%s' is referenced in the service '%s'", ser.Type, ser.Name)
 	}
 	if ser.FunctionID != "" {
 		fn := GetActionFunction(ser.FunctionID)
 		if fn == nil {
-			return fmt.Errorf("function[%s] not found", ser.FunctionID)
+			return fmt.Errorf("function - '%s' not found", ser.FunctionID)
 		}
 		sd.Function = fn
 	}
