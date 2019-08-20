@@ -10,38 +10,12 @@ import (
 	"github.com/project-flogo/core/data/mapper"
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/core/support"
-	logger "github.com/project-flogo/core/support/log"
-	"github.com/project-flogo/core/support/test"
+	"github.com/project-flogo/core/support/log"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 )
 
-// activity context
-type initContext struct {
-	settings      map[string]interface{}
-	mapperFactory mapper.Factory
-	logger        logger.Logger
-}
-
-func newInitContext(name string, settings map[string]interface{}, log logger.Logger) *initContext {
-	return &initContext{
-		settings:      settings,
-		mapperFactory: mapper.NewFactory(resolve.GetBasicResolver()),
-		logger:        logger.ChildLogger(log, name),
-	}
-}
-
-func (i *initContext) Settings() map[string]interface{} {
-	return i.settings
-}
-
-func (i *initContext) MapperFactory() mapper.Factory {
-	return i.mapperFactory
-}
-
-func (i *initContext) Logger() logger.Logger {
-	return i.logger
-}
+var logger = log.ChildLogger(log.RootLogger(), "rules")
 
 // rule action service
 type ruleActionService struct {
@@ -91,7 +65,7 @@ func NewActionService(serviceCfg *config.ServiceDescriptor) (model.ActionService
 		f := activity.GetFactory(serviceCfg.Ref)
 
 		if f != nil {
-			initCtx := newInitContext(serviceCfg.Name, serviceCfg.Settings, logger.ChildLogger(logger.RootLogger(), "ruleaction"))
+			initCtx := newInitContext(serviceCfg.Name, serviceCfg.Settings, log.ChildLogger(log.RootLogger(), "ruleaction"))
 			pa, err := f(initCtx)
 			if err != nil {
 				return nil, fmt.Errorf("unable to create rule action service '%s' : %s", serviceCfg.Name, err.Error())
@@ -134,19 +108,12 @@ func (raService *ruleActionService) SetInput(input map[string]interface{}) {
 	}
 }
 
-// Execute execute rule action service
-func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSession, rName string, tuples map[model.TupleType]model.Tuple, rCtx model.RuleContext) (done bool, err error) {
-	// invoke function and return, if available
-	if raService.Function != nil {
-		raService.Function(ctx, rs, rName, tuples, rCtx)
-		return true, nil
-	}
-
+func resolveExpFromTupleScope(tuples map[model.TupleType]model.Tuple, exprs map[string]interface{}) (map[string]interface{}, error) {
 	// resolve inputs from tuple scope
 	mFactory := mapper.NewFactory(resolve.GetBasicResolver())
-	mapper, err := mFactory.NewMapper(raService.Input)
+	mapper, err := mFactory.NewMapper(exprs)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	tupleScope := make(map[string]interface{})
@@ -155,21 +122,46 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 	}
 
 	scope := data.NewSimpleScope(tupleScope, nil)
-	resolvedInputs, err := mapper.Apply(scope)
-	if err != nil {
-		return false, err
-	}
+	return mapper.Apply(scope)
+}
 
-	if raService.Type == config.TypeServiceActivity {
-		// create activity context and set resolved inputs
-		// TODO: implement context specific to rules instead of test package
-		tc := test.NewActivityContext(raService.Act.Metadata())
-		for k, v := range resolvedInputs {
-			tc.SetInput(k, v)
+// Execute execute rule action service
+func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSession, rName string, tuples map[model.TupleType]model.Tuple, rCtx model.RuleContext) (done bool, err error) {
+
+	switch raService.Type {
+
+	default:
+		return false, fmt.Errorf("unsupported service type - '%s'", raService.Type)
+
+	case config.TypeServiceFunction:
+		// invoke function and return, if available
+		if raService.Function != nil {
+			raService.Function(ctx, rs, rName, tuples, rCtx)
+			return true, nil
 		}
 
-		return raService.Act.Eval(tc)
-	} else if raService.Type == config.TypeServiceAction {
+	case config.TypeServiceActivity:
+		// resolve inputs from tuple scope
+		resolvedInputs, err := resolveExpFromTupleScope(tuples, raService.Input)
+		if err != nil {
+			return false, err
+		}
+		// create activity context and set resolved inputs
+		sContext := newServiceContext(raService.Act.Metadata())
+		for k, v := range resolvedInputs {
+			sContext.SetInput(k, v)
+		}
+		// run activities Eval
+		return raService.Act.Eval(sContext)
+
+	case config.TypeServiceAction:
+		// resolve inputs from tuple scope
+		resolvedInputs, err := resolveExpFromTupleScope(tuples, raService.Input)
+		if err != nil {
+			return false, err
+		}
+
+		// check whether the action is sync action
 		syncAction, syncOk := raService.Action.(action.SyncAction)
 		if syncOk && syncAction != nil {
 			// sync action
@@ -177,10 +169,11 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 			if err != nil {
 				return false, fmt.Errorf("error while running the action service[%s] - %s", raService.Name, err)
 			}
-			fmt.Printf("service[%s] executed successfully. Service outputs: %s \n", raService.Name, results)
+			logger.Infof("service[%s] executed successfully. Service outputs: %s \n", raService.Name, results)
 			return true, nil
 		}
 
+		// check whether the action is async action
 		asyncAction, asyncOk := raService.Action.(action.AsyncAction)
 		if asyncOk && asyncAction != nil {
 			err := asyncAction.Run(ctx, resolvedInputs, &actionResultHandler{name: raService.Name})
@@ -190,7 +183,8 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 			return true, nil
 		}
 	}
-	return true, nil
+
+	return false, fmt.Errorf("service not executed, something went wrong")
 }
 
 type actionResultHandler struct {
@@ -199,10 +193,10 @@ type actionResultHandler struct {
 
 // HandleResult is invoked when there are results available
 func (arh *actionResultHandler) HandleResult(results map[string]interface{}, err error) {
-	fmt.Printf("service[%s] outputs: %s \n", arh.name, results)
+	logger.Infof("service[%s] outputs: %s \n", arh.name, results)
 }
 
 // Done indicates that the action has completed
 func (arh *actionResultHandler) Done() {
-	fmt.Printf("service[%s] executed successfully asynchronously\n", arh.name)
+	logger.Infof("service[%s] executed successfully asynchronously\n", arh.name)
 }
