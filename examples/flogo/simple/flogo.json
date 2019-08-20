@@ -98,7 +98,9 @@
                 "expression" : "$.n1.name == 'Bob'"
               }
             ],
-            "actionFunction": "checkForBobAction"
+            "actionService": {
+              "service": "FunctionService"
+            }
           },
           {
             "name": "n1.name == Bob \u0026\u0026 n1.name == n2.name",
@@ -113,7 +115,9 @@
                 "expression" : "($.n1.name == 'Bob') \u0026\u0026 ($.n1.name == $.n2.name)"
               }
             ],
-            "actionFunction": "checkSameNamesAction"
+            "actionService": {
+              "service": "FunctionService1"
+            }
           },
           {
             "name": "env variable example",
@@ -122,7 +126,9 @@
                 "expression" : "($.n1.name == $env['name'])"
               }
             ],
-            "actionFunction": "envVarExampleAction"
+            "actionService": {
+              "service": "FunctionService2"
+            }
           },
           {
             "name": "flogo property example",
@@ -134,7 +140,31 @@
                 "expression" : "('testprop' == $property['name'])"
               }
             ],
-            "actionFunction": "propertyExampleAction"
+            "actionService": {
+              "service": "FunctionService3"
+            }
+          }
+        ],
+        "services": [
+          {
+            "name": "FunctionService",
+            "description": "function service for checkForBobAction",
+            "function": "checkForBobAction"
+          },
+          {
+            "name": "FunctionService1",
+            "description": "function service for checkSameNamesAction",
+            "function": "checkSameNamesAction"
+          },
+          {
+            "name": "FunctionService2",
+            "description": "function service for envVarExampleAction",
+            "function": "envVarExampleAction"
+          },
+          {
+            "name": "FunctionService3",
+            "description": "function service for propertyExampleAction",
+            "function": "propertyExampleAction"
           }
         ]
       }

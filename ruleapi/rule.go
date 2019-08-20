@@ -9,13 +9,13 @@ import (
 )
 
 type ruleImpl struct {
-	name        string
-	identifiers []model.TupleType
-	conditions  []model.Condition
-	actionFn    model.ActionFunction
-	priority    int
-	deps        map[model.TupleType]map[string]bool
-	ctx         model.RuleContext
+	name          string
+	identifiers   []model.TupleType
+	conditions    []model.Condition
+	actionService model.ActionService
+	priority      int
+	deps          map[model.TupleType]map[string]bool
+	ctx           model.RuleContext
 }
 
 func (rule *ruleImpl) GetContext() model.RuleContext {
@@ -44,16 +44,16 @@ func (rule *ruleImpl) GetName() string {
 	return rule.name
 }
 
-func (rule *ruleImpl) GetActionFn() model.ActionFunction {
-	return rule.actionFn
+func (rule *ruleImpl) GetActionService() model.ActionService {
+	return rule.actionService
 }
 
 func (rule *ruleImpl) GetConditions() []model.Condition {
 	return rule.conditions
 }
 
-func (rule *ruleImpl) SetActionFn(actionFn model.ActionFunction) {
-	rule.actionFn = actionFn
+func (rule *ruleImpl) SetActionService(actionService model.ActionService) {
+	rule.actionService = actionService
 }
 
 func (rule *ruleImpl) addCond(conditionName string, idrs []model.TupleType, cfn model.ConditionEvaluator, ctx model.RuleContext, setIdr bool) {
@@ -139,10 +139,6 @@ func (rule *ruleImpl) String() string {
 
 func (rule *ruleImpl) GetIdentifiers() []model.TupleType {
 	return rule.identifiers
-}
-
-func (rule *ruleImpl) SetAction(actionFn model.ActionFunction) {
-	rule.actionFn = actionFn
 }
 
 func (rule *ruleImpl) AddCondition2(conditionName string, idrs []string, cFn model.ConditionEvaluator, ctx model.RuleContext) (err error) {

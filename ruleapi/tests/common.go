@@ -4,11 +4,15 @@ import (
 	"context"
 	"io/ioutil"
 	"log"
+	"reflect"
+	"runtime"
 	"testing"
 
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
+	"github.com/stretchr/testify/assert"
 )
 
 func createRuleSession() (model.RuleSession, error) {
@@ -63,3 +67,17 @@ type txnCtx struct {
 }
 
 type TestKey struct{}
+
+func createActionServiceFromFunction(t *testing.T, actionFunction model.ActionFunction) model.ActionService {
+	fname := runtime.FuncForPC(reflect.ValueOf(actionFunction).Pointer()).Name()
+	cfg := &config.ServiceDescriptor{
+		Name:        fname,
+		Description: fname,
+		Type:        config.TypeServiceFunction,
+		Function:    actionFunction,
+	}
+	aService, err := ruleapi.NewActionService(cfg)
+	assert.Nil(t, err)
+	assert.NotNil(t, aService)
+	return aService
+}

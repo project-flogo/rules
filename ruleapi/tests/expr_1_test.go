@@ -2,9 +2,10 @@ package tests
 
 import (
 	"context"
+	"testing"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"testing"
 )
 
 //1 condition, 1 expression
@@ -14,7 +15,7 @@ func Test_1_Expr(t *testing.T) {
 	rs, _ := createRuleSession()
 	r1 := ruleapi.NewRule("r1")
 	r1.AddExprCondition("c1", "$.t2.p2 > $.t1.p1", nil)
-	r1.SetAction(a1)
+	r1.SetActionService(createActionServiceFromFunction(t, a1))
 	r1.SetContext(actionCount)
 
 	rs.AddRule(r1)

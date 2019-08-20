@@ -2,9 +2,10 @@ package tests
 
 import (
 	"context"
+	"testing"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"testing"
 )
 
 //TTL = 0, asserted
@@ -14,7 +15,7 @@ func Test_T2(t *testing.T) {
 
 	rule := ruleapi.NewRule("R2")
 	rule.AddCondition("R2_c1", []string{"t2.none"}, trueCondition, nil)
-	rule.SetAction(emptyAction)
+	rule.SetActionService(createActionServiceFromFunction(t, emptyAction))
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
@@ -35,7 +36,7 @@ func t2Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 	lA := len(rtxn.GetRtcAdded())
 	if lA != 0 {
 		t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 0, lA)
-		printTuples(t,"Added", rtxn.GetRtcAdded())
+		printTuples(t, "Added", rtxn.GetRtcAdded())
 	}
 	lM := len(rtxn.GetRtcModified())
 	if lM != 0 {
@@ -46,6 +47,6 @@ func t2Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 	lD := len(rtxn.GetRtcDeleted())
 	if lD != 0 {
 		t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 0, lD)
-		printTuples(t,"Deleted", rtxn.GetRtcDeleted())
+		printTuples(t, "Deleted", rtxn.GetRtcDeleted())
 	}
 }
