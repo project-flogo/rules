@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
+	utils "github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/rete"
@@ -24,36 +26,37 @@ type rulesessionImpl struct {
 	name        string
 	reteNetwork common.Network
 
-	timers     map[interface{}]*time.Timer
-	startupFn  model.StartupRSFunction
-	started    bool
-	config     map[string]string
-	tupleStore model.TupleStore
-	jsonConfig map[string]interface{}
+	timers      map[interface{}]*time.Timer
+	startupFn   model.StartupRSFunction
+	started     bool
+	storeConfig string
+	tupleStore  model.TupleStore
+	jsonConfig  map[string]interface{}
 }
 
+// GetOrCreateRuleSession returns rule session
 func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
 	if name == "" {
 		return nil, errors.New("RuleSession name cannot be empty")
 	}
 	rs := rulesessionImpl{}
+	rs.loadStoreConfig()
 	rs.initRuleSession(name)
+
 	rs1, _ := sessionMap.LoadOrStore(name, &rs)
 	return rs1.(*rulesessionImpl), nil
 }
 
+// GetOrCreateRuleSessionFromConfig returns rule session from created from config
 func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.RuleSession, error) {
-	if name == "" {
-		return nil, errors.New("RuleSession name cannot be empty")
+	rs, err := GetOrCreateRuleSession(name)
+
+	if err != nil {
+		return nil, err
 	}
-	rs := rulesessionImpl{}
-	rs.initRuleSessionWithConfig(name, jsonConfig)
-	//existing, _ := sessionMap.LoadOrStore(name, &rs)
-	//rs1 := existing.(*rulesessionImpl)
-	//rs = *rs1
 
 	ruleSessionDescriptor := config.RuleSessionDescriptor{}
-	err := json.Unmarshal([]byte(jsonConfig), &ruleSessionDescriptor)
+	err = json.Unmarshal([]byte(jsonConfig), &ruleSessionDescriptor)
 	if err != nil {
 		return nil, err
 	}
@@ -73,23 +76,30 @@ func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.Rul
 
 	rs.SetStartupFunction(config.GetStartupRSFunction(name))
 
-	return &rs, nil
+	return rs, nil
 }
 
-func (rs *rulesessionImpl) initRuleSession(name string) {
-	rs.initRuleSessionWithConfig(name, "{}")
+func (rs *rulesessionImpl) loadStoreConfig() {
+	storeConfigFileName := "rsconfig.json"
+	_, err := os.Stat(storeConfigFileName)
+	if err != nil {
+		// TO DO -- get the config from env or assign it as empty json
+		rs.storeConfig = "{}"
+	} else {
+		rs.storeConfig = utils.FileToString(storeConfigFileName)
+	}
 }
 
-func (rs *rulesessionImpl) initRuleSessionWithConfig(name string, jsonConfig string) error {
+func (rs *rulesessionImpl) initRuleSession(name string) error {
 
-	err := json.Unmarshal([]byte(jsonConfig), &rs.jsonConfig)
+	err := json.Unmarshal([]byte(rs.storeConfig), &rs.jsonConfig)
 	if err != nil {
 		return err
 	}
 
 	rs.name = name
 	rs.timers = make(map[interface{}]*time.Timer)
-	rs.reteNetwork = rete.NewReteNetwork(rs.name, jsonConfig)
+	rs.reteNetwork = rete.NewReteNetwork(rs.name, rs.storeConfig)
 
 	//TODO: Configure it from jconsonfig
 	tupleStore := getTupleStore(rs.jsonConfig)
