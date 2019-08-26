@@ -1,0 +1,155 @@
+{
+  "name": "invokeservice",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "Sample Flogo App",
+  "appModel": "1.0.0",
+  "imports": [
+    "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/contrib/activity/log",
+    "github.com/project-flogo/rules/ruleaction",
+    "github.com/project-flogo/rules/activity/dtable"
+  ],
+  "triggers": [
+    {
+      "id": "receive_http_message",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
+      "settings": {
+        "port": "7777"
+      },
+      "handlers": [
+        {
+          "settings": {
+            "method": "GET",
+            "path": "/test/:tupleType"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "=$.pathParams.tupleType",
+                "values": "=$.queryParams"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "rulesession:simple",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+            {
+              "name": "outputData",
+              "type": "any"
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "student.grade == GRADE-A",
+            "conditions": [
+              {
+                "expression":"$.student.grade == 'GRADE-A'"
+              }
+            ],
+            "actionService": {
+              "service": "LogAGradeStudent",
+              "input": {
+                "message": "=$.student.name"
+              }
+            },
+            "priority":2
+          },
+          {
+            "name": "student.name == changegrade.name",
+            "conditions": [
+              {
+                "expression":"$.changegrade.name == $.student.name"
+              }
+            ],
+            "actionService": {
+              "service": "ChangeGrade",
+              "input": {
+                "message": "=$.changegrade.name"
+              }
+            },
+            "priority":2
+          }
+        ],
+        "services": [
+          {
+            "name": "ChangeGrade",
+            "description": "Changes student grade",
+            "type": "activity",
+            "ref": "github.com/project-flogo/rules/activity/dtable",
+            "settings":{
+              "make" : [
+                {"tuple":"student", "field":"grade", "to": "GRADE-A"}
+              ]
+            }
+          },
+          {
+            "name": "LogAGradeStudent",
+            "description": "Logs A Grade Student",
+            "type": "activity",
+            "ref": "github.com/project-flogo/contrib/activity/log"
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "ref": "github.com/project-flogo/rules/ruleaction",
+      "settings": {
+        "ruleSessionURI": "res://rulesession:simple",
+        "tds": [
+          {
+            "name": "student",
+            "properties": [
+              {
+                "name": "name",
+                "pk-index": 0,
+                "type": "string"
+              },
+              {
+                "name": "grade",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "name": "changegrade",
+            "properties": [
+              {
+                "name": "name",
+                "pk-index": 0,
+                "type": "string"
+              },
+              {
+                  "name": "grade",
+                  "type": "string"
+                }
+            ],
+            "ttl":0
+          }
+        ]
+      },
+      "id": "simple_rule"
+    }
+  ]
+}

@@ -151,6 +151,12 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 		for k, v := range resolvedInputs {
 			sContext.SetInput(k, v)
 		}
+		// set rule context
+		sContext.SetInput("ctx", ctx)
+		sContext.SetInput("rulesession", rs)
+		sContext.SetInput("rulename", rName)
+		sContext.SetInput("tuples", tuples)
+		sContext.SetInput("rulecontext", rCtx)
 		// run activities Eval
 		return raService.Act.Eval(sContext)
 
