@@ -1,8 +1,8 @@
 {
-  "name": "invokeservice",
+  "name": "decisiontable",
   "type": "flogo:app",
   "version": "0.0.1",
-  "description": "Sample Flogo App",
+  "description": "Sample Rules App",
   "appModel": "1.0.0",
   "imports": [
     "github.com/project-flogo/contrib/trigger/rest",
