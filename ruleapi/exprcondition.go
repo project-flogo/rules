@@ -1,13 +1,14 @@
 package ruleapi
 
 import (
+	"reflect"
+	"strconv"
+
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/expression"
 	"github.com/project-flogo/core/data/expression/script"
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/rules/common/model"
-	"reflect"
-	"strconv"
 )
 
 var td tuplePropertyResolver
@@ -156,4 +157,11 @@ func (t *tuplePropertyResolver) Resolve(scope data.Scope, item string, field str
 
 func (*tuplePropertyResolver) GetResolverInfo() *resolve.ResolverInfo {
 	return resolve.NewResolverInfo(false, false)
+}
+
+// NewExprCondition creates exprsn condition
+func NewExprCondition(cExpr string) model.Condition {
+	c := exprConditionImpl{}
+	c.initExprConditionImpl("InstantCondition", nil, nil, cExpr, nil)
+	return &c
 }

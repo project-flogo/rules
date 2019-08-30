@@ -60,10 +60,10 @@
         },
         "rules": [
           {
-            "name": "student.grade == GRADE-A",
+            "name": "student.careRequired",
             "conditions": [
               {
-                "expression":"$.student.grade == 'GRADE-A'"
+                "expression": "$.student.careRequired == 'YES'"
               }
             ],
             "actionService": {
@@ -72,13 +72,13 @@
                 "message": "=$.student.name"
               }
             },
-            "priority":2
+            "priority": 2
           },
           {
             "name": "student.name == changegrade.name",
             "conditions": [
               {
-                "expression":"$.changegrade.name == $.student.name"
+                "expression": "$.changegrade.name == $.student.name"
               }
             ],
             "actionService": {
@@ -87,7 +87,7 @@
                 "message": "=$.changegrade.name"
               }
             },
-            "priority":2
+            "priority": 2
           }
         ],
         "services": [
@@ -96,9 +96,55 @@
             "description": "Changes student grade",
             "type": "activity",
             "ref": "github.com/project-flogo/rules/activity/dtable",
-            "settings":{
-              "make" : [
-                {"tuple":"student", "field":"grade", "to": "GRADE-A"}
+            "settings": {
+              "make": [
+                {
+                  "condition": [
+                    {
+                      "tuple": "student",
+                      "field": "grade",
+                      "expr": "== 'GRADE-C'"
+                    },
+                    {
+                      "tuple": "student",
+                      "field": "class",
+                      "expr": "== 'X-A'"
+                    }
+                  ],
+                  "action": [
+                    {
+                      "tuple": "student",
+                      "field": "careRequired",
+                      "value": "YES"
+                    },
+                    {
+                      "tuple": "student",
+                      "field": "extraTimeToStudy",
+                      "value": "2 hours"
+                    }
+                  ]
+                },
+                {
+                  "condition": [
+                    {
+                      "tuple": "student",
+                      "field": "grade",
+                      "expr": "== 'GRADE-A'"
+                    },
+                    {
+                      "tuple": "student",
+                      "field": "class",
+                      "expr": "== 'X-A'"
+                    }
+                  ],
+                  "action": [
+                    {
+                      "tuple": "student",
+                      "field": "careRequired",
+                      "value": "NO"
+                    }
+                  ]
+                }
               ]
             }
           },
@@ -129,11 +175,24 @@
               {
                 "name": "grade",
                 "type": "string"
+              },
+              {
+                "name": "class",
+                "type": "string"
+              },
+              {
+                "name": "careRequired",
+                "type": "string"
+              },
+              {
+                "name": "extraTimeToStudy",
+                "type": "string"
               }
             ]
           },
           {
             "name": "changegrade",
+            "ttl":0,
             "properties": [
               {
                 "name": "name",
@@ -141,11 +200,10 @@
                 "type": "string"
               },
               {
-                  "name": "grade",
-                  "type": "string"
-                }
-            ],
-            "ttl":0
+                "name": "grade",
+                "type": "string"
+              }
+            ]
           }
         ]
       },

@@ -6,6 +6,7 @@ import (
 
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/ruleapi"
 )
 
 func init() {
@@ -14,7 +15,7 @@ func init() {
 
 // Activity decision table based rule action
 type Activity struct {
-	tasks []*Task
+	tasks []*DecisionTable
 }
 
 // New creates new decision table activity
@@ -52,17 +53,46 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 
 	// Run tasks
 	for _, task := range a.tasks {
-		tuple := tuples[model.TupleType(task.Tuple)]
-		if tuple == nil {
-			fmt.Printf("tuple[%s] not found \n", task.Tuple)
-			continue
+
+		conditionEval := false
+		for _, cond := range task.DtConditions {
+
+			eval := evaluateCondition(cond, tuples)
+			if eval {
+				conditionEval = true
+				continue
+			} else {
+				conditionEval = false
+				break
+			}
 		}
-		fmt.Printf("tuple = %v \n", tuple)
-		mutableTuple := tuple.(model.MutableTuple)
-		mutableTuple.SetString(ctx1, task.Field, task.To)
-		fmt.Printf("updated tuple = %v \n", tuple)
+
+		if conditionEval {
+			for _, act := range task.DtActions {
+				tuple := tuples[model.TupleType(act.Tuple)]
+				if tuple == nil {
+					continue
+				}
+				mutableTuple := tuple.(model.MutableTuple)
+				mutableTuple.SetString(ctx1, act.Field, act.Value)
+			}
+		}
+
 	}
 
 	fmt.Println("DECISION TABLE EXIT")
 	return false, nil
+}
+
+func evaluateCondition(cond *DtCondition, tuples map[model.TupleType]model.Tuple) bool {
+
+	condExprsn := "$." + cond.Tuple + "." + cond.Field + " " + cond.Expr
+
+	condExprs := ruleapi.NewExprCondition(condExprsn)
+	res, err := condExprs.Evaluate("", "", tuples, "")
+	if err != nil {
+		return false
+	}
+
+	return res
 }
