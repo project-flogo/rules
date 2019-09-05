@@ -45,9 +45,9 @@ type DtCondition struct {
 
 // DtAction decision row action
 type DtAction struct {
-	Tuple string `md:"tuple"`
-	Field string `md:"field"`
-	Value string `md:"value"`
+	Tuple string      `md:"tuple"`
+	Field string      `md:"field"`
+	Value interface{} `md:"value"`
 }
 
 // FromMap fills Input struct from map

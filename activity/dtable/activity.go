@@ -3,8 +3,10 @@ package dtable
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/project-flogo/core/activity"
+	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
 )
@@ -43,17 +45,12 @@ func (a *Activity) Metadata() *activity.Metadata {
 
 // Eval implements decision table action
 func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
-	fmt.Println("DECISION TABLE ENTER")
 
-	ctx1 := ctx.GetInput("ctx").(context.Context)
-	// rs := ctx.GetInput("rulesession").(model.RuleSession)
-	// rName := ctx.GetInput("rulename").(string)
+	context := ctx.GetInput("ctx").(context.Context)
 	tuples := ctx.GetInput("tuples").(map[model.TupleType]model.Tuple)
-	// rCtx := ctx.GetInput("rulecontext").(model.RuleContext)
 
 	// Run tasks
 	for _, task := range a.tasks {
-
 		conditionEval := false
 		for _, cond := range task.DtConditions {
 
@@ -74,13 +71,51 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 					continue
 				}
 				mutableTuple := tuple.(model.MutableTuple)
-				mutableTuple.SetString(ctx1, act.Field, act.Value)
+
+				tds := mutableTuple.GetTupleDescriptor()
+				strVal := fmt.Sprintf("%v", act.Value)
+
+				switch tds.GetProperty(act.Field).PropType {
+				case data.TypeString:
+					mutableTuple.SetString(context, act.Field, strVal)
+				case data.TypeBool:
+					b, err := strconv.ParseBool(strVal)
+					if err == nil {
+						mutableTuple.SetBool(context, act.Field, b)
+					}
+				case data.TypeInt:
+					i, err := strconv.ParseInt(strVal, 10, 64)
+					if err == nil {
+						mutableTuple.SetInt(context, act.Field, int(i))
+					}
+				case data.TypeInt32:
+					i, err := strconv.ParseInt(strVal, 10, 64)
+					if err == nil {
+						mutableTuple.SetInt(context, act.Field, int(i))
+					}
+				case data.TypeInt64:
+					i, err := strconv.ParseInt(strVal, 10, 64)
+					if err == nil {
+						mutableTuple.SetLong(context, act.Field, i)
+					}
+				case data.TypeFloat32:
+					f, err := strconv.ParseFloat(strVal, 32)
+					if err == nil {
+						mutableTuple.SetDouble(context, act.Field, f)
+					}
+				case data.TypeFloat64:
+					f, err := strconv.ParseFloat(strVal, 64)
+					if err == nil {
+						mutableTuple.SetDouble(context, act.Field, f)
+					}
+				default:
+					mutableTuple.SetValue(context, act.Field, act.Value)
+
+				}
+
 			}
 		}
-
 	}
-
-	fmt.Println("DECISION TABLE EXIT")
 	return false, nil
 }
 

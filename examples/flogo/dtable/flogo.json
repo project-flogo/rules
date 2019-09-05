@@ -63,11 +63,11 @@
             "name": "student.careRequired",
             "conditions": [
               {
-                "expression": "$.student.careRequired == 'YES'"
+                "expression": "$.student.careRequired"
               }
             ],
             "actionService": {
-              "service": "LogAGradeStudent",
+              "service": "LogCareRequiredStudents",
               "input": {
                 "message": "=$.student.name"
               }
@@ -75,16 +75,16 @@
             "priority": 2
           },
           {
-            "name": "student.name == changegrade.name",
+            "name": "student.name == studentanalysis.name",
             "conditions": [
               {
-                "expression": "$.changegrade.name == $.student.name"
+                "expression": "$.studentanalysis.name == $.student.name"
               }
             ],
             "actionService": {
-              "service": "ChangeGrade",
+              "service": "AnalyseStudent",
               "input": {
-                "message": "=$.changegrade.name"
+                "message": "=$.studentanalysis.name"
               }
             },
             "priority": 2
@@ -92,65 +92,47 @@
         ],
         "services": [
           {
-            "name": "ChangeGrade",
-            "description": "Changes student grade",
+            "name": "AnalyseStudent",
+            "description": "Analysing student data",
             "type": "activity",
             "ref": "github.com/project-flogo/rules/activity/dtable",
             "settings": {
               "make": [
                 {
                   "condition": [
-                    {
-                      "tuple": "student",
-                      "field": "grade",
-                      "expr": "== 'GRADE-C'"
-                    },
-                    {
-                      "tuple": "student",
-                      "field": "class",
-                      "expr": "== 'X-A'"
-                    }
+                    {"tuple": "student","field": "grade","expr": "== 'GRADE-C'"},
+                    {"tuple": "student","field": "class","expr": "== 'X-A'"}
                   ],
                   "action": [
-                    {
-                      "tuple": "student",
-                      "field": "careRequired",
-                      "value": "YES"
-                    },
-                    {
-                      "tuple": "student",
-                      "field": "extraTimeToStudy",
-                      "value": "2 hours"
-                    }
+                    { "tuple": "student","field": "careRequired","value": true},
+                    { "tuple": "student","field": "comments","value": "additional study hours required"}
                   ]
                 },
                 {
                   "condition": [
-                    {
-                      "tuple": "student",
-                      "field": "grade",
-                      "expr": "== 'GRADE-A'"
-                    },
-                    {
-                      "tuple": "student",
-                      "field": "class",
-                      "expr": "== 'X-A'"
-                    }
+                    {"tuple": "student","field": "grade","expr": "== 'GRADE-A'"},
+                    {"tuple": "student","field": "class","expr": "== 'X-A'"}
                   ],
                   "action": [
-                    {
-                      "tuple": "student",
-                      "field": "careRequired",
-                      "value": "NO"
-                    }
+                    {"tuple": "student","field": "careRequired","value": false}
+                  ]
+                },
+                {
+                  "condition": [
+                    {"tuple": "student","field": "grade","expr": "== 'GRADE-B'"},
+                    {"tuple": "student","field": "class","expr": "== 'X-A'"}
+                  ],
+                  "action": [
+                    {"tuple": "student","field": "careRequired","value": true},
+                    {"tuple": "student","field": "comments","value": "little care can be taken to achieve grade-a "}
                   ]
                 }
               ]
             }
           },
           {
-            "name": "LogAGradeStudent",
-            "description": "Logs A Grade Student",
+            "name": "LogCareRequiredStudents",
+            "description": "Logs Care required student names",
             "type": "activity",
             "ref": "github.com/project-flogo/contrib/activity/log"
           }
@@ -182,25 +164,21 @@
               },
               {
                 "name": "careRequired",
-                "type": "string"
+                "type": "bool"
               },
               {
-                "name": "extraTimeToStudy",
+                "name": "comments",
                 "type": "string"
               }
             ]
           },
           {
-            "name": "changegrade",
+            "name": "studentanalysis",
             "ttl":0,
             "properties": [
               {
                 "name": "name",
                 "pk-index": 0,
-                "type": "string"
-              },
-              {
-                "name": "grade",
                 "type": "string"
               }
             ]
