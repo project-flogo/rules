@@ -38,6 +38,9 @@ func TestOne(t *testing.T) {
 
 func TestTwo(t *testing.T) {
 	tupleDescAbsFileNm := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/rulesapp/rulesapp.json")
+	if tupleDescAbsFileNm == "" {
+		tupleDescAbsFileNm = "../../examples/rulesapp/rulesapp.json"
+	}
 	tupleDescriptor := common.FileToString(tupleDescAbsFileNm)
 
 	t.Logf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)

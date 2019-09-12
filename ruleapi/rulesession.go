@@ -26,6 +26,13 @@ type rulesessionImpl struct {
 	started   bool
 }
 
+func ClearSessions() {
+	sessionMap.Range(func(key, value interface{}) bool {
+		sessionMap.Delete(key)
+		return true
+	})
+}
+
 func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
 	if name == "" {
 		return nil, errors.New("RuleSession name cannot be empty")

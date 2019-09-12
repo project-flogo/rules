@@ -1,16 +1,16 @@
 package trackntrace
 
 import (
+	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"github.com/project-flogo/rules/common"
 
-	"testing"
-	"time"
-	"io/ioutil"
-	"strconv"
 	"context"
 	"fmt"
+	"io/ioutil"
+	"strconv"
+	"testing"
+	"time"
 )
 
 func TestPkgFlowNormal(t *testing.T) {
@@ -197,12 +197,13 @@ func TestSameTupleInstanceAssert(t *testing.T) {
 	rs.Unregister()
 }
 
-
-
 func createRuleSessionAndRules(t *testing.T) (model.RuleSession, error) {
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
 	tupleDescFileAbsPath := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/trackntrace/trackntrace.json")
+	if tupleDescFileAbsPath == "" {
+		tupleDescFileAbsPath = "trackntrace.json"
+	}
 
 	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
 	if err != nil {
@@ -392,4 +393,4 @@ func packagedelayedAction(ctx context.Context, rs model.RuleSession, ruleName st
 	fmt.Printf("Package is now delayed id[%s]\n", pkgid)
 }
 
-type TestKey struct {}
+type TestKey struct{}
