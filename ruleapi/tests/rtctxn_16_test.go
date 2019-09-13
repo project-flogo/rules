@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/project-flogo/rules/ruleapi"
 )
 
-var actionCnt1 int
+var actionCnt1 uint64
 
 //1 rtc->Schedule assert, Cancel scheduled assert and action should not be fired
 func Test_T16(t *testing.T) {
@@ -31,8 +32,8 @@ func Test_T16(t *testing.T) {
 
 	time.Sleep(2000 * time.Millisecond)
 
-	if actionCnt1 != 0 {
-		t.Errorf("Expecting [0] actions, got [%d]", actionCnt1)
+	if count := atomic.LoadUint64(&actionCnt1); count != 0 {
+		t.Errorf("Expecting [0] actions, got [%d]", count)
 		t.FailNow()
 	}
 
@@ -41,5 +42,5 @@ func Test_T16(t *testing.T) {
 }
 
 func r16_action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	actionCnt1++
+	atomic.AddUint64(&actionCnt1, 1)
 }

@@ -18,6 +18,8 @@ var (
 )
 
 type rulesessionImpl struct {
+	sync.RWMutex
+
 	name        string
 	reteNetwork rete.Network
 
@@ -126,17 +128,25 @@ func (rs *rulesessionImpl) Unregister() {
 func (rs *rulesessionImpl) ScheduleAssert(ctx context.Context, delayInMillis uint64, key interface{}, tuple model.Tuple) {
 
 	timer := time.AfterFunc(time.Millisecond*time.Duration(delayInMillis), func() {
+		rs.Lock()
+		defer rs.Unlock()
 		ctxNew := context.TODO()
 		delete(rs.timers, key)
 		rs.Assert(ctxNew, tuple)
 	})
 
+	rs.Lock()
+	defer rs.Unlock()
 	rs.timers[key] = timer
 }
 
 func (rs *rulesessionImpl) CancelScheduledAssert(ctx context.Context, key interface{}) {
+	rs.RLock()
 	timer, ok := rs.timers[key]
+	rs.RUnlock()
 	if ok {
+		rs.Lock()
+		defer rs.Unlock()
 		fmt.Printf("Cancelling timer attached to key [%v]\n", key)
 		delete(rs.timers, key)
 		timer.Stop()

@@ -2,13 +2,14 @@ package tests
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
 )
 
-var cnt int
+var cnt uint64
 
 //Using 3 Identifiers, different Join conditions and triggering respective actions --->Verify order of actions and count.
 func Test_I2(t *testing.T) {
@@ -57,24 +58,24 @@ func Test_I2(t *testing.T) {
 	t2, _ := model.NewTupleWithKeyValues("t2", "t11")
 	rs.Assert(context.TODO(), t2)
 
-	if cnt != 1 {
-		t.Errorf("Expecting [1] actions, got [%d]", cnt)
+	if count := atomic.LoadUint64(&cnt); count != 1 {
+		t.Errorf("Expecting [1] actions, got [%d]", count)
 		t.FailNow()
 	}
 
 	t3, _ := model.NewTupleWithKeyValues("t3", "t12")
 	rs.Assert(context.TODO(), t3)
 
-	if cnt != 2 {
-		t.Errorf("Expecting [2] actions, got [%d]", cnt)
+	if count := atomic.LoadUint64(&cnt); count != 2 {
+		t.Errorf("Expecting [2] actions, got [%d]", count)
 		t.FailNow()
 	}
 
 	t4, _ := model.NewTupleWithKeyValues("t2", "t13")
 	rs.Assert(context.TODO(), t4)
 
-	if cnt != 5 {
-		t.Errorf("Expecting [5] actions, got [%d]", cnt)
+	if count := atomic.LoadUint64(&cnt); count != 5 {
+		t.Errorf("Expecting [5] actions, got [%d]", count)
 		t.FailNow()
 	}
 
@@ -89,13 +90,13 @@ func i21_action(ctx context.Context, rs model.RuleSession, ruleName string, tupl
 	t2 := tuples[model.TupleType("t2")].(model.MutableTuple)
 	id2, _ := t2.GetString("id")
 
-	if id1 == "t10" && id2 == "t11" && cnt == 0 {
-		cnt++
+	if count := atomic.LoadUint64(&cnt); id1 == "t10" && id2 == "t11" && count == 0 {
+		atomic.AddUint64(&cnt, 1)
 	}
 
 	if id1 == "t10" && id2 == "t13" {
-		if cnt >= 2 && cnt <= 4 {
-			cnt++
+		if count := atomic.LoadUint64(&cnt); count >= 2 && count <= 4 {
+			atomic.AddUint64(&cnt, 1)
 		}
 	}
 }
@@ -107,8 +108,8 @@ func i22_action(ctx context.Context, rs model.RuleSession, ruleName string, tupl
 	t2 := tuples[model.TupleType("t3")].(model.MutableTuple)
 	id3, _ := t2.GetString("id")
 
-	if id1 == "t10" && id3 == "t12" && cnt == 1 {
-		cnt++
+	if count := atomic.LoadUint64(&cnt); id1 == "t10" && id3 == "t12" && count == 1 {
+		atomic.AddUint64(&cnt, 1)
 	}
 }
 
@@ -120,8 +121,8 @@ func i23_action(ctx context.Context, rs model.RuleSession, ruleName string, tupl
 	id3, _ := t2.GetString("id")
 
 	if id1 == "t13" && id3 == "t12" {
-		if cnt >= 2 && cnt <= 4 {
-			cnt++
+		if count := atomic.LoadUint64(&cnt); count >= 2 && count <= 4 {
+			atomic.AddUint64(&cnt, 1)
 		}
 	}
 }
@@ -137,8 +138,8 @@ func i24_action(ctx context.Context, rs model.RuleSession, ruleName string, tupl
 	id3, _ := t3.GetString("id")
 
 	if id1 == "t10" && id2 == "t13" && id3 == "t12" {
-		if cnt >= 2 && cnt <= 4 {
-			cnt++
+		if count := atomic.LoadUint64(&cnt); count >= 2 && count <= 4 {
+			atomic.AddUint64(&cnt, 1)
 		}
 	}
 }

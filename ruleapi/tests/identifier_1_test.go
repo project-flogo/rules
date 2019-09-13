@@ -2,13 +2,14 @@ package tests
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
 )
 
-var count int
+var count uint64
 
 //Check if all combination of tuples t1 and t3 are triggering actions
 func Test_I1(t *testing.T) {
@@ -34,8 +35,8 @@ func Test_I1(t *testing.T) {
 	rs.Assert(context.TODO(), t3)
 
 	//Check if the 2 combinations {t1=t10,t3=t12} and {t1=t11,t3=t12} triggers action twice
-	if count != 2 {
-		t.Errorf("Expecting [2] actions, got [%d]", count)
+	if cnt := atomic.LoadUint64(&count); cnt != 2 {
+		t.Errorf("Expecting [2] actions, got [%d]", cnt)
 		t.FailNow()
 	}
 
@@ -43,8 +44,8 @@ func Test_I1(t *testing.T) {
 	rs.Assert(context.TODO(), t4)
 
 	//Check if the 2 combinations {t1=t10,t3=t13} and {t1=t11,t3=t13} triggers action two more times making the total action count 4
-	if count != 4 {
-		t.Errorf("Expecting [4] actions, got [%d]", count)
+	if cnt := atomic.LoadUint64(&count); cnt != 4 {
+		t.Errorf("Expecting [4] actions, got [%d]", cnt)
 		t.FailNow()
 	}
 
@@ -60,15 +61,15 @@ func i1_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 	id3, _ := t2.GetString("id")
 
 	if id1 == "t11" && id3 == "t12" {
-		count++
+		atomic.AddUint64(&count, 1)
 	}
 	if id1 == "t10" && id3 == "t12" {
-		count++
+		atomic.AddUint64(&count, 1)
 	}
 	if id1 == "t11" && id3 == "t13" {
-		count++
+		atomic.AddUint64(&count, 1)
 	}
 	if id1 == "t10" && id3 == "t13" {
-		count++
+		atomic.AddUint64(&count, 1)
 	}
 }

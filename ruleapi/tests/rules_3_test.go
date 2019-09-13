@@ -2,13 +2,14 @@ package tests
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
 )
 
-var actCnt int
+var actCnt uint64
 
 //Forward chain-Data change in r3action and r32action triggers the r32action.
 func Test_Three(t *testing.T) {
@@ -42,8 +43,8 @@ func Test_Three(t *testing.T) {
 	t2.SetInt(context.TODO(), "p1", 2000)
 	rs.Assert(context.TODO(), t2)
 
-	if actCnt != 2 {
-		t.Errorf("Expecting [2] actions, got [%d]", actCnt)
+	if count := atomic.LoadUint64(&actCnt); count != 2 {
+		t.Errorf("Expecting [2] actions, got [%d]", count)
 		t.FailNow()
 	}
 
@@ -76,7 +77,7 @@ func r3action(ctx context.Context, rs model.RuleSession, ruleName string, tuples
 
 func r32action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
 	//fmt.Println("r132_action triggered")
-	actCnt++
+	atomic.AddUint64(&actCnt, 1)
 
 	tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
 	t10 := rs.GetAssertedTuple(tk).(model.MutableTuple)

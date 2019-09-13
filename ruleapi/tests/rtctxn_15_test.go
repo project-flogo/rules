@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/project-flogo/rules/ruleapi"
 )
 
-var actionCnt int
+var actionCnt uint64
 
 //1 rtc->Scheduled assert, Action should be fired after the delay time.
 func Test_T15(t *testing.T) {
@@ -28,14 +29,14 @@ func Test_T15(t *testing.T) {
 	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
 	rs.ScheduleAssert(context.TODO(), 1000, "1", t1)
 
-	if actionCnt != 0 {
-		t.Errorf("Expecting [0] actions, got [%d]", actionCnt)
+	if count := atomic.LoadUint64(&actionCnt); count != 0 {
+		t.Errorf("Expecting [0] actions, got [%d]", count)
 		t.FailNow()
 	}
 	time.Sleep(2000 * time.Millisecond)
 
-	if actionCnt != 1 {
-		t.Errorf("Expecting [1] actions, got [%d]", actionCnt)
+	if count := atomic.LoadUint64(&actionCnt); count != 1 {
+		t.Errorf("Expecting [1] actions, got [%d]", count)
 		t.FailNow()
 	}
 
@@ -44,5 +45,5 @@ func Test_T15(t *testing.T) {
 }
 
 func r15_action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	actionCnt++
+	atomic.AddUint64(&actionCnt, 1)
 }
