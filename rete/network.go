@@ -28,7 +28,7 @@ type Network interface {
 	RemoveRule(string) model.Rule
 	GetRules() []model.Rule
 	//changedProps are the properties that changed in a previous action
-	Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn)
+	Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn) error
 	//mode can be one of retract, modify, delete
 	Retract(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn)
 
@@ -63,7 +63,7 @@ type reteNetworkImpl struct {
 	currentId int
 
 	assertLock sync.Mutex
-	crudLock   sync.Mutex
+	crudLock   sync.RWMutex
 	txnHandler model.RtcTransactionHandler
 	txnContext interface{}
 }
@@ -185,6 +185,9 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 }
 
 func (nw *reteNetworkImpl) GetRules() []model.Rule {
+	nw.crudLock.RLock()
+	defer nw.crudLock.RUnlock()
+
 	rules := make([]model.Rule, 0)
 
 	for _, rule := range nw.allRules {
@@ -473,16 +476,32 @@ func getClassNode(nw *reteNetworkImpl, name model.TupleType) classNode {
 }
 
 func (nw *reteNetworkImpl) String() string {
+	nw.crudLock.RLock()
+	defer nw.crudLock.RUnlock()
 
 	str := "\n>>> Class View <<<\n"
-
 	for _, classNodeImpl := range nw.allClassNodes {
 		str += classNodeImpl.String() + "\n"
 	}
-	str += ">>>> Rule View <<<<\n"
 
+	str += ">>>> Rule View <<<<\n"
 	for _, rule := range nw.allRules {
-		str += nw.PrintRule(rule)
+		str += "[Rule (" + rule.GetName() + ") Id()]\n"
+		nodesOfRule := nw.ruleNameNodesOfRule[rule.GetName()]
+		for e := nodesOfRule.Front(); e != nil; e = e.Next() {
+			n := e.Value.(abstractNode)
+			switch nodeImpl := n.(type) {
+			case *filterNodeImpl:
+				str += nodeImpl.String()
+			case *joinNodeImpl:
+				str += nodeImpl.String()
+			case *classNodeImpl:
+				str += nw.printClassNode(rule.GetName(), nodeImpl)
+			case *ruleNodeImpl:
+				str += nodeImpl.String()
+			}
+			str += "\n"
+		}
 	}
 
 	return str
@@ -493,6 +512,9 @@ func pickIdentifier(idrs []model.TupleType) model.TupleType {
 }
 
 func (nw *reteNetworkImpl) PrintRule(rule model.Rule) string {
+	nw.crudLock.RLock()
+	defer nw.crudLock.RUnlock()
+
 	//str := "[Rule (" + rule.GetName() + ") Id(" + strconv.Itoa(rule.GetID()) + ")]\n"
 	str := "[Rule (" + rule.GetName() + ") Id()]\n"
 
@@ -527,7 +549,7 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 	return "\t[ClassNode Class(" + classNodeImpl.getName() + ")" + links + "]\n"
 }
 
-func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn) {
+func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn) error {
 
 	if ctx == nil {
 		ctx = context.Background()
@@ -538,6 +560,16 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	if !isRecursive {
 		nw.crudLock.Lock()
 		defer nw.crudLock.Unlock()
+
+		if mode == ADD {
+			assertedTuple := nw.GetAssertedTuple(tuple.GetKey())
+			if assertedTuple == tuple {
+				return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+			} else if assertedTuple != nil {
+				return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+			}
+		}
+
 		nw.assertInternal(newCtx, tuple, changedProps, mode)
 		reteCtxVar.getConflictResolver().resolveConflict(newCtx)
 		//if Timeout is 0, remove it from rete
@@ -546,7 +578,9 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 			if td.TTLInSeconds == 0 { //remove immediately.
 				nw.removeTupleFromRete(tuple)
 			} else if td.TTLInSeconds > 0 { // TTL for the tuple type, after that, remove it from RETE
-				go time.AfterFunc(time.Second*time.Duration(td.TTLInSeconds), func() {
+				time.AfterFunc(time.Second*time.Duration(td.TTLInSeconds), func() {
+					nw.crudLock.Lock()
+					defer nw.crudLock.Unlock()
 					nw.removeTupleFromRete(tuple)
 				})
 			} //else, its -ve and means, never expire
@@ -555,9 +589,20 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 			rtcTxn := newRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
 			nw.txnHandler(ctx, rs, rtcTxn, nw.txnContext)
 		}
-	} else {
-		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple, changedProps, mode))
+		return nil
 	}
+
+	if mode == ADD {
+		assertedTuple := nw.GetAssertedTuple(tuple.GetKey())
+		if assertedTuple == tuple {
+			return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+		} else if assertedTuple != nil {
+			return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+		}
+	}
+
+	reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple, changedProps, mode))
+	return nil
 }
 
 func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
