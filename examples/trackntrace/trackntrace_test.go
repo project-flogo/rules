@@ -200,10 +200,7 @@ func TestSameTupleInstanceAssert(t *testing.T) {
 func createRuleSessionAndRules(t *testing.T) (model.RuleSession, error) {
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
-	tupleDescFileAbsPath := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/trackntrace/trackntrace.json")
-	if tupleDescFileAbsPath == "" {
-		tupleDescFileAbsPath = "trackntrace.json"
-	}
+	tupleDescFileAbsPath := common.GetPathForResource("examples/trackntrace/trackntrace.json", "./trackntrace.json")
 
 	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
 	if err != nil {

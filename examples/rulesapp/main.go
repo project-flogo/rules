@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"github.com/project-flogo/rules/common"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 	fmt.Println("** rulesapp: Example usage of the Rules module/API **")
 
 	//Load the tuple descriptor file (relative to GOPATH)
-	tupleDescAbsFileNm := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/rulesapp/rulesapp.json")
+	tupleDescAbsFileNm := common.GetPathForResource("examples/rulesapp/rulesapp.json", "./rulesapp.json")
 	tupleDescriptor := common.FileToString(tupleDescAbsFileNm)
 
 	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)

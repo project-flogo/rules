@@ -15,10 +15,7 @@ func Test_Two(t *testing.T) {
 	// fmt.Println("** rulesapp: Example usage of the Rules module/API **")
 
 	//Load the tuple descriptor file (relative to GOPATH)
-	tupleDescAbsFileNm := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/rulesapp/rulesapp.json")
-	if tupleDescAbsFileNm == "" {
-		tupleDescAbsFileNm = "../../examples/rulesapp/rulesapp.json"
-	}
+	tupleDescAbsFileNm := common.GetPathForResource("examples/rulesapp/rulesapp.json", "../../examples/rulesapp/rulesapp.json")
 	tupleDescriptor := common.FileToString(tupleDescAbsFileNm)
 
 	// fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)

@@ -15,9 +15,11 @@ import (
 //go:generate go run $GOPATH/src/github.com/TIBCOSoftware/flogo-lib/flogo/gen/gen.go $GOPATH
 
 const (
-	msgValueField      = "message"
-	tupleSchemaPath    = "src/github.com/project-flogo/rules/examples/ordermanagement/schema/oms_schema.json"
-	ruleDefinitionPath = "src/github.com/project-flogo/rules/examples/ordermanagement/schema/rule_definition.json"
+	msgValueField              = "message"
+	tupleSchemaPath            = "examples/ordermanagement/schema/oms_schema.json"
+	ruleDefinitionPath         = "examples/ordermanagement/schema/rule_definition.json"
+	tupleSchemaRelativePath    = "./schema/oms_schema.json"
+	ruleDefinitionRelativePath = "./schema/rule_definition.json"
 )
 
 // cli arguments
@@ -75,7 +77,7 @@ func main() {
 
 // loads the tuple schema
 func loadTupleSchema() error {
-	content := getFileContent(tupleSchemaPath)
+	content := getFileContent(tupleSchemaPath, tupleSchemaRelativePath)
 	err := model.RegisterTupleDescriptors(string(content))
 	if err != nil {
 		return err
@@ -85,13 +87,13 @@ func loadTupleSchema() error {
 
 // create rulesession and load rules in it
 func createAndLoadRuleSession() (model.RuleSession, error) {
-	content := getFileContent(ruleDefinitionPath)
+	content := getFileContent(ruleDefinitionPath, ruleDefinitionRelativePath)
 	return ruleapi.GetOrCreateRuleSessionFromConfig("oms_session", string(content))
 }
 
 // Get file content
-func getFileContent(filePath string) string {
-	absPath := common.GetAbsPathForResource(filePath)
+func getFileContent(filePath, relative string) string {
+	absPath := common.GetPathForResource(filePath, relative)
 	return common.FileToString(absPath)
 }
 

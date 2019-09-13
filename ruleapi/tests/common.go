@@ -14,10 +14,7 @@ import (
 func createRuleSession() (model.RuleSession, error) {
 	rs, _ := ruleapi.GetOrCreateRuleSession("test")
 
-	tupleDescFileAbsPath := common.GetAbsPathForResource("src/github.com/project-flogo/rules/ruleapi/tests/tests.json")
-	if tupleDescFileAbsPath == "" {
-		tupleDescFileAbsPath = "tests.json"
-	}
+	tupleDescFileAbsPath := common.GetPathForResource("ruleapi/tests/tests.json", "./tests.json")
 
 	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
 	if err != nil {
