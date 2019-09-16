@@ -42,6 +42,7 @@ var (
 	adddelete   = flag.Bool("adddelete", false, "add followed by delete mode")
 	addsdeletes = flag.Bool("addsdeletes", false, "adds followed by deletes mode")
 	ttl         = flag.Bool("ttl", false, "add with ttl mode")
+	same        = flag.Bool("same", false, "add same tuple")
 )
 
 func main() {
@@ -124,6 +125,26 @@ func main() {
 			}
 			time.Sleep(time.Second)
 			i++
+		}
+	} else if *same {
+		rs, _ := createRuleSession()
+		defer rs.Unregister()
+		rule := ruleapi.NewRule("R2")
+		rule.AddCondition("R2_c1", []string{"t3.none"}, trueCondition, nil)
+		rule.SetAction(emptyAction)
+		rule.SetPriority(1)
+		rs.AddRule(rule)
+		log.Printf("Rule added: [%s]\n", rule.GetName())
+		rs.Start(nil)
+
+		t1, _ := model.NewTupleWithKeyValues("t3", "t3")
+		err := rs.Assert(context.TODO(), t1)
+		if err != nil {
+			log.Fatalf("err should be nil: %v", err)
+		}
+		for {
+			rs.Assert(context.TODO(), t1)
+			time.Sleep(10 * time.Millisecond)
 		}
 	}
 }
