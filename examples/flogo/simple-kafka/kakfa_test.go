@@ -22,9 +22,12 @@ const (
 	topic     = "orderinfo"
 )
 
-func initProducer() (sarama.SyncProducer, error) {
-	// setup sarama log to stdout
+func TestMain(m *testing.M) {
 	sarama.Logger = log.New(os.Stdout, "", log.Ltime)
+	os.Exit(m.Run())
+}
+
+func initProducer() (sarama.SyncProducer, error) {
 
 	// producer config
 	config := sarama.NewConfig()
