@@ -28,8 +28,6 @@ func New(ctx activity.InitContext) (activity.Activity, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("settings: ", settings)
-	fmt.Println("settings: ", settings.Make[0])
 
 	// Read setting from init context
 	act := &Activity{

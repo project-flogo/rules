@@ -8,7 +8,8 @@
     "github.com/project-flogo/contrib/trigger/rest",
     "github.com/project-flogo/contrib/activity/log",
     "github.com/project-flogo/rules/ruleaction",
-    "github.com/project-flogo/rules/activity/dtable"
+    "github.com/project-flogo/rules/activity/dtable",
+    "github.com/project-flogo/contrib/function/string"
   ],
   "triggers": [
     {
@@ -69,7 +70,7 @@
             "actionService": {
               "service": "LogCareRequiredStudents",
               "input": {
-                "message": "=$.student.name"
+                "message": "=string.concat(\" Student: \",$.student.name, \" -- Comments: \",$.student.comments)"
               }
             },
             "priority": 2

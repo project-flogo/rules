@@ -37,8 +37,8 @@ curl localhost:7777/test/studentanalysis?name=s2
 ```
 You should see following output:
 ```
-2019-09-05T18:35:12.142+0530    INFO    [flogo.rules] - s1
-2019-09-05T18:35:12.142+0530    INFO    [flogo.rules] - s2
+2019-09-05T18:35:12.142+0530    INFO    [flogo.rules] - Student: s1 -- Comments: additional study hours required
+2019-09-05T18:35:12.142+0530    INFO    [flogo.rules] - Student: s2 -- Comments: little care can be taken to achieve grade-a
 ```
 
 ### Writing Decision Table in JSON
