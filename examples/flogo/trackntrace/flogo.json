@@ -108,14 +108,13 @@
             }
           ],
           "output": [
-             {
-               "name": "outputData",
-               "type": "any"
-             }
+            {
+              "name": "outputData",
+              "type": "any"
+            }
           ]
         },
         "rules": [
-          
           {
             "name": "packageInSittingRule",
             "conditions": [
@@ -127,8 +126,10 @@
                 "evaluator": "cPackageInSitting"
               }
             ],
-            "actionFunction": "aPackageInSitting",
-            "priority":1
+            "actionService": {
+              "service": "FunctionService"
+            },
+            "priority": 1
           },
           {
             "name": "packageInDelayedRule",
@@ -141,8 +142,10 @@
                 "evaluator": "cPackageInDelayed"
               }
             ],
-            "actionFunction": "aPackageInDelayed",
-            "priority":1
+            "actionService": {
+              "service": "FunctionService1"
+            },
+            "priority": 1
           },
           {
             "name": "packageInMovingRule",
@@ -155,8 +158,10 @@
                 "evaluator": "cPackageInMoving"
               }
             ],
-            "actionFunction": "aPackageInMoving",
-            "priority":1
+            "actionService": {
+              "service": "FunctionService2"
+            },
+            "priority": 1
           },
           {
             "name": "packageInDroppedRule",
@@ -169,8 +174,10 @@
                 "evaluator": "cPackageInDropped"
               }
             ],
-            "actionFunction": "aPackageInDropped",
-            "priority":1
+            "actionService": {
+              "service": "FunctionService3"
+            },
+            "priority": 1
           },
           {
             "name": "printPackageRule",
@@ -183,8 +190,10 @@
                 "evaluator": "cPackageEvent"
               }
             ],
-            "actionFunction": "aPrintPackage",
-            "priority":2
+            "actionService": {
+              "service": "FunctionService4"
+            },
+            "priority": 2
           },
           {
             "name": "printMoveEventRule",
@@ -197,8 +206,10 @@
                 "evaluator": "cMoveEvent"
               }
             ],
-            "actionFunction": "aPrintMoveEvent",
-            "priority":3
+            "actionService": {
+              "service": "FunctionService5"
+            },
+            "priority": 3
           },
           {
             "name": "joinMoveEventAndPackageEventRule",
@@ -212,8 +223,10 @@
                 "evaluator": "cJoinMoveEventAndPackage"
               }
             ],
-            "actionFunction": "aJoinMoveEventAndPackage",
-            "priority":4
+            "actionService": {
+              "service": "FunctionService6"
+            },
+            "priority": 4
           },
           {
             "name": "aMoveTimeoutEventRule",
@@ -226,8 +239,10 @@
                 "evaluator": "cMoveTimeoutEvent"
               }
             ],
-            "actionFunction": "aMoveTimeoutEvent",
-            "priority":5
+            "actionService": {
+              "service": "FunctionService7"
+            },
+            "priority": 5
           },
           {
             "name": "joinMoveTimeoutEventAndPackage",
@@ -241,8 +256,66 @@
                 "evaluator": "cJoinMoveTimeoutEventAndPackage"
               }
             ],
-            "actionFunction": "aJoinMoveTimeoutEventAndPackage",
-            "priority":6
+            "actionService": {
+              "service": "FunctionService8"
+            },
+            "priority": 6
+          }
+        ],
+        "services": [
+          {
+            "name": "FunctionService",
+            "description": "function service for aPackageInSitting",
+            "type": "function",
+            "function": "aPackageInSitting"
+          },
+          {
+            "name": "FunctionService1",
+            "description": "function service for aPackageInDelayed",
+            "type": "function",
+            "function": "aPackageInDelayed"
+          },
+          {
+            "name": "FunctionService2",
+            "description": "function service for aPackageInMoving",
+            "type": "function",
+            "function": "aPackageInMoving"
+          },
+          {
+            "name": "FunctionService3",
+            "description": "function service for aPackageInDropped",
+            "type": "function",
+            "function": "aPackageInDropped"
+          },
+          {
+            "name": "FunctionService4",
+            "description": "function service for aPrintPackage",
+            "type": "function",
+            "function": "aPrintPackage"
+          },
+          {
+            "name": "FunctionService5",
+            "description": "function service for aPrintMoveEvent",
+            "type": "function",
+            "function": "aPrintMoveEvent"
+          },
+          {
+            "name": "FunctionService6",
+            "description": "function service for aJoinMoveEventAndPackage",
+            "type": "function",
+            "function": "aJoinMoveEventAndPackage"
+          },
+          {
+            "name": "FunctionService7",
+            "description": "function service for aMoveTimeoutEvent",
+            "type": "function",
+            "function": "aMoveTimeoutEvent"
+          },
+          {
+            "name": "FunctionService8",
+            "description": "function service for aJoinMoveTimeoutEventAndPackage",
+            "type": "function",
+            "function": "aJoinMoveTimeoutEventAndPackage"
           }
         ]
       }

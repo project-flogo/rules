@@ -88,6 +88,11 @@ func testApplication(t *testing.T, e engine.Engine) {
 }
 
 func TestSimpleKafkaJSON(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip("skipping simpleKafkaJSON test")
+	}
+
 	_, err := exec.LookPath("docker-compose")
 	if err != nil {
 		t.Skip("skipping test - docker-compose not found")

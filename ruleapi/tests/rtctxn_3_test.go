@@ -2,9 +2,10 @@ package tests
 
 import (
 	"context"
+	"testing"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"testing"
 )
 
 //New asserted in action (forward chain)
@@ -14,7 +15,7 @@ func Test_T3(t *testing.T) {
 
 	rule := ruleapi.NewRule("R3")
 	rule.AddCondition("R3_c1", []string{"t1.none"}, trueCondition, nil)
-	rule.SetAction(R3_action)
+	rule.SetActionService(createActionServiceFromFunction(t, R3_action))
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
@@ -39,7 +40,7 @@ func t3Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 	lA := len(rtxn.GetRtcAdded())
 	if lA != 1 {
 		t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 1, lA)
-		printTuples(t,"Added", rtxn.GetRtcAdded())
+		printTuples(t, "Added", rtxn.GetRtcAdded())
 
 	} else {
 		//ok
@@ -60,6 +61,6 @@ func t3Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 	lD := len(rtxn.GetRtcDeleted())
 	if lD != 0 {
 		t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 0, lD)
-		printTuples(t,"Deleted", rtxn.GetRtcDeleted())
+		printTuples(t, "Deleted", rtxn.GetRtcDeleted())
 	}
 }

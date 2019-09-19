@@ -10,6 +10,8 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"reflect"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -17,7 +19,9 @@ import (
 
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
+	"github.com/stretchr/testify/assert"
 )
 
 func createRuleSession() (model.RuleSession, error) {
@@ -44,6 +48,7 @@ func falseCondition(ruleName string, condName string, tuples map[model.TupleType
 	return false
 }
 func emptyAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+
 }
 
 func printTuples(t *testing.T, oprn string, tupleMap map[string]map[string]model.Tuple) {
@@ -131,4 +136,20 @@ func Pour(port string) {
 			break
 		}
 	}
+}
+
+type TestKey struct{}
+
+func createActionServiceFromFunction(t *testing.T, actionFunction model.ActionFunction) model.ActionService {
+	fname := runtime.FuncForPC(reflect.ValueOf(actionFunction).Pointer()).Name()
+	cfg := &config.ServiceDescriptor{
+		Name:        fname,
+		Description: fname,
+		Type:        config.TypeServiceFunction,
+		Function:    actionFunction,
+	}
+	aService, err := ruleapi.NewActionService(cfg)
+	assert.Nil(t, err)
+	assert.NotNil(t, aService)
+	return aService
 }

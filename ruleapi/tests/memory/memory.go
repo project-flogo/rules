@@ -8,10 +8,13 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+	"reflect"
+	"runtime"
 	"time"
 
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
 )
 
@@ -57,7 +60,7 @@ func main() {
 		defer rs.Unregister()
 		rule := ruleapi.NewRule("R2")
 		rule.AddCondition("R2_c1", []string{"t3.none"}, trueCondition, nil)
-		rule.SetAction(emptyAction)
+		rule.SetActionService(createActionServiceFromFunction(emptyAction))
 		rule.SetPriority(1)
 		rs.AddRule(rule)
 		log.Printf("Rule added: [%s]\n", rule.GetName())
@@ -80,7 +83,7 @@ func main() {
 		defer rs.Unregister()
 		rule := ruleapi.NewRule("R2")
 		rule.AddCondition("R2_c1", []string{"t3.none"}, trueCondition, nil)
-		rule.SetAction(emptyAction)
+		rule.SetActionService(createActionServiceFromFunction(emptyAction))
 		rule.SetPriority(1)
 		rs.AddRule(rule)
 		log.Printf("Rule added: [%s]\n", rule.GetName())
@@ -110,7 +113,7 @@ func main() {
 		defer rs.Unregister()
 		rule := ruleapi.NewRule("R2")
 		rule.AddCondition("R2_c1", []string{"t4.none"}, trueCondition, nil)
-		rule.SetAction(emptyAction)
+		rule.SetActionService(createActionServiceFromFunction(emptyAction))
 		rule.SetPriority(1)
 		rs.AddRule(rule)
 		log.Printf("Rule added: [%s]\n", rule.GetName())
@@ -131,7 +134,7 @@ func main() {
 		defer rs.Unregister()
 		rule := ruleapi.NewRule("R2")
 		rule.AddCondition("R2_c1", []string{"t3.none"}, trueCondition, nil)
-		rule.SetAction(emptyAction)
+		rule.SetActionService(createActionServiceFromFunction(emptyAction))
 		rule.SetPriority(1)
 		rs.AddRule(rule)
 		log.Printf("Rule added: [%s]\n", rule.GetName())
@@ -147,4 +150,16 @@ func main() {
 			time.Sleep(10 * time.Millisecond)
 		}
 	}
+}
+
+func createActionServiceFromFunction(actionFunction model.ActionFunction) model.ActionService {
+	fname := runtime.FuncForPC(reflect.ValueOf(actionFunction).Pointer()).Name()
+	cfg := &config.ServiceDescriptor{
+		Name:        fname,
+		Description: fname,
+		Type:        config.TypeServiceFunction,
+		Function:    actionFunction,
+	}
+	aService, _ := ruleapi.NewActionService(cfg)
+	return aService
 }

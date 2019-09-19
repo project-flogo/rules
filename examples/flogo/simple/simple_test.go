@@ -44,11 +44,12 @@ func testApplication(t *testing.T, e engine.Engine) {
 	outpt := tests.CaptureStdOutput(request)
 
 	var result string
-	if strings.Contains(outpt, "Rule fired") {
+	if strings.Contains(outpt, "Rule fired: [n1.name == Bob]") {
 		result = "success"
 	}
 	assert.Equal(t, "success", result)
 	result = ""
+	outpt = ""
 
 	// check for tuples match n1 and n2
 	request1 := func() {
@@ -62,11 +63,12 @@ func testApplication(t *testing.T, e engine.Engine) {
 	}
 
 	outpt = tests.CaptureStdOutput(request1)
-	if strings.Contains(outpt, "Rule fired") {
+	if strings.Contains(outpt, "Rule fired: [n1.name == Bob && n1.name == n2.name]") {
 		result = "success"
 	}
 	assert.Equal(t, "success", result)
 	result = ""
+	outpt = ""
 
 	//  check  for name mismatch
 	request2 := func() {
@@ -80,10 +82,10 @@ func testApplication(t *testing.T, e engine.Engine) {
 	}
 
 	outpt = tests.CaptureStdOutput(request2)
-	if !strings.Contains(outpt, "Rule fired") {
-		result = "success"
+	if strings.Contains(outpt, "Rule fired: [n1.name == Tom]") {
+		result = "fail"
 	}
-	assert.Equal(t, "success", result)
+	assert.Equal(t, "", result)
 	result = ""
 
 	//  Already asserted tuple check
