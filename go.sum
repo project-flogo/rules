@@ -47,7 +47,7 @@ github.com/project-flogo/contrib/activity/log v0.9.0 h1:Uptmxa+tAi79mtTn4DNwoWIi
 github.com/project-flogo/contrib/activity/log v0.9.0/go.mod h1:Eso9z1s2DyrGdHwLwni0qP1TPtY9L/NclLYIs17dq30=
 github.com/project-flogo/contrib/function/string v0.9.0 h1:9BOAScGsTdnP6Jor6lnTcUwDdYgVBcyAXFpg969qw6E=
 github.com/project-flogo/contrib/function/string v0.9.0/go.mod h1:ucysnPOToMKCKoSROm4cRXDcQFZGit8LUK5SfbCeDh8=
-github.com/project-flogo/contrib/trigger/kafka v0.9.0 h1:EhDEpQOIsdz2Y/4pdGBoUEuAS8XIPrh60p5OfgAV5ts=
+github.com/project-flogo/contrib/trigger/kafka v0.9.0 h1:xeGFM73L0jSYPOd0ihOIpkdF/8ko6/sOZircJYOT5Ew=
 github.com/project-flogo/contrib/trigger/kafka v0.9.0/go.mod h1:NqVLzyM1u4dMGp9q06YsI/JahK/oFNvpV+72tKIt8bk=
 github.com/project-flogo/contrib/trigger/rest v0.9.0 h1:3e9uLWLmg8VG8fcf8Fi4MrLptPc6WI1ZpaylC8eQ3Pk=
 github.com/project-flogo/contrib/trigger/rest v0.9.0/go.mod h1:vxFRTpssjn5eF1fXdCc+L6+PxZOKm5iqkTZPA4lUIsY=
