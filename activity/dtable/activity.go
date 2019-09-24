@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data"
@@ -69,39 +70,58 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 					continue
 				}
 				mutableTuple := tuple.(model.MutableTuple)
-
 				tds := mutableTuple.GetTupleDescriptor()
 				strVal := fmt.Sprintf("%v", act.Value)
-
 				switch tds.GetProperty(act.Field).PropType {
 				case data.TypeString:
+					if strings.Compare(strVal, "<nil>") == 0 {
+						strVal = ""
+					}
 					mutableTuple.SetString(context, act.Field, strVal)
 				case data.TypeBool:
+					if strings.Compare(strVal, "<nil>") == 0 {
+						strVal = "false"
+					}
 					b, err := strconv.ParseBool(strVal)
 					if err == nil {
 						mutableTuple.SetBool(context, act.Field, b)
 					}
 				case data.TypeInt:
+					if strings.Compare(strVal, "<nil>") == 0 {
+						strVal = "0"
+					}
 					i, err := strconv.ParseInt(strVal, 10, 64)
 					if err == nil {
 						mutableTuple.SetInt(context, act.Field, int(i))
 					}
 				case data.TypeInt32:
+					if strings.Compare(strVal, "<nil>") == 0 {
+						strVal = "0"
+					}
 					i, err := strconv.ParseInt(strVal, 10, 64)
 					if err == nil {
 						mutableTuple.SetInt(context, act.Field, int(i))
 					}
 				case data.TypeInt64:
+					if strings.Compare(strVal, "<nil>") == 0 {
+						strVal = "0"
+					}
 					i, err := strconv.ParseInt(strVal, 10, 64)
 					if err == nil {
 						mutableTuple.SetLong(context, act.Field, i)
 					}
 				case data.TypeFloat32:
+					if strings.Compare(strVal, "<nil>") == 0 {
+						strVal = "0.0"
+					}
 					f, err := strconv.ParseFloat(strVal, 32)
 					if err == nil {
 						mutableTuple.SetDouble(context, act.Field, f)
 					}
 				case data.TypeFloat64:
+					if strings.Compare(strVal, "<nil>") == 0 {
+						strVal = "0.0"
+					}
 					f, err := strconv.ParseFloat(strVal, 64)
 					if err == nil {
 						mutableTuple.SetDouble(context, act.Field, f)
@@ -110,17 +130,15 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 					mutableTuple.SetValue(context, act.Field, act.Value)
 
 				}
-
 			}
 		}
 	}
-	return false, nil
+	return true, nil
 }
 
 func evaluateCondition(cond *DtCondition, tuples map[model.TupleType]model.Tuple) bool {
 
 	condExprsn := "$." + cond.Tuple + "." + cond.Field + " " + cond.Expr
-
 	condExprs := ruleapi.NewExprCondition(condExprsn)
 	res, err := condExprs.Evaluate("", "", tuples, "")
 	if err != nil {
