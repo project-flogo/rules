@@ -1,0 +1,318 @@
+{
+  "name": "cardapp",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "Sample Flogo App",
+  "appModel": "1.0.0",
+  "imports": [
+    "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/rules/ruleaction",
+    "github.com/project-flogo/legacybridge"
+  ],
+  "triggers": [
+    {
+      "id": "receive_http_message",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
+      "settings": {
+        "port": "7777"
+      },
+      "handlers": [
+        {
+          "settings": {
+            "method": "PUT",
+            "path": "/newaccount"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "NewAccount",
+                "values": "=$.content"
+              }
+            }
+          ]
+        },
+        {
+          "settings": {
+            "method": "PUT",
+            "path": "/credit"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "UpdateCreditScore",
+                "values": "=$.content"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "rulesession:simple",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+            {
+              "name": "outputData",
+              "type": "any"
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "UserData",
+            "conditions": [
+              {
+                "name": "cBadUser",
+                "identifiers": [
+                  "NewAccount"
+                ],
+                "evaluator": "cBadUser"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService"
+            }
+          },
+          {
+            "name": "NewUser",
+            "conditions": [
+              {
+                "name": "cNewUser",
+                "identifiers": [
+                  "NewAccount"
+                ],
+                "evaluator": "cNewUser"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService1"
+            }
+          },
+          {
+            "name": "NewUser1",
+            "conditions": [
+              {
+                "name": "cUserIdMatch",
+                "identifiers": [
+                  "UpdateCreditScore",
+                  "UserAccount"
+                ],
+                "evaluator": "cUserIdMatch"
+              },
+              {
+                "name": "cUserCreditScore",
+                "identifiers": [
+                  "UpdateCreditScore"
+                ],
+                "evaluator": "cUserCreditScore"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService2"
+            }
+          },
+          {
+            "name": "NewUser2",
+            "conditions": [
+              {
+                "name": "cUserIdMatch",
+                "identifiers": [
+                  "UpdateCreditScore",
+                  "UserAccount"
+                ],
+                "evaluator": "cUserIdMatch"
+              },
+              {
+                "name": "cUserCreditScore",
+                "identifiers": [
+                  "UpdateCreditScore"
+                ],
+                "evaluator": "cUserHighCreditScore"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService3"
+            }
+          },
+          {
+            "name": "Rejected",
+            "conditions": [
+              {
+                "name": "cUserIdMatch",
+                "identifiers": [
+                  "UpdateCreditScore",
+                  "UserAccount"
+                ],
+                "evaluator": "cUserIdMatch"
+              },
+              {
+                "name": "cUserCreditScore",
+                "identifiers": [
+                  "UpdateCreditScore"
+                ],
+                "evaluator": "cUserLowCreditScore"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService4"
+            }
+          }
+        ],
+        "services": [
+          {
+            "name": "FunctionService",
+            "description": "function service for aBadUser",
+            "type": "function",
+            "function": "aBadUser"
+          },
+          {
+            "name": "FunctionService1",
+            "description": "function service for aNewUser",
+            "type": "function",
+            "function": "aNewUser"
+          },
+          {
+            "name": "FunctionService2",
+            "description": "function service for aApproveWithLowerLimit",
+            "type": "function",
+            "function": "aApproveWithLowerLimit"
+          },
+          {
+            "name": "FunctionService3",
+            "description": "function service for aApproveWithHigherLimit",
+            "type": "function",
+            "function": "aApproveWithHigherLimit"
+          },
+          {
+            "name": "FunctionService4",
+            "description": "function service for aUserReject",
+            "type": "function",
+            "function": "aUserReject"
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "ref": "github.com/project-flogo/rules/ruleaction",
+      "settings": {
+        "ruleSessionURI": "res://rulesession:simple",
+        "tds": [
+          {
+            "name": "UserAccount",
+            "properties": [
+              {
+                "name": "Id",
+                "pk-index": 0,
+                "type": "int"
+              },
+              {
+                "name": "Name",
+                "type": "string"
+              },
+              {
+                "name": "Gender",
+                "type": "string"
+              },
+              {
+                "name": "Age",
+                "type": "int"
+              },
+              {
+                "name": "Address",
+                "type": "string"
+              },
+              {
+                "name": "Income",
+                "type": "int"
+              },
+              {
+                "name": "maritalStatus",
+                "type": "string"
+              },
+              {
+                "name": "creditScore",
+                "type": "int"
+              },
+              {
+                "name": "approvedLimit",
+                "type": "int"
+              },
+              {
+                "name": "appStatus",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "name": "NewAccount",
+            "ttl": 0,
+            "properties": [
+              {
+                "name": "Id",
+                "pk-index": 0,
+                "type": "int"
+              },
+              {
+                "name": "Name",
+                "type": "string"
+              },
+              {
+                "name": "Gender",
+                "type": "string"
+              },
+              {
+                "name": "Age",
+                "type": "int"
+              },
+              {
+                "name": "Address",
+                "type": "string"
+              },
+              {
+                "name": "Income",
+                "type": "int"
+              },
+              {
+                "name": "maritalStatus",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "name": "UpdateCreditScore",
+            "properties": [
+              {
+                "name": "Id",
+                "pk-index": 0,
+                "type": "int"
+              },
+              {
+                "name": "creditScore",
+                "type": "int"
+              }
+            ],
+            "ttl": 0
+          }
+        ]
+      },
+      "id": "simple_rule"
+    }
+  ]
+}

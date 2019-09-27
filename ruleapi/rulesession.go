@@ -23,6 +23,8 @@ var (
 )
 
 type rulesessionImpl struct {
+	sync.RWMutex
+
 	name        string
 	reteNetwork common.Network
 
@@ -34,7 +36,13 @@ type rulesessionImpl struct {
 	jsonConfig  map[string]interface{}
 }
 
-// GetOrCreateRuleSession returns rule session
+func ClearSessions() {
+	sessionMap.Range(func(key, value interface{}) bool {
+		sessionMap.Delete(key)
+		return true
+	})
+}
+
 func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
 	if name == "" {
 		return nil, errors.New("RuleSession name cannot be empty")
@@ -61,14 +69,44 @@ func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.Rul
 		return nil, err
 	}
 
+	// inflate action services
+	aServices := make(map[string]model.ActionService)
+	for _, s := range ruleSessionDescriptor.Services {
+		aService, err := NewActionService(s)
+		if err != nil {
+			return nil, err
+		}
+		aServices[s.Name] = aService
+	}
+
 	for _, ruleCfg := range ruleSessionDescriptor.Rules {
 		rule := NewRule(ruleCfg.Name)
 		rule.SetContext("This is a test of context")
-		rule.SetAction(ruleCfg.ActionFunc)
+		// set action service to rule, if exist
+		if ruleCfg.ActionService != nil {
+			aService, found := aServices[ruleCfg.ActionService.Service]
+			if !found {
+				return nil, fmt.Errorf("rule action service[%s] not found", ruleCfg.ActionService.Service)
+			}
+			aService.SetInput(ruleCfg.ActionService.Input)
+			rule.SetActionService(aService)
+		}
 		rule.SetPriority(ruleCfg.Priority)
 
 		for _, condCfg := range ruleCfg.Conditions {
-			rule.AddCondition(condCfg.Name, condCfg.Identifiers, condCfg.Evaluator, nil)
+			if condCfg.Expression == "" {
+				rule.AddCondition(condCfg.Name, condCfg.Identifiers, condCfg.Evaluator, nil)
+			} else {
+				rule.AddExprCondition(condCfg.Name, condCfg.Expression, nil)
+			}
+		}
+		//now add explicit rule identifiers if any
+		if ruleCfg.Identifiers != nil {
+			idrs := []model.TupleType{}
+			for _, idr := range ruleCfg.Identifiers {
+				idrs = append(idrs, model.TupleType(idr))
+			}
+			rule.AddIdrsToRule(idrs)
 		}
 
 		rs.AddRule(rule)
@@ -151,8 +189,8 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err e
 	if ctx == nil {
 		ctx = context.Context(context.Background())
 	}
-	rs.reteNetwork.Assert(ctx, rs, tuple, nil, common.ADD)
-	return nil
+
+	return rs.reteNetwork.Assert(ctx, rs, tuple, nil, common.ADD)
 }
 
 func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.Tuple) {
@@ -178,17 +216,25 @@ func (rs *rulesessionImpl) Unregister() {
 func (rs *rulesessionImpl) ScheduleAssert(ctx context.Context, delayInMillis uint64, key interface{}, tuple model.Tuple) {
 
 	timer := time.AfterFunc(time.Millisecond*time.Duration(delayInMillis), func() {
+		rs.Lock()
+		defer rs.Unlock()
 		ctxNew := context.TODO()
 		delete(rs.timers, key)
 		rs.Assert(ctxNew, tuple)
 	})
 
+	rs.Lock()
+	defer rs.Unlock()
 	rs.timers[key] = timer
 }
 
 func (rs *rulesessionImpl) CancelScheduledAssert(ctx context.Context, key interface{}) {
+	rs.RLock()
 	timer, ok := rs.timers[key]
+	rs.RUnlock()
 	if ok {
+		rs.Lock()
+		defer rs.Unlock()
 		fmt.Printf("Cancelling timer attached to key [%v]\n", key)
 		delete(rs.timers, key)
 		timer.Stop()

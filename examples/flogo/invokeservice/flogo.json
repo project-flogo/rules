@@ -1,0 +1,230 @@
+{
+  "name": "invokeservice",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "Sample Flogo App",
+  "appModel": "1.0.0",
+  "imports": [
+    "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/core/examples/action",
+    "github.com/project-flogo/rules/ruleaction",
+    "github.com/project-flogo/contrib/activity/log",
+    "github.com/project-flogo/flow"
+  ],
+  "triggers": [
+    {
+      "id": "receive_http_message",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
+      "settings": {
+        "port": "7777"
+      },
+      "handlers": [
+        {
+          "settings": {
+            "method": "GET",
+            "path": "/test/n1"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "n1",
+                "values": "=$.queryParams"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "rulesession:simple",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+            {
+              "name": "outputData",
+              "type": "any"
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "n1.name == function",
+            "conditions": [
+              {
+                "name": "c1",
+                "identifiers": [
+                  "n1"
+                ],
+                "evaluator": "cServiceFunction"
+              }
+            ],
+            "actionService": {
+              "service": "ServiceFunction",
+              "input": {
+                "message": "=$.n1.name"
+              }
+            }
+          },
+          {
+            "name": "n1.name == activity",
+            "conditions": [
+              {
+                "name": "c1",
+                "identifiers": [
+                  "n1"
+                ],
+                "evaluator": "cServiceActivity"
+              }
+            ],
+            "actionService": {
+              "service": "ServiceLogActivity",
+              "input": {
+                "message": "=$.n1.name"
+              }
+            }
+          },
+          {
+            "name": "n1.name == syncaction",
+            "conditions": [
+              {
+                "name": "c1",
+                "identifiers": [
+                  "n1"
+                ],
+                "evaluator": "cServiceSyncAction"
+              }
+            ],
+            "actionService": {
+              "service": "ServiceCoreAction",
+              "input": {
+                "anInput": "=$.n1.name"
+              }
+            }
+          },        
+          {
+            "name": "n1.name == asyncaction",
+            "conditions": [
+              {
+                "name": "c1",
+                "identifiers": [
+                  "n1"
+                ],
+                "evaluator": "cServiceASyncAction"
+              }
+            ],
+            "actionService": {
+              "service": "ServiceFlowAction",
+              "input": {
+                "message": "=$.n1.name"
+              }
+            }
+          }
+        ],
+        "services": [
+          {
+            "name": "ServiceFunction",
+            "description": "function service",
+            "type": "function",
+            "function": "serviceFunctionAction"
+          },
+          {
+            "name": "ServiceLogActivity",
+            "description": "log activity service",
+            "type": "activity",
+            "ref": "github.com/project-flogo/contrib/activity/log"
+          },
+          {
+            "name": "ServiceCoreAction",
+            "description": "synchronous action service",
+            "type": "action",
+            "ref": "github.com/project-flogo/core/examples/action",
+            "settings": {
+              "aSetting": "test setting"
+            }
+          },
+          {
+            "name": "ServiceFlowAction",
+            "description": "Asynchronous flow action service",
+            "type": "action",
+            "ref": "github.com/project-flogo/flow",
+            "settings": {
+              "flowURI": "res://flow:sample_flow"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "flow:sample_flow",
+      "data": {
+        "name": "SampleFlow",
+        "metadata": {
+          "input": [
+            {
+              "name": "message",
+              "type": "string"
+            }
+          ]
+        },
+        "tasks": [
+          {
+            "id": "log_message",
+            "name": "Log Message",
+            "description": "Simple Log Activity",
+            "activity": {
+              "ref": "#log",
+              "input": {
+                "message": "=$flow.message"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "ref": "github.com/project-flogo/rules/ruleaction",
+      "settings": {
+        "ruleSessionURI": "res://rulesession:simple",
+        "tds": [
+          {
+            "name": "n1",
+            "properties": [
+              {
+                "name": "name",
+                "pk-index": 0,
+                "type": "string"
+              }
+            ],
+            "ttl": 0
+          },
+          {
+            "name": "n2",
+            "properties": [
+              {
+                "name": "name",
+                "pk-index": 0,
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      "id": "simple_rule"
+    }
+  ]
+}

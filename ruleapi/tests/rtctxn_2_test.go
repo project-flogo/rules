@@ -2,9 +2,10 @@ package tests
 
 import (
 	"context"
+	"testing"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"testing"
 )
 
 //TTL = 0, asserted
@@ -14,7 +15,7 @@ func Test_T2(t *testing.T) {
 
 	rule := ruleapi.NewRule("R2")
 	rule.AddCondition("R2_c1", []string{"t2.none"}, trueCondition, nil)
-	rule.SetAction(emptyAction)
+	rule.SetActionService(createActionServiceFromFunction(t, emptyAction))
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())

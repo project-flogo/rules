@@ -34,8 +34,7 @@ type reteNetworkImpl struct {
 	//handleService map[string]types.ReteHandle
 	handleService types.HandleService
 
-	assertLock sync.Mutex
-	crudLock   sync.Mutex
+	crudLock   sync.RWMutex
 	txnHandler []model.RtcTransactionHandler
 	txnContext []interface{}
 
@@ -109,6 +108,7 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 	classNodeLinksOfRule := list.New()
 
 	conditions := rule.GetConditions()
+	noIdrConditionCnt := 0
 	if len(conditions) == 0 {
 		identifierVar := pickIdentifier(rule.GetIdentifiers())
 		nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, identifierVar, nil, nodeSet)
@@ -116,6 +116,7 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 		for i := 0; i < len(conditions); i++ {
 			if conditions[i].GetIdentifiers() == nil || len(conditions[i].GetIdentifiers()) == 0 {
 				conditionSetNoIdr.PushBack(conditions[i])
+				noIdrConditionCnt++
 			} else if len(conditions[i].GetIdentifiers()) == 1 &&
 				!contains(nodeSet, conditions[i].GetIdentifiers()[0]) {
 				cond := conditions[i]
@@ -125,13 +126,15 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 			}
 		}
 	}
-
+	if len(rule.GetConditions()) != 0 && noIdrConditionCnt == len(rule.GetConditions()) {
+		idr := pickIdentifier(rule.GetIdentifiers())
+		nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, idr, nil, nodeSet)
+	}
 	nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
 
 	cntxt := make([]interface{}, 2)
 	cntxt[0] = nw
 	cntxt[1] = nodesOfRule
-
 	for _, classNode := range nw.allClassNodes {
 		optimizeNetwork(classNode, cntxt)
 	}
@@ -178,8 +181,8 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 	delete(nw.ruleNameNodesOfRule, ruleName)
 	if nodesOfRuleItem != nil {
 		for e := nodesOfRuleItem.Front(); e != nil; e = e.Next() {
-			node := e.Value.(abstractNode)
-			switch nodeImpl := node.(type) {
+			n := e.Value.(abstractNode)
+			switch nodeImpl := n.(type) {
 			//Only interested in joinnodes
 			//case *filterNodeImpl:
 			//case *classNodeImpl:
@@ -197,6 +200,9 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 }
 
 func (nw *reteNetworkImpl) GetRules() []model.Rule {
+	nw.crudLock.RLock()
+	defer nw.crudLock.RUnlock()
+
 	rules := make([]model.Rule, 0)
 
 	for _, rule := range nw.allRules {
@@ -250,8 +256,8 @@ func removeFromList(listVar *list.List, val interface{}) {
 func contains(nodeSet *list.List, identifierVar model.TupleType) bool {
 	identifiers := []model.TupleType{identifierVar}
 	for e := nodeSet.Front(); e != nil; e = e.Next() {
-		node := e.Value.(node)
-		if ContainedByFirst(node.getIdentifiers(), identifiers) {
+		n := e.Value.(node)
+		if ContainedByFirst(n.getIdentifiers(), identifiers) {
 			return true
 		}
 	}
@@ -262,15 +268,15 @@ func (nw *reteNetworkImpl) buildNetwork(rule model.Rule, nodesOfRule *list.List,
 	conditionSet *list.List, nodeSet *list.List, conditionSetNoIdr *list.List) {
 	if conditionSet.Len() == 0 {
 		if nodeSet.Len() == 1 {
-			node := nodeSet.Front().Value.(node)
-			if ContainedByFirst(node.getIdentifiers(), rule.GetIdentifiers()) {
+			n := nodeSet.Front().Value.(node)
+			if ContainedByFirst(n.getIdentifiers(), rule.GetIdentifiers()) {
 				//TODO: Re evaluate set later..
 
-				lastNode := node
+				lastNode := n
 				//check conditions with no identifierVar
 				for e := conditionSetNoIdr.Front(); e != nil; e = e.Next() {
 					conditionVar := e.Value.(model.Condition)
-					fNode := newFilterNode(nw, rule, node.getIdentifiers(), conditionVar)
+					fNode := newFilterNode(nw, rule, n.getIdentifiers(), conditionVar)
 					nodesOfRule.PushBack(fNode)
 					newNodeLink(nw, lastNode, fNode, false)
 					lastNode = fNode
@@ -280,9 +286,9 @@ func (nw *reteNetworkImpl) buildNetwork(rule model.Rule, nodesOfRule *list.List,
 				newNodeLink(nw, lastNode, ruleNode, false)
 				nodesOfRule.PushBack(ruleNode)
 			} else {
-				idrs := SecondMinusFirst(node.getIdentifiers(), rule.GetIdentifiers())
+				idrs := SecondMinusFirst(n.getIdentifiers(), rule.GetIdentifiers())
 				fNode := nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, idrs[0], nil, nodeSet)
-				nw.createJoinNode(rule, nodesOfRule, node, fNode, nil, conditionSet, nodeSet)
+				nw.createJoinNode(rule, nodesOfRule, n, fNode, nil, conditionSet, nodeSet)
 				nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
 			}
 		} else {
@@ -309,14 +315,15 @@ func (nw *reteNetworkImpl) createFilterNode(rule model.Rule, nodesOfRule *list.L
 	for e := conditionSet.Front(); e != nil; e = e.Next() {
 		conditionVar := e.Value.(model.Condition)
 		for f := nodeSet.Front(); f != nil; f = f.Next() {
-			node := f.Value.(node)
-			if ContainedByFirst(node.getIdentifiers(), conditionVar.GetIdentifiers()) {
+			n := f.Value.(node)
+			if ContainedByFirst(n.getIdentifiers(), conditionVar.GetIdentifiers()) {
 				//TODO
-				filterNode := newFilterNode(nw, rule, nil, conditionVar)
-				newNodeLink(nw, node, filterNode, false)
-				removeFromList(nodeSet, node)
+				filterNode := newFilterNode(nw, rule, conditionVar.GetIdentifiers(), conditionVar)
+				newNodeLink(nw, n, filterNode, false)
+				removeFromList(nodeSet, n)
 				nodeSet.PushBack(filterNode)
 				nodesOfRule.PushBack(filterNode)
+				conditionSet.Remove(e)
 				return true
 			}
 		}
@@ -424,11 +431,9 @@ func (nw *reteNetworkImpl) createClassFilterNode(rule model.Rule, nodesOfRule *l
 }
 
 func (nw *reteNetworkImpl) createJoinNode(rule model.Rule, nodesOfRule *list.List, leftNode node, rightNode node, joinCondition model.Condition, conditionSet *list.List, nodeSet *list.List) {
-
 	//TODO handle equivJoins later..
 
 	joinNode := newJoinNode(nw, rule, leftNode.getIdentifiers(), rightNode.getIdentifiers(), joinCondition)
-
 	newNodeLink(nw, leftNode, joinNode, false)
 	newNodeLink(nw, rightNode, joinNode, true)
 	removeFromList(nodeSet, leftNode)
@@ -446,14 +451,14 @@ func findBestNode(nodeSet *list.List, matchIdentifiers []model.TupleType, notThi
 	foundIdr := 0
 
 	for e := nodeSet.Front(); e != nil; e = e.Next() {
-		node := e.Value.(node)
-		if node == notThis {
+		n := e.Value.(node)
+		if n == notThis {
 			continue
 		}
-		foundMatch := len(IntersectionIdentifiers(node.getIdentifiers(), matchIdentifiers))
+		foundMatch := len(IntersectionIdentifiers(n.getIdentifiers(), matchIdentifiers))
 		if foundMatch > foundIdr {
 			foundIdr = foundMatch
-			foundNode = node
+			foundNode = n
 		}
 	}
 	return foundNode
@@ -486,16 +491,32 @@ func getClassNode(nw *reteNetworkImpl, name model.TupleType) classNode {
 }
 
 func (nw *reteNetworkImpl) String() string {
+	nw.crudLock.RLock()
+	defer nw.crudLock.RUnlock()
 
 	str := "\n>>> Class View <<<\n"
-
 	for _, classNodeImpl := range nw.allClassNodes {
 		str += classNodeImpl.String() + "\n"
 	}
-	str += ">>>> Rule View <<<<\n"
 
+	str += ">>>> Rule View <<<<\n"
 	for _, rule := range nw.allRules {
-		str += nw.PrintRule(rule)
+		str += "[Rule (" + rule.GetName() + ") Id()]\n"
+		nodesOfRule := nw.ruleNameNodesOfRule[rule.GetName()]
+		for e := nodesOfRule.Front(); e != nil; e = e.Next() {
+			n := e.Value.(abstractNode)
+			switch nodeImpl := n.(type) {
+			case *filterNodeImpl:
+				str += nodeImpl.String()
+			case *joinNodeImpl:
+				str += nodeImpl.String()
+			case *classNodeImpl:
+				str += nw.printClassNode(rule.GetName(), nodeImpl)
+			case *ruleNodeImpl:
+				str += nodeImpl.String()
+			}
+			str += "\n"
+		}
 	}
 
 	return str
@@ -506,14 +527,17 @@ func pickIdentifier(idrs []model.TupleType) model.TupleType {
 }
 
 func (nw *reteNetworkImpl) PrintRule(rule model.Rule) string {
+	nw.crudLock.RLock()
+	defer nw.crudLock.RUnlock()
+
 	//str := "[Rule (" + rule.GetName() + ") Id(" + strconv.Itoa(rule.GetID()) + ")]\n"
 	str := "[Rule (" + rule.GetName() + ") Id()]\n"
 
 	nodesOfRule := nw.ruleNameNodesOfRule[rule.GetName()]
 
 	for e := nodesOfRule.Front(); e != nil; e = e.Next() {
-		node := e.Value.(abstractNode)
-		switch nodeImpl := node.(type) {
+		n := e.Value.(abstractNode)
+		switch nodeImpl := n.(type) {
 		case *filterNodeImpl:
 			str += nodeImpl.String()
 		case *joinNodeImpl:
@@ -540,7 +564,7 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 	return "\t[ClassNode Class(" + classNodeImpl.getName() + ")" + links + "]\n"
 }
 
-func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) {
+func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
 
 	if ctx == nil {
 		ctx = context.Background()
@@ -551,6 +575,16 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	if !isRecursive {
 		nw.crudLock.Lock()
 		defer nw.crudLock.Unlock()
+
+		if mode == common.ADD {
+			assertedTuple := nw.GetAssertedTuple(tuple.GetKey())
+			if assertedTuple == tuple {
+				return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+			} else if assertedTuple != nil {
+				return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+			}
+		}
+
 		nw.assertInternal(newCtx, tuple, changedProps, mode)
 		reteCtxVar.getConflictResolver().resolveConflict(newCtx)
 		//if Timeout is 0, remove it from rete
@@ -559,7 +593,9 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 			if td.TTLInSeconds == 0 { //remove immediately.
 				nw.removeTupleFromRete(tuple)
 			} else if td.TTLInSeconds > 0 { // TTL for the tuple type, after that, remove it from RETE
-				go time.AfterFunc(time.Second*time.Duration(td.TTLInSeconds), func() {
+				time.AfterFunc(time.Second*time.Duration(td.TTLInSeconds), func() {
+					nw.crudLock.Lock()
+					defer nw.crudLock.Unlock()
 					nw.removeTupleFromRete(tuple)
 				})
 			} //else, its -ve and means, never expire
@@ -570,9 +606,20 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 				txnHandler(newCtx, rs, rtcTxn, nw.txnContext[i])
 			}
 		}
-	} else {
-		reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple, changedProps, mode))
+		return nil
 	}
+
+	if mode == common.ADD {
+		assertedTuple := nw.GetAssertedTuple(tuple.GetKey())
+		if assertedTuple == tuple {
+			return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+		} else if assertedTuple != nil {
+			return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+		}
+	}
+
+	reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple, changedProps, mode))
+	return nil
 }
 
 func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {

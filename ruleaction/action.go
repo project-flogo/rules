@@ -96,6 +96,8 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	}
 
 	ruleAction := &RuleAction{}
+
+	// create rule session
 	ruleSessionDescriptor, err := manager.GetRuleSessionDescriptor(settings.RuleSessionURI)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get RuleSessionDescriptor for %s\n%s", settings.RuleSessionURI, err.Error())

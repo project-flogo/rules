@@ -2,9 +2,10 @@ package tests
 
 import (
 	"context"
+	"testing"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"testing"
 )
 
 //Same as Test_T5, but in 3rd rtc, assert a TTL=0 based and a TTL=1 based
@@ -14,7 +15,7 @@ func Test_T6(t *testing.T) {
 
 	rule := ruleapi.NewRule("R6")
 	rule.AddCondition("R6_c1", []string{"t1.none"}, trueCondition, nil)
-	rule.SetAction(r6_action)
+	rule.SetActionService(createActionServiceFromFunction(t, r6_action))
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())

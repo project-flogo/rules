@@ -8,6 +8,8 @@ import (
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
+var names = 0
+
 //joinNode holds the join tables for unmatched entries
 type joinNode interface {
 	node
@@ -44,8 +46,15 @@ func (jn *joinNodeImpl) initjoinNodeImplVar(nw *reteNetworkImpl, rule model.Rule
 	jn.conditionVar = conditionVar
 
 	// TODO conditionVar nil check
-	jn.leftTable = nw.GetJtService().GetOrCreateJoinTable(nw, rule, leftIdrs, "L_"+conditionVar.GetName())
-	jn.rightTable = nw.GetJtService().GetOrCreateJoinTable(nw, rule, rightIdrs, "R_"+conditionVar.GetName())
+	name := ""
+	if conditionVar == nil {
+		name = strconv.Itoa(names)
+		names++
+	} else {
+		name = conditionVar.GetName()
+	}
+	jn.leftTable = nw.GetJtService().GetOrCreateJoinTable(nw, rule, leftIdrs, "L_"+name)
+	jn.rightTable = nw.GetJtService().GetOrCreateJoinTable(nw, rule, rightIdrs, "R_"+name)
 	jn.setJoinIdentifiers()
 }
 
@@ -167,6 +176,8 @@ func (jn *joinNodeImpl) assertObjects(ctx context.Context, handles []types.ReteH
 
 func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []types.ReteHandle, joinedHandles []types.ReteHandle) {
 
+	var err error
+
 	//TODO: other stuff. right now focus on tuple table
 	jn.joinRightObjects(handles, joinedHandles)
 	//tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
@@ -186,7 +197,10 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []types.Ret
 		} else {
 			tupleMap := copyIntoTupleMap(joinedHandles)
 			cv := jn.conditionVar
-			toPropagate = cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
+			toPropagate, err = cv.Evaluate(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
+			if err != nil {
+				//todo
+			}
 		}
 		if toPropagate {
 			jn.nodeLinkVar.propagateObjects(ctx, joinedHandles)
@@ -217,6 +231,9 @@ func (jn *joinNodeImpl) joinRightObjects(rightHandles []types.ReteHandle, joined
 }
 
 func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []types.ReteHandle, joinedHandles []types.ReteHandle) {
+
+	var err error
+
 	jn.joinLeftObjects(handles, joinedHandles)
 	//TODO: other stuff. right now focus on tuple table
 	//tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
@@ -236,7 +253,10 @@ func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []types.Rete
 		} else {
 			tupleMap := copyIntoTupleMap(joinedHandles)
 			cv := jn.conditionVar
-			toPropagate = cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
+			toPropagate, err = cv.Evaluate(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
+			if err != nil {
+				//todo
+			}
 		}
 		if toPropagate {
 			jn.nodeLinkVar.propagateObjects(ctx, joinedHandles)

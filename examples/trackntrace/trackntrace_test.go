@@ -1,9 +1,14 @@
 package trackntrace
 
 import (
+	"reflect"
+	"runtime"
+
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
+	"github.com/stretchr/testify/assert"
 
 	"context"
 	"fmt"
@@ -200,7 +205,7 @@ func TestSameTupleInstanceAssert(t *testing.T) {
 func createRuleSessionAndRules(t *testing.T) (model.RuleSession, error) {
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
 
-	tupleDescFileAbsPath := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/trackntrace/trackntrace.json")
+	tupleDescFileAbsPath := common.GetPathForResource("examples/trackntrace/trackntrace.json", "./trackntrace.json")
 
 	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
 	if err != nil {
@@ -218,7 +223,7 @@ func loadPkgRulesWithDeps(t *testing.T, rs model.RuleSession) {
 	//handle a package event, create a package in the packageAction
 	rule := ruleapi.NewRule("packageevent")
 	rule.AddCondition("truecondition", []string{"packageevent.none"}, truecondition, nil)
-	rule.SetAction(packageeventAction)
+	rule.SetActionService(createActionServiceFromFunction(t, packageeventAction))
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
@@ -226,7 +231,7 @@ func loadPkgRulesWithDeps(t *testing.T, rs model.RuleSession) {
 	//handle a package, print package details in the packageAction
 	rule1 := ruleapi.NewRule("package")
 	rule1.AddCondition("packageCondition", []string{"package.none"}, packageCondition, nil)
-	rule1.SetAction(packageAction)
+	rule1.SetActionService(createActionServiceFromFunction(t, packageAction))
 	rule1.SetPriority(2)
 	rs.AddRule(rule1)
 	t.Logf("Rule added: [%s]\n", rule1.GetName())
@@ -235,7 +240,7 @@ func loadPkgRulesWithDeps(t *testing.T, rs model.RuleSession) {
 	//for the next destination, etc in the scaneventAction
 	rule2 := ruleapi.NewRule("scanevent")
 	rule2.AddCondition("scaneventCondition", []string{"package.packageid", "scanevent.packageid", "package.curr", "package.next"}, scaneventCondition, nil)
-	rule2.SetAction(scaneventAction)
+	rule2.SetActionService(createActionServiceFromFunction(t, scaneventAction))
 	rule2.SetPriority(2)
 	rs.AddRule(rule2)
 	t.Logf("Rule added: [%s]\n", rule2.GetName())
@@ -243,7 +248,7 @@ func loadPkgRulesWithDeps(t *testing.T, rs model.RuleSession) {
 	//handle a timeout event, triggered by scaneventAction, mark the package as delayed in scantimeoutAction
 	rule3 := ruleapi.NewRule("scantimeout")
 	rule3.AddCondition("scantimeoutCondition", []string{"package.packageid", "scantimeout.packageid"}, scantimeoutCondition, nil)
-	rule3.SetAction(scantimeoutAction)
+	rule3.SetActionService(createActionServiceFromFunction(t, scantimeoutAction))
 	rule3.SetPriority(1)
 	rs.AddRule(rule3)
 	t.Logf("Rule added: [%s]\n", rule3.GetName())
@@ -251,7 +256,7 @@ func loadPkgRulesWithDeps(t *testing.T, rs model.RuleSession) {
 	//notify when a package is marked as delayed, print as such in the packagedelayedAction
 	rule4 := ruleapi.NewRule("packagedelayed")
 	rule4.AddCondition("packageDelayedCheck", []string{"package.status"}, packageDelayedCheck, nil)
-	rule4.SetAction(packagedelayedAction)
+	rule4.SetActionService(createActionServiceFromFunction(t, packagedelayedAction))
 	rule4.SetPriority(1)
 	rs.AddRule(rule4)
 	t.Logf("Rule added: [%s]\n", rule4.GetName())
@@ -391,3 +396,17 @@ func packagedelayedAction(ctx context.Context, rs model.RuleSession, ruleName st
 }
 
 type TestKey struct{}
+
+func createActionServiceFromFunction(t *testing.T, actionFunction model.ActionFunction) model.ActionService {
+	fname := runtime.FuncForPC(reflect.ValueOf(actionFunction).Pointer()).Name()
+	cfg := &config.ServiceDescriptor{
+		Name:        fname,
+		Description: fname,
+		Type:        config.TypeServiceFunction,
+		Function:    actionFunction,
+	}
+	aService, err := ruleapi.NewActionService(cfg)
+	assert.Nil(t, err)
+	assert.NotNil(t, aService)
+	return aService
+}

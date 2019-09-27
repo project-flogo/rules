@@ -2,9 +2,10 @@ package tests
 
 import (
 	"context"
+	"testing"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"testing"
 )
 
 //add and delete in the same rtc
@@ -14,7 +15,7 @@ func Test_T7(t *testing.T) {
 
 	rule := ruleapi.NewRule("R7")
 	rule.AddCondition("R7_c1", []string{"t1.none"}, trueCondition, nil)
-	rule.SetAction(r7_action)
+	rule.SetActionService(createActionServiceFromFunction(t, r7_action))
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())

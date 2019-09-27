@@ -20,8 +20,11 @@ type Network interface {
 	String() string
 	RemoveRule(string) model.Rule
 	GetRules() []model.Rule
-	Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn)
+	//changedProps are the properties that changed in a previous action
+	Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn) error
+	//mode can be one of retract, modify, delete
 	Retract(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn)
+
 	GetAssertedTuple(key model.TupleKey) model.Tuple
 	RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{})
 	//SetConfig(config map[string]string)

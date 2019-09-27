@@ -95,9 +95,13 @@ func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []types.Ret
 		}
 		tupleMap := convertToTupleMap(tuples)
 		cv := fn.conditionVar
-		toPropagate := cv.GetEvaluator()(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
-		if toPropagate {
-			fn.nodeLinkVar.propagateObjects(ctx, handles)
+		toPropagate, err := cv.Evaluate(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
+		if err == nil {
+			if toPropagate {
+				fn.nodeLinkVar.propagateObjects(ctx, handles)
+			}
+		} else {
+			//todo
 		}
 	}
 }
