@@ -179,13 +179,6 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err e
 	if !rs.started {
 		return fmt.Errorf("Cannot assert tuple. Rulesession [%s] not started", rs.name)
 	}
-	assertedTuple := rs.GetAssertedTuple(tuple.GetKey())
-	//if assertedTuple == tuple {
-	//	return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
-	//} else
-	if assertedTuple != nil {
-		return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
-	}
 	if ctx == nil {
 		ctx = context.Context(context.Background())
 	}
@@ -193,12 +186,12 @@ func (rs *rulesessionImpl) Assert(ctx context.Context, tuple model.Tuple) (err e
 	return rs.reteNetwork.Assert(ctx, rs, tuple, nil, common.ADD)
 }
 
-func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.Tuple) {
-	rs.reteNetwork.Retract(ctx, rs, tuple, nil, common.RETRACT)
+func (rs *rulesessionImpl) Retract(ctx context.Context, tuple model.Tuple) error {
+	return rs.reteNetwork.Retract(ctx, rs, tuple, nil, common.RETRACT)
 }
 
-func (rs *rulesessionImpl) Delete(ctx context.Context, tuple model.Tuple) {
-	rs.reteNetwork.Retract(ctx, rs, tuple, nil, common.DELETE)
+func (rs *rulesessionImpl) Delete(ctx context.Context, tuple model.Tuple) error {
+	return rs.reteNetwork.Retract(ctx, rs, tuple, nil, common.DELETE)
 }
 
 func (rs *rulesessionImpl) printNetwork() {

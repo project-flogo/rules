@@ -46,14 +46,14 @@ func (hc *handleServiceImpl) GetHandleByKey(key model.TupleKey) types.ReteHandle
 	return hc.allHandles[key.String()]
 }
 
-func (hc *handleServiceImpl) GetOrCreateHandle(nw types.Network, tuple model.Tuple) types.ReteHandle {
+func (hc *handleServiceImpl) GetOrCreateHandle(nw types.Network, tuple model.Tuple) (types.ReteHandle, bool) {
 	hc.Lock()
 	defer hc.Unlock()
 	h, found := hc.allHandles[tuple.GetKey().String()]
 	if !found {
-		h = newReteHandleImpl(nw, tuple)
+		h = newReteHandleImpl(nw, tuple, "creating")
 
 		hc.allHandles[tuple.GetKey().String()] = h //[tuple.GetKey().String()] = h
 	}
-	return h
+	return h, found
 }

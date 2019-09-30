@@ -66,7 +66,7 @@ func createRow(jtKey string, rowID string, key string, nw types.Network) types.J
 	for _, key := range values {
 		tupleKey := model.FromStringKey(key)
 		tuple := nw.GetTupleStore().GetTupleByKey(tupleKey)
-		handle := newReteHandleImpl(nw, tuple)
+		handle := newReteHandleImpl(nw, tuple, "", "unknown")
 		handles = append(handles, handle)
 	}
 

@@ -34,7 +34,7 @@ func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {
 	rkey := hc.prefix + tuple.GetKey().String()
 	redisutils.GetRedisHdl().Del(rkey)
 	//TODO: Dummy handle
-	h := newReteHandleImpl(hc.GetNw(), tuple)
+	h := newReteHandleImpl(hc.GetNw(), tuple, rkey, "dummy")
 	return h
 
 }
@@ -49,28 +49,37 @@ func (hc *handleServiceImpl) GetHandleByKey(key model.TupleKey) types.ReteHandle
 	m := redisutils.GetRedisHdl().HGetAll(rkey)
 	if len(m) == 0 {
 		return nil
-	} else {
-		tuple := hc.Nw.GetTupleStore().GetTupleByKey(key)
-		if tuple == nil {
-			//TODO: error handling
-			return nil
-		}
-		h := newReteHandleImpl(hc.GetNw(), tuple)
-		return h
 	}
+
+	tuple := hc.Nw.GetTupleStore().GetTupleByKey(key)
+	if tuple == nil {
+		//TODO: error handling
+		return nil
+	}
+	status := ""
+	if value, ok := m["status"]; ok {
+		if value, ok := value.(string); ok {
+			status = value
+		}
+	}
+	h := newReteHandleImpl(hc.GetNw(), tuple, rkey, status)
+	return h
 }
 
-func (hc *handleServiceImpl) GetOrCreateHandle(nw types.Network, tuple model.Tuple) types.ReteHandle {
-
-	key := hc.prefix + tuple.GetKey().String()
-
-	m := redisutils.GetRedisHdl().HGetAll(key)
-	if len(m) == 0 {
-		m := make(map[string]interface{})
-		m["k"] = "v"
-		redisutils.GetRedisHdl().HSetAll(key, m)
+func (hc *handleServiceImpl) GetOrCreateHandle(nw types.Network, tuple model.Tuple) (types.ReteHandle, bool) {
+	key, status := hc.prefix+tuple.GetKey().String(), "creating"
+	exists, _ := redisutils.GetRedisHdl().HSetNX(key, "status", status)
+	if exists {
+		m := redisutils.GetRedisHdl().HGetAll(key)
+		if len(m) > 0 {
+			if value, ok := m["status"]; ok {
+				if value, ok := value.(string); ok {
+					status = value
+				}
+			}
+		}
 	}
 
-	h := newReteHandleImpl(nw, tuple)
-	return h
+	h := newReteHandleImpl(nw, tuple, key, status)
+	return h, exists
 }

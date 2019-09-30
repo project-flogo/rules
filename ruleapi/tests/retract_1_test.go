@@ -70,7 +70,11 @@ func Test_Retract_1(t *testing.T) {
 	{
 		ctx := context.WithValue(context.TODO(), "key", t)
 		tuple, _ := model.NewTupleWithKeyValues("t3", "t3")
-		rs.Retract(ctx, tuple)
+		err := rs.Retract(ctx, tuple)
+		if err != nil {
+			t.Logf("%s", err)
+			t.FailNow()
+		}
 	}
 
 	/**

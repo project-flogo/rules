@@ -49,7 +49,7 @@ type RuleSession interface {
 	GetRules() []Rule
 
 	Assert(ctx context.Context, tuple Tuple) (err error)
-	Retract(ctx context.Context, tuple Tuple)
+	Retract(ctx context.Context, tuple Tuple) error
 
 	ScheduleAssert(ctx context.Context, delayInMillis uint64, key interface{}, tuple Tuple)
 	CancelScheduledAssert(ctx context.Context, key interface{})
@@ -69,7 +69,7 @@ type RuleSession interface {
 	GetAssertedTuple(key TupleKey) Tuple
 
 	//Retract, and remove
-	Delete(ctx context.Context, tuple Tuple)
+	Delete(ctx context.Context, tuple Tuple) error
 
 	//RtcTransactionHandler
 	RegisterRtcTransactionHandler(txnHandler RtcTransactionHandler, handlerCtx interface{})

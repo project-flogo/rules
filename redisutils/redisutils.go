@@ -57,6 +57,20 @@ func (rh *RedisHandle) getPool() *redis.Pool {
 	return rh.pool
 }
 
+func (rh *RedisHandle) HSet(key string, field string, value interface{}) (bool, error) {
+	c := rh.getPool().Get()
+	defer c.Close()
+	exists, err := redis.Int(c.Do("HSET", key, field, value))
+	return exists == 0, err
+}
+
+func (rh *RedisHandle) HSetNX(key string, field string, value interface{}) (bool, error) {
+	c := rh.getPool().Get()
+	defer c.Close()
+	exists, err := redis.Int(c.Do("HSETNX", key, field, value))
+	return exists == 0, err
+}
+
 func (rh *RedisHandle) HSetAll(key string, kvs map[string]interface{}) error {
 
 	var args = []interface{}{key}

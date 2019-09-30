@@ -39,6 +39,8 @@ type ReteHandle interface {
 	SetTuple(tuple model.Tuple)
 	GetTuple() model.Tuple
 	GetTupleKey() model.TupleKey
+	SetStatus(status string)
+	GetStatus() string
 }
 
 type JtRefsService interface {
@@ -62,7 +64,7 @@ type HandleService interface {
 	RemoveHandle(tuple model.Tuple) ReteHandle
 	GetHandle(tuple model.Tuple) ReteHandle
 	GetHandleByKey(key model.TupleKey) ReteHandle
-	GetOrCreateHandle(nw Network, tuple model.Tuple) ReteHandle
+	GetOrCreateHandle(nw Network, tuple model.Tuple) (ReteHandle, bool)
 }
 
 type IdGen interface {

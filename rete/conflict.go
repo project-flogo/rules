@@ -90,13 +90,13 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 
 func (cr *conflictResImpl) deleteAgendaFor(ctx context.Context, modifiedTuple model.Tuple, changeProps map[string]bool) {
 
-	hdlModified := getOrCreateHandle(ctx, modifiedTuple)
+	hdlModified, _ := getOrCreateHandle(ctx, modifiedTuple)
 
 	for e := cr.agendaList.Front(); e != nil; {
 		item := e.Value.(agendaItem)
 		next := e.Next()
 		for _, tuple := range item.getTuples() {
-			hdl := getOrCreateHandle(ctx, tuple)
+			hdl, _ := getOrCreateHandle(ctx, tuple)
 			if hdl == hdlModified { //this agendaitem has the modified tuple, remove the agenda item!
 				toRemove := true
 				//check if the rule depends on this change prop
