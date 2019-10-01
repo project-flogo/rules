@@ -8,8 +8,6 @@ import (
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
-var names = 0
-
 //joinNode holds the join tables for unmatched entries
 type joinNode interface {
 	node
@@ -45,11 +43,9 @@ func (jn *joinNodeImpl) initjoinNodeImplVar(nw *reteNetworkImpl, rule model.Rule
 	jn.rightIdrs = rightIdrs
 	jn.conditionVar = conditionVar
 
-	// TODO conditionVar nil check
 	name := ""
 	if conditionVar == nil {
-		name = strconv.Itoa(names)
-		names++
+		name = nw.getJoinNodeName()
 	} else {
 		name = conditionVar.GetName()
 	}

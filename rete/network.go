@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/project-flogo/rules/common/model"
 
@@ -45,9 +46,10 @@ type reteNetworkImpl struct {
 
 	config map[string]string
 
-	factory    *TypeFactory
-	idGen      types.IdGen
-	tupleStore model.TupleStore
+	factory       *TypeFactory
+	idGen         types.IdGen
+	tupleStore    model.TupleStore
+	joinNodeNames int
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -792,6 +794,12 @@ func (nw *reteNetworkImpl) removeJtRowsForTable(hdl types.ReteHandle, joinTable 
 		//TODO: Delete the rowRef itself
 		rowIter.Remove()
 	}
+}
+
+func (nw *reteNetworkImpl) getJoinNodeName() string {
+	name := strconv.Itoa(nw.joinNodeNames)
+	nw.joinNodeNames++
+	return name
 }
 
 func (nw *reteNetworkImpl) GetIdGenService() types.IdGen {
