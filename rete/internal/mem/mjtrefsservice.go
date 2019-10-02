@@ -8,13 +8,13 @@ import (
 type jtRefsServiceImpl struct {
 	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
 	types.NwServiceImpl
-	tablesAndRows map[string]map[string]map[int]int
+	tablesAndRows map[string]map[int]string
 }
 
 func NewJoinTableRefsInHdlImpl(nw types.Network, config map[string]interface{}) types.JtRefsService {
 	hdlJt := jtRefsServiceImpl{}
 	hdlJt.Nw = nw
-	hdlJt.tablesAndRows = make(map[string]map[string]map[int]int)
+	hdlJt.tablesAndRows = make(map[string]map[int]string)
 	return &hdlJt
 }
 
@@ -23,88 +23,23 @@ func (h *jtRefsServiceImpl) Init() {
 }
 
 func (h *jtRefsServiceImpl) AddEntry(handle types.ReteHandle, jtName string, rowID int) {
-
 	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
-
 	if !found {
-		tblMap = make(map[string]map[int]int)
+		tblMap = make(map[int]string)
 		h.tablesAndRows[handle.GetTupleKey().String()] = tblMap
 	}
-
-	rowsForJoinTable, found := tblMap[jtName]
-	if !found {
-		rowsForJoinTable = make(map[int]int)
-		tblMap[jtName] = rowsForJoinTable
-	}
-	rowsForJoinTable[rowID] = rowID
+	tblMap[rowID] = jtName
 }
 
-func (h *jtRefsServiceImpl) RemoveEntry(handle types.ReteHandle, jtName string) {
+func (h *jtRefsServiceImpl) RemoveEntry(handle types.ReteHandle, jtName string, rowID int) {
 	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
 	if found {
-		delete(tblMap, jtName)
+		delete(tblMap, rowID)
 	}
-}
-
-func (h *jtRefsServiceImpl) RemoveRowEntry(handle types.ReteHandle, jtName string, rowID int) {
-	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
-	if found {
-		rowIDs, fnd := tblMap[jtName]
-		if fnd {
-			delete(rowIDs, rowID)
-		}
-	}
-}
-
-func (h *jtRefsServiceImpl) RemoveTableEntry(handle types.ReteHandle, jtName string) {
-	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
-	if found {
-		delete(tblMap, jtName)
-	}
-}
-
-func (h *jtRefsServiceImpl) GetTableIterator(handle types.ReteHandle) types.JointableIterator {
-	ri := hdlRefsTableIterator{}
-	ri.nw = h.Nw
-	ri.kList = list.List{}
-
-	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
-	if found {
-		ri.tblMap = tblMap
-		for k, _ := range tblMap {
-			ri.kList.PushBack(k)
-		}
-	}
-	ri.curr = ri.kList.Front()
-	return &ri
-}
-
-type hdlRefsTableIterator struct {
-	tblMap     map[string]map[int]int
-	kList      list.List
-	currJtName string
-	curr       *list.Element
-	nw         types.Network
-}
-
-func (ri *hdlRefsTableIterator) HasNext() bool {
-	return ri.curr != nil
-}
-
-func (ri *hdlRefsTableIterator) Next() types.JoinTable {
-	ri.currJtName = ri.curr.Value.(string)
-	jT := ri.nw.GetJtService().GetJoinTable(ri.currJtName)
-	ri.curr = ri.curr.Next()
-	return jT
-}
-
-func (ri *hdlRefsTableIterator) Remove() {
-	delete(ri.tblMap, ri.currJtName)
 }
 
 type hdlRefsRowIterator struct {
-	jtName    string
-	rowIdMap  map[int]int
+	rowIdMap  map[int]string
 	kList     list.List
 	curr      *list.Element
 	currRowId int
@@ -115,36 +50,29 @@ func (ri *hdlRefsRowIterator) HasNext() bool {
 	return ri.curr != nil
 }
 
-func (ri *hdlRefsRowIterator) Next() types.JoinTableRow {
+func (ri *hdlRefsRowIterator) Next() (types.JoinTableRow, types.JoinTable) {
 	rowID := ri.curr.Value.(int)
 	ri.currRowId = rowID
-	var jtRow types.JoinTableRow
-	jT := ri.nw.GetJtService().GetJoinTable(ri.jtName)
-	if jT != nil {
-		jtRow = jT.GetRow(rowID)
-	}
 	ri.curr = ri.curr.Next()
-	return jtRow
+	jT := ri.nw.GetJtService().GetJoinTable(ri.rowIdMap[rowID])
+	if jT != nil {
+		return jT.GetRow(rowID), jT
+	}
+	return nil, jT
 }
 
 func (ri *hdlRefsRowIterator) Remove() {
 	delete(ri.rowIdMap, ri.currRowId)
 }
 
-func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle, jtName string) types.JointableRowIterator {
+func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle) types.JointableIterator {
 	ri := hdlRefsRowIterator{}
-	ri.jtName = jtName
 	ri.kList = list.List{}
 	ri.nw = h.Nw
 	tblMap := h.tablesAndRows[handle.GetTupleKey().String()]
-	if tblMap != nil {
-		rowMap := tblMap[jtName]
-		if rowMap != nil {
-			ri.rowIdMap = rowMap
-			for k, _ := range ri.rowIdMap {
-				ri.kList.PushBack(k)
-			}
-		}
+	ri.rowIdMap = tblMap
+	for rowID := range tblMap {
+		ri.kList.PushBack(rowID)
 	}
 	ri.curr = ri.kList.Front()
 	return &ri

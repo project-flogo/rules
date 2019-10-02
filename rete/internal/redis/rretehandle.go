@@ -61,12 +61,7 @@ func (hdl *reteHandleImpl) AddJoinTableRowRef(joinTableRowVar types.JoinTableRow
 	hdl.Nw.GetJtRefService().AddEntry(hdl, joinTableVar.GetName(), joinTableRowVar.GetID())
 }
 
-//Used when a rule is deleted. See Network.RemoveRule
-func (hdl *reteHandleImpl) RemoveJoinTable(jtName string) {
-	hdl.Nw.GetJtRefService().RemoveEntry(hdl, jtName)
-}
-
 func (hdl *reteHandleImpl) GetRefTableIterator() types.JointableIterator {
-	refTblIterator := hdl.Nw.GetJtRefService().GetTableIterator(hdl)
+	refTblIterator := hdl.Nw.GetJtRefService().GetRowIterator(hdl)
 	return refTblIterator
 }

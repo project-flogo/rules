@@ -16,9 +16,11 @@ type joinTableRowImpl struct {
 }
 
 func newJoinTableRow(jtKey string, handles []types.ReteHandle, nw types.Network) types.JoinTableRow {
-	jtr := joinTableRowImpl{}
+	jtr := joinTableRowImpl{
+		handles: append([]types.ReteHandle{}, handles...),
+		jtKey:   jtKey,
+	}
 	jtr.SetID(nw)
-	jtr.initJoinTableRow(jtKey, handles, nw)
 	return &jtr
 }
 
@@ -32,26 +34,18 @@ func newJoinTableRowLoadedFromStore(jtKey string, rowID int, handles []types.Ret
 	return &jtr
 }
 
-func (jtr *joinTableRowImpl) initJoinTableRow(jtKey string, handles []types.ReteHandle, nw types.Network) {
-	jtr.jtKey = jtKey
-	jtr.handles = append([]types.ReteHandle{}, handles...)
-
-	rowEntry := make(map[string]interface{})
-
-	str := ""
-
+func (jtr *joinTableRowImpl) Write() {
+	handles, row := jtr.handles, make(map[string]interface{})
+	end, str := len(handles)-1, ""
 	for i, v := range handles {
 		str += v.GetTupleKey().String()
-		if i < len(handles)-1 {
+		if i < end {
 			str += ","
 		}
 	}
-
-	rowEntry[strconv.Itoa(jtr.ID)] = str
-
+	row[strconv.Itoa(jtr.ID)] = str
 	hdl := redisutils.GetRedisHdl()
-	hdl.HSetAll(jtKey, rowEntry)
-
+	hdl.HSetAll(jtr.jtKey, row)
 }
 
 func (jtr *joinTableRowImpl) GetHandles() []types.ReteHandle {

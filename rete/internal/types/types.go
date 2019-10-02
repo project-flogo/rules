@@ -31,6 +31,7 @@ type JoinTable interface {
 
 type JoinTableRow interface {
 	NwElemId
+	Write()
 	GetHandles() []ReteHandle
 }
 
@@ -46,11 +47,8 @@ type ReteHandle interface {
 type JtRefsService interface {
 	NwService
 	AddEntry(handle ReteHandle, jtName string, rowID int)
-	RemoveRowEntry(handle ReteHandle, jtName string, rowID int)
-	RemoveTableEntry(handle ReteHandle, jtName string)
-	RemoveEntry(handle ReteHandle, jtName string)
-	GetTableIterator(handle ReteHandle) JointableIterator
-	GetRowIterator(handle ReteHandle, jtName string) JointableRowIterator
+	RemoveEntry(handle ReteHandle, jtName string, rowID int)
+	GetRowIterator(handle ReteHandle) JointableIterator
 }
 
 type JtService interface {
@@ -75,7 +73,7 @@ type IdGen interface {
 
 type JointableIterator interface {
 	HasNext() bool
-	Next() JoinTable
+	Next() (JoinTableRow, JoinTable)
 	Remove()
 }
 

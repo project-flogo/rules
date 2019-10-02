@@ -29,14 +29,12 @@ func (jt *joinTableImpl) initJoinTableImpl(nw types.Network, rule model.Rule, id
 }
 
 func (jt *joinTableImpl) AddRow(handles []types.ReteHandle) types.JoinTableRow {
-
 	row := newJoinTableRow(handles, jt.Nw)
-
-	jt.table[row.GetID()] = row
 	for i := 0; i < len(row.GetHandles()); i++ {
 		handle := row.GetHandles()[i]
 		jt.Nw.GetJtRefService().AddEntry(handle, jt.name, row.GetID())
 	}
+	jt.table[row.GetID()] = row
 	return row
 }
 
@@ -76,7 +74,7 @@ func (jt *joinTableImpl) RemoveAllRows() {
 		//first, from jTable, remove row
 		jt.RemoveRow(row.GetID())
 		for _, hdl := range row.GetHandles() {
-			jt.Nw.GetJtRefService().RemoveTableEntry(hdl, jt.GetName())
+			jt.Nw.GetJtRefService().RemoveEntry(hdl, jt.GetName(), row.GetID())
 		}
 		//Delete the rowRef itself
 		rowIter.Remove()

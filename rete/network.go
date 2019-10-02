@@ -745,13 +745,13 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 	tuple := hdl.GetTuple()
 	alias := tuple.GetTupleType()
 
-	hdlTblIter := nw.jtRefsService.GetTableIterator(hdl)
-
+	hdlTblIter := nw.jtRefsService.GetRowIterator(hdl)
 	for hdlTblIter.HasNext() {
-		joinTable := hdlTblIter.Next()
-		if joinTable == nil {
+		row, joinTable := hdlTblIter.Next()
+		if row == nil || joinTable == nil {
 			continue
 		}
+
 		toDelete := false
 		if changedProps != nil {
 			rule := joinTable.GetRule()
@@ -773,26 +773,11 @@ func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedP
 			continue
 		}
 
-		nw.removeJtRowsForTable(hdl, joinTable)
-	}
-	//TODO: Remove the current entry from underneath
-	hdlTblIter.Remove()
-}
-
-func (nw *reteNetworkImpl) removeJtRowsForTable(hdl types.ReteHandle, joinTable types.JoinTable) {
-	rowIter := nw.jtRefsService.GetRowIterator(hdl, joinTable.GetName())
-	////Remove rows from corresponding join tables
-	for rowIter.HasNext() {
-		row := rowIter.Next()
-		//first, from jTable, remove row
 		joinTable.RemoveRow(row.GetID())
 		for _, otherHdl := range row.GetHandles() {
-			//if otherHdl.GetTupleKey().String() != hdl.GetTupleKey().String() {
-			nw.jtRefsService.RemoveRowEntry(otherHdl, joinTable.GetName(), row.GetID())
-			//}
+			nw.jtRefsService.RemoveEntry(otherHdl, joinTable.GetName(), row.GetID())
 		}
-		//TODO: Delete the rowRef itself
-		rowIter.Remove()
+		hdlTblIter.Remove()
 	}
 }
 

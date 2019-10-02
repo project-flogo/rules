@@ -8,14 +8,15 @@ type joinTableRowImpl struct {
 }
 
 func newJoinTableRow(handles []types.ReteHandle, nw types.Network) types.JoinTableRow {
-	jtr := joinTableRowImpl{}
-	jtr.initJoinTableRow(handles, nw)
+	jtr := joinTableRowImpl{
+		handles: append([]types.ReteHandle{}, handles...),
+	}
+	jtr.SetID(nw)
 	return &jtr
 }
 
-func (jtr *joinTableRowImpl) initJoinTableRow(handles []types.ReteHandle, nw types.Network) {
-	jtr.SetID(nw)
-	jtr.handles = append([]types.ReteHandle{}, handles...)
+func (jtr *joinTableRowImpl) Write() {
+
 }
 
 func (jtr *joinTableRowImpl) GetHandles() []types.ReteHandle {

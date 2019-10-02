@@ -36,6 +36,7 @@ func (jt *joinTableImpl) AddRow(handles []types.ReteHandle) types.JoinTableRow {
 		handle := row.GetHandles()[i]
 		jt.Nw.GetJtRefService().AddEntry(handle, jt.name, row.GetID())
 	}
+	row.Write()
 	return row
 }
 
@@ -54,7 +55,7 @@ func (jt *joinTableImpl) RemoveAllRows() {
 		//first, from jTable, remove row
 		jt.RemoveRow(row.GetID())
 		for _, hdl := range row.GetHandles() {
-			jt.Nw.GetJtRefService().RemoveTableEntry(hdl, jt.GetName())
+			jt.Nw.GetJtRefService().RemoveEntry(hdl, jt.GetName(), row.GetID())
 		}
 		//Delete the rowRef itself
 		rowIter.Remove()
