@@ -1,6 +1,8 @@
 package mem
 
 import (
+	"sync"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
@@ -8,6 +10,7 @@ import (
 type jtServiceImpl struct {
 	types.NwServiceImpl
 	allJoinTables map[string]types.JoinTable
+	sync.RWMutex
 }
 
 func NewJoinTableCollection(nw types.Network, config map[string]interface{}) types.JtService {
@@ -16,15 +19,20 @@ func NewJoinTableCollection(nw types.Network, config map[string]interface{}) typ
 	jtc.allJoinTables = make(map[string]types.JoinTable)
 	return &jtc
 }
+
 func (jtc *jtServiceImpl) Init() {
 
 }
 
 func (jtc *jtServiceImpl) GetJoinTable(joinTableName string) types.JoinTable {
+	jtc.RLock()
+	defer jtc.RUnlock()
 	return jtc.allJoinTables[joinTableName]
 }
 
 func (jtc *jtServiceImpl) GetOrCreateJoinTable(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
+	jtc.Lock()
+	defer jtc.Unlock()
 	jT, found := jtc.allJoinTables[name]
 	if !found {
 		jT = newJoinTableImpl(nw, rule, identifiers, name)

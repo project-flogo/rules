@@ -1,6 +1,8 @@
 package mem
 
 import (
+	"sync"
+
 	"container/list"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/rete/internal/types"
@@ -12,6 +14,7 @@ type joinTableImpl struct {
 	idr   []model.TupleType
 	rule  model.Rule
 	name  string
+	sync.RWMutex
 }
 
 func newJoinTableImpl(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
@@ -34,11 +37,15 @@ func (jt *joinTableImpl) AddRow(handles []types.ReteHandle) types.JoinTableRow {
 		handle := row.GetHandles()[i]
 		jt.Nw.GetJtRefService().AddEntry(handle, jt.name, row.GetID())
 	}
+	jt.Lock()
+	defer jt.Unlock()
 	jt.table[row.GetID()] = row
 	return row
 }
 
 func (jt *joinTableImpl) RemoveRow(rowID int) types.JoinTableRow {
+	jt.Lock()
+	defer jt.Unlock()
 	row, found := jt.table[rowID]
 	if found {
 		delete(jt.table, rowID)
@@ -48,6 +55,8 @@ func (jt *joinTableImpl) RemoveRow(rowID int) types.JoinTableRow {
 }
 
 func (jt *joinTableImpl) GetRowCount() int {
+	jt.RLock()
+	defer jt.RUnlock()
 	return len(jt.table)
 }
 
@@ -56,10 +65,12 @@ func (jt *joinTableImpl) GetRule() model.Rule {
 }
 
 func (jt *joinTableImpl) GetRowIterator() types.JointableRowIterator {
-	return newRowIterator(jt.table)
+	return newRowIterator(jt)
 }
 
 func (jt *joinTableImpl) GetRow(rowID int) types.JoinTableRow {
+	jt.RLock()
+	defer jt.RUnlock()
 	return jt.table[rowID]
 }
 
@@ -82,20 +93,22 @@ func (jt *joinTableImpl) RemoveAllRows() {
 }
 
 type rowIteratorImpl struct {
-	table   map[int]types.JoinTableRow
-	kList   list.List
+	table   *joinTableImpl
+	list    list.List
 	currKey int
 	curr    *list.Element
 }
 
-func newRowIterator(jTable map[int]types.JoinTableRow) types.JointableRowIterator {
-	ri := rowIteratorImpl{}
-	ri.table = jTable
-	ri.kList = list.List{}
-	for k, _ := range jTable {
-		ri.kList.PushBack(k)
+func newRowIterator(jt *joinTableImpl) types.JointableRowIterator {
+	ri := rowIteratorImpl{
+		table: jt,
 	}
-	ri.curr = ri.kList.Front()
+	jt.RLock()
+	defer jt.RUnlock()
+	for k := range jt.table {
+		ri.list.PushBack(k)
+	}
+	ri.curr = ri.list.Front()
 	return &ri
 }
 
@@ -105,11 +118,14 @@ func (ri *rowIteratorImpl) HasNext() bool {
 
 func (ri *rowIteratorImpl) Next() types.JoinTableRow {
 	ri.currKey = ri.curr.Value.(int)
-	val := ri.table[ri.currKey]
 	ri.curr = ri.curr.Next()
-	return val
+	ri.table.RLock()
+	defer ri.table.RUnlock()
+	return ri.table.table[ri.currKey]
 }
 
 func (ri *rowIteratorImpl) Remove() {
-	delete(ri.table, ri.currKey)
+	ri.table.Lock()
+	defer ri.table.Unlock()
+	delete(ri.table.table, ri.currKey)
 }

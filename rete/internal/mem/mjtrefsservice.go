@@ -1,20 +1,27 @@
 package mem
 
 import (
+	"sync"
+
 	"container/list"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
+type jtRowsImpl struct {
+	rows map[int]string
+	sync.RWMutex
+}
+
 type jtRefsServiceImpl struct {
-	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
 	types.NwServiceImpl
-	tablesAndRows map[string]map[int]string
+	tablesAndRows map[string]*jtRowsImpl
+	sync.RWMutex
 }
 
 func NewJoinTableRefsInHdlImpl(nw types.Network, config map[string]interface{}) types.JtRefsService {
 	hdlJt := jtRefsServiceImpl{}
 	hdlJt.Nw = nw
-	hdlJt.tablesAndRows = make(map[string]map[int]string)
+	hdlJt.tablesAndRows = make(map[string]*jtRowsImpl)
 	return &hdlJt
 }
 
@@ -23,38 +30,57 @@ func (h *jtRefsServiceImpl) Init() {
 }
 
 func (h *jtRefsServiceImpl) AddEntry(handle types.ReteHandle, jtName string, rowID int) {
-	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
+	key := handle.GetTupleKey().String()
+	h.Lock()
+	defer h.Unlock()
+	tblMap, found := h.tablesAndRows[key]
 	if !found {
-		tblMap = make(map[int]string)
+		tblMap = &jtRowsImpl{
+			rows: make(map[int]string),
+		}
 		h.tablesAndRows[handle.GetTupleKey().String()] = tblMap
 	}
-	tblMap[rowID] = jtName
+	tblMap.Lock()
+	defer tblMap.Unlock()
+	tblMap.rows[rowID] = jtName
 }
 
 func (h *jtRefsServiceImpl) RemoveEntry(handle types.ReteHandle, jtName string, rowID int) {
-	tblMap, found := h.tablesAndRows[handle.GetTupleKey().String()]
+	key := handle.GetTupleKey().String()
+	h.Lock()
+	defer h.Unlock()
+	tblMap, found := h.tablesAndRows[key]
 	if found {
-		delete(tblMap, rowID)
+		tblMap.Lock()
+		defer tblMap.Unlock()
+		delete(tblMap.rows, rowID)
+		if len(tblMap.rows) == 0 {
+			delete(h.tablesAndRows, key)
+		}
 	}
 }
 
 type hdlRefsRowIterator struct {
-	rowIdMap  map[int]string
-	kList     list.List
-	curr      *list.Element
-	currRowId int
-	nw        types.Network
+	refs    *jtRefsServiceImpl
+	key     string
+	rows    *jtRowsImpl
+	list    list.List
+	current *list.Element
+	rowID   int
+	nw      types.Network
 }
 
 func (ri *hdlRefsRowIterator) HasNext() bool {
-	return ri.curr != nil
+	return ri.current != nil
 }
 
 func (ri *hdlRefsRowIterator) Next() (types.JoinTableRow, types.JoinTable) {
-	rowID := ri.curr.Value.(int)
-	ri.currRowId = rowID
-	ri.curr = ri.curr.Next()
-	jT := ri.nw.GetJtService().GetJoinTable(ri.rowIdMap[rowID])
+	rowID := ri.current.Value.(int)
+	ri.rowID = rowID
+	ri.current = ri.current.Next()
+	ri.rows.RLock()
+	defer ri.rows.RUnlock()
+	jT := ri.nw.GetJtService().GetJoinTable(ri.rows.rows[rowID])
 	if jT != nil {
 		return jT.GetRow(rowID), jT
 	}
@@ -62,18 +88,33 @@ func (ri *hdlRefsRowIterator) Next() (types.JoinTableRow, types.JoinTable) {
 }
 
 func (ri *hdlRefsRowIterator) Remove() {
-	delete(ri.rowIdMap, ri.currRowId)
+	ri.rows.Lock()
+	defer ri.rows.Unlock()
+	delete(ri.rows.rows, ri.rowID)
+	if len(ri.rows.rows) == 0 {
+		ri.refs.Lock()
+		defer ri.refs.Unlock()
+		delete(ri.refs.tablesAndRows, ri.key)
+	}
 }
 
 func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle) types.JointableIterator {
-	ri := hdlRefsRowIterator{}
-	ri.kList = list.List{}
-	ri.nw = h.Nw
-	tblMap := h.tablesAndRows[handle.GetTupleKey().String()]
-	ri.rowIdMap = tblMap
-	for rowID := range tblMap {
-		ri.kList.PushBack(rowID)
+	key := handle.GetTupleKey().String()
+	ri := hdlRefsRowIterator{
+		refs: h,
+		key:  key,
+		nw:   h.Nw,
 	}
-	ri.curr = ri.kList.Front()
+	h.RLock()
+	defer h.RUnlock()
+	tblMap := h.tablesAndRows[key]
+	if tblMap == nil {
+		return &ri
+	}
+	ri.rows = tblMap
+	for rowID := range tblMap.rows {
+		ri.list.PushBack(rowID)
+	}
+	ri.current = ri.list.Front()
 	return &ri
 }

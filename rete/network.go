@@ -35,7 +35,6 @@ type reteNetworkImpl struct {
 	//handleService map[string]types.ReteHandle
 	handleService types.HandleService
 
-	crudLock   sync.RWMutex
 	txnHandler []model.RtcTransactionHandler
 	txnContext []interface{}
 
@@ -50,6 +49,8 @@ type reteNetworkImpl struct {
 	idGen         types.IdGen
 	tupleStore    model.TupleStore
 	joinNodeNames int
+
+	sync.RWMutex
 }
 
 //NewReteNetwork ... creates a new rete network
@@ -95,9 +96,8 @@ func (nw *reteNetworkImpl) initNwServices() {
 }
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
-
-	nw.crudLock.Lock()
-	defer nw.crudLock.Unlock()
+	nw.Lock()
+	defer nw.Unlock()
 
 	if nw.allRules[rule.GetName()] != nil {
 		return fmt.Errorf("Rule already exists.." + rule.GetName())
@@ -160,9 +160,8 @@ func (nw *reteNetworkImpl) setClassNodeAndLinkJoinTables(nodesOfRule *list.List,
 }
 
 func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
-
-	nw.crudLock.Lock()
-	defer nw.crudLock.Unlock()
+	nw.Lock()
+	defer nw.Unlock()
 
 	rule := nw.allRules[ruleName]
 	delete(nw.allRules, ruleName)
@@ -202,8 +201,8 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 }
 
 func (nw *reteNetworkImpl) GetRules() []model.Rule {
-	nw.crudLock.RLock()
-	defer nw.crudLock.RUnlock()
+	nw.RLock()
+	defer nw.RUnlock()
 
 	rules := make([]model.Rule, 0)
 
@@ -493,8 +492,8 @@ func getClassNode(nw *reteNetworkImpl, name model.TupleType) classNode {
 }
 
 func (nw *reteNetworkImpl) String() string {
-	nw.crudLock.RLock()
-	defer nw.crudLock.RUnlock()
+	nw.RLock()
+	defer nw.RUnlock()
 
 	str := "\n>>> Class View <<<\n"
 	for _, classNodeImpl := range nw.allClassNodes {
@@ -529,8 +528,8 @@ func pickIdentifier(idrs []model.TupleType) model.TupleType {
 }
 
 func (nw *reteNetworkImpl) PrintRule(rule model.Rule) string {
-	nw.crudLock.RLock()
-	defer nw.crudLock.RUnlock()
+	nw.RLock()
+	defer nw.RUnlock()
 
 	//str := "[Rule (" + rule.GetName() + ") Id(" + strconv.Itoa(rule.GetID()) + ")]\n"
 	str := "[Rule (" + rule.GetName() + ") Id()]\n"
@@ -575,8 +574,8 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	reteCtxVar, isRecursive, newCtx := getOrSetReteCtx(ctx, nw, rs)
 
 	if !isRecursive {
-		nw.crudLock.Lock()
-		defer nw.crudLock.Unlock()
+		nw.RLock()
+		defer nw.RUnlock()
 
 		err := nw.assertInternal(newCtx, tuple, changedProps, mode)
 		if err != nil {
@@ -591,8 +590,8 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 				nw.removeTupleFromRete(tuple)
 			} else if td.TTLInSeconds > 0 { // TTL for the tuple type, after that, remove it from RETE
 				time.AfterFunc(time.Second*time.Duration(td.TTLInSeconds), func() {
-					nw.crudLock.Lock()
-					defer nw.crudLock.Unlock()
+					nw.RLock()
+					defer nw.RUnlock()
 					nw.removeTupleFromRete(tuple)
 				})
 			} //else, its -ve and means, never expire
@@ -624,8 +623,8 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, rs model.RuleSession, tu
 	}
 	reteCtxVar, isRecursive, ctx := getOrSetReteCtx(ctx, nw, rs)
 	if !isRecursive {
-		nw.crudLock.Lock()
-		defer nw.crudLock.Unlock()
+		nw.RLock()
+		defer nw.RUnlock()
 		err := nw.retractInternal(ctx, tuple, changedProps, mode)
 		if err != nil {
 			return err

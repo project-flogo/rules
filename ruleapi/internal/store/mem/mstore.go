@@ -2,17 +2,20 @@ package mem
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/project-flogo/rules/common/model"
 )
 
 type storeImpl struct {
 	allTuples map[string]model.Tuple
+	sync.RWMutex
 }
 
 func NewStore(jsonConfig map[string]interface{}) model.TupleStore {
-	ms := storeImpl{}
-
-	ms.allTuples = make(map[string]model.Tuple)
+	ms := storeImpl{
+		allTuples: make(map[string]model.Tuple),
+	}
 	return &ms
 }
 
@@ -21,14 +24,20 @@ func (ms *storeImpl) Init() {
 }
 
 func (ms *storeImpl) GetTupleByKey(key model.TupleKey) model.Tuple {
+	ms.RLock()
+	defer ms.RUnlock()
 	return ms.allTuples[key.String()]
 }
 
 func (ms *storeImpl) SaveTuple(tuple model.Tuple) {
+	ms.Lock()
+	defer ms.Unlock()
 	ms.allTuples[tuple.GetKey().String()] = tuple
 }
 
 func (ms *storeImpl) DeleteTuple(key model.TupleKey) {
+	ms.Lock()
+	defer ms.Unlock()
 	delete(ms.allTuples, key.String())
 }
 
