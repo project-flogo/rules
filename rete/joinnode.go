@@ -180,9 +180,20 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []types.Ret
 	jn.rightTable.AddRow(handles)
 	//TODO: rete listeners etc.
 	rIterator := jn.leftTable.GetRowIterator()
+LOOP:
 	for rIterator.HasNext() {
 		tupleTableRowLeft := rIterator.Next()
-		success := jn.joinLeftObjects(tupleTableRowLeft.GetHandles(), joinedHandles)
+		handles := tupleTableRowLeft.GetHandles()
+		for _, handle := range handles {
+			if jn.GetNw().GetHandleService().GetHandle(handle.GetTuple()) == nil {
+				rIterator.Remove()
+				for _, otherHdl := range handles {
+					jn.GetNw().GetJtRefService().RemoveEntry(otherHdl, jn.leftTable.GetName(), tupleTableRowLeft.GetID())
+				}
+				continue LOOP
+			}
+		}
+		success := jn.joinLeftObjects(handles, joinedHandles)
 		if !success {
 			//TODO: handle it
 			continue
@@ -236,9 +247,20 @@ func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []types.Rete
 	jn.leftTable.AddRow(handles)
 	//TODO: rete listeners etc.
 	rIterator := jn.rightTable.GetRowIterator()
+LOOP:
 	for rIterator.HasNext() {
 		tupleTableRowRight := rIterator.Next()
-		success := jn.joinRightObjects(tupleTableRowRight.GetHandles(), joinedHandles)
+		handles := tupleTableRowRight.GetHandles()
+		for _, handle := range handles {
+			if jn.GetNw().GetHandleService().GetHandle(handle.GetTuple()) == nil {
+				rIterator.Remove()
+				for _, otherHdl := range handles {
+					jn.GetNw().GetJtRefService().RemoveEntry(otherHdl, jn.rightTable.GetName(), tupleTableRowRight.GetID())
+				}
+				continue LOOP
+			}
+		}
+		success := jn.joinRightObjects(handles, joinedHandles)
 		if !success {
 			//TODO: handle it
 			continue

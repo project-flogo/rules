@@ -35,13 +35,22 @@ type JoinTableRow interface {
 	GetHandles() []ReteHandle
 }
 
+type ReteHandleStatus uint
+
+const (
+	ReteHandleStatusUnknown ReteHandleStatus = iota
+	ReteHandleStatusCreating
+	ReteHandleStatusCreated
+	ReteHandleStatusDeleting
+)
+
 type ReteHandle interface {
 	NwElemId
 	SetTuple(tuple model.Tuple)
 	GetTuple() model.Tuple
 	GetTupleKey() model.TupleKey
-	SetStatus(status string)
-	GetStatus() string
+	SetStatus(status ReteHandleStatus)
+	GetStatus() ReteHandleStatus
 }
 
 type JtRefsService interface {

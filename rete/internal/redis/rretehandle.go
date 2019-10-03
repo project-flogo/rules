@@ -13,11 +13,11 @@ type reteHandleImpl struct {
 	tuple    model.Tuple
 	tupleKey model.TupleKey
 	key      string
-	status   string
+	status   types.ReteHandleStatus
 	//jtRefs   types.JtRefsService
 }
 
-func newReteHandleImpl(nw types.Network, tuple model.Tuple, key, status string) types.ReteHandle {
+func newReteHandleImpl(nw types.Network, tuple model.Tuple, key string, status types.ReteHandleStatus) types.ReteHandle {
 	h1 := reteHandleImpl{}
 	h1.initHandleImpl(nw, tuple, key, status)
 	return &h1
@@ -30,7 +30,7 @@ func (hdl *reteHandleImpl) SetTuple(tuple model.Tuple) {
 	}
 }
 
-func (hdl *reteHandleImpl) initHandleImpl(nw types.Network, tuple model.Tuple, key, status string) {
+func (hdl *reteHandleImpl) initHandleImpl(nw types.Network, tuple model.Tuple, key string, status types.ReteHandleStatus) {
 	hdl.SetID(nw)
 	hdl.SetTuple(tuple)
 	hdl.tupleKey = tuple.GetKey()
@@ -46,14 +46,14 @@ func (hdl *reteHandleImpl) GetTupleKey() model.TupleKey {
 	return hdl.tupleKey
 }
 
-func (hdl *reteHandleImpl) SetStatus(status string) {
+func (hdl *reteHandleImpl) SetStatus(status types.ReteHandleStatus) {
 	if hdl.key == "" {
 		return
 	}
-	redisutils.GetRedisHdl().HSetNX(hdl.key, "status", status)
+	redisutils.GetRedisHdl().HSet(hdl.key, "status", status)
 }
 
-func (hdl *reteHandleImpl) GetStatus() string {
+func (hdl *reteHandleImpl) GetStatus() types.ReteHandleStatus {
 	return hdl.status
 }
 

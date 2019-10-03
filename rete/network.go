@@ -646,9 +646,10 @@ func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tupl
 	handle := nw.handleService.GetHandle(tuple)
 	if handle == nil {
 		return fmt.Errorf("Tuple with key [%s] doesn't exist", tuple.GetKey().String())
-	} else if handle.GetStatus() != "created" {
-		return fmt.Errorf("Tuple with key [%s] is being asserted", tuple.GetKey().String())
+	} else if handle.GetStatus() != types.ReteHandleStatusCreated {
+		return fmt.Errorf("Tuple with key [%s] is being asserted or deleted: %d", tuple.GetKey().String(), handle.GetStatus())
 	}
+	handle.SetStatus(types.ReteHandleStatusDeleting)
 
 	if ctx == nil {
 		ctx = context.Background()
@@ -679,7 +680,7 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 		if exists {
 			return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
 		}
-		defer handle.SetStatus("created")
+		defer handle.SetStatus(types.ReteHandleStatusCreated)
 	}
 
 	tupleType := tuple.GetTupleType()

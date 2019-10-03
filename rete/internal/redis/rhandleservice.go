@@ -1,6 +1,8 @@
 package redis
 
 import (
+	"strconv"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/redisutils"
 	"github.com/project-flogo/rules/rete/internal/types"
@@ -34,7 +36,7 @@ func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {
 	rkey := hc.prefix + tuple.GetKey().String()
 	redisutils.GetRedisHdl().Del(rkey)
 	//TODO: Dummy handle
-	h := newReteHandleImpl(hc.GetNw(), tuple, rkey, "dummy")
+	h := newReteHandleImpl(hc.GetNw(), tuple, rkey, types.ReteHandleStatusUnknown)
 	return h
 
 }
@@ -56,26 +58,42 @@ func (hc *handleServiceImpl) GetHandleByKey(key model.TupleKey) types.ReteHandle
 		//TODO: error handling
 		return nil
 	}
-	status := ""
+	status := types.ReteHandleStatusUnknown
 	if value, ok := m["status"]; ok {
 		if value, ok := value.(string); ok {
-			status = value
+			number, err := strconv.Atoi(value)
+			if err != nil {
+				panic(err)
+			}
+			status = types.ReteHandleStatus(number)
+		} else {
+			panic("status not string")
 		}
+	} else {
+		panic("missing status")
 	}
 	h := newReteHandleImpl(hc.GetNw(), tuple, rkey, status)
 	return h
 }
 
 func (hc *handleServiceImpl) GetOrCreateHandle(nw types.Network, tuple model.Tuple) (types.ReteHandle, bool) {
-	key, status := hc.prefix+tuple.GetKey().String(), "creating"
+	key, status := hc.prefix+tuple.GetKey().String(), types.ReteHandleStatusCreating
 	exists, _ := redisutils.GetRedisHdl().HSetNX(key, "status", status)
 	if exists {
 		m := redisutils.GetRedisHdl().HGetAll(key)
 		if len(m) > 0 {
 			if value, ok := m["status"]; ok {
 				if value, ok := value.(string); ok {
-					status = value
+					number, err := strconv.Atoi(value)
+					if err != nil {
+						panic(err)
+					}
+					status = types.ReteHandleStatus(number)
+				} else {
+					panic("status not string")
 				}
+			} else {
+				panic("missing status")
 			}
 		}
 	}

@@ -22,12 +22,14 @@ func main() {
 	//First register the tuple descriptors
 	err := model.RegisterTupleDescriptors(tupleDescriptor)
 	if err != nil {
-		fmt.Printf("Error [%s]\n", err)
-		return
+		panic(err)
 	}
 
 	//Create a RuleSession
-	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
+	rs, err := ruleapi.GetOrCreateRuleSession("asession")
+	if err != nil {
+		panic(err)
+	}
 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")
@@ -37,10 +39,16 @@ func main() {
 		Function: checkForBobAction,
 		Type:     "function",
 	}
-	aService, _ := ruleapi.NewActionService(serviceCfg)
+	aService, err := ruleapi.NewActionService(serviceCfg)
+	if err != nil {
+		panic(err)
+	}
 	rule.SetActionService(aService)
 	rule.SetContext("This is a test of context")
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
 
 	// check for name "Bob" in n1, match the "name" field in n2,
@@ -54,14 +62,20 @@ func main() {
 		Type:     "function",
 	}
 	aService2, _ := ruleapi.NewActionService(serviceCfg2)
-	rule.SetActionService(aService2)
-	rs.AddRule(rule2)
+	rule2.SetActionService(aService2)
+	err = rs.AddRule(rule2)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
 	//set a transaction handler
 	rs.RegisterRtcTransactionHandler(txHandler, nil)
 	//Start the rule session
-	rs.Start(nil)
+	err = rs.Start(nil)
+	if err != nil {
+		panic(err)
+	}
 
 	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Tom")
@@ -69,20 +83,20 @@ func main() {
 	t1.SetString(nil, "name", "Tom")
 	err = rs.Assert(nil, t1)
 	if err != nil {
-		fmt.Printf("Warn: [%s]\n", err)
+		panic(err)
+	}
+	t11 := rs.GetStore().GetTupleByKey(t1.GetKey())
+	if t11 == nil {
+		panic(fmt.Errorf("Warn: Tuple should be in store[%s]", t11.GetKey()))
 	}
 
-	t11 := rs.GetStore().GetTupleByKey(t1.GetKey())
-	if t11 != nil {
-		fmt.Printf("Warn: Tuple already in store[%s]\n", t11.GetKey())
-	}
 	//Now assert a "n1" tuple
 	fmt.Println("Asserting n1 tuple with name=Bob")
 	t2, _ := model.NewTupleWithKeyValues("n1", "Bob")
 	t2.SetString(nil, "name", "Bob")
 	err = rs.Assert(nil, t2)
 	if err != nil {
-		fmt.Printf("Warn: [%s]\n", err)
+		panic(err)
 	}
 
 	//Now assert a "n2" tuple
@@ -91,13 +105,22 @@ func main() {
 	t3.SetString(nil, "name", "Bob")
 	err = rs.Assert(nil, t3)
 	if err != nil {
-		fmt.Printf("Warn: [%s]\n", err)
+		panic(err)
 	}
 
 	//Retract tuples
-	rs.Retract(nil, t1)
-	rs.Retract(nil, t2)
-	rs.Retract(nil, t3)
+	err = rs.Retract(nil, t1)
+	if err != nil {
+		panic(err)
+	}
+	err = rs.Retract(nil, t2)
+	if err != nil {
+		panic(err)
+	}
+	err = rs.Retract(nil, t3)
+	if err != nil {
+		panic(err)
+	}
 
 	//delete the rule
 	rs.DeleteRule(rule2.GetName())
