@@ -7,6 +7,8 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var actCnt uint64
@@ -14,40 +16,46 @@ var actCnt uint64
 //Forward chain-Data change in r3action and r32action triggers the r32action.
 func Test_Three(t *testing.T) {
 	actCnt = 0
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	actionMap := make(map[string]string)
 
 	rule := ruleapi.NewRule("R3")
-	rule.AddCondition("R3c1", []string{"t1.id"}, trueCondition, nil)
+	err = rule.AddCondition("R3c1", []string{"t1.id"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r3action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rule1 := ruleapi.NewRule("R32")
-	rule1.AddCondition("R32c1", []string{"t1.p1"}, r3Condition, nil)
+	err = rule1.AddCondition("R32c1", []string{"t1.p1"}, r3Condition, nil)
+	assert.Nil(t, err)
 	rule1.SetActionService(createActionServiceFromFunction(t, r32action))
 	rule1.SetPriority(1)
 	rule1.SetContext(actionMap)
-	rs.AddRule(rule1)
+	err = rs.AddRule(rule1)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule1.GetName())
 
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	t1.SetInt(context.TODO(), "p1", 2000)
-	err := rs.Assert(context.TODO(), t1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = t1.SetInt(context.TODO(), "p1", 2000)
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
 
-	t2, _ := model.NewTupleWithKeyValues("t1", "t11")
-	t2.SetInt(context.TODO(), "p1", 2000)
+	t2, err := model.NewTupleWithKeyValues("t1", "t11")
+	assert.Nil(t, err)
+	err = t2.SetInt(context.TODO(), "p1", 2000)
+	assert.Nil(t, err)
 	err = rs.Assert(context.TODO(), t2)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	if count := atomic.LoadUint64(&actCnt); count != 2 {
 		t.Errorf("Expecting [2] actions, got [%d]", count)

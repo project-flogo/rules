@@ -6,77 +6,51 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //1 condition, 1 expression
 func Test_1_Expr(t *testing.T) {
 	actionCount := map[string]int{"count": 0}
 	rs, err := createRuleSession()
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	r1 := ruleapi.NewRule("r1")
 	err = r1.AddExprCondition("c1", "$.t2.p2 > $.t1.p1", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	r1.SetActionService(createActionServiceFromFunction(t, a1))
 	r1.SetContext(actionCount)
 	err = rs.AddRule(r1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	err = rs.Start(nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	var ctx context.Context
 
 	t1, err := model.NewTupleWithKeyValues("t1", "t1")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	err = t1.SetInt(nil, "p1", 1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	err = t1.SetDouble(nil, "p2", 1.3)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	err = t1.SetString(nil, "p3", "t3")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	ctx = context.WithValue(context.TODO(), TestKey{}, t)
 	err = rs.Assert(ctx, t1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	t2, err := model.NewTupleWithKeyValues("t2", "t2")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	err = t2.SetInt(nil, "p1", 1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	err = t2.SetDouble(nil, "p2", 1.0001)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	err = t2.SetString(nil, "p3", "t3")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	ctx = context.WithValue(context.TODO(), TestKey{}, t)
 	err = rs.Assert(ctx, t2)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	deleteRuleSession(t, rs, t1)
 

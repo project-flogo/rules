@@ -6,47 +6,49 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //2 rtcs, 1st rtc ->Asserted multiple tuple types and verify count, 2nd rtc -> Modified multiple tuple types and verify count.
 func Test_T9(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R9")
-	rule.AddCondition("R9_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	err = rule.AddCondition("R9_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r9_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	txnCtx := txnCtx{t, 0}
 	rs.RegisterRtcTransactionHandler(t9Handler, &txnCtx)
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	err := rs.Assert(context.TODO(), t1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
 
-	t2, _ := model.NewTupleWithKeyValues("t1", "t11")
+	t2, err := model.NewTupleWithKeyValues("t1", "t11")
+	assert.Nil(t, err)
 	err = rs.Assert(context.TODO(), t2)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
-	t3, _ := model.NewTupleWithKeyValues("t3", "t12")
+	t3, err := model.NewTupleWithKeyValues("t3", "t12")
+	assert.Nil(t, err)
 	err = rs.Assert(context.TODO(), t3)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
-	t4, _ := model.NewTupleWithKeyValues("t3", "t13")
+	t4, err := model.NewTupleWithKeyValues("t3", "t13")
+	assert.Nil(t, err)
 	err = rs.Assert(context.TODO(), t4)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	deleteRuleSession(t, rs, t1, t2, t3, t4)
 

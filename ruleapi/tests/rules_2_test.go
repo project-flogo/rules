@@ -8,6 +8,8 @@ import (
 	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Two(t *testing.T) {
@@ -31,30 +33,41 @@ func Test_Two(t *testing.T) {
 	if redis {
 		store = "rsconfig.json"
 	}
-	rs, _ := ruleapi.GetOrCreateRuleSession("asession", store)
+	rs, err := ruleapi.GetOrCreateRuleSession("asession", store)
+	assert.Nil(t, err)
 	actionFireCount := make(map[string]int)
 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("rule1")
-	rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
-	rule.AddCondition("c2", []string{"n1"}, checkForName, nil)
+	err = rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
+	assert.Nil(t, err)
+	err = rule.AddCondition("c2", []string{"n1"}, checkForName, nil)
+	assert.Nil(t, err)
 
 	rule.SetActionService(createActionServiceFromFunction(t, checkForBobAction))
 	rule.SetContext(actionFireCount)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
 
 	//Start the rule session
-	rs.Start(nil)
-	t1, _ := model.NewTupleWithKeyValues("n1", "Tom")
-	rs.Assert(nil, t1)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
+	t1, err := model.NewTupleWithKeyValues("n1", "Tom")
+	assert.Nil(t, err)
+	err = rs.Assert(nil, t1)
+	assert.Nil(t, err)
 
-	t2, _ := model.NewTupleWithKeyValues("n1", "Bob")
-	rs.Assert(nil, t2)
+	t2, err := model.NewTupleWithKeyValues("n1", "Bob")
+	assert.Nil(t, err)
+	err = rs.Assert(nil, t2)
+	assert.Nil(t, err)
 
 	//Retract tuples
-	rs.Retract(nil, t1)
-	rs.Retract(nil, t2)
+	err = rs.Retract(nil, t1)
+	assert.Nil(t, err)
+	err = rs.Retract(nil, t2)
+	assert.Nil(t, err)
 
 	if cnt, found := actionFireCount["count"]; found {
 		if cnt > 1 {

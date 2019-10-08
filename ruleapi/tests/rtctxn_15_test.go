@@ -8,6 +8,8 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var actionCnt uint64
@@ -15,18 +17,23 @@ var actionCnt uint64
 //1 rtc->Scheduled assert, Action should be fired after the delay time.
 func Test_T15(t *testing.T) {
 	actionCnt = 0
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R15")
-	rule.AddCondition("R15_c1", []string{"t1.none"}, trueCondition, nil)
+	err = rule.AddCondition("R15_c1", []string{"t1.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r15_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
 	rs.ScheduleAssert(context.TODO(), 1000, "1", t1)
 
 	if count := atomic.LoadUint64(&actionCnt); count != 0 {

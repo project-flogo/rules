@@ -6,28 +6,33 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //TTL = 0, asserted
 func Test_T2(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R2")
-	rule.AddCondition("R2_c1", []string{"t2.none"}, trueCondition, nil)
+	err = rule.AddCondition("R2_c1", []string{"t2.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, emptyAction))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rs.RegisterRtcTransactionHandler(t2Handler, t)
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t2", "t2")
-	err := rs.Assert(context.TODO(), t1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	t1, err := model.NewTupleWithKeyValues("t2", "t2")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
 	deleteRuleSession(t, rs)
 
 }

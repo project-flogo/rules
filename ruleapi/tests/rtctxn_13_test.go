@@ -6,45 +6,48 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //1 rtc->one assert triggers two rule actions each rule action deletes tuples.Verify Deleted Tuple types and Tuples count.
 func Test_T13(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R13")
-	rule.AddCondition("R13_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	err = rule.AddCondition("R13_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r13_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rule1 := ruleapi.NewRule("R132")
-	rule1.AddCondition("R132_c1", []string{"t3.none"}, trueCondition, nil)
+	err = rule1.AddCondition("R132_c1", []string{"t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule1.SetActionService(createActionServiceFromFunction(t, r132_action))
 	rule1.SetPriority(2)
-	rs.AddRule(rule1)
+	err = rs.AddRule(rule1)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule1.GetName())
 
 	txnCtx := txnCtx{t, 0}
 	rs.RegisterRtcTransactionHandler(t13Handler, &txnCtx)
-	err := rs.Start(nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
 	err = rs.Assert(context.TODO(), t1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
-	t2, _ := model.NewTupleWithKeyValues("t3", "t12")
+	t2, err := model.NewTupleWithKeyValues("t3", "t12")
+	assert.Nil(t, err)
 	err = rs.Assert(context.TODO(), t2)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	deleteRuleSession(t, rs)
 

@@ -6,59 +6,49 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //Retract
 func Test_Retract_1(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	//create a rule joining t1 and t3
 	rule := ruleapi.NewRule("Retract_Test")
-	err := rule.AddCondition("R7_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
-	if err != nil {
-		t.Logf("%s", err)
-		t.FailNow()
-	}
+	err = rule.AddCondition("R7_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	ruleActionCtx := make(map[string]string)
 	rule.SetContext(ruleActionCtx)
 	rule.SetActionService(createActionServiceFromFunction(t, assertAction))
 	rule.SetPriority(1)
 	err = rs.AddRule(rule)
-	if err != nil {
-		t.Logf("%s", err)
-		t.FailNow()
-	}
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	err = rs.Start(nil)
-	if err != nil {
-		t.Logf("%s", err)
-		t.FailNow()
-	}
+	assert.Nil(t, err)
 
 	tuples := []model.Tuple{}
 	// Case1: assert a t1
 	{
 		ctx := context.WithValue(context.TODO(), "key", t)
-		tuple, _ := model.NewTupleWithKeyValues("t1", "t1")
+		tuple, err := model.NewTupleWithKeyValues("t1", "t1")
+		assert.Nil(t, err)
 		tuples = append(tuples, tuple)
-		err := rs.Assert(ctx, tuple)
-		if err != nil {
-			t.Logf("%s", err)
-			t.FailNow()
-		}
+		err = rs.Assert(ctx, tuple)
+		assert.Nil(t, err)
 	}
 
 	// Case2: assert a t3 so that the rule fires for keys t1 and t3
 	{
 		ctx := context.WithValue(context.TODO(), "key", t)
-		tuple, _ := model.NewTupleWithKeyValues("t3", "t3")
-		err := rs.Assert(ctx, tuple)
-		if err != nil {
-			t.Logf("%s", err)
-			t.FailNow()
-		}
+		tuple, err := model.NewTupleWithKeyValues("t3", "t3")
+		assert.Nil(t, err)
+		err = rs.Assert(ctx, tuple)
+		assert.Nil(t, err)
 		// make sure that rule action got fired by inspecting the rule context
 		isActionFired, ok := ruleActionCtx["isActionFired"]
 		if !ok || isActionFired != "Fired" {
@@ -71,12 +61,10 @@ func Test_Retract_1(t *testing.T) {
 	// Case3: now retract t3
 	{
 		ctx := context.WithValue(context.TODO(), "key", t)
-		tuple, _ := model.NewTupleWithKeyValues("t3", "t3")
-		err := rs.Retract(ctx, tuple)
-		if err != nil {
-			t.Logf("%s", err)
-			t.FailNow()
-		}
+		tuple, err := model.NewTupleWithKeyValues("t3", "t3")
+		assert.Nil(t, err)
+		err = rs.Retract(ctx, tuple)
+		assert.Nil(t, err)
 	}
 
 	/**
@@ -86,12 +74,10 @@ func Test_Retract_1(t *testing.T) {
 	*/
 	{
 		ctx := context.WithValue(context.TODO(), "key", t)
-		tuple, _ := model.NewTupleWithKeyValues("t3", "t3")
-		err := rs.Assert(ctx, tuple)
-		if err != nil {
-			t.Logf("%s", err)
-			t.FailNow()
-		}
+		tuple, err := model.NewTupleWithKeyValues("t3", "t3")
+		assert.Nil(t, err)
+		err = rs.Assert(ctx, tuple)
+		assert.Nil(t, err)
 		// make sure that rule action got fired by inspecting the rule context
 		isActionFired, ok := ruleActionCtx["isActionFired"]
 		if !ok || isActionFired != "Fired" {
@@ -108,8 +94,10 @@ func Test_Retract_1(t *testing.T) {
 	*/
 	{
 		ctx := context.WithValue(context.TODO(), "key", t)
-		tuple, _ := model.NewTupleWithKeyValues("t3", "t3")
-		rs.Retract(ctx, tuple)
+		tuple, err := model.NewTupleWithKeyValues("t3", "t3")
+		assert.Nil(t, err)
+		err = rs.Retract(ctx, tuple)
+		assert.Nil(t, err)
 	}
 
 	/**
@@ -119,13 +107,11 @@ func Test_Retract_1(t *testing.T) {
 	*/
 	{
 		ctx := context.WithValue(context.TODO(), "key", t)
-		tuple, _ := model.NewTupleWithKeyValues("t1", "t11")
+		tuple, err := model.NewTupleWithKeyValues("t1", "t11")
+		assert.Nil(t, err)
 		tuples = append(tuples, tuple)
-		err := rs.Assert(ctx, tuple)
-		if err != nil {
-			t.Logf("%s", err)
-			t.FailNow()
-		}
+		err = rs.Assert(ctx, tuple)
+		assert.Nil(t, err)
 		// make sure that rule action doesn't fire by inspecting the rule context
 		_, ok := ruleActionCtx["isActionFired"]
 		if ok {

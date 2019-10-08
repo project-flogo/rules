@@ -6,54 +6,58 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //1 rtc->one assert triggers two rule actions each rule action modifies tuples.Verify Tuple type and Tuples count.
 func Test_T12(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R12")
-	rule.AddCondition("R12_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	err = rule.AddCondition("R12_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r122_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rule1 := ruleapi.NewRule("R122")
-	rule1.AddCondition("R122_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	err = rule1.AddCondition("R122_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule1.SetActionService(createActionServiceFromFunction(t, r12_action))
 	rule1.SetPriority(1)
-	rs.AddRule(rule1)
+	err = rs.AddRule(rule1)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule1.GetName())
 
 	txnCtx := txnCtx{t, 0}
 	rs.RegisterRtcTransactionHandler(t12Handler, &txnCtx)
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	err := rs.Assert(context.TODO(), t1)
-	if err != nil {
-		t.Fatal(err)
-	}
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
 
-	t2, _ := model.NewTupleWithKeyValues("t1", "t11")
+	t2, err := model.NewTupleWithKeyValues("t1", "t11")
+	assert.Nil(t, err)
 	err = rs.Assert(context.TODO(), t2)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
-	t3, _ := model.NewTupleWithKeyValues("t3", "t12")
+	t3, err := model.NewTupleWithKeyValues("t3", "t12")
+	assert.Nil(t, err)
 	err = rs.Assert(context.TODO(), t3)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
-	t4, _ := model.NewTupleWithKeyValues("t3", "t13")
+	t4, err := model.NewTupleWithKeyValues("t3", "t13")
+	assert.Nil(t, err)
 	err = rs.Assert(context.TODO(), t4)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	deleteRuleSession(t, rs, t1, t2, t3, t4)
 

@@ -21,6 +21,7 @@ import (
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -58,9 +59,7 @@ func deleteRuleSession(t *testing.T, session model.RuleSession, tuples ...model.
 	}
 	for _, tuple := range tuples {
 		err := session.Delete(nil, tuple)
-		if err != nil {
-			t.Fatal(err)
-		}
+		assert.Nil(t, err)
 	}
 }
 

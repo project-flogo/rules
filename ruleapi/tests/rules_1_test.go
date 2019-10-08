@@ -7,6 +7,8 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 /**
@@ -17,44 +19,54 @@ the expected outcome is that all three rules should fire
 
 func Test_One(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	actionMap := make(map[string]string)
 
 	//// rule 1
 	r1 := ruleapi.NewRule("R1")
-	r1.AddCondition("C1", []string{"t1"}, checkC1, nil)
+	err = r1.AddCondition("C1", []string{"t1"}, checkC1, nil)
+	assert.Nil(t, err)
 	r1.SetActionService(createActionServiceFromFunction(t, actionA1))
 	r1.SetPriority(1)
 	r1.SetContext(actionMap)
 
-	rs.AddRule(r1)
+	err = rs.AddRule(r1)
+	assert.Nil(t, err)
 
 	// rule 2
 	r2 := ruleapi.NewRule("R2")
-	r2.AddCondition("C2", []string{"t1"}, checkC2, nil)
+	err = r2.AddCondition("C2", []string{"t1"}, checkC2, nil)
+	assert.Nil(t, err)
 	r2.SetActionService(createActionServiceFromFunction(t, actionA2))
 	r2.SetPriority(2)
 	r2.SetContext(actionMap)
 
-	rs.AddRule(r2)
+	err = rs.AddRule(r2)
+	assert.Nil(t, err)
 
 	// rule 3
 	r3 := ruleapi.NewRule("R3")
-	r3.AddCondition("C3", []string{"t1"}, checkC3, nil)
+	err = r3.AddCondition("C3", []string{"t1"}, checkC3, nil)
+	assert.Nil(t, err)
 	r3.SetActionService(createActionServiceFromFunction(t, actionA3))
 	r3.SetPriority(3)
 	r3.SetContext(actionMap)
 
-	rs.AddRule(r3)
+	err = rs.AddRule(r3)
+	assert.Nil(t, err)
 
 	//Start the rule session
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
 	//Now assert a "t1" tuple
-	t1, _ := model.NewTupleWithKeyValues("t1", "Tom")
+	t1, err := model.NewTupleWithKeyValues("t1", "Tom")
+	assert.Nil(t, err)
 	t1.SetString(nil, "p3", "test")
-	rs.Assert(nil, t1)
+	err = rs.Assert(nil, t1)
+	assert.Nil(t, err)
 
 	//unregister the session, i.e; cleanup
 	deleteRuleSession(t, rs, t1)

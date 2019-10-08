@@ -7,6 +7,8 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var cnt uint64
@@ -14,65 +16,83 @@ var cnt uint64
 //Using 3 Identifiers, different Join conditions and triggering respective actions --->Verify order of actions and count.
 func Test_I2(t *testing.T) {
 	cnt = 0
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	//actionMap := make(map[string]string)
 
 	rule := ruleapi.NewRule("I21")
-	rule.AddCondition("I2_c1", []string{"t1.none", "t2.none"}, trueCondition, nil)
+	err = rule.AddCondition("I2_c1", []string{"t1.none", "t2.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, i21_action))
 	rule.SetPriority(1)
 	//rule.SetContext(actionMap)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rule1 := ruleapi.NewRule("I22")
-	rule1.AddCondition("I2_c2", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	err = rule1.AddCondition("I2_c2", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule1.SetActionService(createActionServiceFromFunction(t, i22_action))
 	rule1.SetPriority(1)
 	//rule.SetContext(actionMap)
-	rs.AddRule(rule1)
+	err = rs.AddRule(rule1)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule1.GetName())
 
 	rule2 := ruleapi.NewRule("I23")
-	rule2.AddCondition("I2_c3", []string{"t2.none", "t3.none"}, trueCondition, nil)
+	err = rule2.AddCondition("I2_c3", []string{"t2.none", "t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule2.SetActionService(createActionServiceFromFunction(t, i23_action))
 	rule2.SetPriority(1)
 	//rule.SetContext(actionMap)
-	rs.AddRule(rule2)
+	err = rs.AddRule(rule2)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule1.GetName())
 
 	rule3 := ruleapi.NewRule("I24")
-	rule3.AddCondition("I2_c4", []string{"t1.none", "t2.none", "t3.none"}, trueCondition, nil)
+	err = rule3.AddCondition("I2_c4", []string{"t1.none", "t2.none", "t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule3.SetActionService(createActionServiceFromFunction(t, i24_action))
 	rule3.SetPriority(1)
 	//rule.SetContext(actionMap)
-	rs.AddRule(rule3)
+	err = rs.AddRule(rule3)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule2.GetName())
 
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), t1)
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
 
-	t2, _ := model.NewTupleWithKeyValues("t2", "t11")
-	rs.Assert(context.TODO(), t2)
+	t2, err := model.NewTupleWithKeyValues("t2", "t11")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t2)
+	assert.Nil(t, err)
 
 	if count := atomic.LoadUint64(&cnt); count != 1 {
 		t.Errorf("Expecting [1] actions, got [%d]", count)
 		t.FailNow()
 	}
 
-	t3, _ := model.NewTupleWithKeyValues("t3", "t12")
-	rs.Assert(context.TODO(), t3)
+	t3, err := model.NewTupleWithKeyValues("t3", "t12")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t3)
+	assert.Nil(t, err)
 
 	if count := atomic.LoadUint64(&cnt); count != 2 {
 		t.Errorf("Expecting [2] actions, got [%d]", count)
 		t.FailNow()
 	}
 
-	t4, _ := model.NewTupleWithKeyValues("t2", "t13")
-	rs.Assert(context.TODO(), t4)
+	t4, err := model.NewTupleWithKeyValues("t2", "t13")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t4)
+	assert.Nil(t, err)
 
 	if count := atomic.LoadUint64(&cnt); count != 5 {
 		t.Errorf("Expecting [5] actions, got [%d]", count)
