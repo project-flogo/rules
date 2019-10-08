@@ -1,9 +1,10 @@
 package mem
 
 import (
+	"container/list"
+	"context"
 	"sync"
 
-	"container/list"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
@@ -61,6 +62,7 @@ func (h *jtRefsServiceImpl) RemoveEntry(handle types.ReteHandle, jtName string, 
 }
 
 type hdlRefsRowIterator struct {
+	ctx     context.Context
 	refs    *jtRefsServiceImpl
 	key     string
 	rows    *jtRowsImpl
@@ -82,7 +84,7 @@ func (ri *hdlRefsRowIterator) Next() (types.JoinTableRow, types.JoinTable) {
 	defer ri.rows.RUnlock()
 	jT := ri.nw.GetJtService().GetJoinTable(ri.rows.rows[rowID])
 	if jT != nil {
-		return jT.GetRow(rowID), jT
+		return jT.GetRow(ri.ctx, rowID), jT
 	}
 	return nil, jT
 }
@@ -98,9 +100,10 @@ func (ri *hdlRefsRowIterator) Remove() {
 	}
 }
 
-func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle) types.JointableIterator {
+func (h *jtRefsServiceImpl) GetRowIterator(ctx context.Context, handle types.ReteHandle) types.JointableIterator {
 	key := handle.GetTupleKey().String()
 	ri := hdlRefsRowIterator{
+		ctx:  ctx,
 		refs: h,
 		key:  key,
 		nw:   h.Nw,

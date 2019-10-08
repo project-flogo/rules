@@ -43,12 +43,12 @@ func ClearSessions() {
 	})
 }
 
-func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
+func GetOrCreateRuleSession(name, config string) (model.RuleSession, error) {
 	if name == "" {
 		return nil, errors.New("RuleSession name cannot be empty")
 	}
 	rs := rulesessionImpl{}
-	rs.loadStoreConfig()
+	rs.loadStoreConfig(config)
 	rs.initRuleSession(name)
 
 	rs1, _ := sessionMap.LoadOrStore(name, &rs)
@@ -56,8 +56,8 @@ func GetOrCreateRuleSession(name string) (model.RuleSession, error) {
 }
 
 // GetOrCreateRuleSessionFromConfig returns rule session from created from config
-func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.RuleSession, error) {
-	rs, err := GetOrCreateRuleSession(name)
+func GetOrCreateRuleSessionFromConfig(name, store, jsonConfig string) (model.RuleSession, error) {
+	rs, err := GetOrCreateRuleSession(name, store)
 
 	if err != nil {
 		return nil, err
@@ -117,14 +117,13 @@ func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.Rul
 	return rs, nil
 }
 
-func (rs *rulesessionImpl) loadStoreConfig() {
-	storeConfigFileName := "rsconfig.json"
-	_, err := os.Stat(storeConfigFileName)
+func (rs *rulesessionImpl) loadStoreConfig(name string) {
+	_, err := os.Stat(name)
 	if err != nil {
 		// TO DO -- get the config from env or assign it as empty json
 		rs.storeConfig = "{}"
 	} else {
-		rs.storeConfig = utils.FileToString(storeConfigFileName)
+		rs.storeConfig = utils.FileToString(name)
 	}
 }
 
@@ -258,8 +257,8 @@ func (rs *rulesessionImpl) Start(startupCtx map[string]interface{}) error {
 	return nil
 }
 
-func (rs *rulesessionImpl) GetAssertedTuple(key model.TupleKey) model.Tuple {
-	return rs.reteNetwork.GetAssertedTuple(key)
+func (rs *rulesessionImpl) GetAssertedTuple(ctx context.Context, key model.TupleKey) model.Tuple {
+	return rs.reteNetwork.GetAssertedTuple(ctx, rs, key)
 }
 
 func (rs *rulesessionImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {

@@ -29,15 +29,24 @@ func Test_T13(t *testing.T) {
 
 	txnCtx := txnCtx{t, 0}
 	rs.RegisterRtcTransactionHandler(t13Handler, &txnCtx)
-	rs.Start(nil)
+	err := rs.Start(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), t1)
+	err = rs.Assert(context.TODO(), t1)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	t2, _ := model.NewTupleWithKeyValues("t3", "t12")
-	rs.Assert(context.TODO(), t2)
+	err = rs.Assert(context.TODO(), t2)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	rs.Unregister()
+	deleteRuleSession(t, rs)
 
 }
 
@@ -47,7 +56,7 @@ func r13_action(ctx context.Context, rs model.RuleSession, ruleName string, tupl
 
 	if id == "t12" {
 		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-		t11 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t11 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		if t11 != nil {
 			rs.Delete(ctx, t11)
 		}
@@ -60,7 +69,7 @@ func r132_action(ctx context.Context, rs model.RuleSession, ruleName string, tup
 
 	if id == "t12" {
 		tk, _ := model.NewTupleKeyWithKeyValues("t3", "t12")
-		t12 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t12 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		if t12 != nil {
 			rs.Delete(ctx, t12)
 		}
@@ -68,6 +77,9 @@ func r132_action(ctx context.Context, rs model.RuleSession, ruleName string, tup
 }
 
 func t13Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt = txnCtx.TxnCnt + 1

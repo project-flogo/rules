@@ -13,7 +13,7 @@ var cnt uint64
 
 //Using 3 Identifiers, different Join conditions and triggering respective actions --->Verify order of actions and count.
 func Test_I2(t *testing.T) {
-
+	cnt = 0
 	rs, _ := createRuleSession()
 
 	//actionMap := make(map[string]string)
@@ -79,7 +79,7 @@ func Test_I2(t *testing.T) {
 		t.FailNow()
 	}
 
-	rs.Unregister()
+	deleteRuleSession(t, rs, t1, t3)
 
 }
 

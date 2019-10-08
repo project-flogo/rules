@@ -37,10 +37,12 @@ func Test_Retract_1(t *testing.T) {
 		t.FailNow()
 	}
 
+	tuples := []model.Tuple{}
 	// Case1: assert a t1
 	{
 		ctx := context.WithValue(context.TODO(), "key", t)
 		tuple, _ := model.NewTupleWithKeyValues("t1", "t1")
+		tuples = append(tuples, tuple)
 		err := rs.Assert(ctx, tuple)
 		if err != nil {
 			t.Logf("%s", err)
@@ -118,6 +120,7 @@ func Test_Retract_1(t *testing.T) {
 	{
 		ctx := context.WithValue(context.TODO(), "key", t)
 		tuple, _ := model.NewTupleWithKeyValues("t1", "t11")
+		tuples = append(tuples, tuple)
 		err := rs.Assert(ctx, tuple)
 		if err != nil {
 			t.Logf("%s", err)
@@ -130,7 +133,7 @@ func Test_Retract_1(t *testing.T) {
 			t.FailNow()
 		}
 	}
-	rs.Unregister()
+	deleteRuleSession(t, rs, tuples...)
 
 }
 

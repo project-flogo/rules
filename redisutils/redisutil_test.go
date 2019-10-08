@@ -3,10 +3,66 @@ package redisutils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
+	"net"
+	"os"
+	"os/exec"
 	"strconv"
+	"strings"
 	"testing"
+	"time"
+
+	"github.com/gomodule/redigo/redis"
 )
+
+func Drain(port string) {
+	for {
+		conn, err := net.DialTimeout("tcp", net.JoinHostPort("", port), time.Second)
+		if conn != nil {
+			conn.Close()
+		}
+		if err != nil && strings.Contains(err.Error(), "connect: connection refused") {
+			break
+		}
+	}
+}
+
+func Pour(port string) {
+	for {
+		conn, _ := net.Dial("tcp", net.JoinHostPort("", port))
+		if conn != nil {
+			conn.Close()
+			break
+		}
+	}
+}
+
+func TestMain(m *testing.M) {
+	run := func() int {
+		command := exec.Command("docker", "run", "-p", "6379:6379", "-d", "redis")
+		hash, err := command.Output()
+		if err != nil {
+			panic(err)
+		}
+		Pour("6379")
+
+		defer func() {
+			command := exec.Command("docker", "stop", strings.TrimSpace(string(hash)))
+			err := command.Run()
+			if err != nil {
+				panic(err)
+			}
+			command = exec.Command("docker", "rm", strings.TrimSpace(string(hash)))
+			err = command.Run()
+			if err != nil {
+				panic(err)
+			}
+			Drain("6379")
+		}()
+
+		return m.Run()
+	}
+	os.Exit(run())
+}
 
 func Test_first(t *testing.T) {
 

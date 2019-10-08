@@ -32,9 +32,15 @@ func Test_T11(t *testing.T) {
 	rs.Start(nil)
 
 	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), t1)
+	err := rs.Assert(context.TODO(), t1)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	rs.Unregister()
+	t2, _ := model.NewTupleWithKeyValues("t3", "t2")
+	t3, _ := model.NewTupleWithKeyValues("t3", "t1")
+
+	deleteRuleSession(t, rs, t1, t2, t3)
 
 }
 
@@ -59,6 +65,9 @@ func r112_action(ctx context.Context, rs model.RuleSession, ruleName string, tup
 }
 
 func t11Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt = txnCtx.TxnCnt + 1

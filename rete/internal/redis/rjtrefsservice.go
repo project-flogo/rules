@@ -1,9 +1,11 @@
 package redis
 
 import (
+	"context"
+	"strconv"
+
 	"github.com/project-flogo/rules/redisutils"
 	"github.com/project-flogo/rules/rete/internal/types"
-	"strconv"
 )
 
 type jtRefsServiceImpl struct {
@@ -40,6 +42,7 @@ func (h *jtRefsServiceImpl) RemoveEntry(handle types.ReteHandle, jtName string, 
 }
 
 type hdlRefsRowIteratorImpl struct {
+	ctx  context.Context
 	key  string
 	iter *redisutils.MapIterator
 	nw   types.Network
@@ -54,7 +57,7 @@ func (r *hdlRefsRowIteratorImpl) Next() (types.JoinTableRow, types.JoinTable) {
 	rowID, _ := strconv.Atoi(rowIDStr)
 	jT := r.nw.GetJtService().GetJoinTable(jtName.(string))
 	if jT != nil {
-		return jT.GetRow(rowID), jT
+		return jT.GetRow(r.ctx, rowID), jT
 	}
 	return nil, jT
 }
@@ -63,8 +66,9 @@ func (r *hdlRefsRowIteratorImpl) Remove() {
 	r.iter.Remove()
 }
 
-func (h *jtRefsServiceImpl) GetRowIterator(handle types.ReteHandle) types.JointableIterator {
+func (h *jtRefsServiceImpl) GetRowIterator(ctx context.Context, handle types.ReteHandle) types.JointableIterator {
 	r := hdlRefsRowIteratorImpl{}
+	r.ctx = ctx
 	r.nw = h.Nw
 	r.key = h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
 	hdl := redisutils.GetRedisHdl()

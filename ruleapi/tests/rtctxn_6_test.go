@@ -25,14 +25,23 @@ func Test_T6(t *testing.T) {
 	rs.Start(nil)
 
 	i1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), i1)
+	err := rs.Assert(context.TODO(), i1)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	i2, _ := model.NewTupleWithKeyValues("t1", "t11")
-	rs.Assert(context.TODO(), i2)
+	err = rs.Assert(context.TODO(), i2)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	i3, _ := model.NewTupleWithKeyValues("t1", "t13")
-	rs.Assert(context.TODO(), i3)
-	rs.Unregister()
+	err = rs.Assert(context.TODO(), i3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deleteRuleSession(t, rs, i1, i3)
 
 }
 
@@ -41,7 +50,7 @@ func r6_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 	id, _ := t1.GetString("id")
 	if id == "t11" {
 		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-		t10 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t10 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		if t10 != nil {
 			t10.SetString(ctx, "p3", "v3")
 			t10.SetDouble(ctx, "p2", 11.11)
@@ -49,7 +58,7 @@ func r6_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 	} else if id == "t13" {
 		//delete t11
 		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t11")
-		t11 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t11 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		if t11 != nil {
 			rs.Delete(ctx, t11)
 		}
@@ -63,6 +72,9 @@ func r6_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 }
 
 func t6Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt++
@@ -101,8 +113,8 @@ func t6Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 		}
 	} else if txnCtx.TxnCnt == 3 {
 		lA := len(rtxn.GetRtcAdded())
-		if lA != 1 {
-			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 1, lA)
+		if lA != 2 {
+			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 2, lA)
 			printTuples(t, "Added", rtxn.GetRtcAdded())
 		} else {
 			added, _ := rtxn.GetRtcAdded()["t1"]

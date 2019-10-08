@@ -1,10 +1,12 @@
 package redis
 
 import (
+	"context"
+	"strconv"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/redisutils"
 	"github.com/project-flogo/rules/rete/internal/types"
-	"strconv"
 )
 
 type joinTableImpl struct {
@@ -41,15 +43,15 @@ func (jt *joinTableImpl) AddRow(handles []types.ReteHandle) types.JoinTableRow {
 }
 
 func (jt *joinTableImpl) RemoveRow(rowID int) types.JoinTableRow {
-	row := jt.GetRow(rowID)
+	row := jt.GetRow(nil, rowID)
 	hdl := redisutils.GetRedisHdl()
 	rowId := strconv.Itoa(rowID)
 	hdl.HDel(jt.jtKey, rowId)
 	return row
 }
 
-func (jt *joinTableImpl) RemoveAllRows() {
-	rowIter := jt.GetRowIterator()
+func (jt *joinTableImpl) RemoveAllRows(ctx context.Context) {
+	rowIter := jt.GetRowIterator(ctx)
 	for rowIter.HasNext() {
 		row := rowIter.Next()
 		//first, from jTable, remove row
@@ -71,15 +73,15 @@ func (jt *joinTableImpl) GetRule() model.Rule {
 	return jt.rule
 }
 
-func (jt *joinTableImpl) GetRowIterator() types.JointableRowIterator {
-	return newRowIterator(jt)
+func (jt *joinTableImpl) GetRowIterator(ctx context.Context) types.JointableRowIterator {
+	return newRowIterator(ctx, jt)
 }
 
-func (jt *joinTableImpl) GetRow(rowID int) types.JoinTableRow {
+func (jt *joinTableImpl) GetRow(ctx context.Context, rowID int) types.JoinTableRow {
 	hdl := redisutils.GetRedisHdl()
 	key := hdl.HGet(jt.jtKey, strconv.Itoa(rowID))
 	rowId := strconv.Itoa(rowID)
-	return createRow(jt.name, rowId, key.(string), jt.Nw)
+	return createRow(ctx, jt.name, rowId, key.(string), jt.Nw)
 }
 
 func (jt *joinTableImpl) GetName() string {
@@ -87,15 +89,17 @@ func (jt *joinTableImpl) GetName() string {
 }
 
 type rowIteratorImpl struct {
+	ctx    context.Context
 	iter   *redisutils.MapIterator
 	jtName string
 	nw     types.Network
 	curr   types.JoinTableRow
 }
 
-func newRowIterator(jTable types.JoinTable) types.JointableRowIterator {
+func newRowIterator(ctx context.Context, jTable types.JoinTable) types.JointableRowIterator {
 	key := jTable.GetNw().GetPrefix() + ":jt:" + jTable.GetName()
 	ri := rowIteratorImpl{}
+	ri.ctx = ctx
 	ri.iter = redisutils.GetRedisHdl().GetMapIterator(key)
 	ri.nw = jTable.GetNw()
 	ri.jtName = jTable.GetName()
@@ -109,7 +113,7 @@ func (ri *rowIteratorImpl) HasNext() bool {
 func (ri *rowIteratorImpl) Next() types.JoinTableRow {
 	rowId, key := ri.iter.Next()
 	tupleKeyStr := key.(string)
-	ri.curr = createRow(ri.jtName, rowId, tupleKeyStr, ri.nw)
+	ri.curr = createRow(ri.ctx, ri.jtName, rowId, tupleKeyStr, ri.nw)
 	return ri.curr
 }
 

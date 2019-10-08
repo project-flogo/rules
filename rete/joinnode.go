@@ -2,6 +2,7 @@ package rete
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/project-flogo/rules/common/model"
@@ -179,13 +180,13 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []types.Ret
 	//tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
 	jn.rightTable.AddRow(handles)
 	//TODO: rete listeners etc.
-	rIterator := jn.leftTable.GetRowIterator()
+	rIterator := jn.leftTable.GetRowIterator(ctx)
 LOOP:
 	for rIterator.HasNext() {
 		tupleTableRowLeft := rIterator.Next()
 		handles := tupleTableRowLeft.GetHandles()
 		for _, handle := range handles {
-			if jn.GetNw().GetHandleService().GetHandle(handle.GetTuple()) == nil {
+			if jn.GetNw().GetHandleService().GetHandle(ctx, handle.GetTuple()) == nil {
 				rIterator.Remove()
 				for _, otherHdl := range handles {
 					jn.GetNw().GetJtRefService().RemoveEntry(otherHdl, jn.leftTable.GetName(), tupleTableRowLeft.GetID())
@@ -246,13 +247,14 @@ func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []types.Rete
 	//tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
 	jn.leftTable.AddRow(handles)
 	//TODO: rete listeners etc.
-	rIterator := jn.rightTable.GetRowIterator()
+	rIterator := jn.rightTable.GetRowIterator(ctx)
 LOOP:
 	for rIterator.HasNext() {
 		tupleTableRowRight := rIterator.Next()
 		handles := tupleTableRowRight.GetHandles()
 		for _, handle := range handles {
-			if jn.GetNw().GetHandleService().GetHandle(handle.GetTuple()) == nil {
+			fmt.Println("handle", handle.GetTupleKey(), handle.GetTuple())
+			if jn.GetNw().GetHandleService().GetHandle(ctx, handle.GetTuple()) == nil {
 				rIterator.Remove()
 				for _, otherHdl := range handles {
 					jn.GetNw().GetJtRefService().RemoveEntry(otherHdl, jn.rightTable.GetName(), tupleTableRowRight.GetID())

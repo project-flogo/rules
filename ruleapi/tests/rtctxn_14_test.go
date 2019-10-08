@@ -33,15 +33,26 @@ func Test_T14(t *testing.T) {
 
 	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
 	t1.SetDouble(context.TODO(), "p2", 11.11)
-	rs.Assert(context.TODO(), t1)
+	err := rs.Assert(context.TODO(), t1)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	t2, _ := model.NewTupleWithKeyValues("t3", "t12")
-	rs.Assert(context.TODO(), t2)
+	err = rs.Assert(context.TODO(), t2)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	t3, _ := model.NewTupleWithKeyValues("t3", "t13")
-	rs.Assert(context.TODO(), t3)
+	err = rs.Assert(context.TODO(), t3)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	rs.Unregister()
+	t4, _ := model.NewTupleWithKeyValues("t1", "t2")
+
+	deleteRuleSession(t, rs, t1, t2, t3, t4)
 
 }
 
@@ -64,18 +75,21 @@ func r142_action(ctx context.Context, rs model.RuleSession, ruleName string, tup
 	if id == "t12" {
 		//Modifing p2 with the same value
 		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-		t10 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t10 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		t10.SetDouble(ctx, "p2", 11.11)
 	}
 	if id == "t13" {
 		//Modifing p2 value
 		tk1, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-		t11 := rs.GetAssertedTuple(tk1).(model.MutableTuple)
+		t11 := rs.GetAssertedTuple(ctx, tk1).(model.MutableTuple)
 		t11.SetDouble(ctx, "p2", 12.11)
 	}
 }
 
 func t14Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt = txnCtx.TxnCnt + 1

@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"context"
 	"strconv"
 	"strings"
 
@@ -52,14 +53,33 @@ func (jtr *joinTableRowImpl) GetHandles() []types.ReteHandle {
 	return jtr.handles
 }
 
-func createRow(jtKey string, rowID string, key string, nw types.Network) types.JoinTableRow {
+func createRow(ctx context.Context, jtKey string, rowID string, key string, nw types.Network) types.JoinTableRow {
 
 	values := strings.Split(key, ",")
 
 	handles := []types.ReteHandle{}
 	for _, key := range values {
 		tupleKey := model.FromStringKey(key)
-		tuple := nw.GetTupleStore().GetTupleByKey(tupleKey)
+		var tuple model.Tuple
+		if ctx != nil {
+			if value := ctx.Value(model.RetecontextKeyType{}); value != nil {
+				if value, ok := value.(types.ReteCtx); ok {
+					if modified := value.GetRtcModified(); modified != nil {
+						if value := modified[tupleKey.String()]; value != nil {
+							tuple = value.GetTuple()
+						}
+					}
+					if tuple == nil {
+						if added := value.GetRtcAdded(); added != nil {
+							tuple = added[tupleKey.String()]
+						}
+					}
+				}
+			}
+		}
+		if tuple == nil {
+			tuple = nw.GetTupleStore().GetTupleByKey(tupleKey)
+		}
 		handle := newReteHandleImpl(nw, tuple, "", types.ReteHandleStatusUnknown)
 		handles = append(handles, handle)
 	}

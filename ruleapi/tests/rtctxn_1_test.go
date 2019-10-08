@@ -10,9 +10,7 @@ import (
 
 //TTL != 0 asserted
 func Test_T1(t *testing.T) {
-
 	rs, _ := createRuleSession()
-
 	rule := ruleapi.NewRule("R1")
 	rule.AddCondition("R1_c1", []string{"t1.none"}, trueCondition, t)
 	rule.SetActionService(createActionServiceFromFunction(t, emptyAction))
@@ -24,13 +22,18 @@ func Test_T1(t *testing.T) {
 	rs.Start(nil)
 
 	t1, _ := model.NewTupleWithKeyValues("t1", "t1")
-	rs.Assert(context.TODO(), t1)
-	rs.Unregister()
+	err := rs.Assert(context.TODO(), t1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deleteRuleSession(t, rs, t1)
 
 }
 
 func t1Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
-
+	if done {
+		return
+	}
 	t := handlerCtx.(*testing.T)
 
 	lA := len(rtxn.GetRtcAdded())

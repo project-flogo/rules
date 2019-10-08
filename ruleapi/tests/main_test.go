@@ -1,16 +1,11 @@
-package main
+package tests
 
 import (
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
-
-	"github.com/project-flogo/rules/ruleapi/tests"
-	"github.com/stretchr/testify/assert"
 )
-
-var redis = false
 
 func TestMain(m *testing.M) {
 	code := m.Run()
@@ -19,12 +14,12 @@ func TestMain(m *testing.M) {
 	}
 
 	run := func() int {
-		command := exec.Command("docker", "run", "-p", "6379:6379", "-d", "redis")
+		command := exec.Command("docker", "run", "-p", "6380:6379", "-d", "redis")
 		hash, err := command.Output()
 		if err != nil {
 			panic(err)
 		}
-		tests.Pour("6379")
+		Pour("6380")
 
 		defer func() {
 			command := exec.Command("docker", "stop", strings.TrimSpace(string(hash)))
@@ -37,16 +32,11 @@ func TestMain(m *testing.M) {
 			if err != nil {
 				panic(err)
 			}
-			tests.Drain("6379")
+			Drain("6380")
 		}()
 
 		return m.Run()
 	}
 	redis = true
 	os.Exit(run())
-}
-
-func TestRuleApp(t *testing.T) {
-	err := example(redis)
-	assert.Nil(t, err)
 }

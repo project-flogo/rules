@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+
 	"github.com/project-flogo/rules/common/model"
 )
 
@@ -25,7 +26,7 @@ type Network interface {
 	//mode can be one of retract, modify, delete
 	Retract(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn) error
 
-	GetAssertedTuple(key model.TupleKey) model.Tuple
+	GetAssertedTuple(ctx context.Context, rs model.RuleSession, key model.TupleKey) model.Tuple
 	RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{})
 	//SetConfig(config map[string]string)
 	//GetConfigValue(key string) string

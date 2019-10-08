@@ -13,7 +13,7 @@ var actCnt uint64
 
 //Forward chain-Data change in r3action and r32action triggers the r32action.
 func Test_Three(t *testing.T) {
-
+	actCnt = 0
 	rs, _ := createRuleSession()
 
 	actionMap := make(map[string]string)
@@ -37,18 +37,24 @@ func Test_Three(t *testing.T) {
 
 	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
 	t1.SetInt(context.TODO(), "p1", 2000)
-	rs.Assert(context.TODO(), t1)
+	err := rs.Assert(context.TODO(), t1)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	t2, _ := model.NewTupleWithKeyValues("t1", "t11")
 	t2.SetInt(context.TODO(), "p1", 2000)
-	rs.Assert(context.TODO(), t2)
+	err = rs.Assert(context.TODO(), t2)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if count := atomic.LoadUint64(&actCnt); count != 2 {
 		t.Errorf("Expecting [2] actions, got [%d]", count)
 		t.FailNow()
 	}
 
-	rs.Unregister()
+	deleteRuleSession(t, rs, t1, t2)
 
 }
 
@@ -64,22 +70,20 @@ func r3Condition(ruleName string, condName string, tuples map[model.TupleType]mo
 }
 
 func r3action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	//fmt.Println("r13_action triggered")
 	t1 := tuples[model.TupleType("t1")].(model.MutableTuple)
 	id, _ := t1.GetString("id")
 
 	if id == "t11" {
 		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-		t10 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t10 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		t10.SetInt(ctx, "p1", 100)
 	}
 }
 
 func r32action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	//fmt.Println("r132_action triggered")
 	atomic.AddUint64(&actCnt, 1)
 
 	tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-	t10 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+	t10 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 	t10.SetInt(ctx, "p1", 500)
 }

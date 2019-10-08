@@ -1,9 +1,10 @@
 package mem
 
 import (
+	"container/list"
+	"context"
 	"sync"
 
-	"container/list"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
@@ -64,11 +65,11 @@ func (jt *joinTableImpl) GetRule() model.Rule {
 	return jt.rule
 }
 
-func (jt *joinTableImpl) GetRowIterator() types.JointableRowIterator {
+func (jt *joinTableImpl) GetRowIterator(ctx context.Context) types.JointableRowIterator {
 	return newRowIterator(jt)
 }
 
-func (jt *joinTableImpl) GetRow(rowID int) types.JoinTableRow {
+func (jt *joinTableImpl) GetRow(ctx context.Context, rowID int) types.JoinTableRow {
 	jt.RLock()
 	defer jt.RUnlock()
 	return jt.table[rowID]
@@ -78,8 +79,8 @@ func (jt *joinTableImpl) GetName() string {
 	return jt.name
 }
 
-func (jt *joinTableImpl) RemoveAllRows() {
-	rowIter := jt.GetRowIterator()
+func (jt *joinTableImpl) RemoveAllRows(ctx context.Context) {
+	rowIter := jt.GetRowIterator(ctx)
 	for rowIter.HasNext() {
 		row := rowIter.Next()
 		//first, from jTable, remove row

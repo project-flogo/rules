@@ -203,7 +203,7 @@ func TestSameTupleInstanceAssert(t *testing.T) {
 }
 
 func createRuleSessionAndRules(t *testing.T) (model.RuleSession, error) {
-	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
+	rs, _ := ruleapi.GetOrCreateRuleSession("asession", "")
 
 	tupleDescFileAbsPath := common.GetPathForResource("examples/trackntrace/trackntrace.json", "./trackntrace.json")
 

@@ -39,7 +39,7 @@ func Test_4_Expr(t *testing.T) {
 
 	ctx = context.WithValue(context.TODO(), TestKey{}, t)
 	rs.Assert(ctx, t2)
-	rs.Unregister()
+	deleteRuleSession(t, rs, t1)
 	count := actionCount["count"]
 	if count != 1 {
 		t.Errorf("expected [%d], got [%d]\n", 1, count)

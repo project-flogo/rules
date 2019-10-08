@@ -25,9 +25,12 @@ func Test_T7(t *testing.T) {
 	rs.Start(nil)
 
 	i1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), i1)
+	err := rs.Assert(context.TODO(), i1)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	rs.Unregister()
+	deleteRuleSession(t, rs)
 
 }
 
@@ -40,6 +43,9 @@ func r7_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 }
 
 func t7Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt++

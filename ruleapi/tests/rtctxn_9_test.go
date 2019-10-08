@@ -25,18 +25,30 @@ func Test_T9(t *testing.T) {
 	rs.Start(nil)
 
 	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), t1)
+	err := rs.Assert(context.TODO(), t1)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	t2, _ := model.NewTupleWithKeyValues("t1", "t11")
-	rs.Assert(context.TODO(), t2)
+	err = rs.Assert(context.TODO(), t2)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	t3, _ := model.NewTupleWithKeyValues("t3", "t12")
-	rs.Assert(context.TODO(), t3)
+	err = rs.Assert(context.TODO(), t3)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	t4, _ := model.NewTupleWithKeyValues("t3", "t13")
-	rs.Assert(context.TODO(), t4)
+	err = rs.Assert(context.TODO(), t4)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	rs.Unregister()
+	deleteRuleSession(t, rs, t1, t2, t3, t4)
 
 }
 
@@ -53,21 +65,24 @@ func r9_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 		rs.Assert(ctx, t3)
 	} else if id == "t13" {
 		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-		t10 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t10 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		t10.SetDouble(ctx, "p2", 11.11)
 
 		tk1, _ := model.NewTupleKeyWithKeyValues("t1", "t11")
-		t11 := rs.GetAssertedTuple(tk1).(model.MutableTuple)
+		t11 := rs.GetAssertedTuple(ctx, tk1).(model.MutableTuple)
 		t11.SetDouble(ctx, "p2", 11.11)
 
 		tk2, _ := model.NewTupleKeyWithKeyValues("t3", "t12")
-		t12 := rs.GetAssertedTuple(tk2).(model.MutableTuple)
+		t12 := rs.GetAssertedTuple(ctx, tk2).(model.MutableTuple)
 		t12.SetDouble(ctx, "p2", 11.11)
 
 	}
 }
 
 func t9Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt = txnCtx.TxnCnt + 1

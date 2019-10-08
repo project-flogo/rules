@@ -33,7 +33,6 @@ func (hdl *reteHandleImpl) SetTuple(tuple model.Tuple) {
 func (hdl *reteHandleImpl) initHandleImpl(nw types.Network, tuple model.Tuple, key string, status types.ReteHandleStatus) {
 	hdl.SetID(nw)
 	hdl.SetTuple(tuple)
-	hdl.tupleKey = tuple.GetKey()
 	hdl.key = key
 	hdl.status = status
 }
@@ -62,6 +61,6 @@ func (hdl *reteHandleImpl) AddJoinTableRowRef(joinTableRowVar types.JoinTableRow
 }
 
 func (hdl *reteHandleImpl) GetRefTableIterator() types.JointableIterator {
-	refTblIterator := hdl.Nw.GetJtRefService().GetRowIterator(hdl)
+	refTblIterator := hdl.Nw.GetJtRefService().GetRowIterator(nil, hdl)
 	return refTblIterator
 }

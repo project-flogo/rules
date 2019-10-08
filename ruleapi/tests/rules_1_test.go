@@ -57,7 +57,7 @@ func Test_One(t *testing.T) {
 	rs.Assert(nil, t1)
 
 	//unregister the session, i.e; cleanup
-	rs.Unregister()
+	deleteRuleSession(t, rs, t1)
 
 	if len(actionMap) != 3 {
 		t.Errorf("Expecting [3] actions, got [%d]", len(actionMap))

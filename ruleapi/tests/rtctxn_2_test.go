@@ -24,18 +24,23 @@ func Test_T2(t *testing.T) {
 	rs.Start(nil)
 
 	t1, _ := model.NewTupleWithKeyValues("t2", "t2")
-	rs.Assert(context.TODO(), t1)
-	rs.Unregister()
+	err := rs.Assert(context.TODO(), t1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deleteRuleSession(t, rs)
 
 }
 
 func t2Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
-
+	if done {
+		return
+	}
 	t := handlerCtx.(*testing.T)
 
 	lA := len(rtxn.GetRtcAdded())
-	if lA != 0 {
-		t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 0, lA)
+	if lA != 1 {
+		t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 1, lA)
 		printTuples(t, "Added", rtxn.GetRtcAdded())
 	}
 	lM := len(rtxn.GetRtcModified())

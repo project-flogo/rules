@@ -11,7 +11,7 @@ import (
 )
 
 func TestClearSessions(t *testing.T) {
-	ruleapi.GetOrCreateRuleSession("test")
+	ruleapi.GetOrCreateRuleSession("test", "")
 	ruleapi.ClearSessions()
 }
 
@@ -40,7 +40,7 @@ func TestAssert(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err should be nil: %v", err)
 	}
-	rs.Unregister()
+	deleteRuleSession(t, rs, t1)
 }
 
 func TestRace(t *testing.T) {

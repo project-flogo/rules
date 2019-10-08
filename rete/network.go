@@ -191,8 +191,8 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 			case *joinNodeImpl:
 				//nw.removeRefsFromReteHandles(nodeImpl.leftTable)
 				//nw.removeRefsFromReteHandles(nodeImpl.rightTable)
-				nodeImpl.leftTable.RemoveAllRows()
-				nodeImpl.rightTable.RemoveAllRows()
+				nodeImpl.leftTable.RemoveAllRows(nil)
+				nodeImpl.rightTable.RemoveAllRows(nil)
 			}
 		}
 	}
@@ -216,11 +216,11 @@ func (nw *reteNetworkImpl) removeRefsFromReteHandles(joinTableVar types.JoinTabl
 	if joinTableVar == nil {
 		return
 	}
-	rIterator := joinTableVar.GetRowIterator()
+	rIterator := joinTableVar.GetRowIterator(nil)
 	for rIterator.HasNext() {
 		tableRow := rIterator.Next()
 		for _, handle := range tableRow.GetHandles() {
-			nw.removeJoinTableRowRefs(handle, nil)
+			nw.removeJoinTableRowRefs(nil, handle, nil)
 		}
 	}
 }
@@ -577,27 +577,27 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 		nw.RLock()
 		defer nw.RUnlock()
 
-		err := nw.assertInternal(newCtx, tuple, changedProps, mode)
+		err := nw.AssertInternal(newCtx, tuple, changedProps, mode)
 		if err != nil {
 			return err
 		}
 
-		reteCtxVar.getConflictResolver().resolveConflict(newCtx)
+		reteCtxVar.GetConflictResolver().ResolveConflict(newCtx)
 		//if Timeout is 0, remove it from rete
 		td := model.GetTupleDescriptor(tuple.GetTupleType())
 		if td != nil {
 			if td.TTLInSeconds == 0 { //remove immediately.
-				nw.removeTupleFromRete(tuple)
+				nw.removeTupleFromRete(newCtx, tuple)
 			} else if td.TTLInSeconds > 0 { // TTL for the tuple type, after that, remove it from RETE
 				time.AfterFunc(time.Second*time.Duration(td.TTLInSeconds), func() {
 					nw.RLock()
 					defer nw.RUnlock()
-					nw.removeTupleFromRete(tuple)
+					nw.removeTupleFromRete(nil, tuple)
 				})
 			} //else, its -ve and means, never expire
 		}
 		if nw.txnHandler != nil {
-			rtcTxn := newRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
+			rtcTxn := newRtcTxn(reteCtxVar.GetRtcAdded(), reteCtxVar.GetRtcModified(), reteCtxVar.GetRtcDeleted())
 			for i, txnHandler := range nw.txnHandler {
 				txnHandler(newCtx, rs, rtcTxn, nw.txnContext[i])
 			}
@@ -605,14 +605,14 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 		return nil
 	}
 
-	reteCtxVar.getOpsList().PushBack(newAssertEntry(tuple, changedProps, mode))
+	reteCtxVar.GetOpsList().PushBack(newAssertEntry(tuple, changedProps, mode))
 	return nil
 }
 
-func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
+func (nw *reteNetworkImpl) removeTupleFromRete(ctx context.Context, tuple model.Tuple) {
 	reteHandle := nw.handleService.RemoveHandle(tuple)
 	if reteHandle != nil {
-		nw.removeJoinTableRowRefs(reteHandle, nil)
+		nw.removeJoinTableRowRefs(ctx, reteHandle, nil)
 	}
 }
 
@@ -625,59 +625,65 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, rs model.RuleSession, tu
 	if !isRecursive {
 		nw.RLock()
 		defer nw.RUnlock()
-		err := nw.retractInternal(ctx, tuple, changedProps, mode)
+		err := nw.RetractInternal(ctx, tuple, changedProps, mode)
 		if err != nil {
 			return err
 		}
 		if nw.txnHandler != nil && mode == common.DELETE {
-			rtcTxn := newRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
+			rtcTxn := newRtcTxn(reteCtxVar.GetRtcAdded(), reteCtxVar.GetRtcModified(), reteCtxVar.GetRtcDeleted())
 			for i, txnHandler := range nw.txnHandler {
 				txnHandler(ctx, rs, rtcTxn, nw.txnContext[i])
 			}
 		}
 	} else {
-		reteCtxVar.getOpsList().PushBack(newDeleteEntry(tuple, mode, changedProps))
+		reteCtxVar.GetOpsList().PushBack(newDeleteEntry(tuple, mode, changedProps))
 	}
 
 	return nil
 }
 
-func (nw *reteNetworkImpl) retractInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
-	handle := nw.handleService.GetHandle(tuple)
+func (nw *reteNetworkImpl) RetractInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
+	handle := nw.handleService.GetHandle(ctx, tuple)
 	if handle == nil {
 		return fmt.Errorf("Tuple with key [%s] doesn't exist", tuple.GetKey().String())
 	} else if handle.GetStatus() != types.ReteHandleStatusCreated {
 		return fmt.Errorf("Tuple with key [%s] is being asserted or deleted: %d", tuple.GetKey().String(), handle.GetStatus())
 	}
-	handle.SetStatus(types.ReteHandleStatusDeleting)
+	if mode == common.DELETE {
+		handle.SetStatus(types.ReteHandleStatusDeleting)
+	} else if mode == common.RETRACT {
+		handle.SetStatus(types.ReteHandleStatusRetracting)
+	}
 
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	rCtx, _, _ := getOrSetReteCtx(ctx, nw, nil)
+	rCtx, _, newCtx := getOrSetReteCtx(ctx, nw, nil)
 
-	nw.removeJoinTableRowRefs(handle, changedProps)
+	nw.removeJoinTableRowRefs(newCtx, handle, changedProps)
 	// add it to the delete list
 	if mode == common.DELETE {
-		rCtx.addToRtcDeleted(tuple)
+		rCtx.AddToRtcDeleted(tuple)
+		nw.handleService.RemoveHandle(tuple)
+	} else if mode == common.RETRACT {
+		handle.SetStatus(types.ReteHandleStatusRetracted)
 	}
-	nw.handleService.RemoveHandle(tuple)
-
 	return nil
 }
 
-func (nw *reteNetworkImpl) GetAssertedTuple(key model.TupleKey) model.Tuple {
-	reteHandle := nw.handleService.GetHandleByKey(key)
+func (nw *reteNetworkImpl) GetAssertedTuple(ctx context.Context, rs model.RuleSession, key model.TupleKey) model.Tuple {
+	_, _, newCtx := getOrSetReteCtx(ctx, nw, rs)
+	reteHandle := nw.handleService.GetHandleByKey(newCtx, key)
 	if reteHandle != nil {
 		return reteHandle.GetTuple()
 	}
 	return nil
 }
 
-func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
+func (nw *reteNetworkImpl) AssertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
 	if mode == common.ADD {
-		handle, exists := nw.getOrCreateHandle(ctx, tuple)
-		if exists {
+		handle, exists := nw.GetOrCreateHandle(ctx, tuple)
+		if exists && handle.GetStatus() != types.ReteHandleStatusRetracted {
 			return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
 		}
 		defer handle.SetStatus(types.ReteHandleStatusCreated)
@@ -691,23 +697,22 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 	}
 	td := model.GetTupleDescriptor(tuple.GetTupleType())
 	if td != nil {
-		if td.TTLInSeconds != 0 && mode == common.ADD {
+		if /*td.TTLInSeconds != 0 && */ mode == common.ADD {
 			rCtx := getReteCtx(ctx)
 			if rCtx != nil {
-				rCtx.addToRtcAdded(tuple)
+				rCtx.AddToRtcAdded(tuple)
 			}
 		}
 	}
-
 	return nil
 }
 
-func (nw *reteNetworkImpl) getOrCreateHandle(ctx context.Context, tuple model.Tuple) (types.ReteHandle, bool) {
+func (nw *reteNetworkImpl) GetOrCreateHandle(ctx context.Context, tuple model.Tuple) (types.ReteHandle, bool) {
 	return nw.handleService.GetOrCreateHandle(nw, tuple)
 }
 
-func (nw *reteNetworkImpl) getHandle(tuple model.Tuple) types.ReteHandle {
-	h := nw.handleService.GetHandleByKey(tuple.GetKey())
+func (nw *reteNetworkImpl) getHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle {
+	h := nw.handleService.GetHandleByKey(ctx, tuple.GetKey())
 	return h
 }
 
@@ -738,14 +743,14 @@ func (nw *reteNetworkImpl) GetTupleStore() model.TupleStore {
 
 func getOrCreateHandle(ctx context.Context, tuple model.Tuple) (types.ReteHandle, bool) {
 	reteCtxVar := getReteCtx(ctx)
-	return reteCtxVar.getNetwork().getOrCreateHandle(ctx, tuple)
+	return reteCtxVar.GetNetwork().GetOrCreateHandle(ctx, tuple)
 }
 
-func (nw *reteNetworkImpl) removeJoinTableRowRefs(hdl types.ReteHandle, changedProps map[string]bool) {
+func (nw *reteNetworkImpl) removeJoinTableRowRefs(ctx context.Context, hdl types.ReteHandle, changedProps map[string]bool) {
 	tuple := hdl.GetTuple()
 	alias := tuple.GetTupleType()
 
-	hdlTblIter := nw.jtRefsService.GetRowIterator(hdl)
+	hdlTblIter := nw.jtRefsService.GetRowIterator(ctx, hdl)
 	for hdlTblIter.HasNext() {
 		row, joinTable := hdlTblIter.Next()
 		if row == nil || joinTable == nil {

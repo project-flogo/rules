@@ -1,6 +1,7 @@
 package mem
 
 import (
+	"context"
 	"sync"
 
 	"github.com/project-flogo/rules/common/model"
@@ -34,13 +35,13 @@ func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {
 	return nil
 }
 
-func (hc *handleServiceImpl) GetHandle(tuple model.Tuple) types.ReteHandle {
+func (hc *handleServiceImpl) GetHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle {
 	hc.RLock()
 	defer hc.RUnlock()
 	return hc.allHandles[tuple.GetKey().String()]
 }
 
-func (hc *handleServiceImpl) GetHandleByKey(key model.TupleKey) types.ReteHandle {
+func (hc *handleServiceImpl) GetHandleByKey(ctx context.Context, key model.TupleKey) types.ReteHandle {
 	hc.RLock()
 	defer hc.RUnlock()
 	return hc.allHandles[key.String()]

@@ -66,7 +66,7 @@ type RuleSession interface {
 	Start(startupCtx map[string]interface{}) (err error)
 
 	//return the asserted tuple, nil if not found
-	GetAssertedTuple(key TupleKey) Tuple
+	GetAssertedTuple(ctx context.Context, key TupleKey) Tuple
 
 	//Retract, and remove
 	Delete(ctx context.Context, tuple Tuple) error

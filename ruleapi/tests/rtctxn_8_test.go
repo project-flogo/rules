@@ -25,8 +25,12 @@ func Test_T8(t *testing.T) {
 	rs.Start(nil)
 
 	t1, _ := model.NewTupleWithKeyValues("t1", "t1")
-	rs.Assert(context.TODO(), t1)
-	rs.Unregister()
+	err := rs.Assert(context.TODO(), t1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deleteRuleSession(t, rs, t1)
 
 }
 
@@ -36,6 +40,9 @@ func assertTuple(ctx context.Context, rs model.RuleSession, ruleName string, tup
 }
 
 func t8Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	t := handlerCtx.(*testing.T)
 	if m, found := rtxn.GetRtcAdded()["t1"]; found {

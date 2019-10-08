@@ -16,29 +16,70 @@ func Test_1_Expr(t *testing.T) {
 		t.Fatal(err)
 	}
 	r1 := ruleapi.NewRule("r1")
-	r1.AddExprCondition("c1", "$.t2.p2 > $.t1.p1", nil)
+	err = r1.AddExprCondition("c1", "$.t2.p2 > $.t1.p1", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	r1.SetActionService(createActionServiceFromFunction(t, a1))
 	r1.SetContext(actionCount)
-	rs.AddRule(r1)
-	rs.Start(nil)
+	err = rs.AddRule(r1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = rs.Start(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var ctx context.Context
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t1")
-	t1.SetInt(nil, "p1", 1)
-	t1.SetDouble(nil, "p2", 1.3)
-	t1.SetString(nil, "p3", "t3")
+	t1, err := model.NewTupleWithKeyValues("t1", "t1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = t1.SetInt(nil, "p1", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = t1.SetDouble(nil, "p2", 1.3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = t1.SetString(nil, "p3", "t3")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	ctx = context.WithValue(context.TODO(), TestKey{}, t)
-	rs.Assert(ctx, t1)
+	err = rs.Assert(ctx, t1)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	t2, _ := model.NewTupleWithKeyValues("t2", "t2")
-	t2.SetInt(nil, "p1", 1)
-	t2.SetDouble(nil, "p2", 1.0001)
-	t2.SetString(nil, "p3", "t3")
+	t2, err := model.NewTupleWithKeyValues("t2", "t2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = t2.SetInt(nil, "p1", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = t2.SetDouble(nil, "p2", 1.0001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = t2.SetString(nil, "p3", "t3")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	ctx = context.WithValue(context.TODO(), TestKey{}, t)
-	rs.Assert(ctx, t2)
-	rs.Unregister()
+	err = rs.Assert(ctx, t2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deleteRuleSession(t, rs, t1)
+
 	count := actionCount["count"]
 	if count != 1 {
 		t.Errorf("expected [%d], got [%d]\n", 1, count)

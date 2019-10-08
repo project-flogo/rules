@@ -27,7 +27,11 @@ func Test_Two(t *testing.T) {
 	}
 
 	//Create a RuleSession
-	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
+	store := ""
+	if redis {
+		store = "rsconfig.json"
+	}
+	rs, _ := ruleapi.GetOrCreateRuleSession("asession", store)
 	actionFireCount := make(map[string]int)
 
 	//// check for name "Bob" in n1
@@ -63,7 +67,7 @@ func Test_Two(t *testing.T) {
 	rs.DeleteRule(rule.GetName())
 
 	//unregister the session, i.e; cleanup
-	rs.Unregister()
+	deleteRuleSession(t, rs)
 }
 
 func checkForName(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {

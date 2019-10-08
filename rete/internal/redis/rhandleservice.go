@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/project-flogo/rules/common/model"
@@ -41,21 +42,15 @@ func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {
 
 }
 
-func (hc *handleServiceImpl) GetHandle(tuple model.Tuple) types.ReteHandle {
-	return hc.GetHandleByKey(tuple.GetKey())
+func (hc *handleServiceImpl) GetHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle {
+	return hc.GetHandleByKey(ctx, tuple.GetKey())
 }
 
-func (hc *handleServiceImpl) GetHandleByKey(key model.TupleKey) types.ReteHandle {
+func (hc *handleServiceImpl) GetHandleByKey(ctx context.Context, key model.TupleKey) types.ReteHandle {
 	rkey := hc.prefix + key.String()
 
 	m := redisutils.GetRedisHdl().HGetAll(rkey)
 	if len(m) == 0 {
-		return nil
-	}
-
-	tuple := hc.Nw.GetTupleStore().GetTupleByKey(key)
-	if tuple == nil {
-		//TODO: error handling
 		return nil
 	}
 	status := types.ReteHandleStatusUnknown
@@ -72,6 +67,32 @@ func (hc *handleServiceImpl) GetHandleByKey(key model.TupleKey) types.ReteHandle
 	} else {
 		panic("missing status")
 	}
+
+	var tuple model.Tuple
+	if ctx != nil {
+		if value := ctx.Value(model.RetecontextKeyType{}); value != nil {
+			if value, ok := value.(types.ReteCtx); ok {
+				if modified := value.GetRtcModified(); modified != nil {
+					if value := modified[key.String()]; value != nil {
+						tuple = value.GetTuple()
+					}
+				}
+				if tuple == nil {
+					if added := value.GetRtcAdded(); added != nil {
+						tuple = added[key.String()]
+					}
+				}
+			}
+		}
+	}
+	if tuple == nil {
+		tuple = hc.Nw.GetTupleStore().GetTupleByKey(key)
+	}
+	if tuple == nil {
+		//TODO: error handling
+		return nil
+	}
+
 	h := newReteHandleImpl(hc.GetNw(), tuple, rkey, status)
 	return h
 }

@@ -88,7 +88,7 @@ func loadTupleSchema() error {
 // create rulesession and load rules in it
 func createAndLoadRuleSession() (model.RuleSession, error) {
 	content := getFileContent(ruleDefinitionPath, ruleDefinitionRelativePath)
-	return ruleapi.GetOrCreateRuleSessionFromConfig("oms_session", string(content))
+	return ruleapi.GetOrCreateRuleSessionFromConfig("oms_session", "", string(content))
 }
 
 // Get file content
