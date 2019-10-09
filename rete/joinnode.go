@@ -178,6 +178,11 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []types.Ret
 	//TODO: other stuff. right now focus on tuple table
 	jn.joinRightObjects(handles, joinedHandles)
 	//tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
+	for _, handle := range handles {
+		if status := handle.GetStatus(); status == types.ReteHandleStatusCreating {
+			jn.GetNw().GetTupleStore().SaveTuple(handle.GetTuple())
+		}
+	}
 	jn.rightTable.AddRow(handles)
 	//TODO: rete listeners etc.
 	rIterator := jn.leftTable.GetRowIterator(ctx)
@@ -245,6 +250,11 @@ func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []types.Rete
 	jn.joinLeftObjects(handles, joinedHandles)
 	//TODO: other stuff. right now focus on tuple table
 	//tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
+	for _, handle := range handles {
+		if status := handle.GetStatus(); status == types.ReteHandleStatusCreating {
+			jn.GetNw().GetTupleStore().SaveTuple(handle.GetTuple())
+		}
+	}
 	jn.leftTable.AddRow(handles)
 	//TODO: rete listeners etc.
 	rIterator := jn.rightTable.GetRowIterator(ctx)

@@ -649,25 +649,25 @@ func (nw *reteNetworkImpl) RetractInternal(ctx context.Context, tuple model.Tupl
 	} else if handle.GetStatus() != types.ReteHandleStatusCreated {
 		return fmt.Errorf("Tuple with key [%s] is being asserted or deleted: %d", tuple.GetKey().String(), handle.GetStatus())
 	}
-	if mode == common.DELETE {
-		handle.SetStatus(types.ReteHandleStatusDeleting)
-	} else if mode == common.RETRACT {
-		handle.SetStatus(types.ReteHandleStatusRetracting)
-	}
 
 	if ctx == nil {
 		ctx = context.Background()
 	}
 	rCtx, _, newCtx := getOrSetReteCtx(ctx, nw, nil)
 
-	nw.removeJoinTableRowRefs(newCtx, handle, changedProps)
-	// add it to the delete list
 	if mode == common.DELETE {
-		rCtx.AddToRtcDeleted(tuple)
-		nw.handleService.RemoveHandle(tuple)
-	} else if mode == common.RETRACT {
-		handle.SetStatus(types.ReteHandleStatusRetracted)
+		handle.SetStatus(types.ReteHandleStatusDeleting)
+		defer func() {
+			rCtx.AddToRtcDeleted(tuple)
+			nw.handleService.RemoveHandle(tuple)
+		}()
+	} else if mode == common.RETRACT || mode == common.MODIFY {
+		handle.SetStatus(types.ReteHandleStatusRetracting)
+		defer handle.SetStatus(types.ReteHandleStatusRetracted)
 	}
+
+	nw.removeJoinTableRowRefs(newCtx, handle, changedProps)
+
 	return nil
 }
 
@@ -681,10 +681,14 @@ func (nw *reteNetworkImpl) GetAssertedTuple(ctx context.Context, rs model.RuleSe
 }
 
 func (nw *reteNetworkImpl) AssertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
-	if mode == common.ADD {
+	if mode == common.ADD || mode == common.MODIFY {
 		handle, exists := nw.GetOrCreateHandle(ctx, tuple)
-		if exists && handle.GetStatus() != types.ReteHandleStatusRetracted {
-			return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+		if exists {
+			if handle.GetStatus() == types.ReteHandleStatusRetracted {
+				handle.SetStatus(types.ReteHandleStatusCreating)
+			} else {
+				return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+			}
 		}
 		defer handle.SetStatus(types.ReteHandleStatusCreated)
 	}
