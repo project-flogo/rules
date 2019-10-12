@@ -76,7 +76,7 @@ func (cn *classNodeImpl) String() string {
 }
 
 func (cn *classNodeImpl) assert(ctx context.Context, tuple model.Tuple, changedProps map[string]bool) {
-	handle, _ := getOrCreateHandle(ctx, tuple)
+	handle := getHandleWithTuple(ctx, tuple)
 	handles := make([]types.ReteHandle, 1)
 	handles[0] = handle
 	propagate := false

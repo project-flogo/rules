@@ -1,6 +1,8 @@
 package mem
 
 import (
+	"sync/atomic"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
@@ -12,11 +14,12 @@ type reteHandleImpl struct {
 	tuple    model.Tuple
 	tupleKey model.TupleKey
 	status   types.ReteHandleStatus
+	id       int64
 }
 
-func newReteHandleImpl(nw types.Network, tuple model.Tuple, status types.ReteHandleStatus) types.ReteHandle {
+func newReteHandleImpl(nw types.Network, tuple model.Tuple, status types.ReteHandleStatus, id int64) *reteHandleImpl {
 	h1 := reteHandleImpl{}
-	h1.initHandleImpl(nw, tuple, status)
+	h1.initHandleImpl(nw, tuple, status, id)
 	return &h1
 }
 
@@ -25,11 +28,12 @@ func (hdl *reteHandleImpl) SetTuple(tuple model.Tuple) {
 	hdl.tupleKey = tuple.GetKey()
 }
 
-func (hdl *reteHandleImpl) initHandleImpl(nw types.Network, tuple model.Tuple, status types.ReteHandleStatus) {
+func (hdl *reteHandleImpl) initHandleImpl(nw types.Network, tuple model.Tuple, status types.ReteHandleStatus, id int64) {
 	hdl.SetID(nw)
 	hdl.SetTuple(tuple)
 	hdl.tupleKey = tuple.GetKey()
 	hdl.status = status
+	hdl.id = id
 }
 
 func (hdl *reteHandleImpl) GetTuple() model.Tuple {
@@ -42,6 +46,10 @@ func (hdl *reteHandleImpl) GetTupleKey() model.TupleKey {
 
 func (hdl *reteHandleImpl) SetStatus(status types.ReteHandleStatus) {
 	hdl.status = status
+}
+
+func (hdl *reteHandleImpl) Unlock() {
+	atomic.StoreInt64(&hdl.id, -1)
 }
 
 func (hdl *reteHandleImpl) GetStatus() types.ReteHandleStatus {

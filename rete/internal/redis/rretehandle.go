@@ -14,10 +14,11 @@ type reteHandleImpl struct {
 	tupleKey model.TupleKey
 	key      string
 	status   types.ReteHandleStatus
+	id       int64
 	//jtRefs   types.JtRefsService
 }
 
-func newReteHandleImpl(nw types.Network, tuple model.Tuple, key string, status types.ReteHandleStatus) types.ReteHandle {
+func newReteHandleImpl(nw types.Network, tuple model.Tuple, key string, status types.ReteHandleStatus, id int64) types.ReteHandle {
 	h1 := reteHandleImpl{}
 	h1.initHandleImpl(nw, tuple, key, status)
 	return &h1
@@ -50,6 +51,10 @@ func (hdl *reteHandleImpl) SetStatus(status types.ReteHandleStatus) {
 		return
 	}
 	redisutils.GetRedisHdl().HSet(hdl.key, "status", status)
+}
+
+func (hdl *reteHandleImpl) Unlock() {
+	redisutils.GetRedisHdl().HDel(hdl.key, "id")
 }
 
 func (hdl *reteHandleImpl) GetStatus() types.ReteHandleStatus {

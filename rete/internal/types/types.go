@@ -10,7 +10,7 @@ import (
 
 type Network interface {
 	common.Network
-	GetOrCreateHandle(ctx context.Context, tuple model.Tuple) (ReteHandle, bool)
+	GetHandleWithTuple(ctx context.Context, tuple model.Tuple) ReteHandle
 	AssertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error
 	RetractInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error
 	GetPrefix() string
@@ -88,6 +88,7 @@ type ReteHandle interface {
 	GetTupleKey() model.TupleKey
 	SetStatus(status ReteHandleStatus)
 	GetStatus() ReteHandleStatus
+	Unlock()
 }
 
 type JtRefsService interface {
@@ -108,7 +109,9 @@ type HandleService interface {
 	RemoveHandle(tuple model.Tuple) ReteHandle
 	GetHandle(ctx context.Context, tuple model.Tuple) ReteHandle
 	GetHandleByKey(ctx context.Context, key model.TupleKey) ReteHandle
-	GetOrCreateHandle(nw Network, tuple model.Tuple) (ReteHandle, bool)
+	GetHandleWithTuple(nw Network, tuple model.Tuple) ReteHandle
+	GetOrCreateLockedHandle(nw Network, tuple model.Tuple) (ReteHandle, bool)
+	GetLockedHandle(nw Network, tuple model.Tuple) (ReteHandle, bool)
 }
 
 type IdGen interface {

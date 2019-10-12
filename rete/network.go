@@ -643,11 +643,12 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, rs model.RuleSession, tu
 }
 
 func (nw *reteNetworkImpl) RetractInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
-	handle := nw.handleService.GetHandle(ctx, tuple)
-	if handle == nil {
-		return fmt.Errorf("Tuple with key [%s] doesn't exist", tuple.GetKey().String())
+	handle, locked := nw.handleService.GetLockedHandle(nw, tuple)
+	if locked {
+		return fmt.Errorf("Tuple with key [%s] is locked or doesn't exist", tuple.GetKey().String())
 	} else if handle.GetStatus() != types.ReteHandleStatusCreated {
-		return fmt.Errorf("Tuple with key [%s] is being asserted or deleted: %d", tuple.GetKey().String(), handle.GetStatus())
+		handle.Unlock()
+		return fmt.Errorf("Tuple with key [%s] is not created: %d", tuple.GetKey().String(), handle.GetStatus())
 	}
 
 	if ctx == nil {
@@ -663,7 +664,10 @@ func (nw *reteNetworkImpl) RetractInternal(ctx context.Context, tuple model.Tupl
 		}()
 	} else if mode == common.RETRACT || mode == common.MODIFY {
 		handle.SetStatus(types.ReteHandleStatusRetracting)
-		defer handle.SetStatus(types.ReteHandleStatusRetracted)
+		defer func() {
+			handle.SetStatus(types.ReteHandleStatusRetracted)
+			handle.Unlock()
+		}()
 	}
 
 	nw.removeJoinTableRowRefs(newCtx, handle, changedProps)
@@ -682,15 +686,19 @@ func (nw *reteNetworkImpl) GetAssertedTuple(ctx context.Context, rs model.RuleSe
 
 func (nw *reteNetworkImpl) AssertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
 	if mode == common.ADD || mode == common.MODIFY {
-		handle, exists := nw.GetOrCreateHandle(ctx, tuple)
-		if exists {
-			if handle.GetStatus() == types.ReteHandleStatusRetracted {
-				handle.SetStatus(types.ReteHandleStatusCreating)
-			} else {
-				return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
-			}
+		handle, locked := nw.handleService.GetOrCreateLockedHandle(nw, tuple)
+		if locked {
+			return fmt.Errorf("Tuple with key [%s] is locked", tuple.GetKey().String())
+		} else if handle.GetStatus() == types.ReteHandleStatusRetracted {
+			handle.SetStatus(types.ReteHandleStatusCreating)
+		} else if handle.GetStatus() == types.ReteHandleStatusCreated {
+			handle.Unlock()
+			return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
 		}
-		defer handle.SetStatus(types.ReteHandleStatusCreated)
+		defer func() {
+			handle.SetStatus(types.ReteHandleStatusCreated)
+			handle.Unlock()
+		}()
 	}
 
 	tupleType := tuple.GetTupleType()
@@ -711,8 +719,8 @@ func (nw *reteNetworkImpl) AssertInternal(ctx context.Context, tuple model.Tuple
 	return nil
 }
 
-func (nw *reteNetworkImpl) GetOrCreateHandle(ctx context.Context, tuple model.Tuple) (types.ReteHandle, bool) {
-	return nw.handleService.GetOrCreateHandle(nw, tuple)
+func (nw *reteNetworkImpl) GetHandleWithTuple(ctx context.Context, tuple model.Tuple) types.ReteHandle {
+	return nw.handleService.GetHandleWithTuple(nw, tuple)
 }
 
 func (nw *reteNetworkImpl) getHandle(ctx context.Context, tuple model.Tuple) types.ReteHandle {
@@ -745,9 +753,9 @@ func (nw *reteNetworkImpl) GetTupleStore() model.TupleStore {
 	return nw.tupleStore
 }
 
-func getOrCreateHandle(ctx context.Context, tuple model.Tuple) (types.ReteHandle, bool) {
+func getHandleWithTuple(ctx context.Context, tuple model.Tuple) types.ReteHandle {
 	reteCtxVar := getReteCtx(ctx)
-	return reteCtxVar.GetNetwork().GetOrCreateHandle(ctx, tuple)
+	return reteCtxVar.GetNetwork().GetHandleWithTuple(ctx, tuple)
 }
 
 func (nw *reteNetworkImpl) removeJoinTableRowRefs(ctx context.Context, hdl types.ReteHandle, changedProps map[string]bool) {

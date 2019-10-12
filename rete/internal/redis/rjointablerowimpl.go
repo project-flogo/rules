@@ -80,7 +80,7 @@ func createRow(ctx context.Context, jtKey string, rowID string, key string, nw t
 		if tuple == nil {
 			tuple = nw.GetTupleStore().GetTupleByKey(tupleKey)
 		}
-		handle := newReteHandleImpl(nw, tuple, "", types.ReteHandleStatusUnknown)
+		handle := newReteHandleImpl(nw, tuple, "", types.ReteHandleStatusUnknown, 0)
 		handles = append(handles, handle)
 	}
 
