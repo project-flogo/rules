@@ -1,17 +1,19 @@
 package mem
 
 import (
-	"github.com/project-flogo/rules/rete/internal/types"
 	"sync/atomic"
+
+	"github.com/project-flogo/rules/rete/common"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 type idGenServiceImpl struct {
 	types.NwServiceImpl
-	config    map[string]interface{}
+	config    common.Config
 	currentId int32
 }
 
-func NewIdGenImpl(nw types.Network, config map[string]interface{}) types.IdGen {
+func NewIdGenImpl(nw types.Network, config common.Config) types.IdGen {
 	idg := idGenServiceImpl{}
 	idg.config = config
 	idg.currentId = 0

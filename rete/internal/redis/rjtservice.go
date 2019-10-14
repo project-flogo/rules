@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/common"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
@@ -13,7 +14,7 @@ type jtServiceImpl struct {
 	sync.RWMutex
 }
 
-func NewJoinTableCollection(nw types.Network, config map[string]interface{}) types.JtService {
+func NewJoinTableCollection(nw types.Network, config common.Config) types.JtService {
 	jtc := jtServiceImpl{}
 	jtc.Nw = nw
 	jtc.allJoinTables = make(map[string]types.JoinTable)

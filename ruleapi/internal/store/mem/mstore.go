@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/common"
 )
 
 type storeImpl struct {
@@ -12,7 +13,7 @@ type storeImpl struct {
 	sync.RWMutex
 }
 
-func NewStore(jsonConfig map[string]interface{}) model.TupleStore {
+func NewStore(config common.Config) model.TupleStore {
 	ms := storeImpl{
 		allTuples: make(map[string]model.Tuple),
 	}

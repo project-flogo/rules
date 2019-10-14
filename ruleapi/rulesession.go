@@ -33,7 +33,7 @@ type rulesessionImpl struct {
 	started     bool
 	storeConfig string
 	tupleStore  model.TupleStore
-	jsonConfig  map[string]interface{}
+	config      common.Config
 }
 
 func ClearSessions() {
@@ -117,11 +117,47 @@ func GetOrCreateRuleSessionFromConfig(name, store, jsonConfig string) (model.Rul
 	return rs, nil
 }
 
+const defaultConfig = `{
+  "rs": {
+    "prefix": "x",
+    "store-ref": "mem"
+  },
+  "rete": {
+    "jt-ref": "mem",
+    "idgen-ref": "mem",
+    "jt":"mem"
+  },
+  "stores": {
+    "mem": {
+    },
+    "redis": {
+      "network": "tcp",
+      "address": ":6379"
+    }
+  },
+  "idgens": {
+    "mem": {
+    },
+    "redis": {
+      "network": "tcp",
+      "address": ":6379"
+    }
+  },
+  "jts": {
+    "mem": {
+    },
+    "redis": {
+      "network": "tcp",
+      "address": ":6379"
+    }
+  }
+}`
+
 func (rs *rulesessionImpl) loadStoreConfig(name string) {
 	_, err := os.Stat(name)
 	if err != nil {
 		// TO DO -- get the config from env or assign it as empty json
-		rs.storeConfig = "{}"
+		rs.storeConfig = defaultConfig
 	} else {
 		rs.storeConfig = utils.FileToString(name)
 	}
@@ -129,7 +165,7 @@ func (rs *rulesessionImpl) loadStoreConfig(name string) {
 
 func (rs *rulesessionImpl) initRuleSession(name string) error {
 
-	err := json.Unmarshal([]byte(rs.storeConfig), &rs.jsonConfig)
+	err := json.Unmarshal([]byte(rs.storeConfig), &rs.config)
 	if err != nil {
 		return err
 	}
@@ -139,7 +175,7 @@ func (rs *rulesessionImpl) initRuleSession(name string) error {
 	rs.reteNetwork = rete.NewReteNetwork(rs.name, rs.storeConfig)
 
 	//TODO: Configure it from jconsonfig
-	tupleStore := getTupleStore(rs.jsonConfig)
+	tupleStore := getTupleStore(rs.config)
 	if tupleStore != nil {
 		tupleStore.Init()
 		rs.SetStore(tupleStore)
@@ -148,18 +184,15 @@ func (rs *rulesessionImpl) initRuleSession(name string) error {
 	return nil
 }
 
-func getTupleStore(jsonConfig map[string]interface{}) model.TupleStore {
-	if rsCfg, found := jsonConfig["rs"].(map[string]interface{}); found {
-		if storeRef, found2 := rsCfg["store-ref"].(string); found2 {
-			if storeRef == "" || storeRef == "mem" {
-				return mem.NewStore(jsonConfig)
-			} else if storeRef == "redis" {
-				return redis.NewStore(jsonConfig)
-			}
-		}
+func getTupleStore(config common.Config) model.TupleStore {
+	switch config.Rs.StoreRef {
+	case common.ServiceTypeMem:
+		return mem.NewStore(config)
+	case common.ServiceTypeRedis:
+		return redis.NewStore(config)
+	default:
+		panic("invalid service type")
 	}
-	//default to in-mem
-	return mem.NewStore(jsonConfig)
 }
 
 func (rs *rulesessionImpl) AddRule(rule model.Rule) (err error) {

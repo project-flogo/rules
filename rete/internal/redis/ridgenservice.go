@@ -3,13 +3,14 @@ package redis
 import (
 	"fmt"
 	"github.com/project-flogo/rules/redisutils"
+	"github.com/project-flogo/rules/rete/common"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 type idGenServiceImpl struct {
 	types.NwServiceImpl
 
-	config map[string]interface{}
+	config common.Config
 	//current int
 	rh redisutils.RedisHdl
 
@@ -20,7 +21,7 @@ type idGenServiceImpl struct {
 	fld string
 }
 
-func NewIdGenImpl(nw types.Network, config map[string]interface{}) types.IdGen {
+func NewIdGenImpl(nw types.Network, config common.Config) types.IdGen {
 	r := idGenServiceImpl{}
 	r.Nw = nw
 	r.config = config
@@ -29,11 +30,7 @@ func NewIdGenImpl(nw types.Network, config map[string]interface{}) types.IdGen {
 
 func (ri *idGenServiceImpl) Init() {
 	ri.key = ri.Nw.GetPrefix() + ":idgen"
-	reteCfg := ri.config["rete"].(map[string]interface{})
-	idgenRef := reteCfg["idgen-ref"].(string)
-	idGens := ri.config["idgens"].(map[string]interface{})
-	redisCfg := idGens[idgenRef].(map[string]interface{})
-	redisutils.InitService(redisCfg)
+	redisutils.InitService(ri.config.IDGens.Redis)
 
 	ri.rh = redisutils.GetRedisHdl()
 	j := ri.GetMaxID()

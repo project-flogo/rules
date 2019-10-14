@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/redisutils"
 )
 
 type RtcOprn int
@@ -33,4 +34,29 @@ type Network interface {
 	//GetConfig() map[string]string
 
 	SetTupleStore(tupleStore model.TupleStore)
+}
+
+const (
+	ServiceTypeMem   = "mem"
+	ServiceTypeRedis = "redis"
+)
+
+type Service struct {
+	Mem   map[string]interface{} `json:"mem"`
+	Redis redisutils.RedisConfig `json:"redis"`
+}
+
+type Config struct {
+	Rs struct {
+		Prefix   string `json:"prefix"`
+		StoreRef string `json:"store-ref"`
+	} `json:"rs"`
+	Rete struct {
+		JtRef    string `json:"jt-ref"`
+		IDGenRef string `json:"idgen-ref"`
+		Jt       string `json:"jt"`
+	} `json:"rete"`
+	Stores Service `json:"stores"`
+	IDGens Service `json:"idgens"`
+	Jts    Service `json:"jts"`
 }

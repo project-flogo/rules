@@ -5,6 +5,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/project-flogo/rules/rete/common"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
@@ -19,7 +20,7 @@ type jtRefsServiceImpl struct {
 	sync.RWMutex
 }
 
-func NewJoinTableRefsInHdlImpl(nw types.Network, config map[string]interface{}) types.JtRefsService {
+func NewJoinTableRefsInHdlImpl(nw types.Network, config common.Config) types.JtRefsService {
 	hdlJt := jtRefsServiceImpl{}
 	hdlJt.Nw = nw
 	hdlJt.tablesAndRows = make(map[string]*jtRowsImpl)

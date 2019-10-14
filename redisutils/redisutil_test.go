@@ -66,7 +66,7 @@ func TestMain(m *testing.M) {
 
 func Test_first(t *testing.T) {
 
-	InitService(nil)
+	InitService(RedisConfig{})
 	rd := GetRedisHdl()
 
 	m := make(map[string]interface{})
@@ -211,7 +211,7 @@ func getStruct(c redis.Conn) error {
 
 func Test_three(t *testing.T) {
 
-	InitService(nil)
+	InitService(RedisConfig{})
 
 	hdl := GetRedisHdl()
 
@@ -241,7 +241,7 @@ func Test_three(t *testing.T) {
 }
 
 func Test_four(t *testing.T) {
-	InitService(nil)
+	InitService(RedisConfig{})
 
 	hdl := GetRedisHdl()
 
@@ -252,7 +252,7 @@ func Test_four(t *testing.T) {
 }
 
 func Test_five(t *testing.T) {
-	InitService(nil)
+	InitService(RedisConfig{})
 
 	hdl := GetRedisHdl()
 

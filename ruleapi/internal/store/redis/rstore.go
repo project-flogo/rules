@@ -2,28 +2,27 @@ package redis
 
 import (
 	"fmt"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/redisutils"
+	"github.com/project-flogo/rules/rete/common"
 )
 
 type storeImpl struct {
 	//allTuples map[string]model.Tuple
-	prefix     string
-	jsonConfig map[string]interface{}
+	prefix string
+	config common.Config
 }
 
-func NewStore(jsonConfig map[string]interface{}) model.TupleStore {
-	ms := storeImpl{}
-	ms.jsonConfig = jsonConfig
+func NewStore(config common.Config) model.TupleStore {
+	ms := storeImpl{
+		config: config,
+	}
 	return &ms
 }
 
 func (ms *storeImpl) Init() {
-	reteCfg := ms.jsonConfig["rs"].(map[string]interface{})
-	storeRef := reteCfg["store-ref"].(string)
-	storeCfg := ms.jsonConfig["stores"].(map[string]interface{})
-	redisCfg := storeCfg[storeRef].(map[string]interface{})
-	redisutils.InitService(redisCfg)
+	redisutils.InitService(ms.config.Stores.Redis)
 }
 
 func (ms *storeImpl) GetTupleByKey(key model.TupleKey) model.Tuple {

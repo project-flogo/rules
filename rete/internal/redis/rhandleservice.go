@@ -9,6 +9,7 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/redisutils"
+	"github.com/project-flogo/rules/rete/common"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
@@ -16,12 +17,12 @@ type handleServiceImpl struct {
 	//allHandles map[string]types.ReteHandle
 	types.NwServiceImpl
 	prefix string
-	config map[string]interface{}
+	config common.Config
 	rand.Source
 	sync.Mutex
 }
 
-func NewHandleCollection(nw types.Network, config map[string]interface{}) types.HandleService {
+func NewHandleCollection(nw types.Network, config common.Config) types.HandleService {
 	hc := handleServiceImpl{
 		NwServiceImpl: types.NwServiceImpl{
 			Nw: nw,
@@ -41,11 +42,7 @@ func (hc *handleServiceImpl) Int63() int64 {
 
 func (hc *handleServiceImpl) Init() {
 	hc.prefix = hc.Nw.GetPrefix() + ":h:"
-	reteCfg := hc.config["rete"].(map[string]interface{})
-	jtRef := reteCfg["jt-ref"].(string)
-	jts := hc.config["jts"].(map[string]interface{})
-	redisCfg := jts[jtRef].(map[string]interface{})
-	redisutils.InitService(redisCfg)
+	redisutils.InitService(hc.config.Jts.Redis)
 }
 
 func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {

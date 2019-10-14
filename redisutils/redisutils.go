@@ -9,22 +9,28 @@ var rd RedisHdl
 
 type RedisHdl = *RedisHandle
 
+type RedisConfig struct {
+	Network string `json:"network"`
+	Address string `json:"address"`
+}
+
 type RedisHandle struct {
-	config  map[string]interface{}
+	config  RedisConfig
 	pool    *redis.Pool
 	network string
 	address string
 }
 
-func InitService(config map[string]interface{}) {
+func InitService(config RedisConfig) {
 	if rd == nil {
 		rd = &RedisHandle{}
 		rd.config = config
-		if config != nil {
-			rd.network = rd.config["network"].(string)
-			rd.address = rd.config["address"].(string)
-		} else {
+		rd.network = config.Network
+		if rd.network == "" {
 			rd.network = "tcp"
+		}
+		rd.address = config.Address
+		if rd.address == "" {
 			rd.address = ":6379"
 		}
 		rd.newPool(rd.network, rd.address)

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/common"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
 
@@ -18,7 +19,7 @@ type handleServiceImpl struct {
 	sync.RWMutex
 }
 
-func NewHandleCollection(nw types.Network, config map[string]interface{}) types.HandleService {
+func NewHandleCollection(nw types.Network, config common.Config) types.HandleService {
 	hc := handleServiceImpl{
 		NwServiceImpl: types.NwServiceImpl{
 			Nw: nw,
