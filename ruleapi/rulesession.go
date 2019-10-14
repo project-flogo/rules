@@ -154,13 +154,16 @@ const defaultConfig = `{
 }`
 
 func (rs *rulesessionImpl) loadStoreConfig(name string) {
-	_, err := os.Stat(name)
-	if err != nil {
-		// TO DO -- get the config from env or assign it as empty json
-		rs.storeConfig = defaultConfig
-	} else {
-		rs.storeConfig = utils.FileToString(name)
+	if value := os.Getenv("STORECONFIG"); value != "" {
+		name = value
 	}
+
+	if _, err := os.Stat(name); err != nil {
+		rs.storeConfig = defaultConfig
+		return
+	}
+
+	rs.storeConfig = utils.FileToString(name)
 }
 
 func (rs *rulesessionImpl) initRuleSession(name string) error {
