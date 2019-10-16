@@ -17,8 +17,21 @@ flogo create -f flogo.json
 cd dtable
 flogo build
 cd bin
+```
+
+#### With mem store
+
+```sh
 ./dtable
 ```
+
+#### With redis store
+
+```sh
+docker run -p 6381:6379 -d redis
+STORECONFIG=../../rsconfig.json ./dtable
+```
+
 ### Testing
 
 #### #1 Invoke student analysis decision table
