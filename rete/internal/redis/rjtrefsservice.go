@@ -10,16 +10,17 @@ import (
 )
 
 type jtRefsServiceImpl struct {
-	//keys are jointable-ids and values are lists of row-ids in the corresponding join table
 	types.NwServiceImpl
-
-	//tablesAndRows map[string]map[string]map[int]int
+	redisutils.RedisHdl
 }
 
 func NewJoinTableRefsInHdlImpl(nw types.Network, config common.Config) types.JtRefsService {
-	hdlJt := jtRefsServiceImpl{}
-	hdlJt.Nw = nw
-	//hdlJt.tablesAndRows = make(map[string]map[string]map[int]int)
+	hdlJt := jtRefsServiceImpl{
+		NwServiceImpl: types.NwServiceImpl{
+			Nw: nw,
+		},
+		RedisHdl: redisutils.NewRedisHdl(config.Jts.Redis),
+	}
 	return &hdlJt
 }
 
@@ -30,16 +31,14 @@ func (h *jtRefsServiceImpl) Init() {
 func (h *jtRefsServiceImpl) AddEntry(handle types.ReteHandle, jtName string, rowID int) {
 	// format: prefix:rtbls:tkey ==> {rowID=jtname, ...}
 	key := h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
-	hdl := redisutils.GetRedisHdl()
 	valMap := make(map[string]interface{})
 	valMap[strconv.Itoa(rowID)] = jtName
-	hdl.HSetAll(key, valMap)
+	h.HSetAll(key, valMap)
 }
 
 func (h *jtRefsServiceImpl) RemoveEntry(handle types.ReteHandle, jtName string, rowID int) {
 	key := h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
-	hdl := redisutils.GetRedisHdl()
-	hdl.HDel(key, strconv.Itoa(rowID))
+	h.HDel(key, strconv.Itoa(rowID))
 }
 
 type hdlRefsRowIteratorImpl struct {
@@ -72,7 +71,6 @@ func (h *jtRefsServiceImpl) GetRowIterator(ctx context.Context, handle types.Ret
 	r.ctx = ctx
 	r.nw = h.Nw
 	r.key = h.Nw.GetPrefix() + ":rtbls:" + handle.GetTupleKey().String()
-	hdl := redisutils.GetRedisHdl()
-	r.iter = hdl.GetMapIterator(r.key)
+	r.iter = h.GetMapIterator(r.key)
 	return &r
 }

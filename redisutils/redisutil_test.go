@@ -65,9 +65,8 @@ func TestMain(m *testing.M) {
 }
 
 func Test_first(t *testing.T) {
-
-	InitService(RedisConfig{})
-	rd := GetRedisHdl()
+	rd := NewRedisHdl(RedisConfig{})
+	defer Shutdown()
 
 	m := make(map[string]interface{})
 	m["k1"] = "v1"
@@ -210,10 +209,8 @@ func getStruct(c redis.Conn) error {
 }
 
 func Test_three(t *testing.T) {
-
-	InitService(RedisConfig{})
-
-	hdl := GetRedisHdl()
+	hdl := NewRedisHdl(RedisConfig{})
+	defer Shutdown()
 
 	//iter := hdl.GetListIterator("x:jt:L_c2")
 	//
@@ -241,9 +238,8 @@ func Test_three(t *testing.T) {
 }
 
 func Test_four(t *testing.T) {
-	InitService(RedisConfig{})
-
-	hdl := GetRedisHdl()
+	hdl := NewRedisHdl(RedisConfig{})
+	defer Shutdown()
 
 	//v := hdl.HGet("a", "d")
 	len := hdl.HLen("a")
@@ -252,9 +248,8 @@ func Test_four(t *testing.T) {
 }
 
 func Test_five(t *testing.T) {
-	InitService(RedisConfig{})
-
-	hdl := GetRedisHdl()
+	hdl := NewRedisHdl(RedisConfig{})
+	defer Shutdown()
 
 	for i := 0; i < 10; i++ {
 		m := make(map[string]interface{})

@@ -14,12 +14,12 @@ import (
 )
 
 type handleServiceImpl struct {
-	//allHandles map[string]types.ReteHandle
 	types.NwServiceImpl
 	prefix string
 	config common.Config
 	rand.Source
 	sync.Mutex
+	redisutils.RedisHdl
 }
 
 func NewHandleCollection(nw types.Network, config common.Config) types.HandleService {
@@ -27,10 +27,10 @@ func NewHandleCollection(nw types.Network, config common.Config) types.HandleSer
 		NwServiceImpl: types.NwServiceImpl{
 			Nw: nw,
 		},
-		config: config,
-		Source: rand.NewSource(time.Now().UnixNano()),
+		config:   config,
+		Source:   rand.NewSource(time.Now().UnixNano()),
+		RedisHdl: redisutils.NewRedisHdl(config.Jts.Redis),
 	}
-	//hc.allHandles = make(map[string]types.ReteHandle)
 	return &hc
 }
 
@@ -42,14 +42,13 @@ func (hc *handleServiceImpl) Int63() int64 {
 
 func (hc *handleServiceImpl) Init() {
 	hc.prefix = hc.Nw.GetPrefix() + ":h:"
-	redisutils.InitService(hc.config.Jts.Redis)
 }
 
 func (hc *handleServiceImpl) RemoveHandle(tuple model.Tuple) types.ReteHandle {
 	rkey := hc.prefix + tuple.GetKey().String()
-	redisutils.GetRedisHdl().Del(rkey)
+	hc.Del(rkey)
 	//TODO: Dummy handle
-	h := newReteHandleImpl(hc.GetNw(), tuple, rkey, types.ReteHandleStatusUnknown, -1)
+	h := newReteHandleImpl(hc.GetNw(), hc.RedisHdl, tuple, rkey, types.ReteHandleStatusUnknown, -1)
 	return h
 
 }
@@ -61,7 +60,7 @@ func (hc *handleServiceImpl) GetHandle(ctx context.Context, tuple model.Tuple) t
 func (hc *handleServiceImpl) GetHandleByKey(ctx context.Context, key model.TupleKey) types.ReteHandle {
 	rkey := hc.prefix + key.String()
 
-	m := redisutils.GetRedisHdl().HGetAll(rkey)
+	m := hc.HGetAll(rkey)
 	if len(m) == 0 {
 		return nil
 	}
@@ -115,7 +114,7 @@ func (hc *handleServiceImpl) GetHandleByKey(ctx context.Context, key model.Tuple
 		return nil
 	}
 
-	h := newReteHandleImpl(hc.GetNw(), tuple, rkey, status, id)
+	h := newReteHandleImpl(hc.GetNw(), hc.RedisHdl, tuple, rkey, status, id)
 	return h
 }
 
@@ -123,14 +122,14 @@ func (hc *handleServiceImpl) GetOrCreateLockedHandle(nw types.Network, tuple mod
 	id := hc.Int63()
 	key, status := hc.prefix+tuple.GetKey().String(), types.ReteHandleStatusCreating
 
-	exists, _ := redisutils.GetRedisHdl().HSetNX(key, "id", id)
+	exists, _ := hc.HSetNX(key, "id", id)
 	if exists {
 		return nil, true
 	}
 
-	exists, _ = redisutils.GetRedisHdl().HSetNX(key, "status", status)
+	exists, _ = hc.HSetNX(key, "status", status)
 	if exists {
-		m := redisutils.GetRedisHdl().HGetAll(key)
+		m := hc.HGetAll(key)
 		if len(m) > 0 {
 			if value, ok := m["status"]; ok {
 				if value, ok := value.(string); ok {
@@ -148,7 +147,7 @@ func (hc *handleServiceImpl) GetOrCreateLockedHandle(nw types.Network, tuple mod
 		}
 	}
 
-	h := newReteHandleImpl(nw, tuple, key, status, id)
+	h := newReteHandleImpl(nw, hc.RedisHdl, tuple, key, status, id)
 	return h, false
 }
 
@@ -156,12 +155,12 @@ func (hc *handleServiceImpl) GetLockedHandle(nw types.Network, tuple model.Tuple
 	id := hc.Int63()
 	key := hc.prefix + tuple.GetKey().String()
 
-	exists, _ := redisutils.GetRedisHdl().HSetNX(key, "id", id)
+	exists, _ := hc.HSetNX(key, "id", id)
 	if exists {
 		return nil, true
 	}
 
-	m := redisutils.GetRedisHdl().HGetAll(key)
+	m := hc.HGetAll(key)
 	if len(m) > 0 {
 		if value, ok := m["status"]; ok {
 			if value, ok := value.(string); ok {
@@ -169,7 +168,7 @@ func (hc *handleServiceImpl) GetLockedHandle(nw types.Network, tuple model.Tuple
 				if err != nil {
 					panic(err)
 				}
-				h := newReteHandleImpl(nw, tuple, key, types.ReteHandleStatus(number), id)
+				h := newReteHandleImpl(nw, hc.RedisHdl, tuple, key, types.ReteHandleStatus(number), id)
 				return h, false
 			}
 		}
@@ -180,7 +179,7 @@ func (hc *handleServiceImpl) GetLockedHandle(nw types.Network, tuple model.Tuple
 
 func (hc *handleServiceImpl) GetHandleWithTuple(nw types.Network, tuple model.Tuple) types.ReteHandle {
 	key, status, id := hc.prefix+tuple.GetKey().String(), types.ReteHandleStatusCreating, int64(-1)
-	m := redisutils.GetRedisHdl().HGetAll(key)
+	m := hc.HGetAll(key)
 	if len(m) > 0 {
 		if value, ok := m["status"]; ok {
 			if value, ok := value.(string); ok {
@@ -206,6 +205,6 @@ func (hc *handleServiceImpl) GetHandleWithTuple(nw types.Network, tuple model.Tu
 		}
 	}
 
-	h := newReteHandleImpl(nw, tuple, key, status, id)
+	h := newReteHandleImpl(nw, hc.RedisHdl, tuple, key, status, id)
 	return h
 }

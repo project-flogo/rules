@@ -14,24 +14,29 @@ type joinTableRowImpl struct {
 	types.NwElemIdImpl
 	handles []types.ReteHandle
 	jtKey   string
+	redisutils.RedisHdl
 }
 
-func newJoinTableRow(jtKey string, handles []types.ReteHandle, nw types.Network) types.JoinTableRow {
+func newJoinTableRow(handle redisutils.RedisHdl, jtKey string, handles []types.ReteHandle, nw types.Network) types.JoinTableRow {
 	jtr := joinTableRowImpl{
-		handles: append([]types.ReteHandle{}, handles...),
-		jtKey:   jtKey,
+		RedisHdl: handle,
+		jtKey:    jtKey,
+		handles:  append([]types.ReteHandle{}, handles...),
 	}
 	jtr.SetID(nw)
 	return &jtr
 }
 
-func newJoinTableRowLoadedFromStore(jtKey string, rowID int, handles []types.ReteHandle, nw types.Network) types.JoinTableRow {
-	jtr := joinTableRowImpl{}
-	jtr.jtKey = jtKey
-	jtr.Nw = nw
-	jtr.ID = rowID
-	jtr.handles = handles
-
+func newJoinTableRowLoadedFromStore(handle redisutils.RedisHdl, jtKey string, rowID int, handles []types.ReteHandle, nw types.Network) types.JoinTableRow {
+	jtr := joinTableRowImpl{
+		handles: handles,
+		jtKey:   jtKey,
+		NwElemIdImpl: types.NwElemIdImpl{
+			ID: rowID,
+			Nw: nw,
+		},
+		RedisHdl: handle,
+	}
 	return &jtr
 }
 
@@ -45,15 +50,14 @@ func (jtr *joinTableRowImpl) Write() {
 		}
 	}
 	row[strconv.Itoa(jtr.ID)] = str
-	hdl := redisutils.GetRedisHdl()
-	hdl.HSetAll(jtr.jtKey, row)
+	jtr.HSetAll(jtr.jtKey, row)
 }
 
 func (jtr *joinTableRowImpl) GetHandles() []types.ReteHandle {
 	return jtr.handles
 }
 
-func createRow(ctx context.Context, jtKey string, rowID string, key string, nw types.Network) types.JoinTableRow {
+func createRow(ctx context.Context, handle redisutils.RedisHdl, jtKey string, rowID string, key string, nw types.Network) types.JoinTableRow {
 
 	values := strings.Split(key, ",")
 
@@ -80,12 +84,12 @@ func createRow(ctx context.Context, jtKey string, rowID string, key string, nw t
 		if tuple == nil {
 			tuple = nw.GetTupleStore().GetTupleByKey(tupleKey)
 		}
-		handle := newReteHandleImpl(nw, tuple, "", types.ReteHandleStatusUnknown, 0)
+		handle := newReteHandleImpl(nw, handle, tuple, "", types.ReteHandleStatusUnknown, 0)
 		handles = append(handles, handle)
 	}
 
 	rowId, _ := strconv.Atoi(rowID)
-	jtRow := newJoinTableRowLoadedFromStore(jtKey, rowId, handles, nw)
+	jtRow := newJoinTableRowLoadedFromStore(handle, jtKey, rowId, handles, nw)
 
 	return jtRow
 }

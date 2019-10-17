@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/redisutils"
 	"github.com/project-flogo/rules/rete/common"
 	"github.com/project-flogo/rules/rete/internal/types"
 )
@@ -11,15 +12,21 @@ import (
 type jtServiceImpl struct {
 	types.NwServiceImpl
 	allJoinTables map[string]types.JoinTable
+	redisutils.RedisHdl
 	sync.RWMutex
 }
 
 func NewJoinTableCollection(nw types.Network, config common.Config) types.JtService {
-	jtc := jtServiceImpl{}
-	jtc.Nw = nw
-	jtc.allJoinTables = make(map[string]types.JoinTable)
+	jtc := jtServiceImpl{
+		NwServiceImpl: types.NwServiceImpl{
+			Nw: nw,
+		},
+		allJoinTables: make(map[string]types.JoinTable),
+		RedisHdl:      redisutils.NewRedisHdl(config.Jts.Redis),
+	}
 	return &jtc
 }
+
 func (jtc *jtServiceImpl) Init() {
 
 }
@@ -35,7 +42,7 @@ func (jtc *jtServiceImpl) GetOrCreateJoinTable(nw types.Network, rule model.Rule
 	defer jtc.Unlock()
 	jT, found := jtc.allJoinTables[name]
 	if !found {
-		jT = newJoinTableImpl(nw, rule, identifiers, name)
+		jT = newJoinTableImpl(nw, jtc.RedisHdl, rule, identifiers, name)
 		jtc.allJoinTables[name] = jT
 	}
 	return jT

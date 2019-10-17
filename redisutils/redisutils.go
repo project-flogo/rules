@@ -5,9 +5,9 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-var rd RedisHdl
-
 type RedisHdl = *RedisHandle
+
+var rd = make([]RedisHdl, 0, 8)
 
 type RedisConfig struct {
 	Network string `json:"network"`
@@ -21,24 +21,21 @@ type RedisHandle struct {
 	address string
 }
 
-func InitService(config RedisConfig) {
-	if rd == nil {
-		rd = &RedisHandle{}
-		rd.config = config
-		rd.network = config.Network
-		if rd.network == "" {
-			rd.network = "tcp"
-		}
-		rd.address = config.Address
-		if rd.address == "" {
-			rd.address = ":6379"
-		}
-		rd.newPool(rd.network, rd.address)
+func NewRedisHdl(config RedisConfig) RedisHdl {
+	handle := RedisHandle{
+		config:  config,
+		network: config.Network,
+		address: config.Address,
 	}
-}
-
-func GetRedisHdl() RedisHdl {
-	return rd
+	if handle.network == "" {
+		handle.network = "tcp"
+	}
+	if handle.address == "" {
+		handle.address = ":6379"
+	}
+	handle.newPool(handle.network, handle.address)
+	rd = append(rd, &handle)
+	return &handle
 }
 
 func (rh *RedisHandle) newPool(network string, address string) {
@@ -318,9 +315,9 @@ func (iter *MapIterator) HasNext() bool {
 	return true
 
 }
+
 func (iter *MapIterator) Remove() {
-	hdl := GetRedisHdl()
-	hdl.HDel(iter.key, iter.currKey)
+	iter.rh.HDel(iter.key, iter.currKey)
 }
 
 func (iter *MapIterator) Next() (string, interface{}) {
@@ -352,9 +349,8 @@ func (rh *RedisHandle) GetMapIterator(key string) *MapIterator {
 }
 
 func Shutdown() {
-	if rd != nil {
-
-		rd.pool.Close()
-		rd = nil
+	for _, value := range rd {
+		value.pool.Close()
 	}
+	rd = rd[:0]
 }

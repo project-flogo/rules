@@ -11,15 +11,17 @@ import (
 
 type joinTableImpl struct {
 	types.NwElemIdImpl
-	//table map[int]types.JoinTableRow
+	redisutils.RedisHdl
 	idr   []model.TupleType
 	rule  model.Rule
 	name  string
 	jtKey string
 }
 
-func newJoinTableImpl(nw types.Network, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
-	jt := joinTableImpl{}
+func newJoinTableImpl(nw types.Network, handle redisutils.RedisHdl, rule model.Rule, identifiers []model.TupleType, name string) types.JoinTable {
+	jt := joinTableImpl{
+		RedisHdl: handle,
+	}
 	jt.initJoinTableImpl(nw, rule, identifiers, name)
 	return &jt
 }
@@ -33,7 +35,7 @@ func (jt *joinTableImpl) initJoinTableImpl(nw types.Network, rule model.Rule, id
 }
 
 func (jt *joinTableImpl) AddRow(handles []types.ReteHandle) types.JoinTableRow {
-	row := newJoinTableRow(jt.jtKey, handles, jt.Nw)
+	row := newJoinTableRow(jt.RedisHdl, jt.jtKey, handles, jt.Nw)
 	for i := 0; i < len(row.GetHandles()); i++ {
 		handle := row.GetHandles()[i]
 		jt.Nw.GetJtRefService().AddEntry(handle, jt.name, row.GetID())
@@ -44,9 +46,8 @@ func (jt *joinTableImpl) AddRow(handles []types.ReteHandle) types.JoinTableRow {
 
 func (jt *joinTableImpl) RemoveRow(rowID int) types.JoinTableRow {
 	row := jt.GetRow(nil, rowID)
-	hdl := redisutils.GetRedisHdl()
 	rowId := strconv.Itoa(rowID)
-	hdl.HDel(jt.jtKey, rowId)
+	jt.HDel(jt.jtKey, rowId)
 	return row
 }
 
@@ -65,8 +66,7 @@ func (jt *joinTableImpl) RemoveAllRows(ctx context.Context) {
 }
 
 func (jt *joinTableImpl) GetRowCount() int {
-	hdl := redisutils.GetRedisHdl()
-	return hdl.HLen(jt.name)
+	return jt.HLen(jt.name)
 }
 
 func (jt *joinTableImpl) GetRule() model.Rule {
@@ -74,14 +74,13 @@ func (jt *joinTableImpl) GetRule() model.Rule {
 }
 
 func (jt *joinTableImpl) GetRowIterator(ctx context.Context) types.JointableRowIterator {
-	return newRowIterator(ctx, jt)
+	return newRowIterator(ctx, jt.RedisHdl, jt)
 }
 
 func (jt *joinTableImpl) GetRow(ctx context.Context, rowID int) types.JoinTableRow {
-	hdl := redisutils.GetRedisHdl()
-	key := hdl.HGet(jt.jtKey, strconv.Itoa(rowID))
+	key := jt.HGet(jt.jtKey, strconv.Itoa(rowID))
 	rowId := strconv.Itoa(rowID)
-	return createRow(ctx, jt.name, rowId, key.(string), jt.Nw)
+	return createRow(ctx, jt.RedisHdl, jt.name, rowId, key.(string), jt.Nw)
 }
 
 func (jt *joinTableImpl) GetName() string {
@@ -94,15 +93,17 @@ type rowIteratorImpl struct {
 	jtName string
 	nw     types.Network
 	curr   types.JoinTableRow
+	redisutils.RedisHdl
 }
 
-func newRowIterator(ctx context.Context, jTable types.JoinTable) types.JointableRowIterator {
+func newRowIterator(ctx context.Context, handle redisutils.RedisHdl, jTable types.JoinTable) types.JointableRowIterator {
 	key := jTable.GetNw().GetPrefix() + ":jt:" + jTable.GetName()
 	ri := rowIteratorImpl{}
 	ri.ctx = ctx
-	ri.iter = redisutils.GetRedisHdl().GetMapIterator(key)
+	ri.iter = handle.GetMapIterator(key)
 	ri.nw = jTable.GetNw()
 	ri.jtName = jTable.GetName()
+	ri.RedisHdl = handle
 	return &ri
 }
 
@@ -113,7 +114,7 @@ func (ri *rowIteratorImpl) HasNext() bool {
 func (ri *rowIteratorImpl) Next() types.JoinTableRow {
 	rowId, key := ri.iter.Next()
 	tupleKeyStr := key.(string)
-	ri.curr = createRow(ri.ctx, ri.jtName, rowId, tupleKeyStr, ri.nw)
+	ri.curr = createRow(ri.ctx, ri.RedisHdl, ri.jtName, rowId, tupleKeyStr, ri.nw)
 	return ri.curr
 }
 
