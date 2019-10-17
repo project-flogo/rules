@@ -2,7 +2,6 @@ package rete
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/project-flogo/rules/common/model"
@@ -263,7 +262,6 @@ LOOP:
 		tupleTableRowRight := rIterator.Next()
 		handles := tupleTableRowRight.GetHandles()
 		for _, handle := range handles {
-			fmt.Println("handle", handle.GetTupleKey(), handle.GetTuple())
 			if jn.GetNw().GetHandleService().GetHandle(ctx, handle.GetTuple()) == nil {
 				rIterator.Remove()
 				for _, otherHdl := range handles {
