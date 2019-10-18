@@ -1,6 +1,9 @@
 package rete
 
-import "github.com/project-flogo/rules/common/model"
+import (
+	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/internal/types"
+)
 
 //classNodeLink links the classNode to the rest of the model.Rule's network
 type classNodeLink interface {
@@ -17,14 +20,14 @@ type classNodeLinkImpl struct {
 	classNodeVar  classNode
 }
 
-func newClassNodeLink(nw Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleType) classNodeLink {
+func newClassNodeLink(nw types.Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleType) classNodeLink {
 	cnl := classNodeLinkImpl{}
 	cnl.initClassNodeLinkImpl(nw, classNodeVar, child, rule, identifierVar)
 	return &cnl
 }
 
-func (cnl *classNodeLinkImpl) initClassNodeLinkImpl(nw Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleType) {
-	initClassNodeLink(nw, &cnl.nodeLinkImpl, child)
+func (cnl *classNodeLinkImpl) initClassNodeLinkImpl(nw types.Network, classNodeVar classNode, child node, rule model.Rule, identifierVar model.TupleType) {
+	cnl.initClassNodeLink(nw, child)
 	cnl.classNodeVar = classNodeVar
 	cnl.rule = rule
 	cnl.identifierVar = identifierVar

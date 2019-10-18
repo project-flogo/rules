@@ -6,28 +6,36 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //add and delete in the same rtc
 func Test_T7(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R7")
-	rule.AddCondition("R7_c1", []string{"t1.none"}, trueCondition, nil)
+	err = rule.AddCondition("R7_c1", []string{"t1.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r7_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	txnCtx := txnCtx{t, 0}
 	rs.RegisterRtcTransactionHandler(t7Handler, &txnCtx)
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	i1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), i1)
+	i1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), i1)
+	assert.Nil(t, err)
 
-	rs.Unregister()
+	deleteRuleSession(t, rs)
 
 }
 
@@ -40,6 +48,9 @@ func r7_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 }
 
 func t7Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt++

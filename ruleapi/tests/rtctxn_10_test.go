@@ -6,31 +6,41 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //1 rtc ->Delete multiple tuple types and verify count.
 func Test_T10(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R10")
-	rule.AddCondition("R10_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	err = rule.AddCondition("R10_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r10_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	txnCtx := txnCtx{t, 0}
 	rs.RegisterRtcTransactionHandler(t10Handler, &txnCtx)
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), t1)
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
 
-	t3, _ := model.NewTupleWithKeyValues("t3", "t11")
-	rs.Assert(context.TODO(), t3)
+	t3, err := model.NewTupleWithKeyValues("t3", "t11")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t3)
+	assert.Nil(t, err)
 
-	rs.Unregister()
+	deleteRuleSession(t, rs)
 
 }
 
@@ -40,13 +50,13 @@ func r10_action(ctx context.Context, rs model.RuleSession, ruleName string, tupl
 	id, _ := t3.GetString("id")
 	if id == "t11" {
 		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-		t10 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t10 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		if t10 != nil {
 			rs.Delete(ctx, t10)
 		}
 
 		tk1, _ := model.NewTupleKeyWithKeyValues("t3", "t11")
-		t11 := rs.GetAssertedTuple(tk1).(model.MutableTuple)
+		t11 := rs.GetAssertedTuple(ctx, tk1).(model.MutableTuple)
 		if t11 != nil {
 			rs.Delete(ctx, t11)
 		}
@@ -54,6 +64,9 @@ func r10_action(ctx context.Context, rs model.RuleSession, ruleName string, tupl
 }
 
 func t10Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt = txnCtx.TxnCnt + 1

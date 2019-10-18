@@ -1,32 +1,42 @@
 package tests
 
 import (
+	"context"
+	"testing"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
 
-	"context"
-	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
 //no-identifier condition
 func Test_T8(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R1")
-	rule.AddCondition("R1_c1", []string{"t1.none"}, trueCondition, nil)
-	rule.AddCondition("R1_c2", []string{}, falseCondition, nil)
+	err = rule.AddCondition("R1_c1", []string{"t1.none"}, trueCondition, nil)
+	assert.Nil(t, err)
+	err = rule.AddCondition("R1_c2", []string{}, falseCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, assertTuple))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rs.RegisterRtcTransactionHandler(t8Handler, t)
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t1")
-	rs.Assert(context.TODO(), t1)
-	rs.Unregister()
+	t1, err := model.NewTupleWithKeyValues("t1", "t1")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
+
+	deleteRuleSession(t, rs, t1)
 
 }
 
@@ -36,6 +46,9 @@ func assertTuple(ctx context.Context, rs model.RuleSession, ruleName string, tup
 }
 
 func t8Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	t := handlerCtx.(*testing.T)
 	if m, found := rtxn.GetRtcAdded()["t1"]; found {

@@ -8,84 +8,88 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClearSessions(t *testing.T) {
-	ruleapi.GetOrCreateRuleSession("test")
+	_, err := ruleapi.GetOrCreateRuleSession("test", "")
+	assert.Nil(t, err)
 	ruleapi.ClearSessions()
 }
 
 func TestAssert(t *testing.T) {
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 	rule := ruleapi.NewRule("R2")
-	rule.AddCondition("R2_c1", []string{"t4.none"}, trueCondition, nil)
+	err = rule.AddCondition("R2_c1", []string{"t4.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, emptyAction))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t4", "t4")
-	err := rs.Assert(context.TODO(), t1)
-	if err != nil {
-		t.Fatalf("err should be nil: %v", err)
-	}
+	t1, err := model.NewTupleWithKeyValues("t4", "t4")
+	assert.Nil(t, err)
 	err = rs.Assert(context.TODO(), t1)
-	if err == nil {
-		t.Fatalf("err should be not be nil: %v", err)
-	}
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.NotNil(t, err)
 
 	time.Sleep(2 * time.Second)
 	err = rs.Assert(context.TODO(), t1)
-	if err != nil {
-		t.Fatalf("err should be nil: %v", err)
-	}
-	rs.Unregister()
+	assert.Nil(t, err)
+	deleteRuleSession(t, rs, t1)
 }
 
 func TestRace(t *testing.T) {
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 	defer rs.Unregister()
 	rule := ruleapi.NewRule("R2")
-	rule.AddCondition("R2_c1", []string{"t4.none"}, trueCondition, nil)
+	err = rule.AddCondition("R2_c1", []string{"t4.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, emptyAction))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
 	done := make(chan bool, 8)
 	withTTL := func() {
 		for i := 0; i < 10; i++ {
-			t1, _ := model.NewTupleWithKeyValues("t4", fmt.Sprintf("ttl%d", i))
-			err := rs.Assert(context.TODO(), t1)
-			if err != nil {
-				t.Fatalf("err should be nil: %v", err)
-			}
+			t1, err := model.NewTupleWithKeyValues("t4", fmt.Sprintf("ttl%d", i))
+			assert.Nil(t, err)
+			err = rs.Assert(context.TODO(), t1)
+			assert.Nil(t, err)
 			time.Sleep(10 * time.Millisecond)
 		}
 		done <- true
 	}
 	withDelete := func() {
 		for i := 0; i < 10; i++ {
-			t1, _ := model.NewTupleWithKeyValues("t3", fmt.Sprintf("delete%d", i))
-			err := rs.Assert(context.TODO(), t1)
-			if err != nil {
-				t.Fatalf("err should be nil: %v", err)
-			}
+			t1, err := model.NewTupleWithKeyValues("t3", fmt.Sprintf("delete%d", i))
+			assert.Nil(t, err)
+			err = rs.Assert(context.TODO(), t1)
+			assert.Nil(t, err)
 			time.Sleep(10 * time.Millisecond)
-			rs.Delete(context.TODO(), t1)
+			err = rs.Delete(context.TODO(), t1)
+			assert.Nil(t, err)
 			time.Sleep(10 * time.Millisecond)
 		}
 		done <- true
 	}
 	addOnly := func() {
 		for i := 0; i < 10; i++ {
-			t1, _ := model.NewTupleWithKeyValues("t3", fmt.Sprintf("add%d", i))
-			err := rs.Assert(context.TODO(), t1)
-			if err != nil {
-				t.Fatalf("err should be nil: %v", err)
-			}
+			t1, err := model.NewTupleWithKeyValues("t3", fmt.Sprintf("add%d", i))
+			assert.Nil(t, err)
+			err = rs.Assert(context.TODO(), t1)
+			assert.Nil(t, err)
 			time.Sleep(10 * time.Millisecond)
 		}
 		done <- true

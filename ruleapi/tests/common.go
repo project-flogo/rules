@@ -21,12 +21,17 @@ import (
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
+
 	"github.com/stretchr/testify/assert"
 )
 
-func createRuleSession() (model.RuleSession, error) {
-	rs, _ := ruleapi.GetOrCreateRuleSession("test")
+var (
+	redis = false
+	done  = false
+)
 
+func createRuleSession() (model.RuleSession, error) {
+	done = false
 	tupleDescFileAbsPath := common.GetPathForResource("ruleapi/tests/tests.json", "./tests.json")
 
 	dat, err := ioutil.ReadFile(tupleDescFileAbsPath)
@@ -37,7 +42,25 @@ func createRuleSession() (model.RuleSession, error) {
 	if err != nil {
 		return nil, err
 	}
-	return rs, nil
+
+	store := ""
+	if redis {
+		store = "rsconfig.json"
+	}
+	return ruleapi.GetOrCreateRuleSession("test", store)
+}
+
+func deleteRuleSession(t *testing.T, session model.RuleSession, tuples ...model.Tuple) {
+	done = true
+	defer session.Unregister()
+	rules := session.GetRules()
+	for _, rule := range rules {
+		session.DeleteRule(rule.GetName())
+	}
+	for _, tuple := range tuples {
+		err := session.Delete(nil, tuple)
+		assert.Nil(t, err)
+	}
 }
 
 //conditions and actions

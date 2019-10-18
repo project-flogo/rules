@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/common"
 )
 
 type opsEntry interface {
@@ -23,10 +24,10 @@ type assertEntry interface {
 
 type assertEntryImpl struct {
 	opsEntryImpl
-	mode RtcOprn
+	mode common.RtcOprn
 }
 
-func newAssertEntry(tuple model.Tuple, changeProps map[string]bool, mode RtcOprn) assertEntry {
+func newAssertEntry(tuple model.Tuple, changeProps map[string]bool, mode common.RtcOprn) assertEntry {
 	aEntry := assertEntryImpl{}
 	aEntry.tuple = tuple
 	aEntry.changeProps = changeProps
@@ -36,7 +37,7 @@ func newAssertEntry(tuple model.Tuple, changeProps map[string]bool, mode RtcOprn
 
 func (ai *assertEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
-	reteCtx.getNetwork().assertInternal(ctx, ai.tuple, ai.changeProps, ai.mode)
+	reteCtx.GetNetwork().AssertInternal(ctx, ai.tuple, ai.changeProps, ai.mode)
 }
 
 //Modify Entry
@@ -58,9 +59,9 @@ func newModifyEntry(tuple model.Tuple, changeProps map[string]bool) modifyEntry 
 
 func (me *modifyEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
-	reteCtx.getConflictResolver().deleteAgendaFor(ctx, me.tuple, me.changeProps)
-	reteCtx.getNetwork().Retract(ctx, me.tuple, me.changeProps, MODIFY)
-	reteCtx.getNetwork().Assert(ctx, reteCtx.getRuleSession(), me.tuple, me.changeProps, MODIFY)
+	reteCtx.GetConflictResolver().DeleteAgendaFor(ctx, me.tuple, me.changeProps)
+	reteCtx.GetNetwork().Retract(ctx, reteCtx.GetRuleSession(), me.tuple, me.changeProps, common.MODIFY)
+	reteCtx.GetNetwork().Assert(ctx, reteCtx.GetRuleSession(), me.tuple, me.changeProps, common.MODIFY)
 }
 
 //Delete Entry
@@ -71,10 +72,10 @@ type deleteEntry interface {
 
 type deleteEntryImpl struct {
 	opsEntryImpl
-	mode RtcOprn
+	mode common.RtcOprn
 }
 
-func newDeleteEntry(tuple model.Tuple, mode RtcOprn, changeProps map[string]bool) deleteEntry {
+func newDeleteEntry(tuple model.Tuple, mode common.RtcOprn, changeProps map[string]bool) deleteEntry {
 	dEntry := deleteEntryImpl{}
 	dEntry.tuple = tuple
 	dEntry.mode = mode
@@ -84,6 +85,6 @@ func newDeleteEntry(tuple model.Tuple, mode RtcOprn, changeProps map[string]bool
 
 func (de *deleteEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
-	reteCtx.getConflictResolver().deleteAgendaFor(ctx, de.tuple, de.changeProps)
-	reteCtx.getNetwork().retractInternal(ctx, de.tuple, de.changeProps, de.mode)
+	reteCtx.GetConflictResolver().DeleteAgendaFor(ctx, de.tuple, de.changeProps)
+	reteCtx.GetNetwork().RetractInternal(ctx, de.tuple, de.changeProps, de.mode)
 }

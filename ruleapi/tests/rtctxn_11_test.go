@@ -6,35 +6,50 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //1 rtc->one assert triggers two rule actions each rule action asserts 2 more tuples.Verify Tuple type and Tuples count.
 func Test_T11(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R11")
-	rule.AddCondition("R11_c1", []string{"t1.none"}, trueCondition, nil)
+	err = rule.AddCondition("R11_c1", []string{"t1.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r11_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rule1 := ruleapi.NewRule("R112")
-	rule1.AddCondition("R112_c1", []string{"t1.none"}, trueCondition, nil)
+	err = rule1.AddCondition("R112_c1", []string{"t1.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule1.SetActionService(createActionServiceFromFunction(t, r112_action))
 	rule1.SetPriority(1)
-	rs.AddRule(rule1)
+	err = rs.AddRule(rule1)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule1.GetName())
 
 	txnCtx := txnCtx{t, 0}
 	rs.RegisterRtcTransactionHandler(t11Handler, &txnCtx)
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), t1)
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
 
-	rs.Unregister()
+	t2, err := model.NewTupleWithKeyValues("t3", "t2")
+	assert.Nil(t, err)
+	t3, err := model.NewTupleWithKeyValues("t3", "t1")
+	assert.Nil(t, err)
+
+	deleteRuleSession(t, rs, t1, t2, t3)
 
 }
 
@@ -59,6 +74,9 @@ func r112_action(ctx context.Context, rs model.RuleSession, ruleName string, tup
 }
 
 func t11Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt = txnCtx.TxnCnt + 1

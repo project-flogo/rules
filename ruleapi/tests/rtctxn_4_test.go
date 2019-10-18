@@ -6,26 +6,34 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // modified in action (forward chain)
 func Test_T4(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R4")
-	rule.AddCondition("R4_c1", []string{"t1.none"}, trueCondition, nil)
+	err = rule.AddCondition("R4_c1", []string{"t1.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r4_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rs.RegisterRtcTransactionHandler(t4Handler, t)
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), t1)
-	rs.Unregister()
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
+	deleteRuleSession(t, rs, t1)
 
 }
 
@@ -35,6 +43,9 @@ func r4_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 }
 
 func t4Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	t := handlerCtx.(*testing.T)
 

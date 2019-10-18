@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/Shopify/sarama v1.23.1
 	github.com/aws/aws-sdk-go v1.24.1
+	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/gorilla/websocket v1.4.1
 	github.com/oklog/ulid v1.3.1
 	github.com/project-flogo/contrib/activity/log v0.9.0

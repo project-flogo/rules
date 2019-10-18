@@ -8,25 +8,32 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var actionCnt1 uint64
 
 //1 rtc->Schedule assert, Cancel scheduled assert and action should not be fired
 func Test_T16(t *testing.T) {
-
-	rs, _ := createRuleSession()
+	actionCnt1 = 0
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R16")
-	rule.AddCondition("R16_c1", []string{"t1.none"}, trueCondition, nil)
+	err = rule.AddCondition("R16_c1", []string{"t1.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r16_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
 	rs.ScheduleAssert(context.TODO(), 1000, "1", t1)
 	rs.CancelScheduledAssert(context.TODO(), "1")
 
@@ -37,7 +44,7 @@ func Test_T16(t *testing.T) {
 		t.FailNow()
 	}
 
-	rs.Unregister()
+	deleteRuleSession(t, rs)
 
 }
 

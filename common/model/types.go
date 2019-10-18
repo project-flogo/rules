@@ -49,7 +49,7 @@ type RuleSession interface {
 	GetRules() []Rule
 
 	Assert(ctx context.Context, tuple Tuple) (err error)
-	Retract(ctx context.Context, tuple Tuple)
+	Retract(ctx context.Context, tuple Tuple) error
 
 	ScheduleAssert(ctx context.Context, delayInMillis uint64, key interface{}, tuple Tuple)
 	CancelScheduledAssert(ctx context.Context, key interface{})
@@ -66,13 +66,16 @@ type RuleSession interface {
 	Start(startupCtx map[string]interface{}) (err error)
 
 	//return the asserted tuple, nil if not found
-	GetAssertedTuple(key TupleKey) Tuple
+	GetAssertedTuple(ctx context.Context, key TupleKey) Tuple
 
 	//Retract, and remove
-	Delete(ctx context.Context, tuple Tuple)
+	Delete(ctx context.Context, tuple Tuple) error
 
 	//RtcTransactionHandler
 	RegisterRtcTransactionHandler(txnHandler RtcTransactionHandler, handlerCtx interface{})
+
+	//SetStore
+	GetStore() TupleStore
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side

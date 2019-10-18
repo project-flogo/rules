@@ -19,7 +19,7 @@ import (
 )
 
 func createRuleSession() (model.RuleSession, error) {
-	rs, _ := ruleapi.GetOrCreateRuleSession("test")
+	rs, _ := ruleapi.GetOrCreateRuleSession("test", "")
 
 	tupleDescFileAbsPath := common.GetPathForResource("ruleapi/tests/tests.json", "./../tests.json")
 

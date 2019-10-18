@@ -118,7 +118,7 @@ func resolveExpFromTupleScope(tuples map[model.TupleType]model.Tuple, exprs map[
 
 	tupleScope := make(map[string]interface{})
 	for tk, t := range tuples {
-		tupleScope[string(tk)] = t.GetMap()
+		tupleScope[string(tk)] = t.ToMap()
 	}
 
 	scope := data.NewSimpleScope(tupleScope, nil)

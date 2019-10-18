@@ -6,42 +6,60 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //1 rtc->Redundant add and modify on same tuple->Verify added and modified count
 func Test_T14(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R14")
-	rule.AddCondition("R14_c1", []string{"t1.none"}, trueCondition, nil)
+	err = rule.AddCondition("R14_c1", []string{"t1.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r14_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rule1 := ruleapi.NewRule("R142")
-	rule1.AddCondition("R142_c1", []string{"t3.none"}, trueCondition, nil)
+	err = rule1.AddCondition("R142_c1", []string{"t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule1.SetActionService(createActionServiceFromFunction(t, r142_action))
 	rule1.SetPriority(2)
-	rs.AddRule(rule1)
+	err = rs.AddRule(rule1)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule1.GetName())
 
 	txnCtx := txnCtx{t, 0}
 	rs.RegisterRtcTransactionHandler(t14Handler, &txnCtx)
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	t1.SetDouble(context.TODO(), "p2", 11.11)
-	rs.Assert(context.TODO(), t1)
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = t1.SetDouble(context.TODO(), "p2", 11.11)
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
 
-	t2, _ := model.NewTupleWithKeyValues("t3", "t12")
-	rs.Assert(context.TODO(), t2)
+	t2, err := model.NewTupleWithKeyValues("t3", "t12")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t2)
+	assert.Nil(t, err)
 
-	t3, _ := model.NewTupleWithKeyValues("t3", "t13")
-	rs.Assert(context.TODO(), t3)
+	t3, err := model.NewTupleWithKeyValues("t3", "t13")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t3)
+	assert.Nil(t, err)
 
-	rs.Unregister()
+	t4, err := model.NewTupleWithKeyValues("t1", "t2")
+	assert.Nil(t, err)
+
+	deleteRuleSession(t, rs, t1, t2, t3, t4)
 
 }
 
@@ -64,18 +82,21 @@ func r142_action(ctx context.Context, rs model.RuleSession, ruleName string, tup
 	if id == "t12" {
 		//Modifing p2 with the same value
 		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-		t10 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t10 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		t10.SetDouble(ctx, "p2", 11.11)
 	}
 	if id == "t13" {
 		//Modifing p2 value
 		tk1, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-		t11 := rs.GetAssertedTuple(tk1).(model.MutableTuple)
+		t11 := rs.GetAssertedTuple(ctx, tk1).(model.MutableTuple)
 		t11.SetDouble(ctx, "p2", 12.11)
 	}
 }
 
 func t14Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt = txnCtx.TxnCnt + 1

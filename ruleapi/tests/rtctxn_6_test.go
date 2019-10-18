@@ -6,33 +6,45 @@ import (
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //Same as Test_T5, but in 3rd rtc, assert a TTL=0 based and a TTL=1 based
 func Test_T6(t *testing.T) {
 
-	rs, _ := createRuleSession()
+	rs, err := createRuleSession()
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R6")
-	rule.AddCondition("R6_c1", []string{"t1.none"}, trueCondition, nil)
+	err = rule.AddCondition("R6_c1", []string{"t1.none"}, trueCondition, nil)
+	assert.Nil(t, err)
 	rule.SetActionService(createActionServiceFromFunction(t, r6_action))
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	txnCtx := txnCtx{t, 0}
 	rs.RegisterRtcTransactionHandler(t6Handler, &txnCtx)
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	i1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), i1)
+	i1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), i1)
+	assert.Nil(t, err)
 
-	i2, _ := model.NewTupleWithKeyValues("t1", "t11")
-	rs.Assert(context.TODO(), i2)
+	i2, err := model.NewTupleWithKeyValues("t1", "t11")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), i2)
+	assert.Nil(t, err)
 
-	i3, _ := model.NewTupleWithKeyValues("t1", "t13")
-	rs.Assert(context.TODO(), i3)
-	rs.Unregister()
+	i3, err := model.NewTupleWithKeyValues("t1", "t13")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), i3)
+	assert.Nil(t, err)
+	deleteRuleSession(t, rs, i1, i3)
 
 }
 
@@ -41,7 +53,7 @@ func r6_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 	id, _ := t1.GetString("id")
 	if id == "t11" {
 		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
-		t10 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t10 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		if t10 != nil {
 			t10.SetString(ctx, "p3", "v3")
 			t10.SetDouble(ctx, "p2", 11.11)
@@ -49,7 +61,7 @@ func r6_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 	} else if id == "t13" {
 		//delete t11
 		tk, _ := model.NewTupleKeyWithKeyValues("t1", "t11")
-		t11 := rs.GetAssertedTuple(tk).(model.MutableTuple)
+		t11 := rs.GetAssertedTuple(ctx, tk).(model.MutableTuple)
 		if t11 != nil {
 			rs.Delete(ctx, t11)
 		}
@@ -63,6 +75,9 @@ func r6_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 }
 
 func t6Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, handlerCtx interface{}) {
+	if done {
+		return
+	}
 
 	txnCtx := handlerCtx.(*txnCtx)
 	txnCtx.TxnCnt++

@@ -150,7 +150,7 @@ func (t *tuplePropertyResolver) Resolve(scope data.Scope, item string, field str
 	//return v, err
 	ts := scope.(*tupleScope)
 	tuple := ts.tuples[model.TupleType(field)]
-	m := tuple.GetMap()
+	m := tuple.ToMap()
 	return m, nil
 
 }

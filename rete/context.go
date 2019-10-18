@@ -3,42 +3,19 @@ package rete
 import (
 	"container/list"
 	"context"
+	"fmt"
 
 	"github.com/project-flogo/rules/common/model"
-	"fmt"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 var reteCTXKEY = model.RetecontextKeyType{}
 
-type reteCtx interface {
-	getConflictResolver() conflictRes
-	getOpsList() *list.List
-	getNetwork() Network
-	getRuleSession() model.RuleSession
-	OnValueChange(tuple model.Tuple, prop string)
-
-	getRtcAdded() map[string]model.Tuple
-	getRtcModified() map[string]model.RtcModified
-	getRtcDeleted() map[string]model.Tuple
-
-	addToRtcAdded(tuple model.Tuple)
-	addToRtcModified(tuple model.Tuple)
-	addToRtcDeleted(tuple model.Tuple)
-	addRuleModifiedToOpsList()
-
-	normalize()
-	copyRuleModifiedToRtcModified()
-	resetModified()
-
-	printRtcChangeList()
-
-}
-
 //store any context, may not know all keys upfront
 type reteCtxImpl struct {
-	cr      conflictRes
+	cr      types.ConflictRes
 	opsList *list.List
-	network Network
+	network *reteNetworkImpl
 	rs      model.RuleSession
 
 	//newly added tuples in the current RTC
@@ -52,10 +29,9 @@ type reteCtxImpl struct {
 
 	//modified tuples in the current RTC
 	rtcModifyMap map[string]model.RtcModified
-
 }
 
-func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
+func newReteCtxImpl(network *reteNetworkImpl, rs model.RuleSession) types.ReteCtx {
 	reteCtxVal := reteCtxImpl{}
 	reteCtxVal.cr = newConflictRes()
 	reteCtxVal.opsList = list.New()
@@ -68,26 +44,26 @@ func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
 	return &reteCtxVal
 }
 
-func (rctx *reteCtxImpl) getConflictResolver() conflictRes {
+func (rctx *reteCtxImpl) GetConflictResolver() types.ConflictRes {
 	return rctx.cr
 }
 
-func (rctx *reteCtxImpl) getOpsList() *list.List {
+func (rctx *reteCtxImpl) GetOpsList() *list.List {
 	return rctx.opsList
 }
 
-func (rctx *reteCtxImpl) getNetwork() Network {
+func (rctx *reteCtxImpl) GetNetwork() types.Network {
 	return rctx.network
 }
 
-func (rctx *reteCtxImpl) getRuleSession() model.RuleSession {
+func (rctx *reteCtxImpl) GetRuleSession() model.RuleSession {
 	return rctx.rs
 }
 
 func (rctx *reteCtxImpl) OnValueChange(tuple model.Tuple, prop string) {
 
 	//if handle does not exist means its new
-	if nil != rctx.network.getHandle(tuple) {
+	if nil != rctx.network.getHandle(context.WithValue(context.Background(), reteCTXKEY, rctx), tuple) {
 		rtcModified := rctx.modifyMap[tuple.GetKey().String()]
 		if rtcModified == nil {
 			rtcModified = NewRtcModified(tuple)
@@ -97,37 +73,35 @@ func (rctx *reteCtxImpl) OnValueChange(tuple model.Tuple, prop string) {
 	}
 }
 
-func (rctx *reteCtxImpl) getRtcAdded() map[string]model.Tuple {
+func (rctx *reteCtxImpl) GetRtcAdded() map[string]model.Tuple {
 	return rctx.addMap
 }
-func (rctx *reteCtxImpl) getRtcModified() map[string]model.RtcModified {
+func (rctx *reteCtxImpl) GetRtcModified() map[string]model.RtcModified {
 	return rctx.rtcModifyMap
 }
-func (rctx *reteCtxImpl) getRtcDeleted() map[string]model.Tuple {
+func (rctx *reteCtxImpl) GetRtcDeleted() map[string]model.Tuple {
 	return rctx.deleteMap
 }
 
-func (rctx *reteCtxImpl) addToRtcAdded (tuple model.Tuple) {
+func (rctx *reteCtxImpl) AddToRtcAdded(tuple model.Tuple) {
 	rctx.addMap[tuple.GetKey().String()] = tuple
 }
 
-func (rctx *reteCtxImpl) addToRtcModified (tuple model.Tuple) {
+func (rctx *reteCtxImpl) AddToRtcModified(tuple model.Tuple) {
 	rctx.addMap[tuple.GetKey().String()] = tuple
 }
 
-func (rctx *reteCtxImpl) addToRtcDeleted (tuple model.Tuple) {
+func (rctx *reteCtxImpl) AddToRtcDeleted(tuple model.Tuple) {
 	rctx.deleteMap[tuple.GetKey().String()] = tuple
 }
 
-func (rctx *reteCtxImpl) addRuleModifiedToOpsList() {
+func (rctx *reteCtxImpl) AddRuleModifiedToOpsList() {
 	for _, rtcModified := range rctx.modifyMap {
-		rctx.getOpsList().PushBack(newModifyEntry(rtcModified.GetTuple(), rtcModified.GetModifiedProps()))
+		rctx.GetOpsList().PushBack(newModifyEntry(rtcModified.GetTuple(), rtcModified.GetModifiedProps()))
 	}
 }
 
-
-
-func (rctx *reteCtxImpl) normalize() {
+func (rctx *reteCtxImpl) Normalize() {
 
 	//remove from modify map, those in add map
 	for k, _ := range rctx.addMap {
@@ -139,49 +113,42 @@ func (rctx *reteCtxImpl) normalize() {
 	}
 }
 
-func (rctx *reteCtxImpl) copyRuleModifiedToRtcModified () {
+func (rctx *reteCtxImpl) CopyRuleModifiedToRtcModified() {
 	for k, v := range rctx.modifyMap {
 		rctx.rtcModifyMap[k] = v
 	}
 }
-func (rctx *reteCtxImpl) resetModified() {
+func (rctx *reteCtxImpl) ResetModified() {
 	rctx.modifyMap = make(map[string]model.RtcModified)
 }
 
-func (rctx *reteCtxImpl) printRtcChangeList() {
-	for k, _ := range rctx.getRtcAdded() {
-
+func (rctx *reteCtxImpl) PrintRtcChangeList() {
+	for k := range rctx.GetRtcAdded() {
 		fmt.Printf("Added Tuple: [%s]\n", k)
-
 	}
-	for k, _ := range rctx.getRtcModified() {
-
+	for k := range rctx.GetRtcModified() {
 		fmt.Printf("Modified Tuple: [%s]\n", k)
-
 	}
-	for k, _ := range rctx.getRtcDeleted() {
-
+	for k := range rctx.GetRtcDeleted() {
 		fmt.Printf("Deleted Tuple: [%s]\n", k)
-
 	}
-
 }
 
-func getReteCtx(ctx context.Context) reteCtx {
+func getReteCtx(ctx context.Context) types.ReteCtx {
 	intr := ctx.Value(reteCTXKEY)
 	if intr == nil {
 		return nil
 	}
-	return intr.(reteCtx)
+	return intr.(types.ReteCtx)
 }
 
-func newReteCtx(ctx context.Context, network Network, rs model.RuleSession) (context.Context, reteCtx) {
+func newReteCtx(ctx context.Context, network *reteNetworkImpl, rs model.RuleSession) (context.Context, types.ReteCtx) {
 	reteCtxVar := newReteCtxImpl(network, rs)
 	ctx = context.WithValue(ctx, reteCTXKEY, reteCtxVar)
 	return ctx, reteCtxVar
 }
 
-func getOrSetReteCtx(ctx context.Context, network Network, rs model.RuleSession) (reteCtx, bool, context.Context) {
+func getOrSetReteCtx(ctx context.Context, network *reteNetworkImpl, rs model.RuleSession) (types.ReteCtx, bool, context.Context) {
 	isRecursive := false
 	newCtx := ctx
 	reteCtxVar := getReteCtx(ctx)
