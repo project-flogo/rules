@@ -709,7 +709,7 @@ func (nw *reteNetworkImpl) AssertInternal(ctx context.Context, tuple model.Tuple
 	}
 	td := model.GetTupleDescriptor(tuple.GetTupleType())
 	if td != nil {
-		if /*td.TTLInSeconds != 0 && */ mode == common.ADD {
+		if td.TTLInSeconds != 0 && mode == common.ADD {
 			rCtx := getReteCtx(ctx)
 			if rCtx != nil {
 				rCtx.AddToRtcAdded(tuple)

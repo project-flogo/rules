@@ -116,8 +116,8 @@ func t6Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 		}
 	} else if txnCtx.TxnCnt == 3 {
 		lA := len(rtxn.GetRtcAdded())
-		if lA != 2 {
-			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 2, lA)
+		if lA != 1 {
+			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 1, lA)
 			printTuples(t, "Added", rtxn.GetRtcAdded())
 		} else {
 			added, _ := rtxn.GetRtcAdded()["t1"]

@@ -177,12 +177,20 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []types.Ret
 	//TODO: other stuff. right now focus on tuple table
 	jn.joinRightObjects(handles, joinedHandles)
 	//tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
+	add := true
 	for _, handle := range handles {
 		if status := handle.GetStatus(); status == types.ReteHandleStatusCreating {
-			jn.GetNw().GetTupleStore().SaveTuple(handle.GetTuple())
+			tuple := handle.GetTuple()
+			if descriptor := model.GetTupleDescriptor(tuple.GetTupleType()); descriptor.TTLInSeconds != 0 {
+				jn.GetNw().GetTupleStore().SaveTuple(tuple)
+			} else {
+				add = false
+			}
 		}
 	}
-	jn.rightTable.AddRow(handles)
+	if add {
+		jn.rightTable.AddRow(handles)
+	}
 	//TODO: rete listeners etc.
 	rIterator := jn.leftTable.GetRowIterator(ctx)
 LOOP:
@@ -249,12 +257,20 @@ func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []types.Rete
 	jn.joinLeftObjects(handles, joinedHandles)
 	//TODO: other stuff. right now focus on tuple table
 	//tupleTableRow := newJoinTableRow(handles, jn.nw.incrementAndGetId())
+	add := true
 	for _, handle := range handles {
 		if status := handle.GetStatus(); status == types.ReteHandleStatusCreating {
-			jn.GetNw().GetTupleStore().SaveTuple(handle.GetTuple())
+			tuple := handle.GetTuple()
+			if descriptor := model.GetTupleDescriptor(tuple.GetTupleType()); descriptor.TTLInSeconds != 0 {
+				jn.GetNw().GetTupleStore().SaveTuple(tuple)
+			} else {
+				add = false
+			}
 		}
 	}
-	jn.leftTable.AddRow(handles)
+	if add {
+		jn.leftTable.AddRow(handles)
+	}
 	//TODO: rete listeners etc.
 	rIterator := jn.rightTable.GetRowIterator(ctx)
 LOOP:

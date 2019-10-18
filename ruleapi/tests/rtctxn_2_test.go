@@ -44,8 +44,8 @@ func t2Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 	t := handlerCtx.(*testing.T)
 
 	lA := len(rtxn.GetRtcAdded())
-	if lA != 1 {
-		t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 1, lA)
+	if lA != 0 {
+		t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 0, lA)
 		printTuples(t, "Added", rtxn.GetRtcAdded())
 	}
 	lM := len(rtxn.GetRtcModified())
