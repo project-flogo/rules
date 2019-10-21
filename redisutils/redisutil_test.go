@@ -38,12 +38,12 @@ func Pour(port string) {
 
 func TestMain(m *testing.M) {
 	run := func() int {
-		command := exec.Command("docker", "run", "-p", "6379:6379", "-d", "redis")
+		command := exec.Command("docker", "run", "-p", "6382:6379", "-d", "redis")
 		hash, err := command.Output()
 		if err != nil {
 			panic(err)
 		}
-		Pour("6379")
+		Pour("6382")
 
 		defer func() {
 			command := exec.Command("docker", "stop", strings.TrimSpace(string(hash)))
@@ -56,7 +56,7 @@ func TestMain(m *testing.M) {
 			if err != nil {
 				panic(err)
 			}
-			Drain("6379")
+			Drain("6382")
 		}()
 
 		return m.Run()
@@ -65,7 +65,7 @@ func TestMain(m *testing.M) {
 }
 
 func Test_first(t *testing.T) {
-	rd := NewRedisHdl(RedisConfig{})
+	rd := NewRedisHdl(RedisConfig{Address: ":6382"})
 	defer Shutdown()
 
 	m := make(map[string]interface{})
@@ -209,7 +209,7 @@ func getStruct(c redis.Conn) error {
 }
 
 func Test_three(t *testing.T) {
-	hdl := NewRedisHdl(RedisConfig{})
+	hdl := NewRedisHdl(RedisConfig{Address: ":6382"})
 	defer Shutdown()
 
 	//iter := hdl.GetListIterator("x:jt:L_c2")
@@ -238,7 +238,7 @@ func Test_three(t *testing.T) {
 }
 
 func Test_four(t *testing.T) {
-	hdl := NewRedisHdl(RedisConfig{})
+	hdl := NewRedisHdl(RedisConfig{Address: ":6382"})
 	defer Shutdown()
 
 	//v := hdl.HGet("a", "d")
@@ -248,7 +248,7 @@ func Test_four(t *testing.T) {
 }
 
 func Test_five(t *testing.T) {
-	hdl := NewRedisHdl(RedisConfig{})
+	hdl := NewRedisHdl(RedisConfig{Address: ":6382"})
 	defer Shutdown()
 
 	for i := 0; i < 10; i++ {
