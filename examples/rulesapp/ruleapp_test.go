@@ -19,12 +19,12 @@ func TestMain(m *testing.M) {
 	}
 
 	run := func() int {
-		command := exec.Command("docker", "run", "-p", "6379:6379", "-d", "redis")
+		command := exec.Command("docker", "run", "-p", "6383:6379", "-d", "redis")
 		hash, err := command.Output()
 		if err != nil {
 			panic(err)
 		}
-		tests.Pour("6379")
+		tests.Pour("6383")
 
 		defer func() {
 			command := exec.Command("docker", "stop", strings.TrimSpace(string(hash)))
@@ -37,7 +37,7 @@ func TestMain(m *testing.M) {
 			if err != nil {
 				panic(err)
 			}
-			tests.Drain("6379")
+			tests.Drain("6383")
 		}()
 
 		return m.Run()

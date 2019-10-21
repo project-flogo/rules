@@ -13,7 +13,7 @@
     },
     "redis": {
       "network": "tcp",
-      "address": ":6379"
+      "address": ":6383"
     }
   },
   "idgens": {
@@ -21,7 +21,7 @@
     },
     "redis": {
       "network": "tcp",
-      "address": ":6379"
+      "address": ":6383"
     }
   },
   "jts": {
@@ -29,7 +29,7 @@
     },
     "redis": {
       "network": "tcp",
-      "address": ":6379"
+      "address": ":6383"
     }
   }
 }
