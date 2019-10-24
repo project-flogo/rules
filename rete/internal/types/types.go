@@ -111,7 +111,7 @@ type HandleService interface {
 	GetHandleByKey(ctx context.Context, key model.TupleKey) ReteHandle
 	GetHandleWithTuple(nw Network, tuple model.Tuple) ReteHandle
 	GetOrCreateLockedHandle(nw Network, tuple model.Tuple) (ReteHandle, bool)
-	GetLockedHandle(nw Network, tuple model.Tuple) (ReteHandle, bool)
+	GetLockedHandle(nw Network, tuple model.Tuple) (handle ReteHandle, locked, dne bool)
 }
 
 type IdGen interface {

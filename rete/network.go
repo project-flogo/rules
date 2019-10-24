@@ -643,9 +643,11 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, rs model.RuleSession, tu
 }
 
 func (nw *reteNetworkImpl) RetractInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
-	handle, locked := nw.handleService.GetLockedHandle(nw, tuple)
+	handle, locked, dne := nw.handleService.GetLockedHandle(nw, tuple)
 	if locked {
-		return fmt.Errorf("Tuple with key [%s] is locked or doesn't exist", tuple.GetKey().String())
+		return fmt.Errorf("Tuple with key [%s] is locked", tuple.GetKey().String())
+	} else if dne {
+		return fmt.Errorf("Tuple with key [%s] doesn't exist", tuple.GetKey().String())
 	} else if handle.GetStatus() != types.ReteHandleStatusCreated {
 		handle.Unlock()
 		return fmt.Errorf("Tuple with key [%s] is not created: %d", tuple.GetKey().String(), handle.GetStatus())

@@ -74,20 +74,20 @@ func (hc *handleServiceImpl) GetOrCreateLockedHandle(nw types.Network, tuple mod
 	return nil, true
 }
 
-func (hc *handleServiceImpl) GetLockedHandle(nw types.Network, tuple model.Tuple) (types.ReteHandle, bool) {
+func (hc *handleServiceImpl) GetLockedHandle(nw types.Network, tuple model.Tuple) (handle types.ReteHandle, locked, dne bool) {
 	hc.Lock()
 	defer hc.Unlock()
-	id := hc.Int63()
 	h, found := hc.allHandles[tuple.GetKey().String()]
 	if !found {
-		return nil, true
+		return nil, false, true
 	}
 
+	id := hc.Int63()
 	if atomic.CompareAndSwapInt64(&h.id, -1, id) {
-		return h, false
+		return h, false, false
 	}
 
-	return nil, true
+	return nil, true, false
 }
 
 func (hc *handleServiceImpl) GetHandleWithTuple(nw types.Network, tuple model.Tuple) types.ReteHandle {

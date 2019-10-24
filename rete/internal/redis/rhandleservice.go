@@ -151,13 +151,13 @@ func (hc *handleServiceImpl) GetOrCreateLockedHandle(nw types.Network, tuple mod
 	return h, false
 }
 
-func (hc *handleServiceImpl) GetLockedHandle(nw types.Network, tuple model.Tuple) (types.ReteHandle, bool) {
+func (hc *handleServiceImpl) GetLockedHandle(nw types.Network, tuple model.Tuple) (handle types.ReteHandle, locked, dne bool) {
 	id := hc.Int63()
 	key := hc.prefix + tuple.GetKey().String()
 
-	exists, _ := hc.HSetNX(key, "id", id)
-	if exists {
-		return nil, true
+	locked, _ = hc.HSetNX(key, "id", id)
+	if locked {
+		return nil, true, false
 	}
 
 	m := hc.HGetAll(key)
@@ -168,13 +168,15 @@ func (hc *handleServiceImpl) GetLockedHandle(nw types.Network, tuple model.Tuple
 				if err != nil {
 					panic(err)
 				}
-				h := newReteHandleImpl(nw, hc.RedisHdl, tuple, key, types.ReteHandleStatus(number), id)
-				return h, false
+				handle = newReteHandleImpl(nw, hc.RedisHdl, tuple, key, types.ReteHandleStatus(number), id)
+				return handle, false, false
 			}
 		}
 	}
 
-	return nil, true
+	hc.Del(key)
+
+	return nil, false, true
 }
 
 func (hc *handleServiceImpl) GetHandleWithTuple(nw types.Network, tuple model.Tuple) types.ReteHandle {
