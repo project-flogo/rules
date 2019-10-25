@@ -1,8 +1,6 @@
 package rete
 
 import (
-	"encoding/json"
-
 	"github.com/project-flogo/rules/rete/common"
 	"github.com/project-flogo/rules/rete/internal/mem"
 	"github.com/project-flogo/rules/rete/internal/redis"
@@ -11,61 +9,68 @@ import (
 
 type TypeFactory struct {
 	nw     *reteNetworkImpl
-	config string
-	parsed common.Config
+	config common.Config
 }
 
-func NewFactory(nw *reteNetworkImpl, config string) (*TypeFactory, error) {
-	tf := TypeFactory{}
-	tf.config = config
-	err := json.Unmarshal([]byte(config), &tf.parsed)
-	if err != nil {
-		return nil, err
+func NewFactory(nw *reteNetworkImpl, config common.Config) (*TypeFactory, error) {
+	tf := TypeFactory{
+		nw:     nw,
+		config: config,
 	}
-	tf.nw = nw
 
 	return &tf, nil
 }
 
 func (f *TypeFactory) getJoinTableRefs() types.JtRefsService {
-	switch f.parsed.Rete.Jt {
+	switch f.config.Rete.Jt {
 	case common.ServiceTypeMem:
-		return mem.NewJoinTableRefsInHdlImpl(f.nw, f.parsed)
+		return mem.NewJoinTableRefsInHdlImpl(f.nw, f.config)
 	case common.ServiceTypeRedis:
-		return redis.NewJoinTableRefsInHdlImpl(f.nw, f.parsed)
+		return redis.NewJoinTableRefsInHdlImpl(f.nw, f.config)
 	default:
 		panic("invalid service type")
 	}
 }
 
 func (f *TypeFactory) getJoinTableCollection() types.JtService {
-	switch f.parsed.Rete.Jt {
+	switch f.config.Rete.Jt {
 	case common.ServiceTypeMem:
-		return mem.NewJoinTableCollection(f.nw, f.parsed)
+		return mem.NewJoinTableCollection(f.nw, f.config)
 	case common.ServiceTypeRedis:
-		return redis.NewJoinTableCollection(f.nw, f.parsed)
+		return redis.NewJoinTableCollection(f.nw, f.config)
 	default:
 		panic("invalid service type")
 	}
 }
 
 func (f *TypeFactory) getHandleCollection() types.HandleService {
-	switch f.parsed.Rete.JtRef {
+	switch f.config.Rete.JtRef {
 	case common.ServiceTypeMem:
-		return mem.NewHandleCollection(f.nw, f.parsed)
+		return mem.NewHandleCollection(f.nw, f.config)
 	case common.ServiceTypeRedis:
-		return redis.NewHandleCollection(f.nw, f.parsed)
+		return redis.NewHandleCollection(f.nw, f.config)
 	default:
 		panic("invalid service type")
 	}
 }
 
 func (f *TypeFactory) getIdGen() types.IdGen {
-	switch f.parsed.Rete.IDGenRef {
+	switch f.config.Rete.IDGenRef {
 	case common.ServiceTypeMem:
-		return mem.NewIdGenImpl(f.nw, f.parsed)
+		return mem.NewIdGenImpl(f.nw, f.config)
 	case common.ServiceTypeRedis:
-		return redis.NewIdGenImpl(f.nw, f.parsed)
+		return redis.NewIdGenImpl(f.nw, f.config)
+	default:
+		panic("invalid service type")
+	}
+}
+
+func (f *TypeFactory) getLockService() types.LockService {
+	switch f.config.Rete.IDGenRef {
+	case common.ServiceTypeMem:
+		return mem.NewLockServiceImpl(f.nw, f.config)
+	case common.ServiceTypeRedis:
+		return redis.NewLockServiceImpl(f.nw, f.config)
 	default:
 		panic("invalid service type")
 	}

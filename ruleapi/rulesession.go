@@ -118,6 +118,7 @@ func GetOrCreateRuleSessionFromConfig(name, store, jsonConfig string) (model.Rul
 }
 
 const defaultConfig = `{
+	"mode": "consistency",
   "rs": {
     "prefix": "x",
     "store-ref": "mem"

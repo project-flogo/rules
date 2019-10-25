@@ -1,5 +1,5 @@
 {
-  "mode": "consistency",
+  "mode": "performance",
   "rs": {
     "prefix": "x",
     "store-ref": "redis"
@@ -14,7 +14,7 @@
     },
     "redis": {
       "network": "tcp",
-      "address": ":6381"
+      "address": ":6380"
     }
   },
   "idgens": {
@@ -22,7 +22,7 @@
     },
     "redis": {
       "network": "tcp",
-      "address": ":6381"
+      "address": ":6380"
     }
   },
   "jts": {
@@ -30,7 +30,7 @@
     },
     "redis": {
       "network": "tcp",
-      "address": ":6381"
+      "address": ":6380"
     }
   }
 }

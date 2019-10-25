@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
+	"github.com/stretchr/testify/assert"
 )
 
 func Drain(port string) {
@@ -257,4 +258,34 @@ func Test_five(t *testing.T) {
 		hdl.HSetAll("x", m)
 	}
 
+}
+
+func TestSet(t *testing.T) {
+	hdl := NewRedisHdl(RedisConfig{Address: ":6382"})
+	defer Shutdown()
+
+	ok, err := hdl.Set("lock", "123", true, 60000)
+	assert.Nil(t, err)
+	assert.True(t, ok)
+	ok, err = hdl.Set("lock", "123", true, 60000)
+	assert.NotNil(t, err)
+	assert.False(t, ok)
+	ok, err = hdl.Set("lock", "1234", false, 60000)
+	assert.Nil(t, err)
+	assert.True(t, ok)
+}
+
+func TestDelIfEqual(t *testing.T) {
+	hdl := NewRedisHdl(RedisConfig{Address: ":6382"})
+	defer Shutdown()
+
+	ok, err := hdl.Set("lockx", "123", true, 60000)
+	assert.Nil(t, err)
+	assert.True(t, ok)
+	count, err := hdl.DelIfEqual("lockx", "1234")
+	assert.Nil(t, err)
+	assert.Equal(t, 0, count)
+	count, err = hdl.DelIfEqual("lockx", "123")
+	assert.Nil(t, err)
+	assert.Equal(t, 1, count)
 }

@@ -2,6 +2,7 @@ package redisutils
 
 import (
 	"fmt"
+
 	"github.com/gomodule/redigo/redis"
 )
 
@@ -58,6 +59,33 @@ func (rh *RedisHandle) newPool(network string, address string) {
 
 func (rh *RedisHandle) getPool() *redis.Pool {
 	return rh.pool
+}
+
+func (rh *RedisHandle) Set(key string, value string, nx bool, px int64) (bool, error) {
+	c := rh.getPool().Get()
+	defer c.Close()
+	args := []interface{}{key, value}
+	if nx {
+		args = append(args, "NX")
+	}
+	if px > 0 {
+		args = append(args, "PX", px)
+	}
+	ok, err := redis.String(c.Do("SET", args...))
+	return ok == "OK", err
+}
+
+const delIfEqualScript = `if redis.call("get",KEYS[1]) == ARGV[1]
+then
+    return redis.call("del",KEYS[1])
+else
+    return 0
+end`
+
+func (rh *RedisHandle) DelIfEqual(key string, value string) (int, error) {
+	c := rh.getPool().Get()
+	defer c.Close()
+	return redis.Int(c.Do("EVAL", delIfEqualScript, 1, key, value))
 }
 
 func (rh *RedisHandle) HSet(key string, field string, value interface{}) (bool, error) {

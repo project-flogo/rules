@@ -38,5 +38,11 @@ func TestMain(m *testing.M) {
 		return m.Run()
 	}
 	redis = true
+	code = run()
+	if code != 0 {
+		os.Exit(code)
+	}
+
+	performance = true
 	os.Exit(run())
 }

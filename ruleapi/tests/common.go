@@ -26,8 +26,9 @@ import (
 )
 
 var (
-	redis = false
-	done  = false
+	redis       = false
+	performance = false
+	done        = false
 )
 
 func createRuleSession() (model.RuleSession, error) {
@@ -45,7 +46,11 @@ func createRuleSession() (model.RuleSession, error) {
 
 	store := ""
 	if redis {
-		store = "rsconfig.json"
+		if performance {
+			store = "rsconfigp.json"
+		} else {
+			store = "rsconfig.json"
+		}
 	}
 	return ruleapi.GetOrCreateRuleSession("test", store)
 }

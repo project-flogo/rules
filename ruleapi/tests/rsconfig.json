@@ -1,4 +1,5 @@
 {
+  "mode": "consistency",
   "rs": {
     "prefix": "x",
     "store-ref": "redis"

@@ -15,6 +15,7 @@ type Network interface {
 	RetractInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error
 	GetPrefix() string
 	GetIdGenService() IdGen
+	GetLockService() LockService
 	GetJtService() JtService
 	GetHandleService() HandleService
 	GetJtRefService() JtRefsService
@@ -118,6 +119,12 @@ type IdGen interface {
 	NwService
 	GetMaxID() int
 	GetNextID() int
+}
+
+type LockService interface {
+	NwService
+	Lock()
+	Unlock()
 }
 
 type JointableIterator interface {

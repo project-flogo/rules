@@ -2,6 +2,7 @@ package rete
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
 	"strconv"
@@ -47,6 +48,7 @@ type reteNetworkImpl struct {
 
 	factory       *TypeFactory
 	idGen         types.IdGen
+	lock          types.LockService
 	tupleStore    model.TupleStore
 	joinNodeNames int
 
@@ -68,7 +70,12 @@ func (nw *reteNetworkImpl) initReteNetwork(sessionName string, config string) er
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
 	nw.txnHandler = []model.RtcTransactionHandler{}
 
-	factory, err := NewFactory(nw, config)
+	var parsed common.Config
+	err := json.Unmarshal([]byte(config), &parsed)
+	if err != nil {
+		return err
+	}
+	factory, err := NewFactory(nw, parsed)
 	if err != nil {
 		return err
 	}
@@ -80,6 +87,13 @@ func (nw *reteNetworkImpl) initReteNetwork(sessionName string, config string) er
 	//}
 	nw.prefix = sessionName
 	nw.idGen = factory.getIdGen()
+	switch parsed.Mode {
+	case "", common.ModeConsistency:
+		nw.lock = factory.getLockService()
+	case common.ModePerformance:
+	default:
+		return fmt.Errorf("%s is an invalid mode", parsed.Mode)
+	}
 	nw.jtService = factory.getJoinTableCollection()
 	nw.handleService = factory.getHandleCollection()
 	nw.jtRefsService = factory.getJoinTableRefs()
@@ -90,6 +104,9 @@ func (nw *reteNetworkImpl) initReteNetwork(sessionName string, config string) er
 
 func (nw *reteNetworkImpl) initNwServices() {
 	nw.idGen.Init()
+	if nw.lock != nil {
+		nw.lock.Init()
+	}
 	nw.jtService.Init()
 	nw.handleService.Init()
 	nw.jtRefsService.Init()
@@ -576,6 +593,10 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	if !isRecursive {
 		nw.RLock()
 		defer nw.RUnlock()
+		if nw.lock != nil {
+			nw.lock.Lock()
+			defer nw.lock.Unlock()
+		}
 
 		err := nw.AssertInternal(newCtx, tuple, changedProps, mode)
 		if err != nil {
@@ -592,6 +613,10 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 				time.AfterFunc(time.Second*time.Duration(td.TTLInSeconds), func() {
 					nw.RLock()
 					defer nw.RUnlock()
+					if nw.lock != nil {
+						nw.lock.Lock()
+						defer nw.lock.Unlock()
+					}
 					nw.removeTupleFromRete(nil, tuple)
 				})
 			} //else, its -ve and means, never expire
@@ -625,6 +650,11 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, rs model.RuleSession, tu
 	if !isRecursive {
 		nw.RLock()
 		defer nw.RUnlock()
+		if nw.lock != nil {
+			nw.lock.Lock()
+			defer nw.lock.Unlock()
+		}
+
 		err := nw.RetractInternal(ctx, tuple, changedProps, mode)
 		if err != nil {
 			return err
@@ -808,6 +838,10 @@ func (nw *reteNetworkImpl) getJoinNodeName() string {
 
 func (nw *reteNetworkImpl) GetIdGenService() types.IdGen {
 	return nw.idGen
+}
+
+func (nw *reteNetworkImpl) GetLockService() types.LockService {
+	return nw.lock
 }
 
 func (nw *reteNetworkImpl) GetJtService() types.JtService {

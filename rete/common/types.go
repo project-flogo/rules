@@ -39,6 +39,8 @@ type Network interface {
 const (
 	ServiceTypeMem   = "mem"
 	ServiceTypeRedis = "redis"
+	ModeConsistency  = "consistency"
+	ModePerformance  = "performance"
 )
 
 type Service struct {
@@ -47,7 +49,8 @@ type Service struct {
 }
 
 type Config struct {
-	Rs struct {
+	Mode string `json:"mode"`
+	Rs   struct {
 		Prefix   string `json:"prefix"`
 		StoreRef string `json:"store-ref"`
 	} `json:"rs"`
