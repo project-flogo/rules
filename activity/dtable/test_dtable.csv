@@ -1,0 +1,3 @@
+Id,Condition (1),Condition (2),Condition (3),Condition (4),Condition (5),Action (6),Action (7),Action (8),Description,Priority
+,applicant.age,applicant.creditScore,applicant.hasDL,applicant.maritalStatus,applicant.income,applicant.eligible,applicant.status,applicant.creditLimit,,
+1,>= 16,>= 500,== true,== 'single',> 10000,true,VISA-Granted,2500.0,,
