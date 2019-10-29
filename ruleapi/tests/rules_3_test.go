@@ -16,7 +16,7 @@ var actCnt uint64
 //Forward chain-Data change in r3action and r32action triggers the r32action.
 func Test_Three(t *testing.T) {
 	actCnt = 0
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	actionMap := make(map[string]string)

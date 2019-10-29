@@ -29,10 +29,6 @@ func Test_Two(t *testing.T) {
 	}
 
 	//Create a RuleSession
-	store := ""
-	if redis {
-		store = "rsconfig.json"
-	}
 	rs, err := ruleapi.GetOrCreateRuleSession("asession", store)
 	assert.Nil(t, err)
 	actionFireCount := make(map[string]int)

@@ -17,7 +17,7 @@ var actionCnt uint64
 //1 rtc->Scheduled assert, Action should be fired after the delay time.
 func Test_T15(t *testing.T) {
 	actionCnt = 0
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R15")

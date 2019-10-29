@@ -26,12 +26,13 @@ import (
 )
 
 var (
-	redis       = false
-	performance = false
-	done        = false
+	store = ""
+	image = ""
+	done  = false
 )
 
-func createRuleSession() (model.RuleSession, error) {
+func createRuleSession(t *testing.T) (model.RuleSession, error) {
+	t.Logf("createRuleSession with store=%s and docker image=%s", store, image)
 	done = false
 	tupleDescFileAbsPath := common.GetPathForResource("ruleapi/tests/tests.json", "./tests.json")
 
@@ -44,14 +45,6 @@ func createRuleSession() (model.RuleSession, error) {
 		return nil, err
 	}
 
-	store := ""
-	if redis {
-		if performance {
-			store = "rsconfigp.json"
-		} else {
-			store = "rsconfig.json"
-		}
-	}
 	return ruleapi.GetOrCreateRuleSession("test", store)
 }
 

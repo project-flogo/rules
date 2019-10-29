@@ -13,7 +13,7 @@ import (
 //no-identifier condition
 func Test_T8(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R1")

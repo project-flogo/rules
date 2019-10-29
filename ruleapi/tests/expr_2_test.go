@@ -14,7 +14,7 @@ import (
 func Test_2_Expr(t *testing.T) {
 
 	actionCount := map[string]int{"count": 0}
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 	r1 := ruleapi.NewRule("r1")
 	err = r1.AddExprCondition("c1", "$.t1.p1 > $.t2.p1", nil)

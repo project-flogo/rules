@@ -13,7 +13,7 @@ import (
 //add and delete in the same rtc
 func Test_T7(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R7")

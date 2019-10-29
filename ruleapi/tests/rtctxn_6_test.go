@@ -13,7 +13,7 @@ import (
 //Same as Test_T5, but in 3rd rtc, assert a TTL=0 based and a TTL=1 based
 func Test_T6(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R6")

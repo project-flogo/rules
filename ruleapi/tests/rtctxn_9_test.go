@@ -13,7 +13,7 @@ import (
 //2 rtcs, 1st rtc ->Asserted multiple tuple types and verify count, 2nd rtc -> Modified multiple tuple types and verify count.
 func Test_T9(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R9")

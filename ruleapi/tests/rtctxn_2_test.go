@@ -13,7 +13,7 @@ import (
 //TTL = 0, asserted
 func Test_T2(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R2")
