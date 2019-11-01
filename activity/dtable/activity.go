@@ -40,7 +40,7 @@ type dTable struct {
 	titleRow1 []genCell
 	titleRow2 []genCell
 	metaRow   []metaCell
-	rows      [][]genCell
+	rows      [][]*genCell
 }
 
 type metaCell struct {
@@ -69,11 +69,12 @@ func New(ctx activity.InitContext) (activity.Activity, error) {
 	if err != nil {
 		return nil, err
 	}
+	// dtable.print()
 	err = dtable.compile()
 	if err != nil {
 		return nil, err
 	}
-	dtable.print()
+	// dtable.print()
 
 	// Read setting from init context
 	act := &Activity{
@@ -129,29 +130,32 @@ func loadFromCSVFile(fileName string) (*dTable, error) {
 	}
 
 	dtable := &dTable{}
-	dtable.rows = make([][]genCell, len(lines)-2)
+	dtable.rows = make([][]*genCell, len(lines)-2)
 	for i, line := range lines {
 		if i == 0 {
-			// title row
+			// title row 1
 			dtable.titleRow1 = make([]genCell, len(line))
-			for j, c := range line {
-				dtable.titleRow1[j].rawValue = c
+			for j, val := range line {
+				dtable.titleRow1[j].rawValue = val
 			}
 			continue
 		}
 		if i == 1 {
+			// title row 2
 			dtable.titleRow2 = make([]genCell, len(line))
-			for j, c := range line {
-				dtable.titleRow2[j].rawValue = c
+			for j, val := range line {
+				dtable.titleRow2[j].rawValue = val
 			}
 			continue
 		}
-		// data
-		rowData := make([]genCell, len(line))
+		// other rows
+		row := make([]*genCell, len(line))
 		for j, val := range line {
-			rowData[j].rawValue = val
+			row[j] = &genCell{
+				rawValue: val,
+			}
 		}
-		dtable.rows[i-2] = rowData
+		dtable.rows[i-2] = row
 	}
 	return dtable, nil
 }
@@ -180,21 +184,26 @@ func loadFromXLSFile(fileName string) (*dTable, error) {
 	dtable := &dTable{
 		titleRow1: make([]genCell, titleRowSize),
 		titleRow2: make([]genCell, titleRowSize),
-		rows:      make([][]genCell, 1),
+		rows:      make([][]*genCell, 1),
 	}
-	for i, c := range rows[titleRowIndex] {
-		dtable.titleRow1[i].rawValue = c
+	// title row 1
+	for i, val := range rows[titleRowIndex] {
+		dtable.titleRow1[i].rawValue = val
 	}
-	for i, c := range rows[titleRowIndex+1] {
-		dtable.titleRow2[i].rawValue = c
+	// title row 2
+	for i, val := range rows[titleRowIndex+1] {
+		dtable.titleRow2[i].rawValue = val
 	}
+	// other rows
 	for _, r := range rows[titleRowIndex+2:] {
 		if len(r) == 0 {
 			break
 		}
-		dtrow := make([]genCell, titleRowSize)
-		for i, c := range r {
-			dtrow[i].rawValue = c
+		dtrow := make([]*genCell, titleRowSize)
+		for i, cell := range r {
+			dtrow[i] = &genCell{
+				rawValue: cell,
+			}
 		}
 		dtable.rows = append(dtable.rows, dtrow)
 	}
@@ -245,17 +254,18 @@ func (dtable *dTable) compile() error {
 		metaRow[colIndex].propDesc = propDesc
 	}
 	// process all rows
-	for rowIndex, row := range dtable.rows {
+	for _, row := range dtable.rows {
 		for colIndex, cell := range row {
+			if cell == nil {
+				continue
+			}
 			cell.metaCell = &metaRow[colIndex]
-			dtable.rows[rowIndex][colIndex].metaCell = &metaRow[colIndex]
 			if cell.colType == ctCondition {
 				value := cell.rawValue
 				if !strings.HasPrefix(value, "==") && !strings.HasPrefix(value, ">") && !strings.HasPrefix(value, "<") && !strings.HasPrefix(value, "!") {
 					value = "== " + value
 				}
-				expr := "$." + cell.tupleDesc.Name + "." + cell.propDesc.Name + " " + value
-				dtable.rows[rowIndex][colIndex].cdExpr = expr
+				cell.cdExpr = "$." + cell.tupleDesc.Name + "." + cell.propDesc.Name + " " + value
 			}
 		}
 	}
@@ -268,6 +278,9 @@ func (dtable *dTable) apply(ctx context.Context, tuples map[model.TupleType]mode
 		// process row conditions
 		rowTruthiness := true
 		for _, cell := range row {
+			if cell == nil {
+				continue
+			}
 			if cell.colType == ctCondition {
 				cellTruthiness := evaluateExpression(cell.cdExpr, tuples)
 				rowTruthiness = rowTruthiness && cellTruthiness
@@ -279,6 +292,9 @@ func (dtable *dTable) apply(ctx context.Context, tuples map[model.TupleType]mode
 		// process row actions if all row conditions are evaluated to true
 		if rowTruthiness {
 			for _, cell := range row {
+				if cell == nil {
+					continue
+				}
 				if cell.colType == ctAction {
 					updateTuple(ctx, tuples, cell.tupleDesc.Name, cell.propDesc.Name, cell.rawValue)
 				}
@@ -302,7 +318,8 @@ func (dtable *dTable) print() {
 	// data
 	for _, row := range dtable.rows {
 		for _, rv := range row {
-			fmt.Printf("|  %v--%v  |", rv.cdExpr, rv.metaCell)
+			// fmt.Printf("|  %v--%v  |", rv.cdExpr, rv.metaCell)
+			fmt.Print(rv)
 		}
 		fmt.Println()
 	}
