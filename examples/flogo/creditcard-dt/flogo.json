@@ -104,59 +104,7 @@
             "type": "activity",
             "ref": "github.com/project-flogo/rules/activity/dtable",
             "settings": {
-              "make": [
-                {
-                  "condition": [
-                    {"tuple": "applicant","field": "name","expr": "== 'JohnDoe'"},
-                    {"tuple": "applicant","field": "age","expr": ">= 20"},
-                    {"tuple": "applicant","field": "age","expr": "<= 30"}
-                  ],
-                  "action": [
-                   
-                    { "tuple": "applicant","field": "creditLimit","value": 2500.0},
-                    { "tuple": "applicant","field": "eligible","value": true},
-                    { "tuple": "applicant","field": "status","value": "VISA-Granted"}
-                  ]
-                },
-                {
-                  "condition": [
-                    {"tuple": "applicant","field": "name","expr": "== 'SandraW'"},
-                    {"tuple": "applicant","field": "age","expr": ">= 20"},
-                    {"tuple": "applicant","field": "age","expr": "<= 30"}
-                  ],
-                  "action": [
-                    
-                    { "tuple": "applicant","field": "creditLimit","value": 0.0},
-                    { "tuple": "applicant","field": "eligible","value": false},
-                    { "tuple": "applicant","field": "status","value": "Loan-Rejected"}
-                  ]
-                },
-                {
-                  "condition": [
-                    {"tuple": "applicant","field": "name","expr": "== 'PrakashY'"},
-                    {"tuple": "applicant","field": "age","expr": ">= 20"},
-                    {"tuple": "applicant","field": "age","expr": "<= 30"}
-                  ],
-                  "action": [
-                    
-                    { "tuple": "applicant","field": "creditLimit","value": 7500.0},
-                    { "tuple": "applicant","field": "eligible","value": true},
-                    { "tuple": "applicant","field": "status","value": "Pending"}
-                  ]
-                },
-                {
-                  "condition": [
-                    {"tuple": "applicant","field": "name","expr": "== 'JaneDoe'"},
-                    {"tuple": "applicant","field": "age","expr": ">30"}
-                  ],
-                  "action": [
-                    
-                    { "tuple": "applicant","field": "creditLimit","value": 25000.0},
-                    { "tuple": "applicant","field": "eligible","value": false},
-                    { "tuple": "applicant","field": "status","value": "Platinum-Status"}
-                  ]
-                }
-              ]
+              "dTableFile":"creditcard-dt-file.xlsx"
             }
           },
           {
