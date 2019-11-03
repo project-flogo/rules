@@ -55,6 +55,58 @@ type genCell struct {
 	cdExpr   string
 }
 
+func (cell *genCell) compileExpr() {
+	lhsToken := fmt.Sprintf("$.%s.%s", cell.tupleDesc.Name, cell.propDesc.Name)
+	tokens := strings.Split(cell.rawValue, "&&")
+
+	andConditions := make([]string, 0)
+	for i, v := range tokens {
+		if i == 0 {
+			andConditions = append(andConditions, v)
+			continue
+		}
+		andConditions = append(andConditions, "&&", v)
+	}
+
+	conditions := make([]string, 0)
+	for _, v := range andConditions {
+		tokens = strings.Split(v, "||")
+		if len(tokens) > 1 {
+			for j, v1 := range tokens {
+				if j == 0 {
+					conditions = append(conditions, v1)
+					continue
+				}
+				conditions = append(conditions, "||", v1)
+			}
+			continue
+		}
+		conditions = append(conditions, v)
+	}
+
+	expr := ""
+	for _, c := range conditions {
+		if c == "&&" || c == "||" {
+			expr = fmt.Sprintf("%s %s ", expr, c)
+			continue
+		}
+
+		if !strings.HasPrefix(c, "==") &&
+			!strings.HasPrefix(c, "!=") &&
+			!strings.HasPrefix(c, ">") &&
+			!strings.HasPrefix(c, ">=") &&
+			!strings.HasPrefix(c, "<") &&
+			!strings.HasPrefix(c, "<=") &&
+			!strings.HasPrefix(c, "!") {
+			c = "==" + c
+		}
+		fullCondition := lhsToken + c
+		expr = expr + fullCondition
+	}
+
+	cell.cdExpr = expr
+}
+
 // New creates new decision table activity
 func New(ctx activity.InitContext) (activity.Activity, error) {
 	// Read settings
@@ -261,11 +313,7 @@ func (dtable *dTable) compile() error {
 			}
 			cell.metaCell = &metaRow[colIndex]
 			if cell.colType == ctCondition {
-				value := cell.rawValue
-				if !strings.HasPrefix(value, "==") && !strings.HasPrefix(value, ">") && !strings.HasPrefix(value, "<") && !strings.HasPrefix(value, "!") {
-					value = "== " + value
-				}
-				cell.cdExpr = "$." + cell.tupleDesc.Name + "." + cell.propDesc.Name + " " + value
+				cell.compileExpr()
 			}
 		}
 	}

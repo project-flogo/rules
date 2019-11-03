@@ -131,6 +131,51 @@ var testApplicants = []map[string]interface{}{
 	},
 }
 
+func TestCellCompileExpr(t *testing.T) {
+	err := model.RegisterTupleDescriptors(string(tupleDescriptor))
+	assert.Nil(t, err)
+
+	// test cases input
+	tupleType := "applicant"
+	propName := "name"
+	testcases := make(map[string]string)
+	testcases["foo"] = "$.applicant.name==foo"
+	testcases["==foo"] = "$.applicant.name==foo"
+	testcases["!=foo"] = "$.applicant.name!=foo"
+	testcases[">foo"] = "$.applicant.name>foo"
+	testcases[">=foo"] = "$.applicant.name>=foo"
+	testcases["<foo"] = "$.applicant.name<foo"
+	testcases["<=foo"] = "$.applicant.name<=foo"
+	testcases["< foo"] = "$.applicant.name< foo" // space test
+	testcases["foo&&bar"] = "$.applicant.name==foo && $.applicant.name==bar"
+	testcases[">=foo&&bar"] = "$.applicant.name>=foo && $.applicant.name==bar"
+	testcases["car&&jeep&&bus"] = "$.applicant.name==car && $.applicant.name==jeep && $.applicant.name==bus"
+	testcases["foo||bar"] = "$.applicant.name==foo || $.applicant.name==bar"
+	testcases["car||jeep||bus"] = "$.applicant.name==car || $.applicant.name==jeep || $.applicant.name==bus"
+	testcases["car&&jeep||bus"] = "$.applicant.name==car && $.applicant.name==jeep || $.applicant.name==bus"
+	testcases["car||jeep&&bus"] = "$.applicant.name==car || $.applicant.name==jeep && $.applicant.name==bus"
+
+	// prepare cell
+	tupleDesc := model.GetTupleDescriptor(model.TupleType(tupleType))
+	assert.NotNil(t, tupleDesc)
+	propDesc := tupleDesc.GetProperty(propName)
+	assert.NotNil(t, propDesc)
+	cell := &genCell{
+		metaCell: &metaCell{
+			colType:   ctCondition,
+			tupleDesc: tupleDesc,
+			propDesc:  propDesc,
+		},
+	}
+
+	// run test cases
+	for k, v := range testcases {
+		cell.rawValue = k
+		cell.compileExpr()
+		assert.Equal(t, v, cell.cdExpr)
+	}
+}
+
 func TestNew(t *testing.T) {
 	err := model.RegisterTupleDescriptors(string(tupleDescriptor))
 
