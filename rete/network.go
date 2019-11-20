@@ -63,7 +63,7 @@ type reteNetworkImpl struct {
 	currentId int
 
 	assertLock sync.Mutex
-	crudLock   sync.Mutex
+	//crudLock   sync.Mutex
 	txnHandler model.RtcTransactionHandler
 	txnContext interface{}
 }
@@ -85,8 +85,8 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 
 func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 
-	nw.crudLock.Lock()
-	defer nw.crudLock.Unlock()
+	nw.assertLock.Lock()
+	defer nw.assertLock.Unlock()
 
 	if nw.allRules[rule.GetName()] != nil {
 		return fmt.Errorf("Rule already exists.." + rule.GetName())
@@ -146,8 +146,8 @@ func (nw *reteNetworkImpl) setClassNodeAndLinkJoinTables(nodesOfRule *list.List,
 
 func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 
-	nw.crudLock.Lock()
-	defer nw.crudLock.Unlock()
+	nw.assertLock.Lock()
+	defer nw.assertLock.Unlock()
 
 	rule := nw.allRules[ruleName]
 	delete(nw.allRules, ruleName)
@@ -536,8 +536,8 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 	reteCtxVar, isRecursive, newCtx := getOrSetReteCtx(ctx, nw, rs)
 
 	if !isRecursive {
-		nw.crudLock.Lock()
-		defer nw.crudLock.Unlock()
+		nw.assertLock.Lock()
+		defer nw.assertLock.Unlock()
 		nw.assertInternal(newCtx, tuple, changedProps, mode)
 		reteCtxVar.getConflictResolver().resolveConflict(newCtx)
 		//if Timeout is 0, remove it from rete
@@ -575,8 +575,8 @@ func (nw *reteNetworkImpl) Retract(ctx context.Context, tuple model.Tuple, chang
 	}
 	reteCtxVar, isRecursive, _ := getOrSetReteCtx(ctx, nw, nil)
 	if !isRecursive {
-		nw.crudLock.Lock()
-		defer nw.crudLock.Unlock()
+		nw.assertLock.Lock()
+		defer nw.assertLock.Unlock()
 		nw.retractInternal(ctx, tuple, changedProps, mode)
 		if nw.txnHandler != nil && mode == DELETE {
 			rtcTxn := newRtcTxn(reteCtxVar.getRtcAdded(), reteCtxVar.getRtcModified(), reteCtxVar.getRtcDeleted())
