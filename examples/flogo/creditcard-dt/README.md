@@ -11,6 +11,8 @@ Once you have the `flogo.json` file, you are ready to build your Flogo App
 
 ### Steps
 
+Note: Store implementation can be configured via given `rsconfig.json` file. Start redis-server and use `export STORECONFIG=<path to rsconfig.json>` before running binary.<br>
+
 ```sh
 cd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/creditcard-dt
 flogo create -f flogo.json
@@ -19,6 +21,7 @@ flogo build
 cd bin
 ./creditcard-dt
 ```
+ 
 ### Testing
 
 #### #1 Invoke applicant decision table
