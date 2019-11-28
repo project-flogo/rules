@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/360EntSecGroup-Skylar/excelize"
+	excelizeV2 "github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/metadata"
@@ -214,11 +214,14 @@ func loadFromCSVFile(fileName string) (*dTable, error) {
 
 // loadFromXLSFile loads decision table from Excel file
 func loadFromXLSFile(fileName string) (*dTable, error) {
-	file, err := excelize.OpenFile(fileName)
+	file, err := excelizeV2.OpenFile(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("not able open the file [%s] - %s", fileName, err)
 	}
-	rows := file.GetRows("DecisionTable")
+	rows, err := file.GetRows("DecisionTable")
+	if err != nil {
+		return nil, fmt.Errorf("DecisionTable worksheet not available in %s", fileName)
+	}
 
 	// find titleRowIndex
 	titleRowIndex := 0

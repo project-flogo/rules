@@ -1,9 +1,7 @@
 module github.com/project-flogo/rules
 
-go 1.12
-
 require (
-	github.com/360EntSecGroup-Skylar/excelize v1.4.1
+	github.com/360EntSecGroup-Skylar/excelize/v2 v2.0.0
 	github.com/Shopify/sarama v1.23.1
 	github.com/aws/aws-sdk-go v1.24.1
 	github.com/gomodule/redigo v2.0.0+incompatible
@@ -18,3 +16,5 @@ require (
 	github.com/stretchr/testify v1.4.0
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
 )
+
+go 1.13
