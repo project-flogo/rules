@@ -70,7 +70,7 @@
             "actionService": {              
               "service": "LogCareRequiredStudents",
               "input": {
-                "message": "=string.concat(\" Student: \",$.student.name, \" -- Comments: \",$.student.comments)"
+                "message": "=string.concat(\" Student: \",$.student.name, \" \",$.student.grade, \" -- Comments: \",$.student.comments)"
               }
             },
             "priority": 2
@@ -98,7 +98,7 @@
             "type": "activity",
             "ref": "github.com/project-flogo/rules/activity/dtable",
             "settings": {
-              "dTableFile":"./test/dtable-file.xlsx"
+              "dTableFile":"../test/dtable-file.xlsx"
             }
           },
           {

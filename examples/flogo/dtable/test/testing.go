@@ -14,7 +14,7 @@ import (
 )
 
 func Test(t *testing.T) {
-	data, err := ioutil.ReadFile(filepath.FromSlash("../flogo.json"))
+	data, err := ioutil.ReadFile(filepath.FromSlash("../test/flogo.json"))
 	assert.Nil(t, err)
 	cfg, err := engine.LoadAppConfig(string(data), false)
 	assert.Nil(t, err)
