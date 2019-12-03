@@ -98,7 +98,7 @@
             "type": "activity",
             "ref": "github.com/project-flogo/rules/activity/dtable",
             "settings": {
-              "dTableFile":"./test/dtable-file.xlsx"
+              "dTableFile":"../dtable-file.xlsx"
             }
           },
           {
