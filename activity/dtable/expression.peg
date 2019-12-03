@@ -11,17 +11,24 @@ type Expr Peg {
 e <- sp e1 !.
 e1 <- e2 ( or e2 { p.AddOperator(TypeOr) } )*
 e2 <- e3 ( and e3 { p.AddOperator(TypeAnd) } )*
-e3 <- eq e4 { p.AddOperator(TypeEq) }
-    / neq e4 { p.AddOperator(TypeNEq) }
-    / gte e4 { p.AddOperator(TypeGte) }
-    / gt e4 { p.AddOperator(TypeGt) }
-    / lte e4 { p.AddOperator(TypeLte) }
-    / lt e4 { p.AddOperator(TypeLt) }
+e3 <- not e4 { p.AddOperator(TypeNot) }
+    / e4
+e4 <- eq e5 { p.AddOperator(TypeEq) }
+    / neq e5 { p.AddOperator(TypeNEq) }
+    / gte e5 { p.AddOperator(TypeGte) }
+    / gt e5 { p.AddOperator(TypeGt) }
+    / lte e5 { p.AddOperator(TypeLte) }
+    / lt e5 { p.AddOperator(TypeLt) }
     / open e1 close
-    / e4 { p.AddOperator(TypeEq) }
-e4 <- < name > sp { p.AddLiteral(buffer[begin:end]) }
-name <- [a-zA-Z_0-9'"]*
+    / e5 { p.AddOperator(TypeEq) }
+e5 <- < value > sp { p.AddLiteral(buffer[begin:end]) }
+value <- [0-9]+ [.] [0-9]*
+      / [.] [0-9]+
+      / ["] (!["] .)* ["]
+      / ['] (!['] .)* [']
+      / [a-zA-Z_0-9]+
 
+not <- '!' sp
 and <- '&&' sp
 or <- '||' sp
 eq <- '==' sp

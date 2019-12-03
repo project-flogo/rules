@@ -140,9 +140,16 @@ func TestCellCompileExpr(t *testing.T) {
 	propName := "name"
 	testcases := make(map[string]string)
 	testcases["foo"] = "$.applicant.name == foo"
+	testcases["123foo"] = "$.applicant.name == 123foo"
+	testcases["foo123"] = "$.applicant.name == foo123"
+	testcases["123"] = "$.applicant.name == 123"
+	testcases["123.123"] = "$.applicant.name == 123.123"
+	testcases[".123"] = "$.applicant.name == .123"
+	testcases["!foo"] = "!($.applicant.name == foo)"
 	testcases["==foo"] = "$.applicant.name == foo"
 	testcases["!=foo"] = "$.applicant.name != foo"
 	testcases[">foo"] = "$.applicant.name > foo"
+	testcases["!>foo"] = "!($.applicant.name > foo)"
 	testcases[">=foo"] = "$.applicant.name >= foo"
 	testcases["<foo"] = "$.applicant.name < foo"
 	testcases["<=foo"] = "$.applicant.name <= foo"
@@ -153,6 +160,7 @@ func TestCellCompileExpr(t *testing.T) {
 	testcases["foo||bar"] = "($.applicant.name == foo || $.applicant.name == bar)"
 	testcases["car||jeep||bus"] = "(($.applicant.name == car || $.applicant.name == jeep) || $.applicant.name == bus)"
 	testcases["car&&jeep||bus"] = "(($.applicant.name == car && $.applicant.name == jeep) || $.applicant.name == bus)"
+	testcases["!(car&&(jeep||bus))"] = "!(($.applicant.name == car && ($.applicant.name == jeep || $.applicant.name == bus)))"
 	testcases["car||jeep&&bus"] = "($.applicant.name == car || ($.applicant.name == jeep && $.applicant.name == bus))"
 
 	// prepare cell

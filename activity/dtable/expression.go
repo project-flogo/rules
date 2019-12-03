@@ -6,6 +6,8 @@ type Type uint8
 const (
 	// TypeLiteral a literal type
 	TypeLiteral Type = iota
+	// TypeNot a logical not operation
+	TypeNot
 	// TypeOr a logical or operation
 	TypeOr
 	// TypeAnd a logical and operation
@@ -35,6 +37,8 @@ func (code *ByteCode) String() string {
 	switch code.T {
 	case TypeLiteral:
 		return code.Literal
+	case TypeNot:
+		return "!"
 	case TypeOr:
 		return "||"
 	case TypeAnd:
@@ -89,6 +93,9 @@ func (e *Expression) Evaluate(lhsToken string) string {
 		case TypeLiteral:
 			stack[top] = code.Literal
 			top++
+		case TypeNot:
+			a := &stack[top-1]
+			*a = "!(" + *a + ")"
 		case TypeOr:
 			a, b := &stack[top-2], &stack[top-1]
 			top--
