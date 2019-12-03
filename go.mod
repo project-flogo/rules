@@ -3,6 +3,7 @@ module github.com/project-flogo/rules
 go 1.12
 
 require (
+	github.com/360EntSecGroup-Skylar/excelize v1.4.1
 	github.com/Shopify/sarama v1.23.1
 	github.com/aws/aws-sdk-go v1.24.1
 	github.com/gomodule/redigo v2.0.0+incompatible

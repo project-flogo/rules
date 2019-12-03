@@ -1,0 +1,35 @@
+# Copyright 2010 The Go Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+package dtable
+
+type Expr Peg {
+ Expression
+}
+
+e <- sp e1 !.
+e1 <- e2 ( or e2 { p.AddOperator(TypeOr) } )*
+e2 <- e3 ( and e3 { p.AddOperator(TypeAnd) } )*
+e3 <- eq e4 { p.AddOperator(TypeEq) }
+    / neq e4 { p.AddOperator(TypeNEq) }
+    / gte e4 { p.AddOperator(TypeGte) }
+    / gt e4 { p.AddOperator(TypeGt) }
+    / lte e4 { p.AddOperator(TypeLte) }
+    / lt e4 { p.AddOperator(TypeLt) }
+    / open e1 close
+    / e4 { p.AddOperator(TypeEq) }
+e4 <- < name > sp { p.AddLiteral(buffer[begin:end]) }
+name <- [a-zA-Z_0-9'"]*
+
+and <- '&&' sp
+or <- '||' sp
+eq <- '==' sp
+neq <- '!=' sp
+gt <- '>' sp
+gte <- '>=' sp
+lt <- '<' sp
+lte <- '<=' sp
+open <- '(' sp
+close <- ')' sp
+sp <- ( ' ' / '\t' )*
