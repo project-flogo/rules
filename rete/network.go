@@ -137,6 +137,9 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 
 	//Add NodeLinks
 	nw.ruleNameClassNodeLinksOfRule[rule.GetName()] = classNodeLinksOfRule
+
+	rstr := nw.String()
+	fmt.Printf(rstr)
 	return nil
 }
 
@@ -262,7 +265,7 @@ func (nw *reteNetworkImpl) buildNetwork(rule model.Rule, nodesOfRule *list.List,
 					lastNode = fNode
 				}
 				//Yoohoo! We have a Rule!!
-				ruleNode := newRuleNode(rule)
+				ruleNode := newRuleNode(nw, rule)
 				newNodeLink(nw, lastNode, ruleNode, false)
 				nodesOfRule.PushBack(ruleNode)
 			} else {
