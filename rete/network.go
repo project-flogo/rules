@@ -183,7 +183,8 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 			}
 		}
 	}
-
+	rstr := nw.String()
+	fmt.Printf(rstr)
 	return rule
 }
 
