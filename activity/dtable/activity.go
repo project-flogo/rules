@@ -61,9 +61,9 @@ func (cell *genCell) compileExpr() {
 		return
 	}
 	lhsToken := fmt.Sprintf("$.%s.%s", cell.tupleDesc.Name, cell.propDesc.Name)
-	expression := &Expr{Buffer: cell.rawValue}
+	expression := &Expr{Buffer: rawValue}
 	expression.Init()
-	expression.Expression.Init(cell.rawValue)
+	expression.Expression.Init(rawValue)
 	if err := expression.Parse(); err != nil {
 		panic(err)
 	}
