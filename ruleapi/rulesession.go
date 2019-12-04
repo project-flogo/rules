@@ -75,10 +75,7 @@ func (rs *rulesessionImpl) initRuleSession(name string) {
 }
 
 func (rs *rulesessionImpl) AddRule(rule model.Rule) (err error) {
-	return rs.reteNetwork.AddRule(rule, rs)
-}
-func (rs *rulesessionImpl) AddRuleAndAssert(rule model.Rule) (err error) {
-	return rs.reteNetwork.AddRuleAndAssert(rule, rs)
+	return rs.reteNetwork.AddRule(rule)
 }
 
 func (rs *rulesessionImpl) DeleteRule(ruleName string) {
@@ -176,4 +173,8 @@ func (rs *rulesessionImpl) GetAssertedTuple(key model.TupleKey) model.Tuple {
 
 func (rs *rulesessionImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {
 	rs.reteNetwork.RegisterRtcTransactionHandler(txnHandler, txnContext)
+}
+
+func (rs *rulesessionImpl) ReplayTuplesForRule(ruleName string) (err error) {
+	return rs.reteNetwork.ReplayTuplesForRule(ruleName, rs)
 }

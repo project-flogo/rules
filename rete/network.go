@@ -23,8 +23,7 @@ const (
 
 //Network ... the rete network
 type Network interface {
-	AddRule(rule model.Rule, rs model.RuleSession) error
-	AddRuleAndAssert(rule model.Rule, rs model.RuleSession) (err error)
+	AddRule(rule model.Rule) error
 	String() string
 	RemoveRule(string) model.Rule
 	GetRules() []model.Rule
@@ -44,6 +43,7 @@ type Network interface {
 	GetAssertedTupleByStringKey(key string) model.Tuple
 	//RtcTransactionHandler
 	RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{})
+	ReplayTuplesForRule(ruleName string, rs model.RuleSession) (err error)
 }
 
 type reteNetworkImpl struct {
@@ -83,14 +83,8 @@ func (nw *reteNetworkImpl) initReteNetwork() {
 	nw.ruleNameClassNodeLinksOfRule = make(map[string]*list.List)
 	nw.allHandles = make(map[string]reteHandle)
 }
-func (nw *reteNetworkImpl) AddRuleAndAssert(rule model.Rule, rs model.RuleSession) (err error) {
-	return nw.addRuleWithAssert(rule, rs, true)
-}
-func (nw *reteNetworkImpl) AddRule(rule model.Rule, rs model.RuleSession) (err error) {
-	return nw.addRuleWithAssert(rule, rs, false)
-}
 
-func (nw *reteNetworkImpl) addRuleWithAssert(rule model.Rule, rs model.RuleSession, shouldAssert bool) error {
+func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 	nw.assertLock.Lock()
 	defer nw.assertLock.Unlock()
 
@@ -144,15 +138,18 @@ func (nw *reteNetworkImpl) addRuleWithAssert(rule model.Rule, rs model.RuleSessi
 	//Add NodeLinks
 	nw.ruleNameClassNodeLinksOfRule[rule.GetName()] = classNodeLinksOfRule
 
-	//rstr := nw.String()
-	//fmt.Printf(rstr)
+	return nil
+}
 
-	if shouldAssert {
+func (nw *reteNetworkImpl) ReplayTuplesForRule(ruleName string, rs model.RuleSession) error {
+	if rule, exists := nw.allRules[ruleName]; !exists {
+		return fmt.Errorf("Rule not found [%s]", ruleName)
+	} else {
 		for _, h := range nw.allHandles {
 			tt := h.getTuple().GetTupleType()
 			if ContainedByFirst(rule.GetIdentifiers(), []model.TupleType{tt}) {
 				//assert it but only for this rule.
-				nw.AssertForRule(nil, rs, h.getTuple(), nil, ADD, rule.GetName())
+				nw.assert(nil, rs, h.getTuple(), nil, ADD, ruleName)
 			}
 		}
 	}
@@ -548,7 +545,7 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 }
 
 func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn) {
-	nw.AssertForRule(ctx, rs, tuple, changedProps, mode, "")
+	nw.assert(ctx, rs, tuple, changedProps, mode, "")
 }
 
 func (nw *reteNetworkImpl) removeTupleFromRete(tuple model.Tuple) {
@@ -659,7 +656,7 @@ func (nw *reteNetworkImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTra
 	nw.txnContext = txnContext
 }
 
-func (nw *reteNetworkImpl) AssertForRule(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn, forRule string) {
+func (nw *reteNetworkImpl) assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode RtcOprn, forRule string) {
 
 	if ctx == nil {
 		ctx = context.Background()
