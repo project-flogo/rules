@@ -75,7 +75,10 @@ func (rs *rulesessionImpl) initRuleSession(name string) {
 }
 
 func (rs *rulesessionImpl) AddRule(rule model.Rule) (err error) {
-	return rs.reteNetwork.AddRule(rule)
+	return rs.reteNetwork.AddRule(rule, rs)
+}
+func (rs *rulesessionImpl) AddRuleAndAssert(rule model.Rule) (err error) {
+	return rs.reteNetwork.AddRuleAndAssert(rule, rs)
 }
 
 func (rs *rulesessionImpl) DeleteRule(ruleName string) {

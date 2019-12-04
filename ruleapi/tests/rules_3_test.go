@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/project-flogo/rules/common/model"
@@ -63,7 +64,7 @@ func r3Condition(ruleName string, condName string, tuples map[model.TupleType]mo
 }
 
 func r3action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	//fmt.Println("r13_action triggered")
+	fmt.Println("r13_action triggered")
 	t1 := tuples[model.TupleType("t1")].(model.MutableTuple)
 	id, _ := t1.GetString("id")
 
@@ -75,7 +76,7 @@ func r3action(ctx context.Context, rs model.RuleSession, ruleName string, tuples
 }
 
 func r32action(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	//fmt.Println("r132_action triggered")
+	fmt.Println("r132_action triggered")
 	actCnt++
 
 	tk, _ := model.NewTupleKeyWithKeyValues("t1", "t10")
