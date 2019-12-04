@@ -14,15 +14,16 @@ Once you have the `flogo.json` file, you are ready to build your Flogo App
 ```sh
 cd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/dtable
 flogo create -f flogo.json
-cd dtable
+cd decisiontable
 flogo build
+cp ../dtable-file.xlsx .
 cd bin
 ```
 
 #### With mem store
 
 ```sh
-./dtable
+./decisiontable
 ```
 
 #### With redis store

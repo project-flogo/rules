@@ -1,5 +1,5 @@
 {
-  "name": "decisiontable",
+  "name": "creditcard-dt",
   "type": "flogo:app",
   "version": "0.0.1",
   "description": "Sample Rules App",
