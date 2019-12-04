@@ -14,15 +14,16 @@ Once you have the `flogo.json` file, you are ready to build your Flogo App
 ```sh
 cd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/dtable
 flogo create -f flogo.json
-cd dtable
+cd decisiontable
 flogo build
+cp ../dtable-file.xlsx .
 cd bin
 ```
 
 #### With mem store
 
 ```sh
-./dtable
+./decisiontable
 ```
 
 #### With redis store
@@ -53,49 +54,3 @@ You should see following output:
 2019-09-05T18:35:12.142+0530    INFO    [flogo.rules] - Student: s1 -- Comments: additional study hours required
 2019-09-05T18:35:12.142+0530    INFO    [flogo.rules] - Student: s2 -- Comments: little care can be taken to achieve grade-a
 ```
-
-### Writing Decision Table in JSON
-
-Sample usage can be as below.
-```json
-    {
-            "name": "AnalyseStudent",
-            "description": "Analysing student data",
-            "type": "activity",
-            "ref": "github.com/project-flogo/rules/activity/dtable",
-            "settings": {
-              "make": [
-                {
-                  "condition": [
-                    {"tuple": "student","field": "grade","expr": "== 'GRADE-C'"},
-                    {"tuple": "student","field": "class","expr": "== 'X-A'"}
-                  ],
-                  "action": [
-                    { "tuple": "student","field": "careRequired","value": true},
-                    { "tuple": "student","field": "comments","value": "additional study hours required"}
-                  ]
-                },
-                {
-                  "condition": [
-                    {"tuple": "student","field": "grade","expr": "== 'GRADE-A'"},
-                    {"tuple": "student","field": "class","expr": "== 'X-A'"}
-                  ],
-                  "action": [
-                    {"tuple": "student","field": "careRequired","value": false}
-                  ]
-                },
-                {
-                  "condition": [
-                    {"tuple": "student","field": "grade","expr": "== 'GRADE-B'"},
-                    {"tuple": "student","field": "class","expr": "== 'X-A'"}
-                  ],
-                  "action": [
-                    {"tuple": "student","field": "careRequired","value": true},
-                    {"tuple": "student","field": "comments","value": "little care can be taken to achieve grade-a "}
-                  ]
-                }
-              ]
-            }
-        }
-```
-Decision table will have condition and action included into decition table activity.

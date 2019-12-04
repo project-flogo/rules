@@ -19,6 +19,7 @@ flogo create -f flogo.json
 cd creditcard-dt
 flogo build
 cd bin
+cp ../../creditcard-dt-file.xlsx .
 ./creditcard-dt
 ```
  
