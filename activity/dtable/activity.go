@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/360EntSecGroup-Skylar/excelize"
+	excelize "github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/metadata"
@@ -182,7 +182,7 @@ func loadFromXLSFile(fileName string) (*dTable, error) {
 	if err != nil {
 		return nil, fmt.Errorf("not able open the file [%s] - %s", fileName, err)
 	}
-	rows := file.GetRows("DecisionTable")
+	rows, err := file.GetRows("DecisionTable")
 	if err != nil {
 		return nil, fmt.Errorf("DecisionTable worksheet not available in %s", fileName)
 	}
