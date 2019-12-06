@@ -67,7 +67,7 @@
                 "expression": "$.student.careRequired"
               }
             ],
-            "actionService": {
+            "actionService": {              
               "service": "LogCareRequiredStudents",
               "input": {
                 "message": "=string.concat(\" Student: \",$.student.name, \" -- Comments: \",$.student.comments)"
@@ -82,7 +82,7 @@
                 "expression": "$.studentanalysis.name == $.student.name"
               }
             ],
-            "actionService": {
+            "actionService": {             
               "service": "AnalyseStudent",
               "input": {
                 "message": "=$.studentanalysis.name"
@@ -98,37 +98,7 @@
             "type": "activity",
             "ref": "github.com/project-flogo/rules/activity/dtable",
             "settings": {
-              "make": [
-                {
-                  "condition": [
-                    {"tuple": "student","field": "grade","expr": "== 'GRADE-C'"},
-                    {"tuple": "student","field": "class","expr": "== 'X-A'"}
-                  ],
-                  "action": [
-                    { "tuple": "student","field": "careRequired","value": true},
-                    { "tuple": "student","field": "comments","value": "additional study hours required"}
-                  ]
-                },
-                {
-                  "condition": [
-                    {"tuple": "student","field": "grade","expr": "== 'GRADE-A'"},
-                    {"tuple": "student","field": "class","expr": "== 'X-A'"}
-                  ],
-                  "action": [
-                    {"tuple": "student","field": "careRequired","value": false}
-                  ]
-                },
-                {
-                  "condition": [
-                    {"tuple": "student","field": "grade","expr": "== 'GRADE-B'"},
-                    {"tuple": "student","field": "class","expr": "== 'X-A'"}
-                  ],
-                  "action": [
-                    {"tuple": "student","field": "careRequired","value": true},
-                    {"tuple": "student","field": "comments","value": "little care can be taken to achieve grade-a "}
-                  ]
-                }
-              ]
+              "dTableFile":"../dtable-file.xlsx"
             }
           },
           {

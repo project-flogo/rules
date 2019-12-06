@@ -186,6 +186,7 @@ func loadFromXLSFile(fileName string) (*dTable, error) {
 	if err != nil {
 		return nil, fmt.Errorf("DecisionTable worksheet not available in %s", fileName)
 	}
+
 	// find titleRowIndex
 	titleRowIndex := 0
 	for i, r := range rows {
