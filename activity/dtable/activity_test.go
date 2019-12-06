@@ -139,21 +139,29 @@ func TestCellCompileExpr(t *testing.T) {
 	tupleType := "applicant"
 	propName := "name"
 	testcases := make(map[string]string)
-	testcases["foo"] = "$.applicant.name==foo"
-	testcases["==foo"] = "$.applicant.name==foo"
-	testcases["!=foo"] = "$.applicant.name!=foo"
-	testcases[">foo"] = "$.applicant.name>foo"
-	testcases[">=foo"] = "$.applicant.name>=foo"
-	testcases["<foo"] = "$.applicant.name<foo"
-	testcases["<=foo"] = "$.applicant.name<=foo"
-	testcases["< foo"] = "$.applicant.name< foo" // space test
-	testcases["foo&&bar"] = "$.applicant.name==foo && $.applicant.name==bar"
-	testcases[">=foo&&bar"] = "$.applicant.name>=foo && $.applicant.name==bar"
-	testcases["car&&jeep&&bus"] = "$.applicant.name==car && $.applicant.name==jeep && $.applicant.name==bus"
-	testcases["foo||bar"] = "$.applicant.name==foo || $.applicant.name==bar"
-	testcases["car||jeep||bus"] = "$.applicant.name==car || $.applicant.name==jeep || $.applicant.name==bus"
-	testcases["car&&jeep||bus"] = "$.applicant.name==car && $.applicant.name==jeep || $.applicant.name==bus"
-	testcases["car||jeep&&bus"] = "$.applicant.name==car || $.applicant.name==jeep && $.applicant.name==bus"
+	testcases["foo"] = "$.applicant.name == foo"
+	testcases["123foo"] = "$.applicant.name == 123foo"
+	testcases["foo123"] = "$.applicant.name == foo123"
+	testcases["123"] = "$.applicant.name == 123"
+	testcases["123.123"] = "$.applicant.name == 123.123"
+	testcases[".123"] = "$.applicant.name == .123"
+	testcases["!foo"] = "!($.applicant.name == foo)"
+	testcases["==foo"] = "$.applicant.name == foo"
+	testcases["!=foo"] = "$.applicant.name != foo"
+	testcases[">foo"] = "$.applicant.name > foo"
+	testcases["!>foo"] = "!($.applicant.name > foo)"
+	testcases[">=foo"] = "$.applicant.name >= foo"
+	testcases["<foo"] = "$.applicant.name < foo"
+	testcases["<=foo"] = "$.applicant.name <= foo"
+	testcases["< foo"] = "$.applicant.name < foo" // space test
+	testcases["foo&&bar"] = "($.applicant.name == foo && $.applicant.name == bar)"
+	testcases[">=foo&&bar"] = "($.applicant.name >= foo && $.applicant.name == bar)"
+	testcases["car&&jeep&&bus"] = "(($.applicant.name == car && $.applicant.name == jeep) && $.applicant.name == bus)"
+	testcases["foo||bar"] = "($.applicant.name == foo || $.applicant.name == bar)"
+	testcases["car||jeep||bus"] = "(($.applicant.name == car || $.applicant.name == jeep) || $.applicant.name == bus)"
+	testcases["car&&jeep||bus"] = "(($.applicant.name == car && $.applicant.name == jeep) || $.applicant.name == bus)"
+	testcases["!(car&&(jeep||bus))"] = "!(($.applicant.name == car && ($.applicant.name == jeep || $.applicant.name == bus)))"
+	testcases["car||jeep&&bus"] = "($.applicant.name == car || ($.applicant.name == jeep && $.applicant.name == bus))"
 
 	// prepare cell
 	tupleDesc := model.GetTupleDescriptor(model.TupleType(tupleType))
@@ -170,6 +178,7 @@ func TestCellCompileExpr(t *testing.T) {
 
 	// run test cases
 	for k, v := range testcases {
+		t.Log(k, v)
 		cell.rawValue = k
 		cell.compileExpr()
 		assert.Equal(t, v, cell.cdExpr)
