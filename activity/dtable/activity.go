@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	excelizeV2 "github.com/360EntSecGroup-Skylar/excelize/v2"
+	excelize "github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/metadata"
@@ -56,55 +56,19 @@ type genCell struct {
 }
 
 func (cell *genCell) compileExpr() {
+	rawValue := cell.rawValue
+	if len(rawValue) == 0 {
+		return
+	}
 	lhsToken := fmt.Sprintf("$.%s.%s", cell.tupleDesc.Name, cell.propDesc.Name)
-	tokens := strings.Split(cell.rawValue, "&&")
-
-	andConditions := make([]string, 0)
-	for i, v := range tokens {
-		if i == 0 {
-			andConditions = append(andConditions, v)
-			continue
-		}
-		andConditions = append(andConditions, "&&", v)
+	expression := &Expr{Buffer: rawValue}
+	expression.Init()
+	expression.Expression.Init(rawValue)
+	if err := expression.Parse(); err != nil {
+		panic(err)
 	}
-
-	conditions := make([]string, 0)
-	for _, v := range andConditions {
-		tokens = strings.Split(v, "||")
-		if len(tokens) > 1 {
-			for j, v1 := range tokens {
-				if j == 0 {
-					conditions = append(conditions, v1)
-					continue
-				}
-				conditions = append(conditions, "||", v1)
-			}
-			continue
-		}
-		conditions = append(conditions, v)
-	}
-
-	expr := ""
-	for _, c := range conditions {
-		if c == "&&" || c == "||" {
-			expr = fmt.Sprintf("%s %s ", expr, c)
-			continue
-		}
-
-		if !strings.HasPrefix(c, "==") &&
-			!strings.HasPrefix(c, "!=") &&
-			!strings.HasPrefix(c, ">") &&
-			!strings.HasPrefix(c, ">=") &&
-			!strings.HasPrefix(c, "<") &&
-			!strings.HasPrefix(c, "<=") &&
-			!strings.HasPrefix(c, "!") {
-			c = "==" + c
-		}
-		fullCondition := lhsToken + c
-		expr = expr + fullCondition
-	}
-
-	cell.cdExpr = expr
+	expression.Execute()
+	cell.cdExpr = expression.Evaluate(lhsToken)
 }
 
 // New creates new decision table activity
@@ -214,7 +178,7 @@ func loadFromCSVFile(fileName string) (*dTable, error) {
 
 // loadFromXLSFile loads decision table from Excel file
 func loadFromXLSFile(fileName string) (*dTable, error) {
-	file, err := excelizeV2.OpenFile(fileName)
+	file, err := excelize.OpenFile(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("not able open the file [%s] - %s", fileName, err)
 	}
