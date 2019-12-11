@@ -22,6 +22,7 @@ cd bin
 cp ../../creditcard-dt-file.xlsx .
 ./creditcard-dt
 ```
+### Note : While executing below mentioned commands on windows platform all backward slashes  after applicant name  need to  be omitted 
  
 ### Testing
 
