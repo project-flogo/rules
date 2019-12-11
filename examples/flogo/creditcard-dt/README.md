@@ -22,7 +22,7 @@ cd bin
 cp ../../creditcard-dt-file.xlsx .
 ./creditcard-dt
 ```
- 
+### Note - To execute following commands on windows platform the  backward slashes need to be omitted . 
 ### Testing
 
 #### #1 Invoke applicant decision table
