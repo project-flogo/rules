@@ -29,7 +29,7 @@ A sample `decision table` definition is:
         "type": "activity",
         "ref": "github.com/project-flogo/rules/activity/dtable",
         "settings": {
-            "dTableFile":"creditcard-dt-file.xlsx"
+            "dTableFile":"creditcard-file.xlsx"
         }
     }
 

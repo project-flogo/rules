@@ -1,60 +1,51 @@
-## Flogo Rules based Creditcard application
+# Decision Table Usage
 
+This example demonstrates how to use decision table activity with credit card application example.
 
-This example demonstrates rule based processing of credit card application. In this example three tuples are used, tuples description is given below.
+## Setup and build
+Once you have the `flogo.json` file, you are ready to build your Flogo App
 
+### Pre-requisites
+* Go 1.11
+* Download and build the Flogo CLI 'flogo' and add it to your system PATH
 
-* `UserAccount` tuple is always stored in network, while the other tuples `NewAccount` and `UpdateCreditScore` are removed after usage as ttl is given as 0. 
+### Steps
 
+Note: Store implementation can be configured via given `rsconfig.json` file. Start redis-server and use `export STORECONFIG=<path to rsconfig.json>` before running binary.<br>
 
-## Usage
-
-Get the repo and in this example main.go, functions.go both are available. We can directly build and run the app or create flogo rule app and run it.
-
-#### Conditions 
-
-```
-cBadUser : Check for new user input data - check if age <18 and >=45, empty address and salary less than 10k
-cNewUser : Check for new user input data - check if age >=18 and <= 44, address and salary >= 10k
-cUserIdMatch : Check for id match from 'UserAccount' and 'UpdateCreditScore' tuples
-cUserCreditScore : Check for CreditScore >= 750 && < 820 
-cUserLowCreditScore : Check for CreditScore < 750
-cUserHighCreditScore : Check for CreditScore >= 820 &&  <= 900
-```
-#### Actions 
-```
-aBadUser : Executes when age - < 18 and >=45, address empty, salary less than 10k
-aNewUser : Add the newuser info to userAccount tuple
-aApproveWithLowerLimit : Provides credit card application status approved with lower credit limit
-aApproveWithHigherLimit : Provides credit card application status approved with higher credit limit
-aUserReject : Rejects when lower Credit score provided and retracts NewAccount
-```
-### Direct build and run
-```
+```sh
 cd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/creditcard
-go build
-./creditcard
-```
-### Create app using flogo cli
-```
-cd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/creditcard
-flogo create -f flogo.json creditcard
-cp functions.go creditcard/src
+flogo create -f flogo.json
 cd creditcard
 flogo build
-./bin/creditcard
+cd bin
+cp ../../creditcard-file.xlsx .
+./creditcard
 ```
 
-* Input new user details
+### Testing
 
-```
-$ curl -X PUT http://localhost:7777/newaccount -H 'Content-Type: application/json' -d '{"Name":"Test","Age":"26","Income":"60100","Address":"TEt","Id":"12312","Gender":"male","maritalStatus":"single"}'
-```
-* Update credit score details of the user
+#### #1 Invoke applicant decision table
 
-```
-$ curl -X PUT http://localhost:7777/credit -H 'Content-Type: application/json' -d '{"Id":12312,"creditScore":680}'
+Store aplicants information.
+```sh
+curl localhost:7777/test/applicant?name=JohnDoe\&gender=Male\&age=20\&address=BoltonUK\&hasDL=false\&ssn=1231231234\&income=45000\&maritalStatus=single\&creditScore=500
+curl localhost:7777/test/applicant?name=JaneDoe\&gender=Female\&age=38\&address=BoltonUK\&hasDL=false\&ssn=2424354532\&income=32000\&maritalStatus=single\&creditScore=650
+curl localhost:7777/test/applicant?name=PrakashY\&gender=Male\&age=30\&address=RedwoodShore\&hasDL=true\&ssn=2345342132\&income=150000\&maritalStatus=married\&creditScore=750
+curl localhost:7777/test/applicant?name=SandraW\&gender=Female\&age=26\&address=RedwoodShore\&hasDL=true\&ssn=3213214321\&income=50000\&maritalStatus=single\&creditScore=625
 ```
 
-* Application status will be printed on the console
- 
+Send a process application event.
+```sh
+curl localhost:7777/test/processapplication?start=true\&ssn=1231231234
+curl localhost:7777/test/processapplication?start=true\&ssn=2345342132
+curl localhost:7777/test/processapplication?start=true\&ssn=3213214321
+curl localhost:7777/test/processapplication?start=true\&ssn=2424354532
+```
+You should see following output:
+```
+2019-09-24T12:54:08.674+0530    INFO    [flogo.rules] -  Applicant: JohnDoe -- CreditLimit: 2500 -- status: VISA-Granted
+2019-09-24T12:54:08.683+0530    INFO    [flogo.rules] -  Applicant: PrakashY -- CreditLimit: 7500 -- status: Pending
+2019-09-24T12:54:08.696+0530    INFO    [flogo.rules] -  Applicant: SandraW -- CreditLimit: 0 -- status: Loan-Rejected
+2019-09-24T12:54:09.884+0530    INFO    [flogo.rules] -  Applicant: JaneDoe -- CreditLimit: 25000 -- status: Platinum-Status
+```
