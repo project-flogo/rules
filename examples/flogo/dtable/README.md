@@ -33,6 +33,13 @@ docker run -p 6381:6379 -d redis
 STORECONFIG=../../rsconfig.json ./dtable
 ```
 
+#### With keydb store
+
+```sh
+docker run -p 6381:6379 -d eqalpha/keydb
+STORECONFIG=../../rsconfig.json ./dtable
+```
+
 ### Testing
 
 #### #1 Invoke student analysis decision table

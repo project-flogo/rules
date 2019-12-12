@@ -13,7 +13,7 @@ import (
 // modified in action (forward chain)
 func Test_T4(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R4")

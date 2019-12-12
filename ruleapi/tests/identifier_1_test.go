@@ -16,7 +16,7 @@ var count uint64
 //Check if all combination of tuples t1 and t3 are triggering actions
 func Test_I1(t *testing.T) {
 	count = 0
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("I1")

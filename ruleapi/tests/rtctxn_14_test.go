@@ -13,7 +13,7 @@ import (
 //1 rtc->Redundant add and modify on same tuple->Verify added and modified count
 func Test_T14(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R14")

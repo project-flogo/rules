@@ -14,7 +14,7 @@ import (
 func Test_5_Expr(t *testing.T) {
 
 	actionCount := map[string]int{"count": 0}
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 	r1 := ruleapi.NewRule("r1")
 	err = r1.AddExprCondition("c1", "(($.t1.p1 + $.t2.p1) == 5) && (($.t1.p2 > $.t2.p2) && ($.t1.p3 == $.t2.p3))", nil)

@@ -17,7 +17,7 @@ var actionCnt1 uint64
 //1 rtc->Schedule assert, Cancel scheduled assert and action should not be fired
 func Test_T16(t *testing.T) {
 	actionCnt1 = 0
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R16")

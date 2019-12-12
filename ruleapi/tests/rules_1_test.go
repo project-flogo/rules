@@ -19,7 +19,7 @@ the expected outcome is that all three rules should fire
 
 func Test_One(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	actionMap := make(map[string]string)

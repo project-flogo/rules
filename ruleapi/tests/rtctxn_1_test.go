@@ -12,7 +12,7 @@ import (
 
 //TTL != 0 asserted
 func Test_T1(t *testing.T) {
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 	rule := ruleapi.NewRule("R1")
 	err = rule.AddCondition("R1_c1", []string{"t1.none"}, trueCondition, t)

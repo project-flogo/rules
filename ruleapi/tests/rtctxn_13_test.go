@@ -13,7 +13,7 @@ import (
 //1 rtc->one assert triggers two rule actions each rule action deletes tuples.Verify Deleted Tuple types and Tuples count.
 func Test_T13(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R13")

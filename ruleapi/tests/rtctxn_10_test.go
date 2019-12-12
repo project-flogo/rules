@@ -13,7 +13,7 @@ import (
 //1 rtc ->Delete multiple tuple types and verify count.
 func Test_T10(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R10")

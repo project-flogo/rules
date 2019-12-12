@@ -16,7 +16,7 @@ var cnt uint64
 //Using 3 Identifiers, different Join conditions and triggering respective actions --->Verify order of actions and count.
 func Test_I2(t *testing.T) {
 	cnt = 0
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	//actionMap := make(map[string]string)

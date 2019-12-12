@@ -19,7 +19,7 @@ func TestClearSessions(t *testing.T) {
 }
 
 func TestAssert(t *testing.T) {
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 	rule := ruleapi.NewRule("R2")
 	err = rule.AddCondition("R2_c1", []string{"t4.none"}, trueCondition, nil)
@@ -46,7 +46,7 @@ func TestAssert(t *testing.T) {
 }
 
 func TestRace(t *testing.T) {
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 	defer rs.Unregister()
 	rule := ruleapi.NewRule("R2")

@@ -13,7 +13,7 @@ import (
 //1 rtc->one assert triggers two rule actions each rule action asserts 2 more tuples.Verify Tuple type and Tuples count.
 func Test_T11(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R11")

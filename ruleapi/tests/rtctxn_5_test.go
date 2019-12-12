@@ -13,7 +13,7 @@ import (
 //3 rtcs, 1st rtc ->asserted, 2nd rtc ->modified the 1st one, 3rd rtc ->deleted the 2nd one
 func Test_T5(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("R5")

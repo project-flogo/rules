@@ -13,7 +13,7 @@ import (
 //Retract
 func Test_Retract_1(t *testing.T) {
 
-	rs, err := createRuleSession()
+	rs, err := createRuleSession(t)
 	assert.Nil(t, err)
 
 	//create a rule joining t1 and t3

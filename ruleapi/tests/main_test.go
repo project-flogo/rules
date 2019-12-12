@@ -8,13 +8,21 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	image = "none"
 	code := m.Run()
 	if code != 0 {
 		os.Exit(code)
 	}
 
-	run := func() int {
-		command := exec.Command("docker", "run", "-p", "6380:6379", "-d", "redis")
+	store = "rsconfigmp.json"
+	code = m.Run()
+	if code != 0 {
+		os.Exit(code)
+	}
+
+	run := func(img string) int {
+		image = img
+		command := exec.Command("docker", "run", "-p", "6380:6379", "-d", img)
 		hash, err := command.Output()
 		if err != nil {
 			panic(err)
@@ -37,12 +45,24 @@ func TestMain(m *testing.M) {
 
 		return m.Run()
 	}
-	redis = true
-	code = run()
+	store = "rsconfig.json"
+	code = run("redis")
 	if code != 0 {
 		os.Exit(code)
 	}
 
-	performance = true
-	os.Exit(run())
+	store = "rsconfigp.json"
+	code = run("redis")
+	if code != 0 {
+		os.Exit(code)
+	}
+
+	store = "rsconfig.json"
+	code = run("eqalpha/keydb")
+	if code != 0 {
+		os.Exit(code)
+	}
+
+	store = "rsconfigp.json"
+	os.Exit(run("eqalpha/keydb"))
 }
