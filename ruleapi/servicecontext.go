@@ -7,6 +7,7 @@ import (
 	"github.com/project-flogo/core/data/metadata"
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/core/support/log"
+	"github.com/project-flogo/core/support/trace"
 )
 
 // activity init context
@@ -176,4 +177,9 @@ func (ac *ServiceHost) Return(returnData map[string]interface{}, err error) {
 // Scope returns the scope for the Host's data
 func (ac *ServiceHost) Scope() data.Scope {
 	return ac.HostData
+}
+
+// GetTracingContext returns nil
+func (ac *ServiceHost) GetTracingContext() trace.TracingContext {
+	return nil
 }

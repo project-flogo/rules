@@ -61,6 +61,8 @@ github.com/project-flogo/core v0.9.0/go.mod h1:QGWi7TDLlhGUaYH3n/16ImCuulbEHGADY
 github.com/project-flogo/core v0.9.2/go.mod h1:QGWi7TDLlhGUaYH3n/16ImCuulbEHGADYEXyrcHhX7U=
 github.com/project-flogo/core v0.9.3 h1:uZXHR9j1Byqt+x3faNnOqB8NlEfwE2gpCh40iQ+44oA=
 github.com/project-flogo/core v0.9.3/go.mod h1:QGWi7TDLlhGUaYH3n/16ImCuulbEHGADYEXyrcHhX7U=
+github.com/project-flogo/core v0.9.4 h1:WGvXbfVi00Weys+jR2pR3M2hEkxjPpO4NW+WiJJ6Lgg=
+github.com/project-flogo/core v0.9.4/go.mod h1:QGWi7TDLlhGUaYH3n/16ImCuulbEHGADYEXyrcHhX7U=
 github.com/project-flogo/flow v0.9.2 h1:0y+mWZ158yHWsbY/OsPB0pY0MVFXPRFqtEczHjtnNks=
 github.com/project-flogo/flow v0.9.2/go.mod h1:DPUBHFS5+5N+zXBJ9Q6qeNy+AD6kUDrSzPhhwNdNn1M=
 github.com/project-flogo/legacybridge v0.9.1 h1:d0mYjPHUJCHtXA84tluEbG5sgK4gLFYgpYPWgLCsMpc=

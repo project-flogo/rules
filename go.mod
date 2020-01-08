@@ -13,7 +13,7 @@ require (
 	github.com/project-flogo/contrib/function/string v0.9.0
 	github.com/project-flogo/contrib/trigger/kafka v0.9.0
 	github.com/project-flogo/contrib/trigger/rest v0.9.0
-	github.com/project-flogo/core v0.9.3
+	github.com/project-flogo/core v0.9.4
 	github.com/project-flogo/legacybridge v0.9.1
 	github.com/stretchr/testify v1.4.0
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
