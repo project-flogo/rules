@@ -18,9 +18,29 @@ cd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/creditcard
 flogo create -f flogo.json
 cd creditcard
 flogo build
+cp ../creditcard-file.xlsx .
 cd bin
-cp ../../creditcard-file.xlsx .
 ./creditcard
+```
+
+#### With mem store
+
+```sh
+./creditcard
+```
+
+#### With redis store
+
+```sh
+docker run -p 6381:6379 -d redis
+STORECONFIG=../../rsconfig.json ./creditcard
+```
+
+#### With keydb store
+
+```sh
+docker run -p 6381:6379 -d eqalpha/keydb
+STORECONFIG=../../rsconfig.json ./creditcard
 ```
 
 ### Testing

@@ -104,7 +104,7 @@
             "type": "activity",
             "ref": "github.com/project-flogo/rules/activity/dtable",
             "settings": {
-              "dTableFile":"creditcard-file.xlsx"
+              "dTableFile": "../creditcard-file.xlsx"
             }
           },
           {
@@ -179,7 +179,7 @@
           },
           {
             "name": "processapplication",
-            "ttl":0,
+            "ttl": 0,
             "properties": [
               {
                 "name": "ssn",
