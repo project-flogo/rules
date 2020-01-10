@@ -9,12 +9,16 @@ import (
 
 	_ "github.com/project-flogo/core/data/expression/script"
 	"github.com/project-flogo/core/engine"
+	"github.com/project-flogo/core/support/log"
+
+	_ "github.com/project-flogo/contrib/trigger/rest"
+	_ "github.com/project-flogo/rules/ruleaction"
 )
 
 var (
 	cpuProfile    = flag.String("cpuprofile", "", "Writes CPU profile to the specified file")
 	memProfile    = flag.String("memprofile", "", "Writes memory profile to the specified file")
-	cfgJson       string
+	cfgJSON       string
 	cfgCompressed bool
 )
 
@@ -24,25 +28,22 @@ func main() {
 	if *cpuProfile != "" {
 		f, err := os.Create(*cpuProfile)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to create CPU profiling file: %v\n", err)
+			fmt.Println(fmt.Sprintf("Failed to create CPU profiling file due to error - %s", err.Error()))
 			os.Exit(1)
 		}
-		if err = pprof.StartCPUProfile(f); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to start CPU profiling: %v\n", err)
-			os.Exit(1)
-		}
+		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
 
-	cfg, err := engine.LoadAppConfig(cfgJson, cfgCompressed)
+	cfg, err := engine.LoadAppConfig(cfgJSON, cfgCompressed)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to create engine: %v\n", err)
+		log.RootLogger().Errorf("Failed to create engine: %s", err.Error())
 		os.Exit(1)
 	}
 
 	e, err := engine.New(cfg)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to create engine: %v\n", err)
+		log.RootLogger().Errorf("Failed to create engine: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -51,16 +52,16 @@ func main() {
 	if *memProfile != "" {
 		f, err := os.Create(*memProfile)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to create memory profiling file: %v\n", err)
+			fmt.Println(fmt.Sprintf("Failed to create memory profiling file due to error - %s", err.Error()))
 			os.Exit(1)
 		}
 
 		runtime.GC() // get up-to-date statistics
 		if err := pprof.WriteHeapProfile(f); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to write memory profiling data: %v", err)
+			fmt.Println(fmt.Sprintf("Failed to write memory profiling data to file due to error - %s", err.Error()))
 			os.Exit(1)
 		}
-		_ = f.Close()
+		f.Close()
 	}
 
 	os.Exit(code)
