@@ -1,0 +1,19 @@
+sudo: required
+language: go
+go:
+  - 1.12
+
+os:
+  - linux
+services:
+  - docker
+  - redis-server 
+
+
+install:
+  - pip install --user awscli
+  - go get github.com/ains/go-test-html
+  - go get github.com/project-flogo/cli/...
+
+script:
+  - go test -p 1 ./...
