@@ -4,14 +4,14 @@
   "version": "0.0.1",
   "description": "Sample Flogo App",
   "appModel": "1.0.0",
-  "imports": [
-    "github.com/project-flogo/contrib/trigger/rest",
-    "github.com/project-flogo/core/examples/action",
-    "nil github.com/project-flogo/rules/ruleaction@v0.1.2-0.20191213093114-d57fcc0da0bf",
+  "imports": [   
     "github.com/project-flogo/contrib/activity/log",
+    "github.com/project-flogo/contrib/function/string",
+    "github.com/project-flogo/contrib/trigger/rest",
     "github.com/project-flogo/flow",
-    "nil github.com/project-flogo/rules/activity/dtable@v0.1.2-0.20191213093114-d57fcc0da0bf",
-    "github.com/project-flogo/contrib/function/string"
+    "github.com/project-flogo/core/examples/action",   
+    "github.com/project-flogo/rules/ruleaction",
+    "github.com/project-flogo/rules/activity/dtable"
   ],
   "triggers": [
     {

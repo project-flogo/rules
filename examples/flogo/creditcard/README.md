@@ -89,14 +89,14 @@ You should see following output:
 
 Store aplicants information.
 ```sh
-curl localhost:7777/test/applicant?name=JohnDoe\&gender=Male\&age=20\&address=BoltonUK\&hasDL=false\&ssn=1231231234\&income=45000\&maritalStatus=single\&creditScore=500
-curl localhost:7777/test/applicant?name=JaneDoe\&gender=Female\&age=38\&address=BoltonUK\&hasDL=false\&ssn=2424354532\&income=32000\&maritalStatus=single\&creditScore=650
+curl http://localhost:7777/test/applicant?name=JohnDoe\&gender=Male\&age=20\&address=BoltonUK\&hasDL=false\&ssn=1231231234\&income=45000\&maritalStatus=single\&creditScore=500
+curl http://localhost:7777/test/applicant?name=JaneDoe\&gender=Female\&age=38\&address=BoltonUK\&hasDL=false\&ssn=2424354532\&income=32000\&maritalStatus=single\&creditScore=650
 ```
 
 Send a process application event.
 ```sh
-curl localhost:7777/test/processapplication?start=true\&ssn=1231231234
-curl localhost:7777/test/processapplication?start=true\&ssn=2345342132
+curl http://localhost:7777/test/processapplication?start=true\&ssn=1231231234
+curl http://localhost:7777/test/processapplication?start=true\&ssn=2424354532
 ```
 You should see following output:
 ```
