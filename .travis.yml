@@ -1,0 +1,33 @@
+sudo: required
+language: go
+go:
+  - 1.12
+
+os:
+  - linux
+env :
+  - GO111MODULE=on  
+branches:
+  only:
+    - master
+    - develop
+    - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
+      
+services:
+  - docker
+  - redis-server
+
+script:
+  - env GO111MODULE=off go get -u github.com/project-flogo/cli/...
+  - env GO111MODULE=on go test -p 1 ./...
+
+notifications:
+  email:
+    on_failure: always
+    on_success: always
+    recipients:
+      - rpolishe@tibco.com
+      - lmekala@tibco.com
+      - nthota@tibco.com
+      - ykalidin@tibco.com
+      - asnodgra@tibco.com  
