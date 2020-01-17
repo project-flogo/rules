@@ -5,15 +5,31 @@ go:
 
 os:
   - linux
+env :
+  - GO111MODULE=on  
+branches:
+  only:
+    - master
+    - develop
+    - /^v\d+\.\d+\.\d+(\.\d+)?(-\S*)?$/
+      
 services:
   - docker
-  - redis-server 
-
+  - redis-server
 
 install:
-  - pip install --user awscli
-  - go get github.com/ains/go-test-html
-  - go get github.com/project-flogo/cli/...
+  - go get -u github.com/project-flogo/cli/...
 
 script:
   - go test -p 1 ./...
+
+notifications:
+  email:
+    on_failure: always
+    on_success: always
+    recipients:
+      - rpolishe@tibco.com
+      - lmekala@tibco.com
+      - nthota@tibco.com
+      - ykalidin@tibco.com
+      - asnodgra@tibco.com  
