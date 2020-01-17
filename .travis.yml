@@ -5,8 +5,6 @@ go:
 
 os:
   - linux
-env :
-  - GO111MODULE=on  
 branches:
   only:
     - master
@@ -19,7 +17,7 @@ services:
 
 script:
   - go get -u github.com/project-flogo/cli/...
-  - go test -p 1 ./...
+  - GO111MODULE=on go test -p 1 ./...
 
 notifications:
   email:
