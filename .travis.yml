@@ -5,6 +5,8 @@ go:
 
 os:
   - linux
+env :
+  - GO111MODULE=on  
 branches:
   only:
     - master
@@ -16,7 +18,7 @@ services:
   - redis-server
 
 script:
-  - go get -u github.com/project-flogo/cli/...
+  - env GO111MODULE=off go get -u github.com/project-flogo/cli/...
   - GO111MODULE=on go test -p 1 ./...
 
 notifications:
