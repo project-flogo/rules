@@ -17,10 +17,8 @@ services:
   - docker
   - redis-server
 
-install:
-  - go get github.com/project-flogo/cli/...
-
 script:
+  - go get -u github.com/project-flogo/cli/...
   - go test -p 1 ./...
 
 notifications:
