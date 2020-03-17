@@ -328,3 +328,7 @@ func internalTxnHandler(ctx context.Context, rs model.RuleSession, rtxn model.Rt
 	store.SaveTuples(rtxn.GetRtcAdded())
 	store.SaveModifiedTuples(rtxn.GetRtcModified())
 }
+
+func (rs *rulesessionImpl) ReplayTuplesForRule(ruleName string) (err error) {
+	return rs.reteNetwork.ReplayTuplesForRule(ruleName, rs)
+}

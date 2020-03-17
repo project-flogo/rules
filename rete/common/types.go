@@ -34,6 +34,7 @@ type Network interface {
 	//GetConfig() map[string]string
 
 	SetTupleStore(tupleStore model.TupleStore)
+	ReplayTuplesForRule(ruleName string, rs model.RuleSession) (err error)
 }
 
 const (

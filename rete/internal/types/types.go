@@ -20,6 +20,7 @@ type Network interface {
 	GetHandleService() HandleService
 	GetJtRefService() JtRefsService
 	GetTupleStore() model.TupleStore
+	GetAssertedTupleByStringKey(key string) model.Tuple
 }
 
 type ConflictRes interface {
