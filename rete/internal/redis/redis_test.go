@@ -146,10 +146,6 @@ func (n *testNetwork) GetTupleStore() model.TupleStore {
 	return nil
 }
 
-func (n *testNetwork) GetAssertedTupleByStringKey(key string) model.Tuple {
-	return nil
-}
-
 func (n *testNetwork) ReplayTuplesForRule(ruleName string, rs model.RuleSession) (err error) {
 	return nil
 }

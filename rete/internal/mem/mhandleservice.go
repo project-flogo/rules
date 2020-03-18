@@ -101,3 +101,11 @@ func (hc *handleServiceImpl) GetHandleWithTuple(nw types.Network, tuple model.Tu
 	}
 	return h
 }
+
+func (hc *handleServiceImpl) GetAllHandles() map[string]types.ReteHandle {
+	all := make(map[string]types.ReteHandle)
+	for k, v := range hc.allHandles {
+		all[k] = v
+	}
+	return all
+}

@@ -173,11 +173,6 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 	return nil
 }
 
-func (nw *reteNetworkImpl) ReplayTuplesForRule(ruleName string, rs model.RuleSession) error {
-	// TO DO
-	return nil
-}
-
 func (nw *reteNetworkImpl) setClassNodeAndLinkJoinTables(nodesOfRule *list.List,
 	classNodeLinksOfRule *list.List) {
 }
@@ -219,8 +214,6 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 			}
 		}
 	}
-	rstr := nw.String()
-	fmt.Printf(rstr)
 	return rule
 }
 
@@ -875,7 +868,17 @@ func (nw *reteNetworkImpl) GetPrefix() string {
 	return nw.prefix
 }
 
-func (nw *reteNetworkImpl) GetAssertedTupleByStringKey(key string) model.Tuple {
-	// TO DO
+func (nw *reteNetworkImpl) ReplayTuplesForRule(ruleName string, rs model.RuleSession) error {
+	if rule, exists := nw.allRules[ruleName]; !exists {
+		return fmt.Errorf("Rule not found [%s]", ruleName)
+	} else {
+		for _, h := range nw.handleService.GetAllHandles() {
+			tt := h.GetTuple()
+			if ContainedByFirst(rule.GetIdentifiers(), []model.TupleType{tt.GetTupleType()}) {
+				//assert it but only for this rule.
+				nw.assert(nil, rs, h.GetTuple(), nil, common.ADD, ruleName)
+			}
+		}
+	}
 	return nil
 }

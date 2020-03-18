@@ -20,7 +20,6 @@ type Network interface {
 	GetHandleService() HandleService
 	GetJtRefService() JtRefsService
 	GetTupleStore() model.TupleStore
-	GetAssertedTupleByStringKey(key string) model.Tuple
 }
 
 type ConflictRes interface {
@@ -114,6 +113,7 @@ type HandleService interface {
 	GetHandleWithTuple(nw Network, tuple model.Tuple) ReteHandle
 	GetOrCreateLockedHandle(nw Network, tuple model.Tuple) (ReteHandle, bool)
 	GetLockedHandle(nw Network, tuple model.Tuple) (handle ReteHandle, locked, dne bool)
+	GetAllHandles() map[string]ReteHandle
 }
 
 type IdGen interface {

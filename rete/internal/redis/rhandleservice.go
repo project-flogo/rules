@@ -210,3 +210,7 @@ func (hc *handleServiceImpl) GetHandleWithTuple(nw types.Network, tuple model.Tu
 	h := newReteHandleImpl(nw, hc.RedisHdl, tuple, key, status, id)
 	return h
 }
+
+func (hc *handleServiceImpl) GetAllHandles() map[string]types.ReteHandle {
+	return nil
+}
