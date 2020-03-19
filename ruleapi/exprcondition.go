@@ -19,10 +19,9 @@ func init() {
 	td = tuplePropertyResolver{}
 	//resolver = resolve.NewCompositeResolver(map[string]resolve.Resolver{".": &td})
 	resolver = resolve.NewCompositeResolver(map[string]resolve.Resolver{
-		".":        &td,
-		"env":      &resolve.EnvResolver{},
-		"property": &resolve.PropertyResolver{},
-		"loop":     &resolve.LoopResolver{},
+		".":    &td,
+		"env":  &resolve.EnvResolver{},
+		"loop": &resolve.LoopResolver{},
 	})
 	factory = script.NewExprFactory(resolver)
 }

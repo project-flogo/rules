@@ -7,6 +7,7 @@ import (
 	"github.com/project-flogo/core/data/metadata"
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/core/support/log"
+	"github.com/project-flogo/core/support/trace"
 )
 
 // activity init context
@@ -133,6 +134,11 @@ func (sc *ServiceContext) Logger() log.Logger {
 // SetInput sets input
 func (sc *ServiceContext) SetInput(name string, value interface{}) {
 	sc.inputs[name] = value
+}
+
+// GetTracingContext returns tracing context
+func (sc *ServiceContext) GetTracingContext() trace.TracingContext {
+	return nil
 }
 
 // ServiceHost hosts service
