@@ -226,8 +226,10 @@ func (hc *handleServiceImpl) GetAllHandles(nw types.Network) map[string]types.Re
 	for _, v := range data {
 		tupleKey := strings.Replace(v, hc.prefix, "", 1)
 		tuple := nw.GetTupleStore().GetTupleByKey(model.FromStringKey(tupleKey))
-		reteHandle := hc.GetHandleWithTuple(nw, tuple)
-		allHandles[tupleKey] = reteHandle
+		if tuple != nil {
+			reteHandle := hc.GetHandleWithTuple(nw, tuple)
+			allHandles[tupleKey] = reteHandle
+		}
 	}
 
 	return allHandles
