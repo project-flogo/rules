@@ -382,3 +382,29 @@ func Shutdown() {
 	}
 	rd = rd[:0]
 }
+
+// GetKeys returns all keys present in redis server
+func (rh *RedisHandle) GetKeys(pattern string) ([]string, error) {
+
+	conn := rh.getPool().Get()
+	defer conn.Close()
+
+	iter := 0
+	keys := []string{}
+	for {
+		arr, err := redis.Values(conn.Do("SCAN", iter, "MATCH", pattern))
+		if err != nil {
+			return keys, fmt.Errorf("error retrieving '%s' keys", pattern)
+		}
+
+		iter, _ = redis.Int(arr[0], nil)
+		k, _ := redis.Strings(arr[1], nil)
+		keys = append(keys, k...)
+
+		if iter == 0 {
+			break
+		}
+	}
+
+	return keys, nil
+}

@@ -732,8 +732,10 @@ func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple
 		} else if handle.GetStatus() == types.ReteHandleStatusRetracted {
 			handle.SetStatus(types.ReteHandleStatusCreating)
 		} else if handle.GetStatus() == types.ReteHandleStatusCreated {
-			handle.Unlock()
-			return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+			if len(forRule) == 0 {
+				handle.Unlock()
+				return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+			}
 		}
 		defer func() {
 			handle.SetStatus(types.ReteHandleStatusCreated)
@@ -872,7 +874,7 @@ func (nw *reteNetworkImpl) ReplayTuplesForRule(ruleName string, rs model.RuleSes
 	if rule, exists := nw.allRules[ruleName]; !exists {
 		return fmt.Errorf("Rule not found [%s]", ruleName)
 	} else {
-		for _, h := range nw.handleService.GetAllHandles() {
+		for _, h := range nw.handleService.GetAllHandles(nw) {
 			tt := h.GetTuple()
 			if ContainedByFirst(rule.GetIdentifiers(), []model.TupleType{tt.GetTupleType()}) {
 				//assert it but only for this rule.
