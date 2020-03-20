@@ -10,11 +10,11 @@ import (
 	"github.com/project-flogo/rules/common/model"
 
 	"container/list"
-	"github.com/project-flogo/rules/rete/internal/types"
 	"sync"
 	"time"
-	//"github.com/project-flogo/rules/rete/common"
+
 	"github.com/project-flogo/rules/rete/common"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 type reteNetworkImpl struct {
@@ -169,6 +169,7 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 
 	//Add NodeLinks
 	nw.ruleNameClassNodeLinksOfRule[rule.GetName()] = classNodeLinksOfRule
+
 	return nil
 }
 
@@ -213,7 +214,6 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 			}
 		}
 	}
-
 	return rule
 }
 
@@ -583,6 +583,10 @@ func (nw *reteNetworkImpl) printClassNode(ruleName string, classNodeImpl *classN
 }
 
 func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
+	return nw.assert(ctx, rs, tuple, changedProps, mode, "")
+}
+
+func (nw *reteNetworkImpl) assert(ctx context.Context, rs model.RuleSession, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn, forRule string) error {
 
 	if ctx == nil {
 		ctx = context.Background()
@@ -598,7 +602,7 @@ func (nw *reteNetworkImpl) Assert(ctx context.Context, rs model.RuleSession, tup
 			defer nw.lock.Unlock()
 		}
 
-		err := nw.AssertInternal(newCtx, tuple, changedProps, mode)
+		err := nw.assertInternal(newCtx, tuple, changedProps, mode, forRule)
 		if err != nil {
 			return err
 		}
@@ -717,6 +721,10 @@ func (nw *reteNetworkImpl) GetAssertedTuple(ctx context.Context, rs model.RuleSe
 }
 
 func (nw *reteNetworkImpl) AssertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn) error {
+	return nw.assertInternal(ctx, tuple, changedProps, mode, "")
+}
+
+func (nw *reteNetworkImpl) assertInternal(ctx context.Context, tuple model.Tuple, changedProps map[string]bool, mode common.RtcOprn, forRule string) error {
 	if mode == common.ADD || mode == common.MODIFY {
 		handle, locked := nw.handleService.GetOrCreateLockedHandle(nw, tuple)
 		if locked {
@@ -724,8 +732,10 @@ func (nw *reteNetworkImpl) AssertInternal(ctx context.Context, tuple model.Tuple
 		} else if handle.GetStatus() == types.ReteHandleStatusRetracted {
 			handle.SetStatus(types.ReteHandleStatusCreating)
 		} else if handle.GetStatus() == types.ReteHandleStatusCreated {
-			handle.Unlock()
-			return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+			if len(forRule) == 0 {
+				handle.Unlock()
+				return fmt.Errorf("Tuple with key [%s] already asserted", tuple.GetKey().String())
+			}
 		}
 		defer func() {
 			handle.SetStatus(types.ReteHandleStatusCreated)
@@ -737,7 +747,7 @@ func (nw *reteNetworkImpl) AssertInternal(ctx context.Context, tuple model.Tuple
 	listItem := nw.allClassNodes[string(tupleType)]
 	if listItem != nil {
 		classNodeVar := listItem.(classNode)
-		classNodeVar.assert(ctx, tuple, changedProps)
+		classNodeVar.assert(ctx, tuple, changedProps, forRule)
 	}
 	td := model.GetTupleDescriptor(tuple.GetTupleType())
 	if td != nil {
@@ -858,4 +868,19 @@ func (nw *reteNetworkImpl) GetHandleService() types.HandleService {
 
 func (nw *reteNetworkImpl) GetPrefix() string {
 	return nw.prefix
+}
+
+func (nw *reteNetworkImpl) ReplayTuplesForRule(ruleName string, rs model.RuleSession) error {
+	if rule, exists := nw.allRules[ruleName]; !exists {
+		return fmt.Errorf("Rule not found [%s]", ruleName)
+	} else {
+		for _, h := range nw.handleService.GetAllHandles(nw) {
+			tt := h.GetTuple()
+			if ContainedByFirst(rule.GetIdentifiers(), []model.TupleType{tt.GetTupleType()}) {
+				//assert it but only for this rule.
+				nw.assert(nil, rs, h.GetTuple(), nil, common.ADD, ruleName)
+			}
+		}
+	}
+	return nil
 }

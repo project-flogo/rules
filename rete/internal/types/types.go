@@ -113,6 +113,7 @@ type HandleService interface {
 	GetHandleWithTuple(nw Network, tuple model.Tuple) ReteHandle
 	GetOrCreateLockedHandle(nw Network, tuple model.Tuple) (ReteHandle, bool)
 	GetLockedHandle(nw Network, tuple model.Tuple) (handle ReteHandle, locked, dne bool)
+	GetAllHandles(nw Network) map[string]ReteHandle
 }
 
 type IdGen interface {

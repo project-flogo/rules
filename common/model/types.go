@@ -76,6 +76,8 @@ type RuleSession interface {
 
 	//SetStore
 	GetStore() TupleStore
+	//replay existing tuples into a rule
+	ReplayTuplesForRule(ruleName string) (err error)
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side

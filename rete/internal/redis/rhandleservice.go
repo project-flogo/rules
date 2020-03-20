@@ -4,9 +4,11 @@ import (
 	"context"
 	"math/rand"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/project-flogo/core/support/log"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/redisutils"
 	"github.com/project-flogo/rules/rete/common"
@@ -209,4 +211,26 @@ func (hc *handleServiceImpl) GetHandleWithTuple(nw types.Network, tuple model.Tu
 
 	h := newReteHandleImpl(nw, hc.RedisHdl, tuple, key, status, id)
 	return h
+}
+
+func (hc *handleServiceImpl) GetAllHandles(nw types.Network) map[string]types.ReteHandle {
+
+	allHandles := make(map[string]types.ReteHandle)
+
+	data, err := hc.GetKeys(hc.prefix + "*")
+	if err != nil {
+		log.RootLogger().Errorf("No keys found in redis: %s", err)
+		return allHandles
+	}
+
+	for _, v := range data {
+		tupleKey := strings.Replace(v, hc.prefix, "", 1)
+		tuple := nw.GetTupleStore().GetTupleByKey(model.FromStringKey(tupleKey))
+		if tuple != nil {
+			reteHandle := hc.GetHandleWithTuple(nw, tuple)
+			allHandles[tupleKey] = reteHandle
+		}
+	}
+
+	return allHandles
 }

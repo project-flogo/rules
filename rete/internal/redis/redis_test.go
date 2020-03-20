@@ -146,6 +146,10 @@ func (n *testNetwork) GetTupleStore() model.TupleStore {
 	return nil
 }
 
+func (n *testNetwork) ReplayTuplesForRule(ruleName string, rs model.RuleSession) (err error) {
+	return nil
+}
+
 func TestLockServiceImpl(t *testing.T) {
 	fini := make(chan bool, 1)
 	go func() {
