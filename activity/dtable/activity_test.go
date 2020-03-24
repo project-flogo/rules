@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/project-flogo/core/data/mapper"
+	dtableRuleApi "github.com/project-flogo/rules/ruleapi/dtable"
 )
 
 const tupleDescriptor = `[
@@ -168,20 +169,20 @@ func TestCellCompileExpr(t *testing.T) {
 	assert.NotNil(t, tupleDesc)
 	propDesc := tupleDesc.GetProperty(propName)
 	assert.NotNil(t, propDesc)
-	cell := &genCell{
-		metaCell: &metaCell{
-			colType:   ctCondition,
-			tupleDesc: tupleDesc,
-			propDesc:  propDesc,
+	cell := &dtableRuleApi.GenCell{
+		MetaCell: &dtableRuleApi.MetaCell{
+			ColType:   dtableRuleApi.CtCondition,
+			TupleDesc: tupleDesc,
+			PropDesc:  propDesc,
 		},
 	}
 
 	// run test cases
 	for k, v := range testcases {
 		t.Log(k, v)
-		cell.rawValue = k
-		cell.compileExpr()
-		assert.Equal(t, v, cell.cdExpr)
+		cell.RawValue = k
+		cell.CompileExpr()
+		assert.Equal(t, v, cell.CdExpr)
 	}
 }
 
