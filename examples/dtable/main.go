@@ -40,7 +40,8 @@ func example(redis bool) error {
 	if err != nil {
 		return err
 	}
-	dtableVar, err := dtableapi.FromFile("dtable-file.xlsx")
+
+	dtableVar, err = dtableapi.FromFile("dtable-file.xlsx")
 	if err != nil {
 		return err
 	}
