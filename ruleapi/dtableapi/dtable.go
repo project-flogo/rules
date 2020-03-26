@@ -1,4 +1,4 @@
-package dtable
+package dtableapi
 
 import (
 	"context"
@@ -25,11 +25,18 @@ const (
 	CtPriority                     // priority
 )
 
-type DTable struct {
+type dTable struct {
 	titleRow1 []GenCell
 	titleRow2 []GenCell
 	metaRow   []MetaCell
 	rows      [][]*GenCell
+}
+
+// DecisionTable interface
+type DecisionTable interface {
+	Apply(ctx context.Context, tuples map[model.TupleType]model.Tuple)
+	Compile() error
+	Print()
 }
 
 type MetaCell struct {
@@ -60,8 +67,8 @@ func (cell *GenCell) CompileExpr() {
 	cell.CdExpr = expression.Evaluate(lhsToken)
 }
 
-// LoadFromFile returns dtable
-func LoadFromFile(fileName string) (*DTable, error) {
+// FromFile returns dtable
+func FromFile(fileName string) (DecisionTable, error) {
 	if fileName == "" {
 		return nil, fmt.Errorf("file name can't be empty")
 	}
@@ -78,7 +85,7 @@ func LoadFromFile(fileName string) (*DTable, error) {
 }
 
 // loadFromCSVFile loads decision table from CSV file
-func loadFromCSVFile(fileName string) (*DTable, error) {
+func loadFromCSVFile(fileName string) (DecisionTable, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("not able open the file [%s] - %s", fileName, err)
@@ -90,7 +97,7 @@ func loadFromCSVFile(fileName string) (*DTable, error) {
 		return nil, fmt.Errorf("not able read the file [%s] - %s", fileName, err)
 	}
 
-	dtable := &DTable{}
+	dtable := &dTable{}
 	dtable.rows = make([][]*GenCell, len(lines)-2)
 	for i, line := range lines {
 		if i == 0 {
@@ -122,7 +129,7 @@ func loadFromCSVFile(fileName string) (*DTable, error) {
 }
 
 // loadFromXLSFile loads decision table from Excel file
-func loadFromXLSFile(fileName string) (*DTable, error) {
+func loadFromXLSFile(fileName string) (DecisionTable, error) {
 	file, err := excelize.OpenFile(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("not able open the file [%s] - %s", fileName, err)
@@ -143,7 +150,7 @@ func loadFromXLSFile(fileName string) (*DTable, error) {
 	}
 	titleRowSize := len(rows[titleRowIndex])
 
-	dtable := &DTable{
+	dtable := &dTable{
 		titleRow1: make([]GenCell, titleRowSize),
 		titleRow2: make([]GenCell, titleRowSize),
 		rows:      make([][]*GenCell, 1),
@@ -173,7 +180,7 @@ func loadFromXLSFile(fileName string) (*DTable, error) {
 	return dtable, nil
 }
 
-func (dtable *DTable) Compile() error {
+func (dtable *dTable) Compile() error {
 	// compute meta row from titleRow1 & titleRow2
 	metaRow := make([]MetaCell, len(dtable.titleRow1))
 	dtable.metaRow = metaRow
@@ -230,7 +237,7 @@ func (dtable *DTable) Compile() error {
 	return nil
 }
 
-func (dtable *DTable) Apply(ctx context.Context, tuples map[model.TupleType]model.Tuple) {
+func (dtable *dTable) Apply(ctx context.Context, tuples map[model.TupleType]model.Tuple) {
 	// process all rows
 	for _, row := range dtable.rows {
 		// process row conditions
@@ -262,7 +269,7 @@ func (dtable *DTable) Apply(ctx context.Context, tuples map[model.TupleType]mode
 }
 
 // print prints decision table into stdout - TO BE REMOVED
-func (dtable *DTable) Print() {
+func (dtable *dTable) Print() {
 	// title
 	for _, v := range dtable.titleRow1 {
 		fmt.Printf("|  %v  |", v.RawValue)

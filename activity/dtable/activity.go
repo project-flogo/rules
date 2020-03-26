@@ -6,7 +6,7 @@ import (
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data/metadata"
 	"github.com/project-flogo/rules/common/model"
-	"github.com/project-flogo/rules/ruleapi/dtable"
+	"github.com/project-flogo/rules/ruleapi/dtableapi"
 )
 
 func init() {
@@ -15,7 +15,7 @@ func init() {
 
 // Activity decision table based rule action
 type Activity struct {
-	dtable *dtable.DTable
+	dtable dtableapi.DecisionTable
 }
 
 // New creates new decision table activity
@@ -28,7 +28,7 @@ func New(ctx activity.InitContext) (activity.Activity, error) {
 	}
 
 	// Read decision table from file
-	dtable, err := dtable.LoadFromFile(settings.DTableFile)
+	dtable, err := dtableapi.FromFile(settings.DTableFile)
 	if err != nil {
 		return nil, err
 	}

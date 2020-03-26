@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/project-flogo/core/data/mapper"
-	dtableRuleApi "github.com/project-flogo/rules/ruleapi/dtable"
+	dtableRuleApi "github.com/project-flogo/rules/ruleapi/dtableapi"
 )
 
 const tupleDescriptor = `[

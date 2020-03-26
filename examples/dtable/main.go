@@ -8,7 +8,7 @@ import (
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
-	"github.com/project-flogo/rules/ruleapi/dtable"
+	"github.com/project-flogo/rules/ruleapi/dtableapi"
 )
 
 func main() {
@@ -18,7 +18,7 @@ func main() {
 	}
 }
 
-var dtableVar *dtable.DTable
+var dtableVar dtableapi.DecisionTable
 
 func example(redis bool) error {
 	//Load the tuple descriptor file (relative to GOPATH)
@@ -40,17 +40,15 @@ func example(redis bool) error {
 	if err != nil {
 		return err
 	}
-	dtable, err := dtable.LoadFromFile("dtable-file.xlsx")
+	dtableVar, err := dtableapi.FromFile("dtable-file.xlsx")
 	if err != nil {
 		return err
 	}
 
-	err = dtable.Compile()
+	err = dtableVar.Compile()
 	if err != nil {
 		return err
 	}
-
-	dtableVar = dtable
 
 	// // student care information rule
 	// rule1 := ruleapi.NewRule("studentcare")

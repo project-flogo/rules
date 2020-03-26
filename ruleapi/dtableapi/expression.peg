@@ -1,4 +1,4 @@
-package dtable
+package dtableapi
 
 type Expr Peg {
  Expression
