@@ -68,13 +68,13 @@ func example(redis bool) error {
 		return err
 	}
 
-	stngs := make(map[string]interface{})
-	stngs["filename"] = "dtable-file.xlsx"
+	settings := make(map[string]interface{})
+	settings["filename"] = "dtable-file.xlsx"
 
 	dtableService := &config.ServiceDescriptor{
 		Name:     "dtableservice",
 		Type:     "rulefunction",
-		Settings: stngs,
+		Settings: settings,
 	}
 	aService2, err := ruleapi.NewActionService(dtableService)
 	if err != nil {
