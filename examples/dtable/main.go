@@ -8,7 +8,6 @@ import (
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
 	"github.com/project-flogo/rules/ruleapi"
-	"github.com/project-flogo/rules/ruleapi/dtableapi"
 )
 
 func main() {
@@ -17,8 +16,6 @@ func main() {
 		panic(err)
 	}
 }
-
-var dtableVar dtableapi.DecisionTable
 
 func example(redis bool) error {
 	//Load the tuple descriptor file (relative to GOPATH)
@@ -41,38 +38,28 @@ func example(redis bool) error {
 		return err
 	}
 
-	dtableVar, err = dtableapi.FromFile("dtable-file.xlsx")
+	// student care information rule
+	rule1 := ruleapi.NewRule("studentcare")
+	err = rule1.AddExprCondition("c2", "$.student.careRequired", nil)
 	if err != nil {
 		return err
 	}
-
-	err = dtableVar.Compile()
+	printService := &config.ServiceDescriptor{
+		Name:     "printstudentinfo",
+		Function: printStudentInfo,
+		Type:     "function",
+	}
+	aService1, err := ruleapi.NewActionService(printService)
 	if err != nil {
 		return err
 	}
+	rule1.SetActionService(aService1)
+	rule1.SetPriority(2)
 
-	// // student care information rule
-	// rule1 := ruleapi.NewRule("studentcare")
-	// err = rule1.AddCondition("c1", []string{"student.careRequired"}, checkstudentcoments, nil)
-	// if err != nil {
-	// 	return err
-	// }
-	// printService := &config.ServiceDescriptor{
-	// 	Name:     "printstudentinfo",
-	// 	Function: printStudentInfo,
-	// 	Type:     "function",
-	// }
-	// aService1, err := ruleapi.NewActionService(printService)
-	// if err != nil {
-	// 	return err
-	// }
-	// rule1.SetActionService(aService1)
-	// rule1.SetPriority(2)
-
-	// err = rs.AddRule(rule1)
-	// if err != nil {
-	// 	return err
-	// }
+	err = rs.AddRule(rule1)
+	if err != nil {
+		return err
+	}
 
 	// student analysis rule
 	rule2 := ruleapi.NewRule("studentanalysis")
@@ -80,10 +67,14 @@ func example(redis bool) error {
 	if err != nil {
 		return err
 	}
+
+	stngs := make(map[string]interface{})
+	stngs["filename"] = "dtable-file.xlsx"
+
 	dtableService := &config.ServiceDescriptor{
 		Name:     "dtableservice",
-		Function: dtableServiceFn,
-		Type:     "function",
+		Type:     "rulefunction",
+		Settings: stngs,
 	}
 	aService2, err := ruleapi.NewActionService(dtableService)
 	if err != nil {
@@ -173,12 +164,7 @@ func txHandler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 
 }
 
-// func printStudentInfo(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-// 	student := tuples["student"]
-// 	fmt.Println("Student Info: ", student.ToMap())
-// }
-
-func dtableServiceFn(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	dtableVar.Apply(context.TODO(), tuples)
-	fmt.Println("Student Info: ", tuples["student"].ToMap())
+func printStudentInfo(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+	student := tuples["student"].ToMap()
+	fmt.Println("Student Name: ", student["name"], " Comments: ", student["comments"])
 }

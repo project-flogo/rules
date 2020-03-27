@@ -1,4 +1,4 @@
-package dtableapi
+package ruleapi
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 	excelize "github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/rules/common/model"
-	"github.com/project-flogo/rules/ruleapi"
 )
 
 // Decision table column types
@@ -292,7 +291,7 @@ func (dtable *dTable) Print() {
 
 // evaluateExpression evaluates expr into boolean value in tuples scope
 func evaluateExpression(expr string, tuples map[model.TupleType]model.Tuple) bool {
-	condExpr := ruleapi.NewExprCondition(expr)
+	condExpr := NewExprCondition(expr)
 	result, err := condExpr.Evaluate("", "", tuples, "")
 	if err != nil {
 		return false

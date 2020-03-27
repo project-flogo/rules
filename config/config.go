@@ -17,6 +17,8 @@ const (
 	TypeServiceActivity = "activity"
 	// TypeServiceAction action based rule service
 	TypeServiceAction = "action"
+	// TypeRuleFunction decision table based rule service
+	TypeRuleFunction = "rulefunction"
 )
 
 // RuleSessionDescriptor is a collection of rules to be loaded

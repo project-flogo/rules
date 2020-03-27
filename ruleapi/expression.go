@@ -1,4 +1,4 @@
-package dtableapi
+package ruleapi
 
 // Type is a type of byte code
 type Type uint8
