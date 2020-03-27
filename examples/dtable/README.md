@@ -1,17 +1,14 @@
 # Decision Table Usage
 
-This example demonstrates usage decision table with student analysis example.
+This example demonstrates usage of decision table api model with student analysis example.
+
+The following rules are used in the example:
+* `studentcare`: Gets fired when `student.careRequired` is true and invokes the `printstudentinfo` function. This function prints the Student name and comments. 
+* `studentanalysis`: Gets fired when `studentanalysis.name` and `student.name` are same. It invokes  `dtableservice` which analyses the student and updates the `student.careRequired` and `student.comments` accordingly. 
 
 ### Pre-requisites
 * Go 1.11
 * The **GOPATH** environment variable on your system must be set properly
-
-## Setup and Usage
-
-The following rules are used in the example:
-
-* `studentcare`: Gets fired when `student.careRequired` is true and invokes the `printstudentinfo` function. This function prints the Student name and comments. 
-* `studentanalysis`: Gets fired when `studentanalysis.name` and `student.name` are same. It invokes  `dtableservice` which analyses the student and updates the `student.careRequired` and `student.comments` accordingly. 
 
 ### Steps
 
