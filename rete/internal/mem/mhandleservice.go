@@ -53,7 +53,11 @@ func (hc *handleServiceImpl) GetHandle(ctx context.Context, tuple model.Tuple) t
 func (hc *handleServiceImpl) GetHandleByKey(ctx context.Context, key model.TupleKey) types.ReteHandle {
 	hc.RLock()
 	defer hc.RUnlock()
-	return hc.allHandles[key.String()]
+	reteHndl, ok := hc.allHandles[key.String()]
+	if ok {
+		return reteHndl
+	}
+	return nil
 }
 
 func (hc *handleServiceImpl) GetOrCreateLockedHandle(nw types.Network, tuple model.Tuple) (types.ReteHandle, bool) {
@@ -66,7 +70,6 @@ func (hc *handleServiceImpl) GetOrCreateLockedHandle(nw types.Network, tuple mod
 		hc.allHandles[tuple.GetKey().String()] = h
 		return h, false
 	}
-
 	if atomic.CompareAndSwapInt64(&h.id, -1, id) {
 		return h, false
 	}
@@ -95,7 +98,7 @@ func (hc *handleServiceImpl) GetHandleWithTuple(nw types.Network, tuple model.Tu
 	defer hc.Unlock()
 	h, found := hc.allHandles[tuple.GetKey().String()]
 	if !found {
-		h = newReteHandleImpl(nw, tuple, types.ReteHandleStatusCreating, 0)
+		h = newReteHandleImpl(nw, tuple, types.ReteHandleStatusCreating, int64(-1))
 
 		hc.allHandles[tuple.GetKey().String()] = h //[tuple.GetKey().String()] = h
 	}
