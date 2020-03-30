@@ -28,7 +28,7 @@ func New(ctx activity.InitContext) (activity.Activity, error) {
 	}
 
 	// Read decision table from file
-	dtable, err := ruleapi.FromFile(settings.DTableFile)
+	dtable, err := ruleapi.LoadDecisionTableFromFile(settings.DTableFile)
 	if err != nil {
 		return nil, err
 	}

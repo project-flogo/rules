@@ -73,7 +73,7 @@ func example(redis bool) error {
 
 	dtableService := &config.ServiceDescriptor{
 		Name:     "dtableservice",
-		Type:     "rulefunction",
+		Type:     "decisiontable",
 		Settings: settings,
 	}
 	aService2, err := ruleapi.NewActionService(dtableService)

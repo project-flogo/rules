@@ -98,11 +98,11 @@ func NewActionService(serviceCfg *config.ServiceDescriptor) (model.ActionService
 			return nil, fmt.Errorf("not able create action - %s", err)
 		}
 
-	case config.TypeRuleFunction:
+	case config.TypeDecisionTable:
 		fileName := serviceCfg.Settings["filename"].(string)
 		if len(fileName) != 0 {
 			var err error
-			raService.DTable, err = FromFile(fileName)
+			raService.DTable, err = LoadDecisionTableFromFile(fileName)
 			if err != nil {
 				return nil, fmt.Errorf("Unable to load Decison Table - %s", err)
 			}
@@ -202,7 +202,7 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 			return true, nil
 		}
 
-	case config.TypeRuleFunction:
+	case config.TypeDecisionTable:
 		err := raService.DTable.Compile()
 		if err != nil {
 			return false, fmt.Errorf("unable to compile decision table while running the action service[%s] - %s", raService.Name, err)

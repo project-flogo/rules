@@ -17,18 +17,18 @@ import (
 type dtColType int8
 
 const (
-	CtID          dtColType = iota // ID
-	CtCondition                    // condition
-	CtAction                       // action
-	CtDescription                  // Description
-	CtPriority                     // priority
+	ctID          dtColType = iota // ID
+	ctCondition                    // condition
+	ctAction                       // action
+	ctDescription                  // Description
+	ctPriority                     // priority
 )
 
 type dTable struct {
-	titleRow1 []GenCell
-	titleRow2 []GenCell
-	metaRow   []MetaCell
-	rows      [][]*GenCell
+	titleRow1 []genCell
+	titleRow2 []genCell
+	metaRow   []metaCell
+	rows      [][]*genCell
 }
 
 // DecisionTable interface
@@ -38,24 +38,24 @@ type DecisionTable interface {
 	Print()
 }
 
-type MetaCell struct {
+type metaCell struct {
 	ColType   dtColType
-	TupleDesc *model.TupleDescriptor
-	PropDesc  *model.TuplePropertyDescriptor
+	tupleDesc *model.TupleDescriptor
+	propDesc  *model.TuplePropertyDescriptor
 }
 
-type GenCell struct {
-	*MetaCell
-	RawValue string
-	CdExpr   string
+type genCell struct {
+	*metaCell
+	rawValue string
+	cdExpr   string
 }
 
-func (cell *GenCell) CompileExpr() {
-	rawValue := cell.RawValue
+func (cell *genCell) compileExpr() {
+	rawValue := cell.rawValue
 	if len(rawValue) == 0 {
 		return
 	}
-	lhsToken := fmt.Sprintf("$.%s.%s", cell.TupleDesc.Name, cell.PropDesc.Name)
+	lhsToken := fmt.Sprintf("$.%s.%s", cell.tupleDesc.Name, cell.propDesc.Name)
 	expression := &Expr{Buffer: rawValue}
 	expression.Init()
 	expression.Expression.Init(rawValue)
@@ -63,11 +63,11 @@ func (cell *GenCell) CompileExpr() {
 		panic(err)
 	}
 	expression.Execute()
-	cell.CdExpr = expression.Evaluate(lhsToken)
+	cell.cdExpr = expression.Evaluate(lhsToken)
 }
 
-// FromFile returns dtable
-func FromFile(fileName string) (DecisionTable, error) {
+// LoadDecisionTableFromFile returns dtable from file
+func LoadDecisionTableFromFile(fileName string) (DecisionTable, error) {
 	if fileName == "" {
 		return nil, fmt.Errorf("file name can't be empty")
 	}
@@ -97,29 +97,29 @@ func loadFromCSVFile(fileName string) (DecisionTable, error) {
 	}
 
 	dtable := &dTable{}
-	dtable.rows = make([][]*GenCell, len(lines)-2)
+	dtable.rows = make([][]*genCell, len(lines)-2)
 	for i, line := range lines {
 		if i == 0 {
 			// title row 1
-			dtable.titleRow1 = make([]GenCell, len(line))
+			dtable.titleRow1 = make([]genCell, len(line))
 			for j, val := range line {
-				dtable.titleRow1[j].RawValue = val
+				dtable.titleRow1[j].rawValue = val
 			}
 			continue
 		}
 		if i == 1 {
 			// title row 2
-			dtable.titleRow2 = make([]GenCell, len(line))
+			dtable.titleRow2 = make([]genCell, len(line))
 			for j, val := range line {
-				dtable.titleRow2[j].RawValue = val
+				dtable.titleRow2[j].rawValue = val
 			}
 			continue
 		}
 		// other rows
-		row := make([]*GenCell, len(line))
+		row := make([]*genCell, len(line))
 		for j, val := range line {
-			row[j] = &GenCell{
-				RawValue: val,
+			row[j] = &genCell{
+				rawValue: val,
 			}
 		}
 		dtable.rows[i-2] = row
@@ -150,27 +150,27 @@ func loadFromXLSFile(fileName string) (DecisionTable, error) {
 	titleRowSize := len(rows[titleRowIndex])
 
 	dtable := &dTable{
-		titleRow1: make([]GenCell, titleRowSize),
-		titleRow2: make([]GenCell, titleRowSize),
-		rows:      make([][]*GenCell, 1),
+		titleRow1: make([]genCell, titleRowSize),
+		titleRow2: make([]genCell, titleRowSize),
+		rows:      make([][]*genCell, 1),
 	}
 	// title row 1
 	for i, val := range rows[titleRowIndex] {
-		dtable.titleRow1[i].RawValue = val
+		dtable.titleRow1[i].rawValue = val
 	}
 	// title row 2
 	for i, val := range rows[titleRowIndex+1] {
-		dtable.titleRow2[i].RawValue = val
+		dtable.titleRow2[i].rawValue = val
 	}
 	// other rows
 	for _, r := range rows[titleRowIndex+2:] {
 		if len(r) == 0 {
 			break
 		}
-		dtrow := make([]*GenCell, titleRowSize)
+		dtrow := make([]*genCell, titleRowSize)
 		for i, cell := range r {
-			dtrow[i] = &GenCell{
-				RawValue: cell,
+			dtrow[i] = &genCell{
+				rawValue: cell,
 			}
 		}
 		dtable.rows = append(dtable.rows, dtrow)
@@ -181,32 +181,32 @@ func loadFromXLSFile(fileName string) (DecisionTable, error) {
 
 func (dtable *dTable) Compile() error {
 	// compute meta row from titleRow1 & titleRow2
-	metaRow := make([]MetaCell, len(dtable.titleRow1))
+	metaRow := make([]metaCell, len(dtable.titleRow1))
 	dtable.metaRow = metaRow
 	// titleRow1 determines column type
 	for colIndex, cell := range dtable.titleRow1 {
-		if strings.Contains(cell.RawValue, "Id") {
-			metaRow[colIndex].ColType = CtID
-		} else if strings.Contains(cell.RawValue, "Condition") {
-			metaRow[colIndex].ColType = CtCondition
-		} else if strings.Contains(cell.RawValue, "Action") {
-			metaRow[colIndex].ColType = CtAction
-		} else if strings.Contains(cell.RawValue, "Description") {
-			metaRow[colIndex].ColType = CtDescription
-		} else if strings.Contains(cell.RawValue, "Priority") {
-			metaRow[colIndex].ColType = CtPriority
+		if strings.Contains(cell.rawValue, "Id") {
+			metaRow[colIndex].ColType = ctID
+		} else if strings.Contains(cell.rawValue, "Condition") {
+			metaRow[colIndex].ColType = ctCondition
+		} else if strings.Contains(cell.rawValue, "Action") {
+			metaRow[colIndex].ColType = ctAction
+		} else if strings.Contains(cell.rawValue, "Description") {
+			metaRow[colIndex].ColType = ctDescription
+		} else if strings.Contains(cell.rawValue, "Priority") {
+			metaRow[colIndex].ColType = ctPriority
 		} else {
-			return fmt.Errorf("unknown column type - %s", cell.RawValue)
+			return fmt.Errorf("unknown column type - %s", cell.rawValue)
 		}
 	}
 	// titleRow2 determines tuple type & property
 	for colIndex, cell := range dtable.titleRow2 {
-		if cell.RawValue == "" {
+		if cell.rawValue == "" {
 			continue
 		}
-		tokens := strings.Split(cell.RawValue, ".")
+		tokens := strings.Split(cell.rawValue, ".")
 		if len(tokens) != 2 {
-			return fmt.Errorf("[%s] is not a valid tuple property representation", cell.RawValue)
+			return fmt.Errorf("[%s] is not a valid tuple property representation", cell.rawValue)
 		}
 		tupleType := tokens[0]
 		propName := tokens[1]
@@ -218,8 +218,8 @@ func (dtable *dTable) Compile() error {
 		if propDesc == nil {
 			return fmt.Errorf("property[%s] is not a valid property for the tuple type[%s]", propName, tupleType)
 		}
-		metaRow[colIndex].TupleDesc = tupleDesc
-		metaRow[colIndex].PropDesc = propDesc
+		metaRow[colIndex].tupleDesc = tupleDesc
+		metaRow[colIndex].propDesc = propDesc
 	}
 	// process all rows
 	for _, row := range dtable.rows {
@@ -227,9 +227,9 @@ func (dtable *dTable) Compile() error {
 			if cell == nil {
 				continue
 			}
-			cell.MetaCell = &metaRow[colIndex]
-			if cell.ColType == CtCondition {
-				cell.CompileExpr()
+			cell.metaCell = &metaRow[colIndex]
+			if cell.ColType == ctCondition {
+				cell.compileExpr()
 			}
 		}
 	}
@@ -245,8 +245,8 @@ func (dtable *dTable) Apply(ctx context.Context, tuples map[model.TupleType]mode
 			if cell == nil {
 				continue
 			}
-			if cell.ColType == CtCondition {
-				cellTruthiness := evaluateExpression(cell.CdExpr, tuples)
+			if cell.ColType == ctCondition {
+				cellTruthiness := evaluateExpression(cell.cdExpr, tuples)
 				rowTruthiness = rowTruthiness && cellTruthiness
 				if !rowTruthiness {
 					break
@@ -259,8 +259,8 @@ func (dtable *dTable) Apply(ctx context.Context, tuples map[model.TupleType]mode
 				if cell == nil {
 					continue
 				}
-				if cell.ColType == CtAction {
-					updateTuple(ctx, tuples, cell.TupleDesc.Name, cell.PropDesc.Name, cell.RawValue)
+				if cell.ColType == ctAction {
+					updateTuple(ctx, tuples, cell.tupleDesc.Name, cell.propDesc.Name, cell.rawValue)
 				}
 			}
 		}
@@ -271,18 +271,18 @@ func (dtable *dTable) Apply(ctx context.Context, tuples map[model.TupleType]mode
 func (dtable *dTable) Print() {
 	// title
 	for _, v := range dtable.titleRow1 {
-		fmt.Printf("|  %v  |", v.RawValue)
+		fmt.Printf("|  %v  |", v.rawValue)
 	}
 	fmt.Println()
 	// meta title
 	for _, v := range dtable.titleRow2 {
-		fmt.Printf("|  %v  |", v.RawValue)
+		fmt.Printf("|  %v  |", v.rawValue)
 	}
 	fmt.Println()
 	// data
 	for _, row := range dtable.rows {
 		for _, rv := range row {
-			// fmt.Printf("|  %v--%v  |", rv.cdExpr, rv.MetaCell)
+			// fmt.Printf("|  %v--%v  |", rv.cdExpr, rv.metaCell)
 			fmt.Print(rv)
 		}
 		fmt.Println()
