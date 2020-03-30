@@ -25,7 +25,7 @@ var (
 
 func example(redis bool) error {
 	//Load the tuple descriptor file (relative to GOPATH)
-	tupleDescAbsFileNm := common.GetPathForResource("examples/trackNtrace/rulesapp.json", "./rulesapp.json")
+	tupleDescAbsFileNm := common.GetPathForResource("examples/statemachine/rulesapp.json", "./rulesapp.json")
 	tupleDescriptor := common.FileToString(tupleDescAbsFileNm)
 	currentEventType = "none"
 	//First register the tuple descriptors
