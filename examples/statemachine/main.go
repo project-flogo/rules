@@ -45,7 +45,8 @@ func example(redis bool) error {
 	}
 
 	events := make(map[string]int, 8)
-	//// check for name "Bob" in n1
+
+	//// check if the packaage is in sitting state
 	rule := ruleapi.NewRule("cPackageInSittingRule")
 	err = rule.AddCondition("c1", []string{"package.state"}, cPackageInSitting, events)
 	if err != nil {
@@ -68,8 +69,7 @@ func example(redis bool) error {
 		return err
 	}
 
-	// check for name "Bob" in n1, match the "name" field in n2,
-	// in effect, fire the rule when name field in both tuples is "Bob"
+	//// check if the packaage is in Delayed state
 	rule2 := ruleapi.NewRule("packageInDelayedRule")
 	err = rule2.AddCondition("c1", []string{"package.state"}, cPackageInDelayed, events)
 	if err != nil {
@@ -92,7 +92,7 @@ func example(redis bool) error {
 		return err
 	}
 
-	// check for name in n1, match the env variable "name"
+	//// check if the packaage is in moving state
 	rule3 := ruleapi.NewRule("packageInMovingRule")
 	err = rule3.AddCondition("c1", []string{"package.state"}, cPackageInMoving, events)
 	if err != nil {
@@ -115,7 +115,7 @@ func example(redis bool) error {
 		return err
 	}
 
-	// check for name in n1, match the env variable "name"
+	//// check if the packaage is in Dropped state
 	rule4 := ruleapi.NewRule("packageInDroppedRule")
 	err = rule4.AddCondition("c1", []string{"package.state"}, cPackageInDropped, events)
 	if err != nil {
@@ -138,7 +138,7 @@ func example(redis bool) error {
 		return err
 	}
 
-	// check for name in n1, match the env variable "name"
+	//// check if the packaage is in normal state and print
 	rule5 := ruleapi.NewRule("printPackageRule")
 	err = rule5.AddCondition("c1", []string{"package"}, cPackageEvent, events)
 	if err != nil {
@@ -161,7 +161,7 @@ func example(redis bool) error {
 		return err
 	}
 
-	// check for name in n1, match the env variable "name"
+	// check for moveevent
 	rule6 := ruleapi.NewRule("printMoveEventRule")
 	err = rule6.AddCondition("c1", []string{"moveevent"}, cMoveEvent, events)
 	if err != nil {
@@ -184,7 +184,7 @@ func example(redis bool) error {
 		return err
 	}
 
-	// check for name in n1, match the env variable "name"
+	// check if the package exists for received moveevent and join it with the package
 	rule7 := ruleapi.NewRule("joinMoveEventAndPackageEventRule")
 	err = rule7.AddCondition("c1", []string{"moveevent", "package"}, cMoveEventPkg, events)
 	if err != nil {
@@ -207,7 +207,7 @@ func example(redis bool) error {
 		return err
 	}
 
-	// check for name in n1, match the env variable "name"
+	// check for movetimeoutevent for package
 	rule8 := ruleapi.NewRule("aMoveTimeoutEventRule")
 	err = rule8.AddCondition("c1", []string{"movetimeoutevent"}, cMoveTimeoutEvent, events)
 	if err != nil {
@@ -230,6 +230,7 @@ func example(redis bool) error {
 		return err
 	}
 
+	//Join movetimeoutevent and package
 	rule9 := ruleapi.NewRule("joinMoveTimeoutEventAndPackage")
 	err = rule9.AddCondition("c1", []string{"movetimeoutevent", "package"}, cMoveTimeoutEventPkg, events)
 	if err != nil {
@@ -276,7 +277,6 @@ func example(redis bool) error {
 	finished := make(chan bool)
 	go sleepfunc(finished)
 
-	//Now assert a "PACKAGE2" tuple
 	t1, err := model.NewTupleWithKeyValues("moveevent", "PACKAGE2")
 	if err != nil {
 		return err

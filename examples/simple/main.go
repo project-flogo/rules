@@ -156,6 +156,7 @@ func example(redis bool) error {
 		return err
 	}
 
+	//Now assert a "n1" tuple
 	t4, err := model.NewTupleWithKeyValues("n1", "Smith")
 	if err != nil {
 		return err
@@ -214,7 +215,7 @@ func example(redis bool) error {
 
 func checkForBob(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
 	//This conditions filters on name="Bob"
-	fmt.Println("checkForBob")
+	//fmt.Println("checkForBob")
 	t1 := tuples["n1"]
 	if t1 == nil {
 		return false
@@ -233,7 +234,7 @@ func checkForBob(ruleName string, condName string, tuples map[model.TupleType]mo
 }
 
 func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	fmt.Println("checkForBobAction")
+	//fmt.Println("checkForBobAction")
 	t1 := tuples["n1"]
 	if t1 == nil {
 		return
@@ -245,13 +246,14 @@ func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName strin
 	if name == "" {
 		return
 	}
+	fmt.Println("Rule checkForBobAction is fired")
 	events := ruleCtx.(map[string]int)
 	count := events["checkForBobAction"]
 	events["checkForBobAction"] = count + 1
 }
 
 func checkSameNamesCondition(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-	fmt.Println("checkSameNamesCondition")
+	//fmt.Println("checkSameNamesCondition")
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]
 	if t1 == nil || t2 == nil {
@@ -278,7 +280,7 @@ func checkSameNamesCondition(ruleName string, condName string, tuples map[model.
 }
 
 func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	fmt.Println("checkSameNamesAction")
+	//fmt.Println("checkSameNamesAction")
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]
 	if t1 == nil || t2 == nil {
@@ -298,13 +300,14 @@ func checkSameNamesAction(ctx context.Context, rs model.RuleSession, ruleName st
 	if name2 == "" {
 		return
 	}
+	fmt.Println("Rule checkSameNamesAction is fired")
 	events := ruleCtx.(map[string]int)
 	count := events["checkSameNamesAction"]
 	events["checkSameNamesAction"] = count + 1
 }
 
 func checkSameEnvName(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-	fmt.Println("checkSameEnvName")
+	//fmt.Println("checkSameEnvName")
 	t1 := tuples["n1"]
 	if t1 == nil {
 		return false
@@ -324,7 +327,7 @@ func checkSameEnvName(ruleName string, condName string, tuples map[model.TupleTy
 }
 
 func checkSameEnvNameAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	fmt.Println("checkSameEnvNameAction")
+
 	t1 := tuples["n1"]
 	if t1 == nil {
 		return
@@ -336,6 +339,7 @@ func checkSameEnvNameAction(ctx context.Context, rs model.RuleSession, ruleName 
 	if name == "" {
 		return
 	}
+	fmt.Println("Rule checkSameEnvNameAction is fired")
 	events := ruleCtx.(map[string]int)
 	count := events["checkSameEnvNameAction"]
 	events["checkSameEnvNameAction"] = count + 1
