@@ -1,0 +1,54 @@
+[
+  {
+    "name": "package",
+    "properties": [
+      {
+        "name": "id",
+        "type": "string",
+        "pk-index": 0
+      },
+      {
+        "name": "state",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "name": "moveevent",
+    "ttl": 0,
+    "properties": [
+      {
+        "name": "id",
+        "type": "string",
+        "pk-index": 0
+      },
+      {
+        "name": "packageid",
+        "type": "string"
+      },
+      {
+        "name": "targetstate",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "name": "movetimeoutevent",
+    "ttl": 0,
+    "properties": [
+      {
+        "name": "id",
+        "type": "string",
+        "pk-index": 0
+      },
+      {
+        "name": "packageid",
+        "type": "string"
+      },
+      {
+        "name": "timeoutinmillis",
+        "type": "integer"
+      }
+    ]
+  }
+]

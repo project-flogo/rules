@@ -100,7 +100,7 @@ func testApplication(t *testing.T, e engine.Engine) {
 	result = ""
 }
 
-func TestTracknTraceJSON(t *testing.T) {
+func TestStateMachineJSON(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping Handler Routing JSON integration test in short mode")
 	}
