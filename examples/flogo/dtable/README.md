@@ -30,14 +30,14 @@ cd bin
 
 ```sh
 docker run -p 6381:6379 -d redis
-STORECONFIG=../../rsconfig.json ./dtable
+STORECONFIG=../../rsconfig.json ./decisiontable
 ```
 
 #### With keydb store
 
 ```sh
 docker run -p 6381:6379 -d eqalpha/keydb
-STORECONFIG=../../rsconfig.json ./dtable
+STORECONFIG=../../rsconfig.json ./decisiontable
 ```
 
 ### Testing

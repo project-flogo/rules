@@ -1,6 +1,6 @@
 # Invoke service when rule fires
 
-This example demonstrates how a rule can invoke rule `service`. A rule `service` is a `go function` or a `flogo action` or a `flogo activity`.
+This example demonstrates how a rule can invoke rule `service`. A rule `service` can be a `go function` or a `flogo action` or a `flogo activity`.
 
 ## Setup and build
 Once you have the `flogo.json` file and a `functions.go` file, you are ready to build your Flogo App

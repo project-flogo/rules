@@ -47,6 +47,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestRuleApp(t *testing.T) {
+	os.Setenv("name", "Smith")
 	err := example(redis)
 	assert.Nil(t, err)
 }

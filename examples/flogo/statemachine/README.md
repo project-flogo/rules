@@ -1,6 +1,6 @@
 ## Flogo Rules based State Machine
 
-This example demonstrates the capability of rules to to process package states using a flogo app. In this example three tuples are used, tuples description is given below.
+This example demonstrates the capability of rules to process package states using a flogo app. In this example three tuples are used, tuples description is given below.
 
 ```json
 {

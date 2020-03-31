@@ -25,7 +25,7 @@ Run the example:
 ```
 docker run -p 6383:6379 -d redis
 go get -u github.com/project-flogo/rules/...
-cd $GOPATH/src/github.com/project-flogo/rules/examples/simple
+cd $GOPATH/src/github.com/project-flogo/rules/examples/rulesapp
 export name=Smith
 go run main.go
 ```

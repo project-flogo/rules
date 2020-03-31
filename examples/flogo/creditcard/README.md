@@ -1,6 +1,6 @@
-# Decision Table Usage
+# Credit Card example
 
-This example demonstrates how to use decision table activity with credit card application example.
+This example demonstrates how to use decision table activity for credit card application example.
 
 ## Setup and build
 Once you have the `flogo.json` file, you are ready to build your Flogo App
