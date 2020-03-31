@@ -1,0 +1,39 @@
+[
+    {
+      "name": "student",
+      "properties": [
+        {
+          "name": "name",
+          "pk-index": 0,
+          "type": "string"
+        },
+        {
+          "name": "grade",
+          "type": "string"
+        },
+        {
+          "name": "class",
+          "type": "string"
+        },
+        {
+          "name": "careRequired",
+          "type": "bool"
+        },
+        {
+          "name": "comments",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "studentanalysis",
+      "ttl":0,
+      "properties": [
+        {
+          "name": "name",
+          "pk-index": 0,
+          "type": "string"
+        }
+      ]
+    }
+  ]

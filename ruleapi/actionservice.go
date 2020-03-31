@@ -24,6 +24,7 @@ type ruleActionService struct {
 	Function model.ActionFunction
 	Act      activity.Activity
 	Action   action.Action
+	DTable   DecisionTable
 	Input    map[string]interface{}
 }
 
@@ -95,6 +96,18 @@ func NewActionService(serviceCfg *config.ServiceDescriptor) (model.ActionService
 		raService.Action, err = actionFactory.New(actionCfg)
 		if err != nil {
 			return nil, fmt.Errorf("not able create action - %s", err)
+		}
+
+	case config.TypeDecisionTable:
+		fileName := serviceCfg.Settings["filename"].(string)
+		if len(fileName) != 0 {
+			var err error
+			raService.DTable, err = LoadDecisionTableFromFile(fileName)
+			if err != nil {
+				return nil, fmt.Errorf("Unable to load Decison Table - %s", err)
+			}
+		} else {
+			return nil, fmt.Errorf("Decision Table filename not specified")
 		}
 	}
 
@@ -188,6 +201,14 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 			}
 			return true, nil
 		}
+
+	case config.TypeDecisionTable:
+		err := raService.DTable.Compile()
+		if err != nil {
+			return false, fmt.Errorf("unable to compile decision table while running the action service[%s] - %s", raService.Name, err)
+		}
+		raService.DTable.Apply(ctx, tuples)
+		return true, nil
 	}
 
 	return false, fmt.Errorf("service not executed, something went wrong")
