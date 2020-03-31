@@ -24,7 +24,7 @@ const (
 	ctPriority                     // priority
 )
 
-type dTable struct {
+type decisionTableImpl struct {
 	titleRow1 []genCell
 	titleRow2 []genCell
 	metaRow   []metaCell
@@ -96,7 +96,7 @@ func loadFromCSVFile(fileName string) (DecisionTable, error) {
 		return nil, fmt.Errorf("not able read the file [%s] - %s", fileName, err)
 	}
 
-	dtable := &dTable{}
+	dtable := &decisionTableImpl{}
 	dtable.rows = make([][]*genCell, len(lines)-2)
 	for i, line := range lines {
 		if i == 0 {
@@ -149,7 +149,7 @@ func loadFromXLSFile(fileName string) (DecisionTable, error) {
 	}
 	titleRowSize := len(rows[titleRowIndex])
 
-	dtable := &dTable{
+	dtable := &decisionTableImpl{
 		titleRow1: make([]genCell, titleRowSize),
 		titleRow2: make([]genCell, titleRowSize),
 		rows:      make([][]*genCell, 1),
@@ -179,7 +179,7 @@ func loadFromXLSFile(fileName string) (DecisionTable, error) {
 	return dtable, nil
 }
 
-func (dtable *dTable) Compile() error {
+func (dtable *decisionTableImpl) Compile() error {
 	// compute meta row from titleRow1 & titleRow2
 	metaRow := make([]metaCell, len(dtable.titleRow1))
 	dtable.metaRow = metaRow
@@ -236,7 +236,7 @@ func (dtable *dTable) Compile() error {
 	return nil
 }
 
-func (dtable *dTable) Apply(ctx context.Context, tuples map[model.TupleType]model.Tuple) {
+func (dtable *decisionTableImpl) Apply(ctx context.Context, tuples map[model.TupleType]model.Tuple) {
 	// process all rows
 	for _, row := range dtable.rows {
 		// process row conditions
@@ -268,7 +268,7 @@ func (dtable *dTable) Apply(ctx context.Context, tuples map[model.TupleType]mode
 }
 
 // print prints decision table into stdout - TO BE REMOVED
-func (dtable *dTable) Print() {
+func (dtable *decisionTableImpl) Print() {
 	// title
 	for _, v := range dtable.titleRow1 {
 		fmt.Printf("|  %v  |", v.rawValue)
