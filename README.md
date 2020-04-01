@@ -65,48 +65,111 @@ First we start off with loading the `TupleDescriptor`. It accepts a JSON string 
 Next create a `RuleSession` and add all the `Rule`s with their `Condition`s and `Actions`s.
 
 	//Create a RuleSession
-	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
+	rs, err := ruleapi.GetOrCreateRuleSession("asession", store)
+	if err != nil {
+		return err
+	}
 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")
-	rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
-	rule.SetAction(checkForBobAction)
-	rule.SetContext("This is a test of context")
-	rs.AddRule(rule)
-	fmt.Printf("Rule added: [%s]\n", rule.GetName())
+	err = rule.AddCondition("c1", []string{"n1"}, checkForBob, events)
+	if err != nil {
+		return err
+	}
+	serviceCfg := &config.ServiceDescriptor{
+		Name:     "checkForBobAction",
+		Function: checkForBobAction,
+		Type:     "function",
+	}
+	aService, err := ruleapi.NewActionService(serviceCfg)
+	if err != nil {
+		return err
+	}
+	rule.SetActionService(aService)
+	rule.SetContext(events)
+	err = rs.AddRule(rule)
+	if err != nil {
+		return err
+	}
 
 	// check for name "Bob" in n1, match the "name" field in n2,
 	// in effect, fire the rule when name field in both tuples is "Bob"
 	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
-	rule2.AddCondition("c1", []string{"n1"}, checkForBob, nil)
-	rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, nil)
-	rule2.SetAction(checkSameNamesAction)
-	rs.AddRule(rule2)
-	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
-	
-	//Finally, start the rule session before asserting tuples
-	//Your startup function, if registered will be invoked here
-	rs.Start(nil)
+	err = rule2.AddCondition("c1", []string{"n1"}, checkForBob, events)
+	if err != nil {
+		return err
+	}
+	err = rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, events)
+	if err != nil {
+		return err
+	}
+	serviceCfg2 := &config.ServiceDescriptor{
+		Name:     "checkSameNamesAction",
+		Function: checkSameNamesAction,
+		Type:     "function",
+	}
+	aService2, err := ruleapi.NewActionService(serviceCfg2)
+	if err != nil {
+		return err
+	}
+	rule2.SetActionService(aService2)
+	rule2.SetContext(events)
+	err = rs.AddRule(rule2)
+	if err != nil {
+		return err
+	}
+
+	// check for name in n1, match the env variable "name"
+	rule3 := ruleapi.NewRule("n1.name == envname")
+	err = rule3.AddCondition("c1", []string{"n1"}, checkSameEnvName, events)
+	if err != nil {
+		return err
+	}
+	serviceCfg3 := &config.ServiceDescriptor{
+		Name:     "checkSameEnvNameAction",
+		Function: checkSameEnvNameAction,
+		Type:     "function",
+	}
+	aService3, err := ruleapi.NewActionService(serviceCfg3)
+	if err != nil {
+		return err
+	}
+	rule3.SetActionService(aService3)
+	rule3.SetContext(events)
+	err = rs.AddRule(rule3)
+	if err != nil {
+		return err
+	}
+
+	//set a transaction handler
+	rs.RegisterRtcTransactionHandler(txHandler, nil)
+	//Start the rule session
+	err = rs.Start(nil)
+	if err != nil {
+		return err
+	}
 
 Here we create and assert the actual `Tuple's` which will be evaluated against the `Rule's` `Condition's` defined above.
 
 	//Now assert a "n1" tuple
-	fmt.Println("Asserting n1 tuple with name=Tom")
 	t1, _ := model.NewTupleWithKeyValues("n1", "Tom")
 	t1.SetString(nil, "name", "Tom")
 	rs.Assert(nil, t1)
 
 	//Now assert a "n1" tuple
-	fmt.Println("Asserting n1 tuple with name=Bob")
 	t2, _ := model.NewTupleWithKeyValues("n1", "Bob")
 	t2.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t2)
 
 	//Now assert a "n2" tuple
-	fmt.Println("Asserting n2 tuple with name=Bob")
 	t3, _ := model.NewTupleWithKeyValues("n2", "Bob")
 	t3.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t3)
+
+	//Now assert a "n1" tuple
+	t4, _ := model.NewTupleWithKeyValues("n1", "Smith")
+	t4.SetString(nil, "name", "Smith")
+	rs.Assert(nil, t4)
 
 Finally, once all `Rule` `Condition's` are evaluated and `Action's` are executed, we can `Retract` all the `Tuple's` from the `RuleSession` and unregister the RuleSession.
 
@@ -114,6 +177,7 @@ Finally, once all `Rule` `Condition's` are evaluated and `Action's` are executed
 	rs.Retract(nil, t1)
 	rs.Retract(nil, t2)
 	rs.Retract(nil, t3)
+	rs.Retract(nil, t4)
 
 	//delete the rule
 	rs.DeleteRule(rule.GetName())
