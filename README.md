@@ -145,6 +145,8 @@ Finally, once all `Rule` `Condition's` are evaluated and `Action's` are executed
 
 	//delete the rule
 	rs.DeleteRule(rule.GetName())
+	rs.DeleteRule(rule2.GetName())
+	rs.DeleteRule(rule3.GetName())
 
 	//unregister the session, i.e; cleanup
 	rs.Unregister()
