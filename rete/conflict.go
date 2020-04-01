@@ -5,19 +5,14 @@ import (
 	"context"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
-
-type conflictRes interface {
-	addAgendaItem(rule model.Rule, tupleMap map[model.TupleType]model.Tuple)
-	resolveConflict(ctx context.Context)
-	deleteAgendaFor(ctx context.Context, tuple model.Tuple, changeProps map[string]bool)
-}
 
 type conflictResImpl struct {
 	agendaList list.List
 }
 
-func newConflictRes() conflictRes {
+func newConflictRes() types.ConflictRes {
 	cr := conflictResImpl{}
 	cr.initCR()
 	return &cr
@@ -27,7 +22,7 @@ func (cr *conflictResImpl) initCR() {
 	cr.agendaList = list.List{}
 }
 
-func (cr *conflictResImpl) addAgendaItem(rule model.Rule, tupleMap map[model.TupleType]model.Tuple) {
+func (cr *conflictResImpl) AddAgendaItem(rule model.Rule, tupleMap map[model.TupleType]model.Tuple) {
 	item := newAgendaItem(rule, tupleMap)
 	v := rule.GetPriority()
 	found := false
@@ -44,7 +39,7 @@ func (cr *conflictResImpl) addAgendaItem(rule model.Rule, tupleMap map[model.Tup
 	}
 }
 
-func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
+func (cr *conflictResImpl) ResolveConflict(ctx context.Context) {
 	var item agendaItem
 
 	front := cr.agendaList.Front()
@@ -53,28 +48,29 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 		if val != nil {
 			item = val.(agendaItem)
 			actionTuples := item.getTuples()
-			actionFn := item.getRule().GetActionFn()
-			if actionFn != nil {
+			// execute rule action service
+			aService := item.getRule().GetActionService()
+			if aService != nil {
 				reteCtxV := getReteCtx(ctx)
-				actionFn(ctx, reteCtxV.getRuleSession(), item.getRule().GetName(), actionTuples, item.getRule().GetContext())
+				aService.Execute(ctx, reteCtxV.GetRuleSession(), item.getRule().GetName(), actionTuples, item.getRule().GetContext())
 			}
 		}
 
 		reteCtxV := getReteCtx(ctx)
 
-		reteCtxV.addRuleModifiedToOpsList()
+		reteCtxV.AddRuleModifiedToOpsList()
 
-		reteCtxV.copyRuleModifiedToRtcModified()
+		reteCtxV.CopyRuleModifiedToRtcModified()
 		//action scoped, clear it for the next action
-		reteCtxV.resetModified()
+		reteCtxV.ResetModified()
 
 		if reteCtxV != nil {
-			opsFront := reteCtxV.getOpsList().Front()
+			opsFront := reteCtxV.GetOpsList().Front()
 			for opsFront != nil {
-				opsVal := reteCtxV.getOpsList().Remove(opsFront)
+				opsVal := reteCtxV.GetOpsList().Remove(opsFront)
 				oprn := opsVal.(opsEntry)
 				oprn.execute(ctx)
-				opsFront = reteCtxV.getOpsList().Front()
+				opsFront = reteCtxV.GetOpsList().Front()
 			}
 		}
 
@@ -82,20 +78,20 @@ func (cr *conflictResImpl) resolveConflict(ctx context.Context) {
 	}
 
 	reteCtxV := getReteCtx(ctx)
-	reteCtxV.normalize()
+	reteCtxV.Normalize()
 	//reteCtxV.printRtcChangeList()
 
 }
 
-func (cr *conflictResImpl) deleteAgendaFor(ctx context.Context, modifiedTuple model.Tuple, changeProps map[string]bool) {
+func (cr *conflictResImpl) DeleteAgendaFor(ctx context.Context, modifiedTuple model.Tuple, changeProps map[string]bool) {
 
-	hdlModified := getOrCreateHandle(ctx, modifiedTuple)
+	hdlModified := getHandleWithTuple(ctx, modifiedTuple)
 
 	for e := cr.agendaList.Front(); e != nil; {
 		item := e.Value.(agendaItem)
 		next := e.Next()
 		for _, tuple := range item.getTuples() {
-			hdl := getOrCreateHandle(ctx, tuple)
+			hdl := getHandleWithTuple(ctx, tuple)
 			if hdl == hdlModified { //this agendaitem has the modified tuple, remove the agenda item!
 				toRemove := true
 				//check if the rule depends on this change prop

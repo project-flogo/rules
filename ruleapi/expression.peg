@@ -1,0 +1,38 @@
+package ruleapi
+
+type Expr Peg {
+ Expression
+}
+
+e <- sp e1 !.
+e1 <- e2 ( or e2 { p.AddOperator(TypeOr) } )*
+e2 <- e3 ( and e3 { p.AddOperator(TypeAnd) } )*
+e3 <- not e4 { p.AddOperator(TypeNot) }
+    / e4
+e4 <- eq e5 { p.AddOperator(TypeEq) }
+    / neq e5 { p.AddOperator(TypeNEq) }
+    / gte e5 { p.AddOperator(TypeGte) }
+    / gt e5 { p.AddOperator(TypeGt) }
+    / lte e5 { p.AddOperator(TypeLte) }
+    / lt e5 { p.AddOperator(TypeLt) }
+    / open e1 close
+    / e5 { p.AddOperator(TypeEq) }
+e5 <- < value > sp { p.AddLiteral(buffer[begin:end]) }
+value <- [0-9]+ [.] [0-9]*
+      / [.] [0-9]+
+      / ["] (!["] .)* ["]
+      / ['] (!['] .)* [']
+      / [a-zA-Z_0-9]+
+
+not <- '!' sp
+and <- '&&' sp
+or <- '||' sp
+eq <- '==' sp
+neq <- '!=' sp
+gt <- '>' sp
+gte <- '>=' sp
+lt <- '<' sp
+lte <- '<=' sp
+open <- '(' sp
+close <- ')' sp
+sp <- ( ' ' / '\t' )*

@@ -3,6 +3,8 @@ package model
 import (
 	"fmt"
 	"reflect"
+	"strings"
+
 	"github.com/project-flogo/core/data/coerce"
 )
 
@@ -69,24 +71,38 @@ func NewTupleKeyWithKeyValues(tupleType TupleType, values ...interface{}) (tuple
 	tk.td = *td
 	tk.keys = make(map[string]interface{})
 
-	if len(values) != len(td.GetKeyProps()) {
-		return nil, fmt.Errorf("Wrong number of key values in type [%s]. Expecting [%d], got [%d]",
-			td.Name, len(td.GetKeyProps()), len(values))
+	switch vt := values[0].(type) {
+	case map[string]interface{}:
+		if len(vt) != len(td.GetKeyProps()) {
+			return nil, fmt.Errorf("Wrong number of key values in type [%s]. Expecting [%d], got [%d]",
+				td.Name, len(td.GetKeyProps()), len(vt))
+		}
+	default:
+		if len(values) != len(td.GetKeyProps()) {
+			return nil, fmt.Errorf("Wrong number of key values in type [%s]. Expecting [%d], got [%d]",
+				td.Name, len(td.GetKeyProps()), len(values))
+		}
 	}
 
-	i := 0
-	for _, keyProp := range td.GetKeyProps() {
+	for i, keyProp := range td.GetKeyProps() {
 		tdp := td.GetProperty(keyProp)
 		val := values[i]
+
+		switch typ := val.(type) {
+		case map[string]interface{}:
+			val = typ[keyProp]
+		}
+
 		coerced, err := coerce.ToType(val, tdp.PropType)
+
 		if err == nil {
 			tk.keys[keyProp] = coerced
 		} else {
 			return nil, fmt.Errorf("Type mismatch for field [%s] in type [%s] Expecting [%s], got [%v]",
 				keyProp, td.Name, tdp.PropType.String(), reflect.TypeOf(val))
 		}
-		i++
 	}
+
 	tk.keyAsStr = tk.keysAsString()
 	return &tk, err
 }
@@ -117,4 +133,33 @@ func (tk *tupleKeyImpl) keysAsString() string {
 		}
 	}
 	return str
+}
+
+//TODO: Validations
+func FromStringKey(strTupleKey string) TupleKey {
+
+	keyComps := strings.Split(strTupleKey, ":")
+
+	tupleType := TupleType(keyComps[0])
+
+	key := ""
+
+	keyMap := make(map[string]interface{})
+
+	for i, v := range keyComps {
+		if i == 0 {
+			continue
+		} else if i%2 == 1 {
+			//this is a key
+			key = v
+		} else {
+			//this is a value
+			keyMap[key] = v
+		}
+	}
+
+	tupleKey, _ := NewTupleKeyWithKeyValues(tupleType, keyMap)
+
+	return tupleKey
+
 }

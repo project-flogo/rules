@@ -12,6 +12,8 @@ import (
 func init() {
 	config.RegisterActionFunction("checkForBobAction", checkForBobAction)
 	config.RegisterActionFunction("checkSameNamesAction", checkSameNamesAction)
+	config.RegisterActionFunction("envVarExampleAction", envVarExampleAction)
+	config.RegisterActionFunction("propertyExampleAction", propertyExampleAction)
 
 	config.RegisterConditionEvaluator("checkForBob", checkForBob)
 	config.RegisterConditionEvaluator("checkSameNamesCondition", checkSameNamesCondition)
@@ -34,7 +36,7 @@ func checkForBobAction(ctx context.Context, rs model.RuleSession, ruleName strin
 	fmt.Printf("Context is [%s]\n", ruleCtx)
 	t1 := tuples["n1"]
 	if t1 == nil {
-		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
+		fmt.Println("Should not get nil tuples here in JoinCondition3! This is an error")
 		return
 	}
 }
@@ -43,7 +45,7 @@ func checkSameNamesCondition(ruleName string, condName string, tuples map[model.
 	t1 := tuples["n1"]
 	t2 := tuples["n2"]
 	if t1 == nil || t2 == nil {
-		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
+		fmt.Println("Should not get nil tuples here in JoinCondition4! This is an error")
 		return false
 	}
 	name1, _ := t1.GetString("name")
@@ -71,4 +73,27 @@ func StartupRSFunction(ctx context.Context, rs model.RuleSession, startupCtx map
 	t3.SetString(nil, "name", "Bob")
 	rs.Assert(nil, t3)
 	return nil
+}
+
+func envVarExampleAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+	fmt.Printf("Rule fired: [%s]\n", ruleName)
+	t1 := tuples["n1"]
+	if t1 == nil {
+		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
+		return
+	} else {
+		nm, _ := t1.GetString("name")
+		fmt.Printf("n1.name is [%s]\n", nm)
+	}
+}
+func propertyExampleAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+	fmt.Printf("Rule fired: [%s]\n", ruleName)
+	t1 := tuples["n1"]
+	if t1 == nil {
+		fmt.Println("Should not get nil tuples here ! This is an error")
+		return
+	} else {
+		nm, _ := t1.GetString("name")
+		fmt.Printf("n1.name is [%s]\n", nm)
+	}
 }

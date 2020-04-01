@@ -1,0 +1,162 @@
+{
+  "name": "decisiontable",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "Sample Rules App",
+  "appModel": "1.0.0",
+  "imports": [
+    "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/contrib/activity/log",
+    "github.com/project-flogo/rules/ruleaction",
+    "github.com/project-flogo/rules/activity/dtable",
+    "github.com/project-flogo/contrib/function/string"
+  ],
+  "triggers": [
+    {
+      "id": "receive_http_message",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
+      "settings": {
+        "port": "7777"
+      },
+      "handlers": [
+        {
+          "settings": {
+            "method": "GET",
+            "path": "/test/:tupleType"
+          },
+          "actions": [
+            {
+              "id": "simple_rule",
+              "input": {
+                "tupletype": "=$.pathParams.tupleType",
+                "values": "=$.queryParams"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "rulesession:simple",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+            {
+              "name": "outputData",
+              "type": "any"
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "student.careRequired",
+            "conditions": [
+              {
+                "expression": "$.student.careRequired"
+              }
+            ],
+            "actionService": {              
+              "service": "LogCareRequiredStudents",
+              "input": {
+                "message": "=string.concat(\" Student: \",$.student.name, \" -- Comments: \",$.student.comments)"
+              }
+            },
+            "priority": 2
+          },
+          {
+            "name": "student.name == studentanalysis.name",
+            "conditions": [
+              {
+                "expression": "$.studentanalysis.name == $.student.name"
+              }
+            ],
+            "actionService": {             
+              "service": "AnalyseStudent",
+              "input": {
+                "message": "=$.studentanalysis.name"
+              }
+            },
+            "priority": 2
+          }
+        ],
+        "services": [
+          {
+            "name": "AnalyseStudent",
+            "description": "Analysing student data",
+            "type": "activity",
+            "ref": "github.com/project-flogo/rules/activity/dtable",
+            "settings": {
+              "dTableFile":"../dtable-file.xlsx"
+            }
+          },
+          {
+            "name": "LogCareRequiredStudents",
+            "description": "Logs Care required student names",
+            "type": "activity",
+            "ref": "github.com/project-flogo/contrib/activity/log"
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "ref": "github.com/project-flogo/rules/ruleaction",
+      "settings": {
+        "ruleSessionURI": "res://rulesession:simple",
+        "tds": [
+          {
+            "name": "student",
+            "properties": [
+              {
+                "name": "name",
+                "pk-index": 0,
+                "type": "string"
+              },
+              {
+                "name": "grade",
+                "type": "string"
+              },
+              {
+                "name": "class",
+                "type": "string"
+              },
+              {
+                "name": "careRequired",
+                "type": "bool"
+              },
+              {
+                "name": "comments",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "name": "studentanalysis",
+            "ttl":0,
+            "properties": [
+              {
+                "name": "name",
+                "pk-index": 0,
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      "id": "simple_rule"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "mode": "consistency",
+  "rs": {
+    "prefix": "x",
+    "store-ref": "redis"
+  },
+  "rete": {
+    "jt-ref": "redis",
+    "idgen-ref": "redis",
+    "jt":"redis"
+  },
+  "stores": {
+    "mem": {
+    },
+    "redis": {
+      "network": "tcp",
+      "address": ":6380"
+    }
+  },
+  "idgens": {
+    "mem": {
+    },
+    "redis": {
+      "network": "tcp",
+      "address": ":6380"
+    }
+  },
+  "jts": {
+    "mem": {
+    },
+    "redis": {
+      "network": "tcp",
+      "address": ":6380"
+    }
+  }
+}

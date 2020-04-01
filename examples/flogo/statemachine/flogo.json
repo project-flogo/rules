@@ -1,0 +1,324 @@
+{
+  "name": "statemachine",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "appModel": "1.0.0",
+  "triggers": [
+    {
+      "id": "receive_http_message",
+      "ref": "github.com/project-flogo/contrib/trigger/rest",
+      "name": "Receive HTTP Message",
+      "settings": {
+        "port": "7777"
+      },
+      "handlers": [
+        {
+          "name": "moveevent",
+          "settings": {
+            "method": "GET",
+            "path": "/moveevent"
+          },
+          "action": {
+            "id": "simple_rule",
+            "input": {
+              "tupletype": "moveevent",
+              "values": "=$.queryParams"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "simple_rule",
+      "ref": "github.com/project-flogo/rules/ruleaction",
+      "settings": {
+        "ruleSessionURI": "res://rulesession:simple",
+        "tds": [
+          {
+            "name": "package",
+            "properties": [
+              {
+                "name": "id",
+                "type": "string",
+                "pk-index": 0
+              },
+              {
+                "name": "state",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "name": "moveevent",
+            "ttl": 0,
+            "properties": [
+              {
+                "name": "id",
+                "type": "string",
+                "pk-index": 0
+              },
+              {
+                "name": "packageid",
+                "type": "string"
+              },
+              {
+                "name": "targetstate",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "name": "movetimeoutevent",
+            "ttl": 0,
+            "properties": [
+              {
+                "name": "id",
+                "type": "string",
+                "pk-index": 0
+              },
+              {
+                "name": "packageid",
+                "type": "string"
+              },
+              {
+                "name": "timeoutinmillis",
+                "type": "integer"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "resources": [
+    {
+      "id": "rulesession:simple",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "values",
+              "type": "string"
+            },
+            {
+              "name": "tupletype",
+              "type": "string"
+            }
+          ],
+          "output": [
+            {
+              "name": "outputData",
+              "type": "any"
+            }
+          ]
+        },
+        "rules": [
+          {
+            "name": "packageInSittingRule",
+            "conditions": [
+              {
+                "name": "cPackageInSitting",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInSitting"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService"
+            },
+            "priority": 1
+          },
+          {
+            "name": "packageInDelayedRule",
+            "conditions": [
+              {
+                "name": "cPackageInDelayed",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInDelayed"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService1"
+            },
+            "priority": 1
+          },
+          {
+            "name": "packageInMovingRule",
+            "conditions": [
+              {
+                "name": "cPackageInMoving",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInMoving"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService2"
+            },
+            "priority": 1
+          },
+          {
+            "name": "packageInDroppedRule",
+            "conditions": [
+              {
+                "name": "cPackageInDropped",
+                "identifiers": [
+                  "package.state"
+                ],
+                "evaluator": "cPackageInDropped"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService3"
+            },
+            "priority": 1
+          },
+          {
+            "name": "printPackageRule",
+            "conditions": [
+              {
+                "name": "cPackageEvent",
+                "identifiers": [
+                  "package"
+                ],
+                "evaluator": "cPackageEvent"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService4"
+            },
+            "priority": 2
+          },
+          {
+            "name": "printMoveEventRule",
+            "conditions": [
+              {
+                "name": "cMoveEvent",
+                "identifiers": [
+                  "moveevent"
+                ],
+                "evaluator": "cMoveEvent"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService5"
+            },
+            "priority": 3
+          },
+          {
+            "name": "joinMoveEventAndPackageEventRule",
+            "conditions": [
+              {
+                "name": "cJoinMoveEventAndPackage",
+                "identifiers": [
+                  "moveevent",
+                  "package"
+                ],
+                "evaluator": "cJoinMoveEventAndPackage"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService6"
+            },
+            "priority": 4
+          },
+          {
+            "name": "aMoveTimeoutEventRule",
+            "conditions": [
+              {
+                "name": "cMoveTimeoutEvent",
+                "identifiers": [
+                  "movetimeoutevent"
+                ],
+                "evaluator": "cMoveTimeoutEvent"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService7"
+            },
+            "priority": 5
+          },
+          {
+            "name": "joinMoveTimeoutEventAndPackage",
+            "conditions": [
+              {
+                "name": "cJoinMoveTimeoutEventAndPackage",
+                "identifiers": [
+                  "movetimeoutevent",
+                  "package"
+                ],
+                "evaluator": "cJoinMoveTimeoutEventAndPackage"
+              }
+            ],
+            "actionService": {
+              "service": "FunctionService8"
+            },
+            "priority": 6
+          }
+        ],
+        "services": [
+          {
+            "name": "FunctionService",
+            "description": "function service for aPackageInSitting",
+            "type": "function",
+            "function": "aPackageInSitting"
+          },
+          {
+            "name": "FunctionService1",
+            "description": "function service for aPackageInDelayed",
+            "type": "function",
+            "function": "aPackageInDelayed"
+          },
+          {
+            "name": "FunctionService2",
+            "description": "function service for aPackageInMoving",
+            "type": "function",
+            "function": "aPackageInMoving"
+          },
+          {
+            "name": "FunctionService3",
+            "description": "function service for aPackageInDropped",
+            "type": "function",
+            "function": "aPackageInDropped"
+          },
+          {
+            "name": "FunctionService4",
+            "description": "function service for aPrintPackage",
+            "type": "function",
+            "function": "aPrintPackage"
+          },
+          {
+            "name": "FunctionService5",
+            "description": "function service for aPrintMoveEvent",
+            "type": "function",
+            "function": "aPrintMoveEvent"
+          },
+          {
+            "name": "FunctionService6",
+            "description": "function service for aJoinMoveEventAndPackage",
+            "type": "function",
+            "function": "aJoinMoveEventAndPackage"
+          },
+          {
+            "name": "FunctionService7",
+            "description": "function service for aMoveTimeoutEvent",
+            "type": "function",
+            "function": "aMoveTimeoutEvent"
+          },
+          {
+            "name": "FunctionService8",
+            "description": "function service for aJoinMoveTimeoutEventAndPackage",
+            "type": "function",
+            "function": "aJoinMoveTimeoutEventAndPackage"
+          }
+        ]
+      }
+    }
+  ]
+}

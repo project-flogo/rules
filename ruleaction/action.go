@@ -96,6 +96,8 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	}
 
 	ruleAction := &RuleAction{}
+
+	// create rule session
 	ruleSessionDescriptor, err := manager.GetRuleSessionDescriptor(settings.RuleSessionURI)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get RuleSessionDescriptor for %s\n%s", settings.RuleSessionURI, err.Error())
@@ -105,7 +107,7 @@ func (f *ActionFactory) New(cfg *action.Config) (action.Action, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshall RuleSessionDescriptor : %s", err.Error())
 	}
-	ruleAction.rs, err = ruleapi.GetOrCreateRuleSessionFromConfig(settings.RuleSessionURI, string(ruleCollectionJSON))
+	ruleAction.rs, err = ruleapi.GetOrCreateRuleSessionFromConfig(settings.RuleSessionURI, "", string(ruleCollectionJSON))
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to create rulesession for %s\n %s", settings.RuleSessionURI, err.Error())

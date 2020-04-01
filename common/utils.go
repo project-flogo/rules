@@ -57,6 +57,28 @@ func GetAbsPathForResource(resourcepath string) string {
 	return ""
 }
 
+// GetPathForResource gets the resource path off $GOPATH or relative
+func GetPathForResource(resource, relative string) string {
+	GOPATH := os.Getenv("GOPATH")
+	// fmt.Printf("GOPATH - [%s]\n", GOPATH)
+	paths := strings.Split(GOPATH, ":")
+	for _, path := range paths {
+		// fmt.Printf("path[%s]\n", path)
+		absPath := path + "/src/github.com/project-flogo/rules/" + resource
+		_, err := os.Stat(absPath)
+		if err == nil {
+			return absPath
+		}
+	}
+
+	_, err := os.Stat(relative)
+	if err == nil {
+		return relative
+	}
+
+	return ""
+}
+
 // FileToString reads file content to string
 func FileToString(fileName string) string {
 	dat, err := ioutil.ReadFile(fileName)

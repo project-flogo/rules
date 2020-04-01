@@ -7,35 +7,27 @@ import (
 	"strconv"
 
 	"github.com/project-flogo/rules/common/model"
+	"github.com/project-flogo/rules/rete/internal/types"
 )
 
 //node a building block of the rete network
 type node interface {
 	abstractNode
+	types.NwElemId
 	getIdentifiers() []model.TupleType
-	getID() int
 	addNodeLink(nodeLink)
-	assertObjects(ctx context.Context, handles []reteHandle, isRight bool)
+	assertObjects(ctx context.Context, handles []types.ReteHandle, isRight bool)
 }
 
 type nodeImpl struct {
+	types.NwElemIdImpl
 	identifiers []model.TupleType
 	nodeLinkVar nodeLink
-	id          int
 	rule        model.Rule
 }
 
-//NewNode ... returns a new node
-//func newNode(nw Network, rule model.Rule, identifiers []model.TupleType) node {
-//	n := nodeImpl{}
-//	n.initNodeImpl(nw, rule, identifiers)
-//	return &n
-//}
-
-func (n *nodeImpl) initNodeImpl(nw Network, rule model.Rule, identifiers []model.TupleType) {
-
-	n.id = nw.incrementAndGetId()
-
+func (n *nodeImpl) initNodeImpl(nw *reteNetworkImpl, rule model.Rule, identifiers []model.TupleType) {
+	n.SetID(nw)
 	n.identifiers = identifiers
 	n.rule = rule
 }
@@ -44,16 +36,12 @@ func (n *nodeImpl) getIdentifiers() []model.TupleType {
 	return n.identifiers
 }
 
-func (n *nodeImpl) getID() int {
-	return n.id
-}
-
 func (n *nodeImpl) addNodeLink(nl nodeLink) {
 	n.nodeLinkVar = nl
 }
 
 func (n *nodeImpl) String() string {
-	str := "id:" + strconv.Itoa(n.id) + ", idrs:"
+	str := "id:" + strconv.Itoa(n.GetID()) + ", idrs:"
 	for _, nodeIdentifier := range n.identifiers {
 		str += string(nodeIdentifier) + ","
 	}
@@ -87,6 +75,6 @@ func findSimilarNodes(nodeSet *list.List) []node {
 	return similarNodes
 }
 
-func (n *nodeImpl) assertObjects(ctx context.Context, handles []reteHandle, isRight bool) {
+func (n *nodeImpl) assertObjects(ctx context.Context, handles []types.ReteHandle, isRight bool) {
 	fmt.Println("Abstract method here.., see filterNodeImpl and joinNodeImpl")
 }

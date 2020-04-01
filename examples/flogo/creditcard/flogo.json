@@ -1,13 +1,15 @@
 {
-  "name": "cardapp",
+  "name": "creditcard",
   "type": "flogo:app",
   "version": "0.0.1",
-  "description": "Sample Flogo App",
+  "description": "Sample Rules App",
   "appModel": "1.0.0",
   "imports": [
     "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/contrib/activity/log",
     "github.com/project-flogo/rules/ruleaction",
-    "github.com/project-flogo/legacybridge"
+    "github.com/project-flogo/rules/activity/dtable",
+    "github.com/project-flogo/contrib/function/string"
   ],
   "triggers": [
     {
@@ -19,30 +21,15 @@
       "handlers": [
         {
           "settings": {
-            "method": "PUT",
-            "path": "/newaccount"
+            "method": "GET",
+            "path": "/test/:tupleType"
           },
           "actions": [
             {
               "id": "simple_rule",
               "input": {
-                "tupletype": "NewAccount",
-                "values": "=$.content"
-              }
-            }
-          ]
-        },
-        {
-          "settings": {
-            "method": "PUT",
-            "path": "/credit"
-          },
-          "actions": [
-            {
-              "id": "simple_rule",
-              "input": {
-                "tupletype": "UpdateCreditScore",
-                "values": "=$.content"
+                "tupletype": "=$.pathParams.tupleType",
+                "values": "=$.queryParams"
               }
             }
           ]
@@ -74,93 +61,57 @@
         },
         "rules": [
           {
-            "name": "UserData",
+            "name": "Process Application with applicant simple dt",
             "conditions": [
               {
-                "name": "cBadUser",
-                "identifiers": [
-                  "NewAccount"
-                ],
-                "evaluator": "cBadUser"
-              }
-            ],
-            "actionFunction": "aBadUser"
-          },
-          {
-            "name": "NewUser",
-            "conditions": [
-              {
-                "name": "cNewUser",
-                "identifiers": [
-                  "NewAccount"
-                ],
-                "evaluator": "cNewUser"
-              }
-            ],
-            "actionFunction": "aNewUser"
-          },
-          {
-            "name": "NewUser1",
-            "conditions": [
-              {
-                "name": "cUserIdMatch",
-                "identifiers": [
-                  "UpdateCreditScore",
-                  "UserAccount"
-                ],
-                "evaluator": "cUserIdMatch"
+                "expression": "$.processapplication.start == true "
               },
               {
-                "name": "cUserCreditScore",
-                "identifiers": [
-                  "UpdateCreditScore"
-                ],
-                "evaluator": "cUserCreditScore"
+                "expression": "$.processapplication.ssn == $.applicant.ssn"
               }
             ],
-            "actionFunction": "aApproveWithLowerLimit"
+            "actionService": {
+              "service": "ApplicantSimple",
+              "input": {
+                "message": "test ApplicantSimple"
+              }
+            },
+            "priority": 1
           },
           {
-            "name": "NewUser2",
+            "name": "Display Information",
             "conditions": [
               {
-                "name": "cUserIdMatch",
-                "identifiers": [
-                  "UpdateCreditScore",
-                  "UserAccount"
-                ],
-                "evaluator": "cUserIdMatch"
+                "expression": "$.applicant.creditLimit >= 0 "
               },
               {
-                "name": "cUserCreditScore",
-                "identifiers": [
-                  "UpdateCreditScore"
-                ],
-                "evaluator": "cUserHighCreditScore"
+                "expression": "$.applicant.status != nil "
               }
             ],
-            "actionFunction": "aApproveWithHigherLimit"
+            "actionService": {
+              "service": "LogInformation",
+              "input": {
+                "message": "=string.concat(\" Applicant: \",$.applicant.name, \" -- CreditLimit: \",$.applicant.creditLimit, \" -- status: \",$.applicant.status)"
+              }
+            },
+            "priority": 3
+          }
+        ],
+        "services": [
+          {
+            "name": "ApplicantSimple",
+            "description": "Simple Applicants approval dt",
+            "type": "activity",
+            "ref": "github.com/project-flogo/rules/activity/dtable",
+            "settings": {
+              "dTableFile":"creditcard-file.xlsx"
+            }
           },
           {
-            "name": "Rejected",
-            "conditions": [
-              {
-                "name": "cUserIdMatch",
-                "identifiers": [
-                  "UpdateCreditScore",
-                  "UserAccount"
-                ],
-                "evaluator": "cUserIdMatch"
-              },
-              {
-                "name": "cUserCreditScore",
-                "identifiers": [
-                  "UpdateCreditScore"
-                ],
-                "evaluator": "cUserLowCreditScore"
-              }
-            ],
-            "actionFunction": "aUserReject"
+            "name": "LogInformation",
+            "description": "Logs Applicant Information",
+            "type": "activity",
+            "ref": "github.com/project-flogo/contrib/activity/log"
           }
         ]
       }
@@ -173,32 +124,36 @@
         "ruleSessionURI": "res://rulesession:simple",
         "tds": [
           {
-            "name": "UserAccount",
+            "name": "applicant",
             "properties": [
               {
-                "name": "Id",
+                "name": "name",
                 "pk-index": 0,
-                "type": "int"
-              },
-              {
-                "name": "Name",
                 "type": "string"
               },
               {
-                "name": "Gender",
+                "name": "gender",
                 "type": "string"
               },
               {
-                "name": "Age",
+                "name": "age",
                 "type": "int"
               },
               {
-                "name": "Address",
+                "name": "address",
                 "type": "string"
               },
               {
-                "name": "Income",
-                "type": "int"
+                "name": "hasDL",
+                "type": "bool"
+              },
+              {
+                "name": "ssn",
+                "type": "long"
+              },
+              {
+                "name": "income",
+                "type": "double"
               },
               {
                 "name": "maritalStatus",
@@ -209,64 +164,33 @@
                 "type": "int"
               },
               {
-                "name": "approvedLimit",
-                "type": "int"
+                "name": "status",
+                "type": "string"
               },
               {
-                "name": "appStatus",
-                "type": "string"
+                "name": "eligible",
+                "type": "bool"
+              },
+              {
+                "name": "creditLimit",
+                "type": "double"
               }
             ]
           },
           {
-            "name": "NewAccount",
-            "ttl": 0,
+            "name": "processapplication",
+            "ttl":0,
             "properties": [
               {
-                "name": "Id",
+                "name": "ssn",
                 "pk-index": 0,
-                "type": "int"
+                "type": "long"
               },
               {
-                "name": "Name",
-                "type": "string"
-              },
-              {
-                "name": "Gender",
-                "type": "string"
-              },
-              {
-                "name": "Age",
-                "type": "int"
-              },
-              {
-                "name": "Address",
-                "type": "string"
-              },
-              {
-                "name": "Income",
-                "type": "int"
-              },
-              {
-                "name": "maritalStatus",
-                "type": "string"
+                "name": "start",
+                "type": "bool"
               }
             ]
-          },
-          {
-            "name": "UpdateCreditScore",
-            "properties": [
-              {
-                "name": "Id",
-                "pk-index": 0,
-                "type": "int"
-              },
-              {
-                "name": "creditScore",
-                "type": "int"
-              }
-            ],
-            "ttl": 0
           }
         ]
       },

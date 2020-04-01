@@ -2,53 +2,69 @@ package tests
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
+
+	"github.com/stretchr/testify/assert"
 )
 
-var count int
+var count uint64
 
 //Check if all combination of tuples t1 and t3 are triggering actions
 func Test_I1(t *testing.T) {
-
-	rs, _ := createRuleSession()
+	count = 0
+	rs, err := createRuleSession(t)
+	assert.Nil(t, err)
 
 	rule := ruleapi.NewRule("I1")
-	rule.AddCondition("I1_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
-	rule.SetAction(i1_action)
+	err = rule.AddCondition("I1_c1", []string{"t1.none", "t3.none"}, trueCondition, nil)
+	assert.Nil(t, err)
+	rule.SetActionService(createActionServiceFromFunction(t, i1_action))
+
 	rule.SetPriority(1)
-	rs.AddRule(rule)
+	err = rs.AddRule(rule)
+	assert.Nil(t, err)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
-	rs.Start(nil)
+	err = rs.Start(nil)
+	assert.Nil(t, err)
 
-	t1, _ := model.NewTupleWithKeyValues("t1", "t10")
-	rs.Assert(context.TODO(), t1)
+	t1, err := model.NewTupleWithKeyValues("t1", "t10")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t1)
+	assert.Nil(t, err)
 
-	t2, _ := model.NewTupleWithKeyValues("t1", "t11")
-	rs.Assert(context.TODO(), t2)
+	t2, err := model.NewTupleWithKeyValues("t1", "t11")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t2)
+	assert.Nil(t, err)
 
-	t3, _ := model.NewTupleWithKeyValues("t3", "t12")
-	rs.Assert(context.TODO(), t3)
+	t3, err := model.NewTupleWithKeyValues("t3", "t12")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t3)
+	assert.Nil(t, err)
 
 	//Check if the 2 combinations {t1=t10,t3=t12} and {t1=t11,t3=t12} triggers action twice
-	if count != 2 {
-		t.Errorf("Expecting [2] actions, got [%d]", count)
+	if cnt := atomic.LoadUint64(&count); cnt != 2 {
+		t.Errorf("Expecting [2] actions, got [%d]", cnt)
 		t.FailNow()
 	}
 
-	t4, _ := model.NewTupleWithKeyValues("t3", "t13")
-	rs.Assert(context.TODO(), t4)
+	t4, err := model.NewTupleWithKeyValues("t3", "t13")
+	assert.Nil(t, err)
+	err = rs.Assert(context.TODO(), t4)
+	assert.Nil(t, err)
 
 	//Check if the 2 combinations {t1=t10,t3=t13} and {t1=t11,t3=t13} triggers action two more times making the total action count 4
-	if count != 4 {
-		t.Errorf("Expecting [4] actions, got [%d]", count)
+	if cnt := atomic.LoadUint64(&count); cnt != 4 {
+		t.Errorf("Expecting [4] actions, got [%d]", cnt)
 		t.FailNow()
 	}
 
-	rs.Unregister()
+	deleteRuleSession(t, rs, t1, t2, t3, t4)
 
 }
 
@@ -60,15 +76,15 @@ func i1_action(ctx context.Context, rs model.RuleSession, ruleName string, tuple
 	id3, _ := t2.GetString("id")
 
 	if id1 == "t11" && id3 == "t12" {
-		count++
+		atomic.AddUint64(&count, 1)
 	}
 	if id1 == "t10" && id3 == "t12" {
-		count++
+		atomic.AddUint64(&count, 1)
 	}
 	if id1 == "t11" && id3 == "t13" {
-		count++
+		atomic.AddUint64(&count, 1)
 	}
 	if id1 == "t10" && id3 == "t13" {
-		count++
+		atomic.AddUint64(&count, 1)
 	}
 }
