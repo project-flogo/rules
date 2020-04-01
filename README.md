@@ -65,89 +65,53 @@ First we start off with loading the `TupleDescriptor`. It accepts a JSON string 
 Next create a `RuleSession` and add all the `Rule`s with their `Condition`s and `Actions`s.
 
 	//Create a RuleSession
-	rs, err := ruleapi.GetOrCreateRuleSession("asession", store)
-	if err != nil {
-		return err
-	}
+	rs, _ := ruleapi.GetOrCreateRuleSession("asession", "")
 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")
-	err = rule.AddCondition("c1", []string{"n1"}, checkForBob, events)
-	if err != nil {
-		return err
-	}
+	rule.AddCondition("c1", []string{"n1"}, checkForBob, events)
 	serviceCfg := &config.ServiceDescriptor{
 		Name:     "checkForBobAction",
 		Function: checkForBobAction,
 		Type:     "function",
 	}
-	aService, err := ruleapi.NewActionService(serviceCfg)
-	if err != nil {
-		return err
-	}
+	aService,_ := ruleapi.NewActionService(serviceCfg)
 	rule.SetActionService(aService)
 	rule.SetContext(events)
-	err = rs.AddRule(rule)
-	if err != nil {
-		return err
-	}
+	rs.AddRule(rule)
 
 	// check for name "Bob" in n1, match the "name" field in n2,
 	// in effect, fire the rule when name field in both tuples is "Bob"
 	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
-	err = rule2.AddCondition("c1", []string{"n1"}, checkForBob, events)
-	if err != nil {
-		return err
-	}
-	err = rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, events)
-	if err != nil {
-		return err
-	}
+	rule2.AddCondition("c1", []string{"n1"}, checkForBob, events)
+	rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, events)
 	serviceCfg2 := &config.ServiceDescriptor{
 		Name:     "checkSameNamesAction",
 		Function: checkSameNamesAction,
 		Type:     "function",
 	}
-	aService2, err := ruleapi.NewActionService(serviceCfg2)
-	if err != nil {
-		return err
-	}
+	aService2,_ := ruleapi.NewActionService(serviceCfg2)
 	rule2.SetActionService(aService2)
 	rule2.SetContext(events)
-	err = rs.AddRule(rule2)
-	if err != nil {
-		return err
-	}
+	rs.AddRule(rule2)
 
 	// check for name in n1, match the env variable "name"
 	rule3 := ruleapi.NewRule("n1.name == envname")
-	err = rule3.AddCondition("c1", []string{"n1"}, checkSameEnvName, events)
-	if err != nil {
-		return err
-	}
+	rule3.AddCondition("c1", []string{"n1"}, checkSameEnvName, events)
 	serviceCfg3 := &config.ServiceDescriptor{
 		Name:     "checkSameEnvNameAction",
 		Function: checkSameEnvNameAction,
 		Type:     "function",
 	}
-	aService3, err := ruleapi.NewActionService(serviceCfg3)
-	if err != nil {
-		return err
-	}
+	aService3,_ := ruleapi.NewActionService(serviceCfg3)
 	rule3.SetActionService(aService3)
 	rule3.SetContext(events)
-	err = rs.AddRule(rule3)
-	if err != nil {
-		return err
-	}
+	rs.AddRule(rule3)
 
 	//set a transaction handler
 	rs.RegisterRtcTransactionHandler(txHandler, nil)
 	//Start the rule session
-	err = rs.Start(nil)
-	if err != nil {
-		return err
-	}
+	rs.Start(nil)
 
 Here we create and assert the actual `Tuple's` which will be evaluated against the `Rule's` `Condition's` defined above.
 
