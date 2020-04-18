@@ -18,8 +18,9 @@ type ruleNodeImpl struct {
 	rule model.Rule
 }
 
-func newRuleNode(rule model.Rule) ruleNode {
+func newRuleNode(nw Network, rule model.Rule) ruleNode {
 	rn := ruleNodeImpl{}
+	rn.nodeImpl.initNodeImpl(nw, rule, rule.GetIdentifiers())
 	rn.identifiers = rule.GetIdentifiers()
 	rn.rule = rule
 	return &rn

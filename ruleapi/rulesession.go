@@ -186,3 +186,7 @@ func (rs *rulesessionImpl) GetAssertedTuple(key model.TupleKey) model.Tuple {
 func (rs *rulesessionImpl) RegisterRtcTransactionHandler(txnHandler model.RtcTransactionHandler, txnContext interface{}) {
 	rs.reteNetwork.RegisterRtcTransactionHandler(txnHandler, txnContext)
 }
+
+func (rs *rulesessionImpl) ReplayTuplesForRule(ruleName string) (err error) {
+	return rs.reteNetwork.ReplayTuplesForRule(ruleName, rs)
+}

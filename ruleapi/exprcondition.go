@@ -1,13 +1,14 @@
 package ruleapi
 
 import (
+	"reflect"
+	"strconv"
+
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/expression"
 	"github.com/project-flogo/core/data/expression/script"
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/rules/common/model"
-	"reflect"
-	"strconv"
 )
 
 var td tuplePropertyResolver
@@ -18,10 +19,9 @@ func init() {
 	td = tuplePropertyResolver{}
 	//resolver = resolve.NewCompositeResolver(map[string]resolve.Resolver{".": &td})
 	resolver = resolve.NewCompositeResolver(map[string]resolve.Resolver{
-		".":        &td,
-		"env":      &resolve.EnvResolver{},
-		"property": &resolve.PropertyResolver{},
-		"loop":     &resolve.LoopResolver{},
+		".":    &td,
+		"env":  &resolve.EnvResolver{},
+		"loop": &resolve.LoopResolver{},
 	})
 	factory = script.NewExprFactory(resolver)
 }

@@ -36,7 +36,7 @@ func newAssertEntry(tuple model.Tuple, changeProps map[string]bool, mode RtcOprn
 
 func (ai *assertEntryImpl) execute(ctx context.Context) {
 	reteCtx := getReteCtx(ctx)
-	reteCtx.getNetwork().assertInternal(ctx, ai.tuple, ai.changeProps, ai.mode)
+	reteCtx.getNetwork().assertInternal(ctx, ai.tuple, ai.changeProps, ai.mode, "")
 }
 
 //Modify Entry
