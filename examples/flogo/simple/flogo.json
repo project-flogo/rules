@@ -131,7 +131,7 @@
             ],
             "conditions": [
               {
-                "expression" : "('testprop' == $property['name'])"
+                "expression" : "($.n1.name == $property['name'])"
               }
             ],
             "actionFunction": "propertyExampleAction"
