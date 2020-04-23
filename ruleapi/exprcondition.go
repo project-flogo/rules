@@ -1,6 +1,7 @@
 package ruleapi
 
 import (
+	"github.com/project-flogo/core/data/property"
 	"reflect"
 	"strconv"
 
@@ -21,7 +22,7 @@ func init() {
 	resolver = resolve.NewCompositeResolver(map[string]resolve.Resolver{
 		".":        &td,
 		"env":      &resolve.EnvResolver{},
-		"property": &resolve.PropertyResolver{},
+		"property": &property.Resolver{},
 		"loop":     &resolve.LoopResolver{},
 	})
 	factory = script.NewExprFactory(resolver)
