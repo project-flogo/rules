@@ -277,7 +277,7 @@ func validateRefs(refs []string) error {
 //		return keys, err
 //	}
 //
-//	for key, _ := range refs {
+//	for key := range refs {
 //		keys = append (keys, key)
 //	}
 //	return keys, err

@@ -2,8 +2,9 @@ package model
 
 import (
 	"fmt"
-	"github.com/project-flogo/core/data/coerce"
 	"reflect"
+
+	"github.com/project-flogo/core/data/coerce"
 )
 
 // TupleKey primary key of a tuple
@@ -97,7 +98,7 @@ func (tk *tupleKeyImpl) GetProps() []string {
 }
 
 func (tk *tupleKeyImpl) GetValue(prop string) interface{} {
-	val, _ := tk.keys[prop]
+	val := tk.keys[prop]
 	return val
 }
 

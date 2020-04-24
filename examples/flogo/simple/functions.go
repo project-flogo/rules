@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"github.com/project-flogo/rules/config"
 
 	"github.com/project-flogo/rules/common/model"
@@ -71,7 +72,7 @@ func StartupRSFunction(ctx context.Context, rs model.RuleSession, startupCtx map
 	fmt.Printf("In startup rule function..\n")
 	t3, _ := model.NewTupleWithKeyValues("n1", "Bob")
 	t3.SetString(nil, "name", "Bob")
-	rs.Assert(nil, t3)
+	rs.Assert(context.TODO(), t3)
 	return nil
 }
 

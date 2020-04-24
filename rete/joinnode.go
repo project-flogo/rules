@@ -106,9 +106,9 @@ func (jn *joinNodeImpl) setJoinIdentifiers() {
 		}
 	}
 
-	if outIndex != jn.totalIdrLen {
-		//TODO ERROR HANDLING!
-	}
+	// if outIndex != jn.totalIdrLen {
+	// 	//TODO ERROR HANDLING!
+	// }
 }
 
 //String Stringer.String interface
@@ -164,7 +164,7 @@ func (jn *joinNodeImpl) assertObjects(ctx context.Context, handles []reteHandle,
 
 func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []reteHandle, joinedHandles []reteHandle) {
 
-	var err error
+	// var err error
 
 	//TODO: other stuff. right now focus on tuple table
 	jn.joinRightObjects(handles, joinedHandles)
@@ -183,10 +183,10 @@ func (jn *joinNodeImpl) assertFromRight(ctx context.Context, handles []reteHandl
 		} else {
 			tupleMap := copyIntoTupleMap(joinedHandles)
 			cv := jn.conditionVar
-			toPropagate, err = cv.Evaluate(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
-			if err != nil {
-				//todo
-			}
+			toPropagate, _ = cv.Evaluate(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
+			// if err != nil {
+			// 	//todo handling evaluate error
+			// }
 		}
 		if toPropagate {
 			jn.nodeLinkVar.propagateObjects(ctx, joinedHandles)
@@ -218,7 +218,7 @@ func (jn *joinNodeImpl) joinRightObjects(rightHandles []reteHandle, joinedHandle
 
 func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []reteHandle, joinedHandles []reteHandle) {
 
-	var err error
+	// var err error
 
 	jn.joinLeftObjects(handles, joinedHandles)
 	//TODO: other stuff. right now focus on tuple table
@@ -237,10 +237,10 @@ func (jn *joinNodeImpl) assertFromLeft(ctx context.Context, handles []reteHandle
 		} else {
 			tupleMap := copyIntoTupleMap(joinedHandles)
 			cv := jn.conditionVar
-			toPropagate, err = cv.Evaluate(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
-			if err != nil {
-				//todo
-			}
+			toPropagate, _ = cv.Evaluate(cv.GetName(), cv.GetRule().GetName(), tupleMap, cv.GetContext())
+			// if err != nil {
+			// 	//todo handling evaluate error
+			// }
 		}
 		if toPropagate {
 			jn.nodeLinkVar.propagateObjects(ctx, joinedHandles)

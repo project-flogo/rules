@@ -3,9 +3,10 @@ package tests
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"testing"
 )
 
 /**
@@ -52,8 +53,8 @@ func Test_One(t *testing.T) {
 
 	//Now assert a "t1" tuple
 	t1, _ := model.NewTupleWithKeyValues("t1", "Tom")
-	t1.SetString(nil, "p3", "test")
-	rs.Assert(nil, t1)
+	t1.SetString(context.TODO(), "p3", "test")
+	rs.Assert(context.TODO(), t1)
 
 	//unregister the session, i.e; cleanup
 	rs.Unregister()

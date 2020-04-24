@@ -42,7 +42,7 @@ func (fn *filterNodeImpl) setConvert() {
 			idx := GetIndex(fn.identifiers, condIdr)
 			if idx != -1 {
 				fn.convert[i] = idx
-			} else {
+				// } else {
 				//TODO ERROR HANDLING
 			}
 		}
@@ -99,7 +99,7 @@ func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []reteHandl
 			if toPropagate {
 				fn.nodeLinkVar.propagateObjects(ctx, handles)
 			}
-		} else {
+			// } else {
 			//todo
 		}
 	}

@@ -2,9 +2,10 @@ package tests
 
 import (
 	"context"
+	"testing"
+
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"testing"
 )
 
 //1 conditions, 3 expr
@@ -24,17 +25,17 @@ func Test_4_Expr(t *testing.T) {
 	var ctx context.Context
 
 	t1, _ := model.NewTupleWithKeyValues("t1", "t1")
-	t1.SetInt(nil, "p1", 2)
-	t1.SetDouble(nil, "p2", 1.3)
-	t1.SetString(nil, "p3", "t3")
+	t1.SetInt(context.TODO(), "p1", 2)
+	t1.SetDouble(context.TODO(), "p2", 1.3)
+	t1.SetString(context.TODO(), "p3", "t3")
 
 	ctx = context.WithValue(context.TODO(), TestKey{}, t)
 	rs.Assert(ctx, t1)
 
 	t2, _ := model.NewTupleWithKeyValues("t2", "t2")
-	t2.SetInt(nil, "p1", 1)
-	t2.SetDouble(nil, "p2", 1.1)
-	t2.SetString(nil, "p3", "t3")
+	t2.SetInt(context.TODO(), "p1", 1)
+	t2.SetDouble(context.TODO(), "p2", 1.1)
+	t2.SetString(context.TODO(), "p3", "t3")
 
 	ctx = context.WithValue(context.TODO(), TestKey{}, t)
 	rs.Assert(ctx, t2)

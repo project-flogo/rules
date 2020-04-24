@@ -78,7 +78,7 @@ func IntersectionIdentifiers(first []model.TupleType, second []model.TupleType) 
 
 //EqualSets ... compare two identifiers based on their contents
 func EqualSets(first []model.TupleType, second []model.TupleType) bool {
-	return len(SecondMinusFirst(first, second)) == 0 && len(SecondMinusFirst(first, second)) == 0
+	return len(SecondMinusFirst(first, second)) == 0
 }
 
 //GetIndex ... return the index of thisIdr in identifiers
@@ -87,7 +87,7 @@ func GetIndex(identifiers []model.TupleType, thisIdr model.TupleType) int {
 		if idr == thisIdr {
 			return i
 		}
-		i++
+		// i++
 	}
 	return -1
 }
