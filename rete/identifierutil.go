@@ -87,7 +87,6 @@ func GetIndex(identifiers []model.TupleType, thisIdr model.TupleType) int {
 		if idr == thisIdr {
 			return i
 		}
-		// i++
 	}
 	return -1
 }
