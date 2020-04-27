@@ -1,13 +1,11 @@
 {
   "name": "rulesaction",
   "type": "flogo:action",
-  "ref": "github.com/project-flogo/rules/ruleaction",
   "version": "0.0.1",
   "title": "Rules Action",
   "description": "Simple Rules Action",
   "homepage": "https://github.com/project-flogo/rules/ruleaction",
   "async": false,
-
   "settings": [
     {
       "name": "ruleSessionURI",

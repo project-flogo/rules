@@ -6,8 +6,7 @@
   "appModel": "1.0.0",
   "imports": [
     "github.com/project-flogo/contrib/trigger/rest",
-    "github.com/project-flogo/rules/ruleaction",
-    "github.com/project-flogo/legacybridge"
+    "github.com/project-flogo/rules/ruleaction"
   ],
   "triggers": [
     {

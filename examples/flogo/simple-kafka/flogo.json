@@ -4,6 +4,10 @@
   "version": "0.0.1",
   "description": "Sample Flogo App",
   "appModel": "1.0.0",
+  "imports": [
+    "github.com/project-flogo/contrib/trigger/kafka",
+    "github.com/project-flogo/rules/ruleaction"
+  ],
   "triggers": [
     {
       "id": "receive_kafka_message",
