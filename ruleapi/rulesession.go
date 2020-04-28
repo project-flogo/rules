@@ -56,7 +56,19 @@ func GetOrCreateRuleSessionFromConfig(name string, jsonConfig string) (model.Rul
 		rule.SetPriority(ruleCfg.Priority)
 
 		for _, condCfg := range ruleCfg.Conditions {
-			rule.AddCondition(condCfg.Name, condCfg.Identifiers, condCfg.Evaluator, nil)
+			if condCfg.Expression == "" {
+				rule.AddCondition(condCfg.Name, condCfg.Identifiers, condCfg.Evaluator, nil)
+			} else {
+				rule.AddExprCondition(condCfg.Name, condCfg.Expression, nil)
+			}
+		}
+		//now add explicit rule identifiers if any
+		if ruleCfg.Identifiers != nil {
+			idrs := []model.TupleType{}
+			for _, idr := range ruleCfg.Identifiers {
+				idrs = append(idrs, model.TupleType(idr))
+			}
+			rule.AddIdrsToRule(idrs)
 		}
 
 		rs.AddRule(rule)

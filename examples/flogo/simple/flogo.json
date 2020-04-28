@@ -8,6 +8,13 @@
     "github.com/project-flogo/contrib/trigger/rest",
     "github.com/project-flogo/rules/ruleaction"
   ],
+  "properties": [
+    {
+      "name": "name",
+      "type": "string",
+      "value": "testprop"
+    }
+  ],
   "triggers": [
     {
       "id": "receive_http_message",
@@ -16,32 +23,17 @@
         "port": "7777"
       },
       "handlers": [
-        {   
-          "settings": {
-            "method": "GET",
-            "path": "/test/n1"
-          },
-          "actions": [
-            {
-              "id": "simple_rule",
-              "input": {
-                "tupletype": "n1",
-							  "values": "=$.queryParams"
-              }
-            }
-          ]
-        },
         {
           "settings": {
             "method": "GET",
-            "path": "/test/n2"
+            "path": "/test/:tupleType"
           },
           "actions": [
             {
               "id": "simple_rule",
               "input": {
-                "tupletype": "n2",
-							  "values": "=$.queryParams"
+                "tupletype": "=$.pathParams.tupleType",
+                "values": "=$.queryParams"
               }
             }
           ]
@@ -96,10 +88,10 @@
             }
           ],
           "output": [
-             {
-               "name": "outputData",
-               "type": "any"
-             }
+            {
+              "name": "outputData",
+              "type": "any"
+            }
           ]
         },
         "rules": [
@@ -107,11 +99,7 @@
             "name": "n1.name == Bob",
             "conditions": [
               {
-                "name": "c1",
-                "identifiers": [
-                  "n1"
-                ],
-                "evaluator": "checkForBob"
+                "expression" : "$.n1.name == 'Bob'"
               }
             ],
             "actionFunction": "checkForBobAction"
@@ -120,22 +108,37 @@
             "name": "n1.name == Bob \u0026\u0026 n1.name == n2.name",
             "conditions": [
               {
-                "name": "c1",
                 "identifiers": [
                   "n1"
                 ],
                 "evaluator": "checkForBob"
               },
               {
-                "name": "c2",
-                "identifiers": [
-                  "n1",
-                  "n2"
-                ],
-                "evaluator": "checkSameNamesCondition"
+                "expression" : "($.n1.name == 'Bob') \u0026\u0026 ($.n1.name == $.n2.name)"
               }
             ],
             "actionFunction": "checkSameNamesAction"
+          },
+          {
+            "name": "env variable example",
+            "conditions": [
+              {
+                "expression" : "($.n1.name == $env['name'])"
+              }
+            ],
+            "actionFunction": "envVarExampleAction"
+          },
+          {
+            "name": "flogo property example",
+            "identifiers": [
+              "n1"
+            ],
+            "conditions": [
+              {
+                "expression" : "($.n1.name == $property['name'])"
+              }
+            ],
+            "actionFunction": "propertyExampleAction"
           }
         ]
       }

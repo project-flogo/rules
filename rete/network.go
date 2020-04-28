@@ -99,6 +99,7 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 	classNodeLinksOfRule := list.New()
 
 	conditions := rule.GetConditions()
+	noIdrConditionCnt := 0
 	if len(conditions) == 0 {
 		identifierVar := pickIdentifier(rule.GetIdentifiers())
 		nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, identifierVar, nil, nodeSet)
@@ -106,6 +107,7 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 		for i := 0; i < len(conditions); i++ {
 			if conditions[i].GetIdentifiers() == nil || len(conditions[i].GetIdentifiers()) == 0 {
 				conditionSetNoIdr.PushBack(conditions[i])
+				noIdrConditionCnt++
 			} else if len(conditions[i].GetIdentifiers()) == 1 &&
 				!contains(nodeSet, conditions[i].GetIdentifiers()[0]) {
 				cond := conditions[i]
@@ -114,6 +116,10 @@ func (nw *reteNetworkImpl) AddRule(rule model.Rule) (err error) {
 				conditionSet.PushBack(conditions[i])
 			}
 		}
+	}
+	if len(rule.GetConditions()) != 0 && noIdrConditionCnt == len(rule.GetConditions()) {
+		idr := pickIdentifier(rule.GetIdentifiers())
+		nw.createClassFilterNode(rule, nodesOfRule, classNodeLinksOfRule, idr, nil, nodeSet)
 	}
 
 	nw.buildNetwork(rule, nodesOfRule, classNodeLinksOfRule, conditionSet, nodeSet, conditionSetNoIdr)
