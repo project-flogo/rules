@@ -2,7 +2,6 @@ package rete
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/project-flogo/rules/common/model"
@@ -43,9 +42,8 @@ func (fn *filterNodeImpl) setConvert() {
 			idx := GetIndex(fn.identifiers, condIdr)
 			if idx != -1 {
 				fn.convert[i] = idx
-			} else {
+				// } else {
 				//TODO ERROR HANDLING
-				fmt.Print("TODO ERROR HANDLING")
 			}
 		}
 	}
@@ -101,9 +99,8 @@ func (fn *filterNodeImpl) assertObjects(ctx context.Context, handles []reteHandl
 			if toPropagate {
 				fn.nodeLinkVar.propagateObjects(ctx, handles)
 			}
-		} else {
+			// } else {
 			//TODO ERROR HANDLING
-			fmt.Print("TODO ERROR HANDLING")
 		}
 	}
 }

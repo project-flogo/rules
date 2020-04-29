@@ -2,7 +2,6 @@ package rete
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/project-flogo/rules/common/model"
@@ -73,26 +72,24 @@ func (nl *nodeLinkImpl) getChild() node {
 
 func (nl *nodeLinkImpl) setConvert() {
 
-	if len(nl.parentIds) != len(nl.childIds) {
-		//TODO: ERROR handling
-		fmt.Print("TODO ERROR HANDLING")
-	}
+	// if len(nl.parentIds) != len(nl.childIds) {
+	// 	//TODO: ERROR handling
+	// }
 	nl.numIdentifiers = len(nl.parentIds)
 	nl.convert = make([]int, nl.numIdentifiers)
 
 	for i := 0; i < nl.numIdentifiers; i++ {
-		found := false
+		// found := false
 		for j := 0; j < nl.numIdentifiers; j++ {
 			if nl.parentIds[i] == nl.childIds[j] {
-				found = true
+				// found = true
 				nl.convert[i] = j
 				break
 			}
 		}
-		if !found {
-			//TODO: ERROR handling
-			fmt.Print("TODO ERROR HANDLING")
-		}
+		// if !found {
+		// 	//TODO: ERROR handling
+		// }
 	}
 
 	need := false
