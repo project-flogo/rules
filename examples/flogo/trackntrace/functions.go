@@ -61,7 +61,7 @@ func AssertThisPackage(ctx context.Context, rs model.RuleSession, startupCtx map
 	fmt.Printf("In startup rule function..\n")
 	pkg, _ := model.NewTupleWithKeyValues("package", "PACKAGE1")
 	pkg.SetString(nil, "state", "normal")
-	rs.Assert(nil, pkg)
+	rs.Assert(context.TODO(), pkg)
 	return nil
 }
 

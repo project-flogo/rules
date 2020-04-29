@@ -7,7 +7,7 @@ type rtcModifiedImpl struct {
 	props map[string]bool
 }
 
-func NewRtcModified (tuple model.Tuple) model.RtcModified {
+func NewRtcModified(tuple model.Tuple) model.RtcModified {
 	rm := rtcModifiedImpl{}
 	rm.tuple = tuple
 	rm.props = make(map[string]bool)

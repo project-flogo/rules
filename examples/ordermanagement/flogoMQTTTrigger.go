@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 
 	//"github.com/TIBCOSoftware/flogo-contrib/trigger/mqtt"
+	"github.com/project-flogo/core/api"
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/engine"
-	"github.com/project-flogo/core/api"
 	"github.com/project-flogo/core/support/log"
 	"github.com/project-flogo/rules/common/model"
 )

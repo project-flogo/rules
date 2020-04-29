@@ -155,7 +155,7 @@ func (nw *reteNetworkImpl) ReplayTuplesForRule(ruleName string, rs model.RuleSes
 			tt := h.getTuple().GetTupleType()
 			if ContainedByFirst(rule.GetIdentifiers(), []model.TupleType{tt}) {
 				//assert it but only for this rule.
-				nw.assert(nil, rs, h.getTuple(), nil, ADD, ruleName)
+				nw.assert(context.TODO(), rs, h.getTuple(), nil, ADD, ruleName)
 			}
 		}
 	}
@@ -203,7 +203,7 @@ func (nw *reteNetworkImpl) RemoveRule(ruleName string) model.Rule {
 		}
 	}
 	rstr := nw.String()
-	fmt.Printf(rstr)
+	fmt.Print(rstr)
 	return rule
 }
 

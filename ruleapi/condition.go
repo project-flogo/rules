@@ -1,8 +1,9 @@
 package ruleapi
 
 import (
-	"github.com/project-flogo/rules/common/model"
 	"strconv"
+
+	"github.com/project-flogo/rules/common/model"
 )
 
 type conditionImpl struct {

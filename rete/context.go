@@ -4,8 +4,9 @@ import (
 	"container/list"
 	"context"
 
-	"github.com/project-flogo/rules/common/model"
 	"fmt"
+
+	"github.com/project-flogo/rules/common/model"
 )
 
 var reteCTXKEY = model.RetecontextKeyType{}
@@ -31,7 +32,6 @@ type reteCtx interface {
 	resetModified()
 
 	printRtcChangeList()
-
 }
 
 //store any context, may not know all keys upfront
@@ -52,7 +52,6 @@ type reteCtxImpl struct {
 
 	//modified tuples in the current RTC
 	rtcModifyMap map[string]model.RtcModified
-
 }
 
 func newReteCtxImpl(network Network, rs model.RuleSession) reteCtx {
@@ -107,15 +106,15 @@ func (rctx *reteCtxImpl) getRtcDeleted() map[string]model.Tuple {
 	return rctx.deleteMap
 }
 
-func (rctx *reteCtxImpl) addToRtcAdded (tuple model.Tuple) {
+func (rctx *reteCtxImpl) addToRtcAdded(tuple model.Tuple) {
 	rctx.addMap[tuple.GetKey().String()] = tuple
 }
 
-func (rctx *reteCtxImpl) addToRtcModified (tuple model.Tuple) {
+func (rctx *reteCtxImpl) addToRtcModified(tuple model.Tuple) {
 	rctx.addMap[tuple.GetKey().String()] = tuple
 }
 
-func (rctx *reteCtxImpl) addToRtcDeleted (tuple model.Tuple) {
+func (rctx *reteCtxImpl) addToRtcDeleted(tuple model.Tuple) {
 	rctx.deleteMap[tuple.GetKey().String()] = tuple
 }
 
@@ -125,21 +124,19 @@ func (rctx *reteCtxImpl) addRuleModifiedToOpsList() {
 	}
 }
 
-
-
 func (rctx *reteCtxImpl) normalize() {
 
 	//remove from modify map, those in add map
-	for k, _ := range rctx.addMap {
+	for k := range rctx.addMap {
 		delete(rctx.rtcModifyMap, k)
 	}
 	//remove from modify map, those in delete map
-	for k, _ := range rctx.deleteMap {
+	for k := range rctx.deleteMap {
 		delete(rctx.rtcModifyMap, k)
 	}
 }
 
-func (rctx *reteCtxImpl) copyRuleModifiedToRtcModified () {
+func (rctx *reteCtxImpl) copyRuleModifiedToRtcModified() {
 	for k, v := range rctx.modifyMap {
 		rctx.rtcModifyMap[k] = v
 	}
@@ -149,17 +146,17 @@ func (rctx *reteCtxImpl) resetModified() {
 }
 
 func (rctx *reteCtxImpl) printRtcChangeList() {
-	for k, _ := range rctx.getRtcAdded() {
+	for k := range rctx.getRtcAdded() {
 
 		fmt.Printf("Added Tuple: [%s]\n", k)
 
 	}
-	for k, _ := range rctx.getRtcModified() {
+	for k := range rctx.getRtcModified() {
 
 		fmt.Printf("Modified Tuple: [%s]\n", k)
 
 	}
-	for k, _ := range rctx.getRtcDeleted() {
+	for k := range rctx.getRtcDeleted() {
 
 		fmt.Printf("Deleted Tuple: [%s]\n", k)
 

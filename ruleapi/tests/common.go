@@ -42,7 +42,7 @@ func printTuples(t *testing.T, oprn string, tupleMap map[string]map[string]model
 
 	for k, v := range tupleMap {
 		t.Logf("%s tuples for type [%s]\n", oprn, k)
-		for k1, _ := range v {
+		for k1 := range v {
 			t.Logf("    tuples key [%s]\n", k1)
 		}
 	}
@@ -51,7 +51,7 @@ func printModified(t *testing.T, modified map[string]map[string]model.RtcModifie
 
 	for k, v := range modified {
 		t.Logf("%s tuples for type [%s]\n", "Modified", k)
-		for k1, _ := range v {
+		for k1 := range v {
 			t.Logf("    tuples key [%s]\n", k1)
 		}
 	}

@@ -1,16 +1,16 @@
 package trackntrace
 
 import (
+	"github.com/project-flogo/rules/common"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/ruleapi"
-	"github.com/project-flogo/rules/common"
 
-	"testing"
-	"time"
-	"io/ioutil"
-	"strconv"
 	"context"
 	"fmt"
+	"io/ioutil"
+	"strconv"
+	"testing"
+	"time"
 )
 
 func TestPkgFlowNormal(t *testing.T) {
@@ -158,9 +158,9 @@ func TestDuplicateAssert(t *testing.T) {
 	}
 
 	pkgEvt2, _ := model.NewTupleWithKeyValues("package", "1")
-	pkgEvt2.SetString(nil, "curr", "sfo")
-	pkgEvt2.SetString(nil, "next", "ny")
-	pkgEvt2.SetString(nil, "status", "normal")
+	pkgEvt2.SetString(context.TODO(), "curr", "sfo")
+	pkgEvt2.SetString(context.TODO(), "next", "ny")
+	pkgEvt2.SetString(context.TODO(), "status", "normal")
 	ctx = context.WithValue(context.TODO(), TestKey{}, t)
 	err = rs.Assert(ctx, pkgEvt2)
 	if err == nil {
@@ -196,8 +196,6 @@ func TestSameTupleInstanceAssert(t *testing.T) {
 	}
 	rs.Unregister()
 }
-
-
 
 func createRuleSessionAndRules(t *testing.T) (model.RuleSession, error) {
 	rs, _ := ruleapi.GetOrCreateRuleSession("asession")
@@ -392,4 +390,4 @@ func packagedelayedAction(ctx context.Context, rs model.RuleSession, ruleName st
 	fmt.Printf("Package is now delayed id[%s]\n", pkgid)
 }
 
-type TestKey struct {}
+type TestKey struct{}

@@ -69,14 +69,14 @@ func t11Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, ha
 			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 2, lA)
 			printTuples(t, "Added", rtxn.GetRtcAdded())
 		} else {
-			tuples, _ := rtxn.GetRtcAdded()["t1"]
+			tuples := rtxn.GetRtcAdded()["t1"]
 			if tuples != nil {
 				if len(tuples) != 1 {
 					t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 1, len(tuples))
 					printTuples(t, "Added", rtxn.GetRtcAdded())
 				}
 			}
-			tuples3, _ := rtxn.GetRtcAdded()["t3"]
+			tuples3 := rtxn.GetRtcAdded()["t3"]
 			if tuples3 != nil {
 				if len(tuples3) != 2 {
 					t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 2, len(tuples3))

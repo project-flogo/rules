@@ -1,9 +1,10 @@
 package ruleapi
 
 import (
-	"github.com/project-flogo/core/data/property"
 	"reflect"
 	"strconv"
+
+	"github.com/project-flogo/core/data/property"
 
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/expression"

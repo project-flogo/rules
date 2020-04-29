@@ -50,7 +50,7 @@ func (tx *rtcTxnImpl) groupModifiedByType(modifiedTxn map[string]model.RtcModifi
 	}
 }
 
-func (tx *rtcTxnImpl)  groupAddedByType(addedTxn map[string]model.Tuple) {
+func (tx *rtcTxnImpl) groupAddedByType(addedTxn map[string]model.Tuple) {
 	for key, tuple := range addedTxn {
 		tdType := tuple.GetTupleDescriptor().Name
 		tupleMap, found := tx.added[tdType]

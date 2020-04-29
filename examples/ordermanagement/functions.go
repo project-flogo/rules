@@ -7,9 +7,9 @@ import (
 
 	"github.com/project-flogo/rules/examples/ordermanagement/audittrail"
 
+	"github.com/project-flogo/core/support/log"
 	"github.com/project-flogo/rules/common/model"
 	"github.com/project-flogo/rules/config"
-	"github.com/project-flogo/core/support/log"
 )
 
 func init() {

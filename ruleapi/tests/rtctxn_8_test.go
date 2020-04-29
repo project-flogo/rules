@@ -30,9 +30,8 @@ func Test_T8(t *testing.T) {
 
 }
 
-
 func assertTuple(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
-	t, _:= model.NewTupleWithKeyValues("t1", "t2")
+	t, _ := model.NewTupleWithKeyValues("t1", "t2")
 	rs.Assert(ctx, t)
 }
 
@@ -43,7 +42,7 @@ func t8Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 		lA := len(m)
 		if lA != 1 {
 			t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 1, lA)
-			printTuples(t,"Added", rtxn.GetRtcAdded())
+			printTuples(t, "Added", rtxn.GetRtcAdded())
 		}
 	}
 	lM := len(rtxn.GetRtcModified())
@@ -54,6 +53,6 @@ func t8Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 	lD := len(rtxn.GetRtcDeleted())
 	if lD != 0 {
 		t.Errorf("RtcDeleted: Expected [%d], got [%d]\n", 0, lD)
-		printTuples(t,"Deleted", rtxn.GetRtcDeleted())
+		printTuples(t, "Deleted", rtxn.GetRtcDeleted())
 	}
 }
