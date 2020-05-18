@@ -39,6 +39,7 @@ type RuleDescriptor struct {
 	Conditions    []*ConditionDescriptor
 	ActionService *ActionServiceDescriptor
 	Priority      int
+	Identifiers   []string
 }
 
 // ConditionDescriptor defines a condition in a rule
@@ -46,6 +47,7 @@ type ConditionDescriptor struct {
 	Name        string
 	Identifiers []string
 	Evaluator   model.ConditionEvaluator
+	Expression  string
 }
 
 // ActionServiceDescriptor defines rule action service
@@ -71,6 +73,7 @@ func (c *RuleDescriptor) UnmarshalJSON(d []byte) error {
 		Conditions    []*ConditionDescriptor   `json:"conditions"`
 		ActionService *ActionServiceDescriptor `json:"actionService,omitempty"`
 		Priority      int                      `json:"priority"`
+		Identifiers   []string                 `json:"identifiers"`
 	}{}
 
 	if err := json.Unmarshal(d, ser); err != nil {
@@ -81,6 +84,7 @@ func (c *RuleDescriptor) UnmarshalJSON(d []byte) error {
 	c.Conditions = ser.Conditions
 	c.ActionService = ser.ActionService
 	c.Priority = ser.Priority
+	c.Identifiers = ser.Identifiers
 
 	return nil
 }
@@ -89,6 +93,14 @@ func (c *RuleDescriptor) UnmarshalJSON(d []byte) error {
 func (c *RuleDescriptor) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString("{")
 	buffer.WriteString("\"name\":" + "\"" + c.Name + "\",")
+	if c.Identifiers != nil {
+		buffer.WriteString("\"identifiers\":[")
+		for _, id := range c.Identifiers {
+			buffer.WriteString("\"" + id + "\",")
+		}
+		buffer.Truncate(buffer.Len() - 1)
+		buffer.WriteString("],")
+	}
 
 	buffer.WriteString("\"conditions\":[")
 	for _, condition := range c.Conditions {
@@ -115,6 +127,7 @@ func (c *ConditionDescriptor) UnmarshalJSON(d []byte) error {
 		Name        string   `json:"name"`
 		Identifiers []string `json:"identifiers"`
 		EvaluatorId string   `json:"evaluator"`
+		Expression  string   `json:"expression"`
 	}{}
 
 	if err := json.Unmarshal(d, ser); err != nil {
@@ -124,6 +137,7 @@ func (c *ConditionDescriptor) UnmarshalJSON(d []byte) error {
 	c.Name = ser.Name
 	c.Identifiers = ser.Identifiers
 	c.Evaluator = GetConditionEvaluator(ser.EvaluatorId)
+	c.Expression = ser.Expression
 
 	return nil
 }
@@ -132,15 +146,18 @@ func (c *ConditionDescriptor) UnmarshalJSON(d []byte) error {
 func (c *ConditionDescriptor) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString("{")
 	buffer.WriteString("\"name\":" + "\"" + c.Name + "\",")
-	buffer.WriteString("\"identifiers\":[")
-	for _, id := range c.Identifiers {
-		buffer.WriteString("\"" + id + "\",")
+	if c.Identifiers != nil {
+		buffer.WriteString("\"identifiers\":[")
+		for _, id := range c.Identifiers {
+			buffer.WriteString("\"" + id + "\",")
+		}
+		buffer.Truncate(buffer.Len() - 1)
+		buffer.WriteString("],")
 	}
-	buffer.Truncate(buffer.Len() - 1)
-	buffer.WriteString("],")
 
 	conditionEvaluatorID := GetConditionEvaluatorID(c.Evaluator)
-	buffer.WriteString("\"evaluator\":\"" + conditionEvaluatorID + "\"}")
+	buffer.WriteString("\"evaluator\":\"" + conditionEvaluatorID + "\",")
+	buffer.WriteString("\"expression\":\"" + c.Expression + "\"}")
 
 	return buffer.Bytes(), nil
 }

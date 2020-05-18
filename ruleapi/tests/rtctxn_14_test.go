@@ -86,14 +86,14 @@ func t14Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, ha
 			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 1, lA)
 			printTuples(t, "Added", rtxn.GetRtcAdded())
 		} else {
-			tuples, _ := rtxn.GetRtcAdded()["t1"]
+			tuples := rtxn.GetRtcAdded()["t1"]
 			if tuples != nil {
 				if len(tuples) != 2 {
 					t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 2, len(tuples))
 					printTuples(t, "Added", rtxn.GetRtcAdded())
 				}
 			}
-			tuples3, _ := rtxn.GetRtcAdded()["t3"]
+			tuples3 := rtxn.GetRtcAdded()["t3"]
 			if tuples3 != nil {
 				if len(tuples3) != 0 {
 					t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 0, len(tuples3))
@@ -118,14 +118,14 @@ func t14Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, ha
 			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 1, lA)
 			printTuples(t, "Added", rtxn.GetRtcAdded())
 		} else {
-			tuples, _ := rtxn.GetRtcAdded()["t1"]
+			tuples := rtxn.GetRtcAdded()["t1"]
 			if tuples != nil {
 				if len(tuples) != 0 {
 					t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 0, len(tuples))
 					printTuples(t, "Added", rtxn.GetRtcAdded())
 				}
 			}
-			tuples3, _ := rtxn.GetRtcAdded()["t3"]
+			tuples3 := rtxn.GetRtcAdded()["t3"]
 			if tuples3 != nil {
 				if len(tuples3) != 1 {
 					t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 1, len(tuples3))
@@ -150,14 +150,14 @@ func t14Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, ha
 			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 1, lA)
 			printTuples(t, "Added", rtxn.GetRtcAdded())
 		} else {
-			tuples, _ := rtxn.GetRtcAdded()["t1"]
+			tuples := rtxn.GetRtcAdded()["t1"]
 			if tuples != nil {
 				if len(tuples) != 0 {
 					t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 0, len(tuples))
 					printTuples(t, "Added", rtxn.GetRtcAdded())
 				}
 			}
-			tuples3, _ := rtxn.GetRtcAdded()["t3"]
+			tuples3 := rtxn.GetRtcAdded()["t3"]
 			if tuples3 != nil {
 				if len(tuples3) != 1 {
 					t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 1, len(tuples3))
@@ -170,14 +170,14 @@ func t14Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, ha
 			t.Errorf("RtcModified: Expected [%d], got [%d]\n", 1, lM)
 			printModified(t, rtxn.GetRtcModified())
 		} else {
-			tuples, _ := rtxn.GetRtcModified()["t1"]
+			tuples := rtxn.GetRtcModified()["t1"]
 			if tuples != nil {
 				if len(tuples) != 1 {
 					t.Errorf("RtcModified: Expected [%d], got [%d]\n", 1, len(tuples))
 					printModified(t, rtxn.GetRtcModified())
 				}
 			}
-			tuples3, _ := rtxn.GetRtcModified()["t3"]
+			tuples3 := rtxn.GetRtcModified()["t3"]
 			if tuples3 != nil {
 				if len(tuples3) != 0 {
 					t.Errorf("RtcModified: Expected [%d], got [%d]\n", 0, len(tuples3))

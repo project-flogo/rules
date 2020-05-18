@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	sRuleSession   = "rulesession"
-	sTupleDescFile = "tupleDescriptorFile"
-	ivValues       = "values"
+	// sRuleSession   = "rulesession"
+	// sTupleDescFile = "tupleDescriptorFile"
+	ivValues = "values"
 )
 
 var actionMetadata = action.ToMetadata(&Settings{})

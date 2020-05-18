@@ -39,13 +39,14 @@ func falseCondition(ruleName string, condName string, tuples map[model.TupleType
 	return false
 }
 func emptyAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+
 }
 
 func printTuples(t *testing.T, oprn string, tupleMap map[string]map[string]model.Tuple) {
 
 	for k, v := range tupleMap {
 		t.Logf("%s tuples for type [%s]\n", oprn, k)
-		for k1, _ := range v {
+		for k1 := range v {
 			t.Logf("    tuples key [%s]\n", k1)
 		}
 	}
@@ -54,7 +55,7 @@ func printModified(t *testing.T, modified map[string]map[string]model.RtcModifie
 
 	for k, v := range modified {
 		t.Logf("%s tuples for type [%s]\n", "Modified", k)
-		for k1, _ := range v {
+		for k1 := range v {
 			t.Logf("    tuples key [%s]\n", k1)
 		}
 	}
@@ -78,3 +79,5 @@ func createActionServiceFromFunction(t *testing.T, actionFunction model.ActionFu
 	assert.NotNil(t, aService)
 	return aService
 }
+
+type TestKey struct{}

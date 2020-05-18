@@ -43,14 +43,14 @@ func Test_Two(t *testing.T) {
 	//Start the rule session
 	rs.Start(nil)
 	t1, _ := model.NewTupleWithKeyValues("n1", "Tom")
-	rs.Assert(nil, t1)
+	rs.Assert(context.TODO(), t1)
 
 	t2, _ := model.NewTupleWithKeyValues("n1", "Bob")
-	rs.Assert(nil, t2)
+	rs.Assert(context.TODO(), t2)
 
 	//Retract tuples
-	rs.Retract(nil, t1)
-	rs.Retract(nil, t2)
+	rs.Retract(context.TODO(), t1)
+	rs.Retract(context.TODO(), t2)
 
 	if cnt, found := actionFireCount["count"]; found {
 		if cnt > 1 {

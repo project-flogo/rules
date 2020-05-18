@@ -260,3 +260,21 @@ and you should see this on the console
 Rule fired: [n1.name == Bob && n1.name == n2.name]
 n1.name = [Bob], n2.name = [Bob]
 ```
+### Test using env
+Stop and start your binary
+```
+name=testenv ./simplerules
+```
+
+From the command line send `curl localhost:7777/test/n1?name=testenv` you should see below output.
+```
+Rule fired: [env variable example]
+n1.name is [testenv]
+```
+
+### Test using property in flogo.json
+From the command line send `curl localhost:7777/test/n1?name=testprop` you should see below output.
+```
+Rule fired: [flogo property example]
+n1.name is [testprop]
+```

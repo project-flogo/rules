@@ -105,7 +105,7 @@ func t6Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 			t.Errorf("RtcAdded: Types expected [%d], got [%d]\n", 1, lA)
 			printTuples(t, "Added", rtxn.GetRtcAdded())
 		} else {
-			added, _ := rtxn.GetRtcAdded()["t1"]
+			added := rtxn.GetRtcAdded()["t1"]
 			if len(added) != 2 {
 				t.Errorf("RtcAdded: Tuples expected [%d], got [%d]\n", 2, len(added))
 				printTuples(t, "Added", rtxn.GetRtcAdded())

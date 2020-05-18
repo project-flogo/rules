@@ -26,16 +26,18 @@ type MutableRule interface {
 	SetActionService(actionService ActionService)
 	SetPriority(priority int)
 	SetContext(ctx RuleContext)
+	AddExprCondition(conditionName string, cExpr string, ctx RuleContext) error
+	AddIdrsToRule(idrs []TupleType)
 }
 
 //Condition interface to maintain/get various condition properties
 type Condition interface {
 	GetName() string
-	GetEvaluator() ConditionEvaluator
 	GetRule() Rule
 	GetIdentifiers() []TupleType
 	GetContext() RuleContext
 	String() string
+	Evaluate(string, string, map[TupleType]Tuple, RuleContext) (bool, error)
 }
 
 // RuleSession to maintain rules and assert tuples against those rules
@@ -71,6 +73,9 @@ type RuleSession interface {
 
 	//RtcTransactionHandler
 	RegisterRtcTransactionHandler(txnHandler RtcTransactionHandler, handlerCtx interface{})
+
+	//replay existing tuples into a rule
+	ReplayTuplesForRule(ruleName string) (err error)
 }
 
 //ConditionEvaluator is a function pointer for handling condition evaluations on the server side

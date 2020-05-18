@@ -58,26 +58,3 @@ func (m *ResourceManager) GetRuleActionDescriptor(uri string) (*RuleActionDescri
 
 	return nil, errors.New("cannot find RuleSession: " + uri)
 }
-
-//ioMetadata support
-/*
-type ActionResource struct {
-	IOMetadata *metadata.IOMetadata `json:"metadata"`
-}
-
-type ResManager struct {
-	IOMetadata *metadata.IOMetadata
-}
-
-func (m *ResManager) LoadResource(resConfig *resource.Config) (*resource.Resource, error) {
-
-	var res *ActionResource
-	err := json.Unmarshal(resConfig.Data, &res)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling metadata resource with id '%s', %s", resConfig.ID, err.Error())
-	}
-
-	m.IOMetadata = res.IOMetadata
-	return resource.New("ruleaction", m.IOMetadata), nil
-}
-*/

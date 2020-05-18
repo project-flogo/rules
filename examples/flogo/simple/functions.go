@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"github.com/project-flogo/rules/config"
 
 	"github.com/project-flogo/rules/common/model"
@@ -12,6 +13,8 @@ import (
 func init() {
 	config.RegisterActionFunction("checkForBobAction", checkForBobAction)
 	config.RegisterActionFunction("checkSameNamesAction", checkSameNamesAction)
+	config.RegisterActionFunction("envVarExampleAction", envVarExampleAction)
+	config.RegisterActionFunction("propertyExampleAction", propertyExampleAction)
 
 	config.RegisterConditionEvaluator("checkForBob", checkForBob)
 	config.RegisterConditionEvaluator("checkSameNamesCondition", checkSameNamesCondition)
@@ -69,6 +72,29 @@ func StartupRSFunction(ctx context.Context, rs model.RuleSession, startupCtx map
 	fmt.Printf("In startup rule function..\n")
 	t3, _ := model.NewTupleWithKeyValues("n1", "Bob")
 	t3.SetString(nil, "name", "Bob")
-	rs.Assert(nil, t3)
+	rs.Assert(context.TODO(), t3)
 	return nil
+}
+
+func envVarExampleAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+	fmt.Printf("Rule fired: [%s]\n", ruleName)
+	t1 := tuples["n1"]
+	if t1 == nil {
+		fmt.Println("Should not get nil tuples here in JoinCondition! This is an error")
+		return
+	} else {
+		nm, _ := t1.GetString("name")
+		fmt.Printf("n1.name is [%s]\n", nm)
+	}
+}
+func propertyExampleAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {
+	fmt.Printf("Rule fired: [%s]\n", ruleName)
+	t1 := tuples["n1"]
+	if t1 == nil {
+		fmt.Println("Should not get nil tuples here ! This is an error")
+		return
+	} else {
+		nm, _ := t1.GetString("name")
+		fmt.Printf("n1.name is [%s]\n", nm)
+	}
 }

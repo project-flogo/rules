@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"reflect"
+
 	"github.com/project-flogo/core/data/coerce"
 )
 
@@ -97,7 +98,7 @@ func (tk *tupleKeyImpl) GetProps() []string {
 }
 
 func (tk *tupleKeyImpl) GetValue(prop string) interface{} {
-	val, _ := tk.keys[prop]
+	val := tk.keys[prop]
 	return val
 }
 

@@ -45,7 +45,7 @@ func t4Handler(ctx context.Context, rs model.RuleSession, rtxn model.RtcTxn, han
 
 	} else {
 		//ok
-		tuples, _ := rtxn.GetRtcAdded()["t1"]
+		tuples := rtxn.GetRtcAdded()["t1"]
 		if tuples != nil {
 			if len(tuples) != 1 {
 				t.Errorf("RtcAdded: Expected [%d], got [%d]\n", 1, lA)

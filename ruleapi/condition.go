@@ -1,6 +1,8 @@
 package ruleapi
 
 import (
+	"strconv"
+
 	"github.com/project-flogo/rules/common/model"
 )
 
@@ -20,6 +22,10 @@ func newCondition(name string, rule model.Rule, identifiers []model.TupleType, c
 }
 
 func (cnd *conditionImpl) initConditionImpl(name string, rule model.Rule, identifiers []model.TupleType, cfn model.ConditionEvaluator, ctx model.RuleContext) {
+	if name == "" {
+		cndIdx := len(rule.GetConditions()) + 1
+		name = "c_" + strconv.Itoa(cndIdx)
+	}
 	cnd.name = name
 	cnd.rule = rule
 	cnd.identifiers = append(cnd.identifiers, identifiers...)
@@ -34,9 +40,9 @@ func (cnd *conditionImpl) GetContext() model.RuleContext {
 	return cnd.ctx
 }
 
-func (cnd *conditionImpl) GetEvaluator() model.ConditionEvaluator {
-	return cnd.cfn
-}
+//func (cnd *conditionImpl) GetEvaluator() model.ConditionEvaluator {
+//	return cnd.cfn
+//}
 
 func (cnd *conditionImpl) String() string {
 	return "[Condition: name:" + cnd.name + ", idrs: TODO]"
@@ -51,4 +57,13 @@ func (cnd *conditionImpl) GetRule() model.Rule {
 }
 func (cnd *conditionImpl) GetTupleTypeAlias() []model.TupleType {
 	return cnd.identifiers
+}
+
+func (cnd *conditionImpl) Evaluate(condName string, ruleNm string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) (bool, error) {
+	result := false
+	if cnd.cfn != nil {
+		result = cnd.cfn(condName, ruleNm, tuples, ctx)
+	}
+
+	return result, nil
 }

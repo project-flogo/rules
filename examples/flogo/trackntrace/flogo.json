@@ -3,6 +3,10 @@
   "type": "flogo:app",
   "version": "0.0.1",
   "appModel": "1.0.0",
+  "imports": [
+    "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/rules/ruleaction"
+  ],
   "triggers": [
     {
       "id": "receive_http_message",

@@ -103,7 +103,7 @@ func (cr *conflictResImpl) deleteAgendaFor(ctx context.Context, modifiedTuple mo
 				if changeProps != nil {
 					if depProps, found := item.getRule().GetDeps()[tuple.GetTupleType()]; found {
 						if len(depProps) > 0 {
-							for prop, _ := range depProps {
+							for prop := range depProps {
 								if _, fnd := changeProps[prop]; fnd {
 									toRemove = true
 									break

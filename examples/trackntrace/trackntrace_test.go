@@ -163,9 +163,9 @@ func TestDuplicateAssert(t *testing.T) {
 	}
 
 	pkgEvt2, _ := model.NewTupleWithKeyValues("package", "1")
-	pkgEvt2.SetString(nil, "curr", "sfo")
-	pkgEvt2.SetString(nil, "next", "ny")
-	pkgEvt2.SetString(nil, "status", "normal")
+	pkgEvt2.SetString(context.TODO(), "curr", "sfo")
+	pkgEvt2.SetString(context.TODO(), "next", "ny")
+	pkgEvt2.SetString(context.TODO(), "status", "normal")
 	ctx = context.WithValue(context.TODO(), TestKey{}, t)
 	err = rs.Assert(ctx, pkgEvt2)
 	if err == nil {
