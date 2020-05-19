@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/project-flogo/core/action"
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data"
 	"github.com/project-flogo/core/data/mapper"
@@ -23,7 +22,6 @@ type ruleActionService struct {
 	Type     string
 	Function model.ActionFunction
 	Act      activity.Activity
-	Action   action.Action
 	Input    map[string]interface{}
 }
 
@@ -74,28 +72,6 @@ func NewActionService(serviceCfg *config.ServiceDescriptor) (model.ActionService
 		}
 
 		raService.Act = act
-
-	case config.TypeServiceAction:
-		if serviceCfg.Ref[0] == '#' {
-			var ok bool
-			actionRef := serviceCfg.Ref
-			serviceCfg.Ref, ok = support.GetAliasRef("action", actionRef)
-			if !ok {
-				return nil, fmt.Errorf("action - '%s' not imported", actionRef)
-			}
-		}
-
-		actionFactory := action.GetFactory(serviceCfg.Ref)
-		if actionFactory == nil {
-			return nil, fmt.Errorf("factory not found for the action - '%s'", serviceCfg.Ref)
-		}
-
-		actionCfg := &action.Config{Settings: serviceCfg.Settings}
-		var err error
-		raService.Action, err = actionFactory.New(actionCfg)
-		if err != nil {
-			return nil, fmt.Errorf("not able create action - %s", err)
-		}
 	}
 
 	return raService, nil
@@ -153,35 +129,6 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 		}
 		// run activities Eval
 		return raService.Act.Eval(sContext)
-
-	case config.TypeServiceAction:
-		// resolve inputs from tuple scope
-		resolvedInputs, err := resolveExpFromTupleScope(tuples, raService.Input)
-		if err != nil {
-			return false, err
-		}
-
-		// check whether the action is sync action
-		syncAction, syncOk := raService.Action.(action.SyncAction)
-		if syncOk && syncAction != nil {
-			// sync action
-			results, err := syncAction.Run(ctx, resolvedInputs)
-			if err != nil {
-				return false, fmt.Errorf("error while running the action service[%s] - %s", raService.Name, err)
-			}
-			logger.Infof("service[%s] executed successfully. Service outputs: %s \n", raService.Name, results)
-			return true, nil
-		}
-
-		// check whether the action is async action
-		asyncAction, asyncOk := raService.Action.(action.AsyncAction)
-		if asyncOk && asyncAction != nil {
-			err := asyncAction.Run(ctx, resolvedInputs, &actionResultHandler{name: raService.Name})
-			if err != nil {
-				return false, fmt.Errorf("error while running the action service[%s] - %s", raService.Name, err)
-			}
-			return true, nil
-		}
 	}
 
 	return false, fmt.Errorf("service not executed, something went wrong")

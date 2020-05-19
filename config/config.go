@@ -11,12 +11,10 @@ import (
 )
 
 const (
-	// TypeServiceFunction function based rule service
+	// TypeServiceFunction represents go function based rule service
 	TypeServiceFunction = "function"
-	// TypeServiceActivity activity based rule service
+	// TypeServiceActivity represents flgo-activity based rule service
 	TypeServiceActivity = "activity"
-	// TypeServiceAction action based rule service
-	TypeServiceAction = "action"
 )
 
 // RuleSessionDescriptor is a collection of rules to be loaded
@@ -179,7 +177,7 @@ func (sd *ServiceDescriptor) UnmarshalJSON(d []byte) error {
 
 	sd.Name = ser.Name
 	sd.Description = ser.Description
-	if ser.Type == TypeServiceFunction || ser.Type == TypeServiceActivity || ser.Type == TypeServiceAction {
+	if ser.Type == TypeServiceFunction || ser.Type == TypeServiceActivity {
 		sd.Type = ser.Type
 	} else {
 		return fmt.Errorf("unsupported type - '%s' is referenced in the service '%s'", ser.Type, ser.Name)
