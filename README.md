@@ -40,7 +40,7 @@ A `Rule` constitutes of multiple Conditions and the rule triggers when all its c
 
 A `Condition` is an expression involving one or more tuple types. When the expression evaluates to true, the condition passes. In order to optimize a Rule's evaluation, the Rule network needs to know of the TupleTypes and the properties of the TupleType which participate in the `Condition` evaluation. These are provided when constructing the condition and adding it to the rule.
 
-A `actionService` can be either go-funtion or a flogo-activity, this gets invoked each time that a matching combination of tuples are found that result in a `true` evaluation of all its conditions. Those matching tuples are passed to the service.
+A `ActionService` can be either go-funtion or a flogo-activity, this gets invoked each time that a matching combination of tuples are found that result in a `true` evaluation of all its conditions. Those matching tuples are passed to the service.
 
 A `RuleSession` is a handle to interact with the rules API. You can create and register multiple rule sessions. Rule sessions are silos for the data that they hold, they are similar to namespaces. Sharing objects/state across rule sessions is not supported.
  
@@ -72,6 +72,7 @@ Next create a `RuleSession` and add all the `Rule`s with their `Condition`s and 
 	rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
 	serviceCfg := &config.ServiceDescriptor{
 		Name:     "checkForBobAction",
+		Type:     config.TypeServiceFunction,
 		Function: checkForBobAction,
 	}
 	aService, _ := ruleapi.NewActionService(serviceCfg)
@@ -87,6 +88,7 @@ Next create a `RuleSession` and add all the `Rule`s with their `Condition`s and 
 	rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, nil)
 	serviceCfg2 := &config.ServiceDescriptor{
 		Name:     "checkSameNamesAction",
+		Type:     config.TypeServiceFunction,
 		Function: checkSameNamesAction,
 	}
 	aService2, _ := ruleapi.NewActionService(serviceCfg2)
