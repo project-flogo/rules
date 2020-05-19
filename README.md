@@ -40,7 +40,7 @@ A `Rule` constitutes of multiple Conditions and the rule triggers when all its c
 
 A `Condition` is an expression involving one or more tuple types. When the expression evaluates to true, the condition passes. In order to optimize a Rule's evaluation, the Rule network needs to know of the TupleTypes and the properties of the TupleType which participate in the `Condition` evaluation. These are provided when constructing the condition and adding it to the rule.
 
-A `Action` is a function that is invoked each time that a matching combination of tuples are found that result in a `true` evaluation of all its conditions. Those matching tuples are passed to the action function.
+A `actionService` can be either go-funtion or a flogo-activity, this gets invoked each time that a matching combination of tuples are found that result in a `true` evaluation of all its conditions. Those matching tuples are passed to the service.
 
 A `RuleSession` is a handle to interact with the rules API. You can create and register multiple rule sessions. Rule sessions are silos for the data that they hold, they are similar to namespaces. Sharing objects/state across rule sessions is not supported.
  
@@ -70,7 +70,12 @@ Next create a `RuleSession` and add all the `Rule`s with their `Condition`s and 
 	//// check for name "Bob" in n1
 	rule := ruleapi.NewRule("n1.name == Bob")
 	rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
-	rule.SetAction(checkForBobAction)
+	serviceCfg := &config.ServiceDescriptor{
+		Name:     "checkForBobAction",
+		Function: checkForBobAction,
+	}
+	aService, _ := ruleapi.NewActionService(serviceCfg)
+	rule.SetActionService(aService)
 	rule.SetContext("This is a test of context")
 	rs.AddRule(rule)
 	fmt.Printf("Rule added: [%s]\n", rule.GetName())
@@ -80,12 +85,16 @@ Next create a `RuleSession` and add all the `Rule`s with their `Condition`s and 
 	rule2 := ruleapi.NewRule("n1.name == Bob && n1.name == n2.name")
 	rule2.AddCondition("c1", []string{"n1"}, checkForBob, nil)
 	rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, nil)
-	rule2.SetAction(checkSameNamesAction)
+	serviceCfg2 := &config.ServiceDescriptor{
+		Name:     "checkSameNamesAction",
+		Function: checkSameNamesAction,
+	}
+	aService2, _ := ruleapi.NewActionService(serviceCfg2)
+	rule.SetActionService(aService2)
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
-	
-	//Finally, start the rule session before asserting tuples
-	//Your startup function, if registered will be invoked here
+
+	//Start the rule session
 	rs.Start(nil)
 
 Here we create and assert the actual `Tuple's` which will be evaluated against the `Rule's` `Condition's` defined above.

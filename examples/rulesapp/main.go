@@ -18,7 +18,6 @@ func main() {
 	tupleDescAbsFileNm := common.GetAbsPathForResource("src/github.com/project-flogo/rules/examples/rulesapp/rulesapp.json")
 	tupleDescriptor := common.FileToString(tupleDescAbsFileNm)
 
-	fmt.Printf("Loaded tuple descriptor: \n%s\n", tupleDescriptor)
 	//First register the tuple descriptors
 	err := model.RegisterTupleDescriptors(tupleDescriptor)
 	if err != nil {
@@ -34,6 +33,7 @@ func main() {
 	rule.AddCondition("c1", []string{"n1"}, checkForBob, nil)
 	serviceCfg := &config.ServiceDescriptor{
 		Name:     "checkForBobAction",
+		Type:     config.TypeServiceFunction,
 		Function: checkForBobAction,
 	}
 	aService, _ := ruleapi.NewActionService(serviceCfg)
@@ -49,10 +49,11 @@ func main() {
 	rule2.AddCondition("c2", []string{"n1", "n2"}, checkSameNamesCondition, nil)
 	serviceCfg2 := &config.ServiceDescriptor{
 		Name:     "checkSameNamesAction",
+		Type:     config.TypeServiceFunction,
 		Function: checkSameNamesAction,
 	}
 	aService2, _ := ruleapi.NewActionService(serviceCfg2)
-	rule.SetActionService(aService2)
+	rule2.SetActionService(aService2)
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
