@@ -122,6 +122,31 @@
             "actionService": {
               "service": "FunctionService1"
             }
+          },
+          {
+            "name": "env variable example",
+            "conditions": [
+              {
+                "expression" : "($.n1.name == $env['simpleappname'])"
+              }
+            ],
+            "actionService": {
+              "service": "envVarExampleAction"
+            }
+          },
+          {
+            "name": "flogo property example",
+            "identifiers": [
+              "n1"
+            ],
+            "conditions": [
+              {
+                "expression" : "($.n1.name == $property['name'])"
+              }
+            ],
+            "actionService": {
+              "service": "propertyExampleAction"
+            }
           }
         ],
         "services": [
@@ -136,6 +161,18 @@
             "description": "function service for checkSameNamesAction",
             "type": "function",
             "function": "checkSameNamesAction"
+          },
+          {
+            "name": "envVarExampleAction",
+            "description": "function service for envVarExampleAction",
+            "type": "function",
+            "function": "envVarExampleAction"
+          },
+          {
+            "name": "propertyExampleAction",
+            "description": "function service for propertyExampleAction",
+            "type": "function",
+            "function": "propertyExampleAction"
           }
         ]
       }
