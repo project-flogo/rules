@@ -100,7 +100,6 @@ func example() error {
 	if err != nil {
 		return err
 	}
-	
 
 	//Now assert a "n1" tuple
 	t2, err := model.NewTupleWithKeyValues("n1", "Bob")
@@ -159,7 +158,7 @@ func example() error {
 	if events["checkSameNamesAction"] != 1 {
 		return fmt.Errorf("checkSameNamesAction should have been called once")
 	}
-	
+
 	return nil
 }
 

@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	_ "github.com/project-flogo/core/data/expression/script"
 	"github.com/project-flogo/core/engine"
 	"github.com/project-flogo/rules/ruleapi/tests"
 

@@ -22,7 +22,7 @@ func TestNewActionService(t *testing.T) {
 
 	// unsupported service type
 	cfg.Type = "unknowntype"
-	aService, err = NewActionService(cfg)
+	_, err = NewActionService(cfg)
 	assert.NotNil(t, err)
 	assert.Equal(t, "service type - 'unknowntype' is not supported", err.Error())
 

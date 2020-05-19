@@ -133,17 +133,3 @@ func (raService *ruleActionService) Execute(ctx context.Context, rs model.RuleSe
 
 	return false, fmt.Errorf("service not executed, something went wrong")
 }
-
-type actionResultHandler struct {
-	name string
-}
-
-// HandleResult is invoked when there are results available
-func (arh *actionResultHandler) HandleResult(results map[string]interface{}, err error) {
-	logger.Infof("service[%s] outputs: %s \n", arh.name, results)
-}
-
-// Done indicates that the action has completed
-func (arh *actionResultHandler) Done() {
-	logger.Infof("service[%s] executed successfully asynchronously\n", arh.name)
-}
