@@ -270,46 +270,55 @@
           {
             "name": "FunctionService",
             "description": "function service for aPackageInSitting",
+            "type": "function",
             "function": "aPackageInSitting"
           },
           {
             "name": "FunctionService1",
             "description": "function service for aPackageInDelayed",
+            "type": "function",
             "function": "aPackageInDelayed"
           },
           {
             "name": "FunctionService2",
             "description": "function service for aPackageInMoving",
+            "type": "function",
             "function": "aPackageInMoving"
           },
           {
             "name": "FunctionService3",
             "description": "function service for aPackageInDropped",
+            "type": "function",
             "function": "aPackageInDropped"
           },
           {
             "name": "FunctionService4",
             "description": "function service for aPrintPackage",
+            "type": "function",
             "function": "aPrintPackage"
           },
           {
             "name": "FunctionService5",
             "description": "function service for aPrintMoveEvent",
+            "type": "function",
             "function": "aPrintMoveEvent"
           },
           {
             "name": "FunctionService6",
             "description": "function service for aJoinMoveEventAndPackage",
+            "type": "function",
             "function": "aJoinMoveEventAndPackage"
           },
           {
             "name": "FunctionService7",
             "description": "function service for aMoveTimeoutEvent",
+            "type": "function",
             "function": "aMoveTimeoutEvent"
           },
           {
             "name": "FunctionService8",
             "description": "function service for aJoinMoveTimeoutEventAndPackage",
+            "type": "function",
             "function": "aJoinMoveTimeoutEventAndPackage"
           }
         ]

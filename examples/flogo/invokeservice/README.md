@@ -31,29 +31,7 @@ You should see following output:
 Rule[n1.name == function] fired. serviceFunctionAction() function got invoked.
 ```
 
-#### #2 Invoke flogo async action (Ex: flow action) based service
-
-Send a curl request
-`curl http://localhost:7777/test/n1?name=asyncaction`
-You should see following output:
-```
-2019-08-20T09:57:46.780+0530	INFO	[flogo.activity.log] -	asyncaction
-2019-08-20T09:57:46.781+0530	INFO	[flogo.rules] -	service[ServiceFlowAction] outputs: map[] 
-
-2019-08-20T09:57:46.781+0530	INFO	[flogo.flow] -	Instance [39470b3be53593aa827043a05086504f] Done
-2019-08-20T09:57:46.781+0530	INFO	[flogo.rules] -	service[ServiceFlowAction] executed successfully asynchronously
-```
-
-#### #3 Invoke flogo sync action based service
-Send a curl request
-`curl http://localhost:7777/test/n1?name=syncaction`
-You should see following output:
-```
-2019-08-20T09:58:21.090+0530	INFO	[flogo] -	Input: syncaction
-2019-08-20T09:58:21.090+0530	INFO	[flogo.rules] -	service[ServiceCoreAction] executed successfully. Service outputs: map[anOutput:syncaction] 
-```
-
-#### #4 Invoke activity based service
+#### #2 Invoke activity based service
 Send a curl request
 `curl http://localhost:7777/test/n1?name=activity`
 You should see following output:

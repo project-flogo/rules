@@ -129,11 +129,13 @@
           {
             "name": "FunctionService",
             "description": "function service for groceryAction",
+            "type": "function",
             "function": "groceryAction"
           },
           {
             "name": "FunctionService1",
             "description": "function service",
+            "type": "function",
             "function": "furnitureAction"
           }
         ]

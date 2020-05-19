@@ -6,7 +6,6 @@
   "appModel": "1.0.0",
   "imports": [
     "github.com/project-flogo/contrib/trigger/rest",
-    "github.com/project-flogo/core/examples/action",
     "github.com/project-flogo/rules/ruleaction",
     "github.com/project-flogo/contrib/activity/log",
     "github.com/project-flogo/flow"
@@ -95,42 +94,6 @@
                 "message": "=$.n1.name"
               }
             }
-          },
-          {
-            "name": "n1.name == syncaction",
-            "conditions": [
-              {
-                "name": "c1",
-                "identifiers": [
-                  "n1"
-                ],
-                "evaluator": "cServiceSyncAction"
-              }
-            ],
-            "actionService": {
-              "service": "ServiceCoreAction",
-              "input": {
-                "anInput": "=$.n1.name"
-              }
-            }
-          },        
-          {
-            "name": "n1.name == asyncaction",
-            "conditions": [
-              {
-                "name": "c1",
-                "identifiers": [
-                  "n1"
-                ],
-                "evaluator": "cServiceASyncAction"
-              }
-            ],
-            "actionService": {
-              "service": "ServiceFlowAction",
-              "input": {
-                "message": "=$.n1.name"
-              }
-            }
           }
         ],
         "services": [
@@ -145,24 +108,6 @@
             "description": "log activity service",
             "type": "activity",
             "ref": "github.com/project-flogo/contrib/activity/log"
-          },
-          {
-            "name": "ServiceCoreAction",
-            "description": "synchronous action service",
-            "type": "action",
-            "ref": "github.com/project-flogo/core/examples/action",
-            "settings": {
-              "aSetting": "test setting"
-            }
-          },
-          {
-            "name": "ServiceFlowAction",
-            "description": "Asynchronous flow action service",
-            "type": "action",
-            "ref": "github.com/project-flogo/flow",
-            "settings": {
-              "flowURI": "res://flow:sample_flow"
-            }
           }
         ]
       }

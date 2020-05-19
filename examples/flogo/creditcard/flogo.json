@@ -176,26 +176,31 @@
           {
             "name": "FunctionService",
             "description": "function service for aBadUser",
+            "type": "function",
             "function": "aBadUser"
           },
           {
             "name": "FunctionService1",
             "description": "function service for aNewUser",
+            "type": "function",
             "function": "aNewUser"
           },
           {
             "name": "FunctionService2",
             "description": "function service for aApproveWithLowerLimit",
+            "type": "function",
             "function": "aApproveWithLowerLimit"
           },
           {
             "name": "FunctionService3",
             "description": "function service for aApproveWithHigherLimit",
+            "type": "function",
             "function": "aApproveWithHigherLimit"
           },
           {
             "name": "FunctionService4",
             "description": "function service for aUserReject",
+            "type": "function",
             "function": "aUserReject"
           }
         ]

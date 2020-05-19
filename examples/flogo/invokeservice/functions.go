@@ -15,14 +15,11 @@ func init() {
 
 	config.RegisterConditionEvaluator("cServiceFunction", cServiceFunction)
 	config.RegisterConditionEvaluator("cServiceActivity", cServiceActivity)
-	config.RegisterConditionEvaluator("cServiceSyncAction", cServiceSyncAction)
-	config.RegisterConditionEvaluator("cServiceASyncAction", cServiceASyncAction)
 
 	config.RegisterStartupRSFunction("simple", StartupRSFunction)
 }
 
 func cServiceFunction(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-	//This conditions filters on name="Tom"
 	t1 := tuples["n1"]
 	if t1 == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
@@ -33,7 +30,6 @@ func cServiceFunction(ruleName string, condName string, tuples map[model.TupleTy
 }
 
 func cServiceActivity(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-	//This conditions filters on name="Bob"
 	t1 := tuples["n1"]
 	if t1 == nil {
 		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
@@ -41,28 +37,6 @@ func cServiceActivity(ruleName string, condName string, tuples map[model.TupleTy
 	}
 	name, _ := t1.GetString("name")
 	return name == "activity"
-}
-
-func cServiceSyncAction(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-	//This conditions filters on name="Tom"
-	t1 := tuples["n1"]
-	if t1 == nil {
-		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
-		return false
-	}
-	name, _ := t1.GetString("name")
-	return name == "syncaction"
-}
-
-func cServiceASyncAction(ruleName string, condName string, tuples map[model.TupleType]model.Tuple, ctx model.RuleContext) bool {
-	//This conditions filters on name="Michael"
-	t1 := tuples["n1"]
-	if t1 == nil {
-		fmt.Println("Should not get a nil tuple in FilterCondition! This is an error")
-		return false
-	}
-	name, _ := t1.GetString("name")
-	return name == "asyncaction"
 }
 
 func serviceFunctionAction(ctx context.Context, rs model.RuleSession, ruleName string, tuples map[model.TupleType]model.Tuple, ruleCtx model.RuleContext) {

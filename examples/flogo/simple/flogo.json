@@ -128,11 +128,13 @@
           {
             "name": "FunctionService",
             "description": "function service for checkForBobAction",
+            "type": "function",
             "function": "checkForBobAction"
           },
           {
             "name": "FunctionService1",
             "description": "function service for checkSameNamesAction",
+            "type": "function",
             "function": "checkSameNamesAction"
           }
         ]
