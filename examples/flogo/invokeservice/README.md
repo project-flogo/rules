@@ -9,7 +9,7 @@ Once you have the `flogo.json` file and a `functions.go` file, you are ready to 
 
 ```sh
 cd $GOPATH/src/github.com/project-flogo/rules/examples/flogo/invokeservice
-flogo create -f flogo.json
+flogo create -f flogo.json invokeservice
 cp functions.go ./invokeservice/src
 cd invokeservice
 flogo build

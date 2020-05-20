@@ -92,7 +92,7 @@ Next create a `RuleSession` and add all the `Rule`s with their `Condition`s and 
 		Function: checkSameNamesAction,
 	}
 	aService2, _ := ruleapi.NewActionService(serviceCfg2)
-	rule.SetActionService(aService2)
+	rule2.SetActionService(aService2)
 	rs.AddRule(rule2)
 	fmt.Printf("Rule added: [%s]\n", rule2.GetName())
 
