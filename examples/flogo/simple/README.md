@@ -15,13 +15,24 @@
 
 ## Steps to configure and build a Rules based Flogo App
 Below is the `flogo.json` file used in this example application. We will use this example to explain the configuration and setup of a Flogo/Rules App
-```
+```json
 {
   "name": "simplerules",
   "type": "flogo:app",
   "version": "0.0.1",
   "description": "Sample Flogo App",
   "appModel": "1.0.0",
+  "imports": [
+    "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/rules/ruleaction"
+  ],
+  "properties": [
+    {
+      "name": "name",
+      "type": "string",
+      "value": "testprop"
+    }
+  ],
   "triggers": [
     {
       "id": "receive_http_message",
@@ -30,31 +41,16 @@ Below is the `flogo.json` file used in this example application. We will use thi
         "port": "7777"
       },
       "handlers": [
-        {   
-          "settings": {
-            "method": "GET",
-            "path": "/test/n1"
-          },
-          "actions": [
-            {
-              "id": "simple_rule",
-              "input": {
-                "tupletype": "n1",
-                "values": "=$.queryParams"
-              }
-            }
-          ]
-        },
         {
           "settings": {
             "method": "GET",
-            "path": "/test/n2"
+            "path": "/test/:tupleType"
           },
           "actions": [
             {
               "id": "simple_rule",
               "input": {
-                "tupletype": "n2",
+                "tupletype": "=$.pathParams.tupleType",
                 "values": "=$.queryParams"
               }
             }
@@ -110,10 +106,10 @@ Below is the `flogo.json` file used in this example application. We will use thi
             }
           ],
           "output": [
-             {
-               "name": "outputData",
-               "type": "any"
-             }
+            {
+              "name": "outputData",
+              "type": "any"
+            }
           ]
         },
         "rules": [
@@ -121,41 +117,49 @@ Below is the `flogo.json` file used in this example application. We will use thi
             "name": "n1.name == Bob",
             "conditions": [
               {
-                "name": "c1",
-                "identifiers": [
-                  "n1"
-                ],
-                "evaluator": "checkForBob"
+                "expression" : "$.n1.name == 'Bob'"
               }
             ],
-            "actionFunction": "checkForBobAction"
+            "actionService": {
+              "service": "FunctionService"
+            }
           },
           {
             "name": "n1.name == Bob \u0026\u0026 n1.name == n2.name",
             "conditions": [
               {
-                "name": "c1",
                 "identifiers": [
                   "n1"
                 ],
                 "evaluator": "checkForBob"
               },
               {
-                "name": "c2",
-                "identifiers": [
-                  "n1",
-                  "n2"
-                ],
-                "evaluator": "checkSameNamesCondition"
+                "expression" : "($.n1.name == 'Bob') \u0026\u0026 ($.n1.name == $.n2.name)"
               }
             ],
-            "actionFunction": "checkSameNamesAction"
+            "actionService": {
+              "service": "FunctionService1"
+            }
+          }
+        ],
+        "services": [
+          {
+            "name": "FunctionService",
+            "description": "function service for checkForBobAction",
+            "type": "function",
+            "function": "checkForBobAction"
+          },
+          {
+            "name": "FunctionService1",
+            "description": "function service for checkSameNamesAction",
+            "type": "function",
+            "function": "checkSameNamesAction"
           }
         ]
       }
     }
   ]
-}
+} 
 ``` 
 ## Action configuration
 First configure the top level `actions` section. Here, the tags `id`, `ruleSessionURI` and `tds` are user configurable.
@@ -179,8 +183,9 @@ under `identifiers`. These identifiers should be one of `tds/names` defined in t
 be an unique string. This string will bind to a Go function at runtime (explained later)
 Note how you can have multiple conditions (See the second condition in the example above)
 
-The `actionFunction` is your rule's action. It means that when the `evaluator` condition is met, invoke this function
-Again, this is a unique string whose value binds to a Go function at runtime (explained later)
+The `actionService` is your rule's action. It means that when the `evaluator` condition is met, this service
+gets invoked which will call either a go-funtion or flogo-activity as defined under the `service` section.
+In this example if `checkForBob` and expression `($.n1.name == 'Bob') \u0026\u0026 ($.n1.name == $.n2.name)` are true then service named `FunctionService` gets invoked (i.e go-function named `checkForBobAction`).
 
 ## Configure the trigger handler
 Flogo users are perhaps already familiar with the trigger configurations. 
@@ -216,6 +221,8 @@ corresponding string tokens defined in the `resources/rules/conditions/evaluator
 func init() {
 	config.RegisterActionFunction("checkForBobAction", checkForBobAction)
 	config.RegisterActionFunction("checkSameNamesAction", checkSameNamesAction)
+	config.RegisterActionFunction("envVarExampleAction", envVarExampleAction)
+	config.RegisterActionFunction("propertyExampleAction", propertyExampleAction)
 
 	config.RegisterConditionEvaluator("checkForBob", checkForBob)
 	config.RegisterConditionEvaluator("checkSameNamesCondition", checkSameNamesCondition)

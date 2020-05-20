@@ -15,7 +15,7 @@ func Test_T5(t *testing.T) {
 
 	rule := ruleapi.NewRule("R5")
 	rule.AddCondition("R5_c1", []string{"t1.none"}, trueCondition, nil)
-	rule.SetAction(r5_action)
+	rule.SetActionService(createActionServiceFromFunction(t, r5_action))
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())

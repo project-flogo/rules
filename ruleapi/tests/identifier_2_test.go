@@ -19,7 +19,7 @@ func Test_I2(t *testing.T) {
 
 	rule := ruleapi.NewRule("I21")
 	rule.AddCondition("I2_c1", []string{"t1.none", "t2.none"}, trueCondition, nil)
-	rule.SetAction(i21_action)
+	rule.SetActionService(createActionServiceFromFunction(t, i21_action))
 	rule.SetPriority(1)
 	//rule.SetContext(actionMap)
 	rs.AddRule(rule)
@@ -27,7 +27,7 @@ func Test_I2(t *testing.T) {
 
 	rule1 := ruleapi.NewRule("I22")
 	rule1.AddCondition("I2_c2", []string{"t1.none", "t3.none"}, trueCondition, nil)
-	rule1.SetAction(i22_action)
+	rule1.SetActionService(createActionServiceFromFunction(t, i22_action))
 	rule1.SetPriority(1)
 	//rule.SetContext(actionMap)
 	rs.AddRule(rule1)
@@ -35,7 +35,7 @@ func Test_I2(t *testing.T) {
 
 	rule2 := ruleapi.NewRule("I23")
 	rule2.AddCondition("I2_c3", []string{"t2.none", "t3.none"}, trueCondition, nil)
-	rule2.SetAction(i23_action)
+	rule2.SetActionService(createActionServiceFromFunction(t, i23_action))
 	rule2.SetPriority(1)
 	//rule.SetContext(actionMap)
 	rs.AddRule(rule2)
@@ -43,7 +43,7 @@ func Test_I2(t *testing.T) {
 
 	rule3 := ruleapi.NewRule("I24")
 	rule3.AddCondition("I2_c4", []string{"t1.none", "t2.none", "t3.none"}, trueCondition, nil)
-	rule3.SetAction(i24_action)
+	rule3.SetActionService(createActionServiceFromFunction(t, i24_action))
 	rule3.SetPriority(1)
 	//rule.SetContext(actionMap)
 	rs.AddRule(rule3)

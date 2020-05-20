@@ -22,7 +22,7 @@ func Test_Retract_1(t *testing.T) {
 	}
 	ruleActionCtx := make(map[string]string)
 	rule.SetContext(ruleActionCtx)
-	rule.SetAction(assertAction)
+	rule.SetActionService(createActionServiceFromFunction(t, assertAction))
 	rule.SetPriority(1)
 	err = rs.AddRule(rule)
 	if err != nil {

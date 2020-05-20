@@ -15,14 +15,14 @@ func Test_T11(t *testing.T) {
 
 	rule := ruleapi.NewRule("R11")
 	rule.AddCondition("R11_c1", []string{"t1.none"}, trueCondition, nil)
-	rule.SetAction(r11_action)
+	rule.SetActionService(createActionServiceFromFunction(t, r11_action))
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rule1 := ruleapi.NewRule("R112")
 	rule1.AddCondition("R112_c1", []string{"t1.none"}, trueCondition, nil)
-	rule1.SetAction(r112_action)
+	rule1.SetActionService(createActionServiceFromFunction(t, r112_action))
 	rule1.SetPriority(1)
 	rs.AddRule(rule1)
 	t.Logf("Rule added: [%s]\n", rule1.GetName())

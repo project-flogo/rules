@@ -24,7 +24,7 @@ func Test_One(t *testing.T) {
 	//// rule 1
 	r1 := ruleapi.NewRule("R1")
 	r1.AddCondition("C1", []string{"t1"}, checkC1, nil)
-	r1.SetAction(actionA1)
+	r1.SetActionService(createActionServiceFromFunction(t, actionA1))
 	r1.SetPriority(1)
 	r1.SetContext(actionMap)
 
@@ -33,7 +33,7 @@ func Test_One(t *testing.T) {
 	// rule 2
 	r2 := ruleapi.NewRule("R2")
 	r2.AddCondition("C2", []string{"t1"}, checkC2, nil)
-	r2.SetAction(actionA2)
+	r2.SetActionService(createActionServiceFromFunction(t, actionA2))
 	r2.SetPriority(2)
 	r2.SetContext(actionMap)
 
@@ -42,7 +42,7 @@ func Test_One(t *testing.T) {
 	// rule 3
 	r3 := ruleapi.NewRule("R3")
 	r3.AddCondition("C3", []string{"t1"}, checkC3, nil)
-	r3.SetAction(actionA3)
+	r3.SetActionService(createActionServiceFromFunction(t, actionA3))
 	r3.SetPriority(3)
 	r3.SetContext(actionMap)
 

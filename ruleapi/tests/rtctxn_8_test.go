@@ -16,7 +16,7 @@ func Test_T8(t *testing.T) {
 	rule := ruleapi.NewRule("R1")
 	rule.AddCondition("R1_c1", []string{"t1.none"}, trueCondition, nil)
 	rule.AddCondition("R1_c2", []string{}, falseCondition, nil)
-	rule.SetAction(assertTuple)
+	rule.SetActionService(createActionServiceFromFunction(t, assertTuple))
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())

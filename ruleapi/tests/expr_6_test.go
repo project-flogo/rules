@@ -22,7 +22,7 @@ func Test_6_Expr(t *testing.T) {
 	rs, _ := createRuleSession()
 	r1 := ruleapi.NewRule("r1")
 	r1.AddExprCondition("c1", "($.t1.p3 == $env['name_rules_test_6'])", nil)
-	r1.SetAction(a6)
+	r1.SetActionService(createActionServiceFromFunction(t, a6))
 	r1.SetContext(actionCount)
 
 	rs.AddRule(r1)

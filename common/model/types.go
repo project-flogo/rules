@@ -12,7 +12,7 @@ type Rule interface {
 	GetName() string
 	GetIdentifiers() []TupleType
 	GetConditions() []Condition
-	GetActionFn() ActionFunction
+	GetActionService() ActionService
 	String() string
 	GetPriority() int
 	GetDeps() map[TupleType]map[string]bool
@@ -23,7 +23,7 @@ type Rule interface {
 type MutableRule interface {
 	Rule
 	AddCondition(conditionName string, idrs []string, cFn ConditionEvaluator, ctx RuleContext) (err error)
-	SetAction(actionFn ActionFunction)
+	SetActionService(actionService ActionService)
 	SetPriority(priority int)
 	SetContext(ctx RuleContext)
 	AddExprCondition(conditionName string, cExpr string, ctx RuleContext) error
@@ -85,6 +85,12 @@ type ConditionEvaluator func(string, string, map[TupleType]Tuple, RuleContext) b
 //ActionFunction is a function pointer for handling action callbacks on the server side
 //i.e part of the server side API
 type ActionFunction func(context.Context, RuleSession, string, map[TupleType]Tuple, RuleContext)
+
+// ActionService action service
+type ActionService interface {
+	SetInput(input map[string]interface{})
+	Execute(context.Context, RuleSession, string, map[TupleType]Tuple, RuleContext) (done bool, err error)
+}
 
 //StartupRSFunction is called once after creation of a RuleSession
 type StartupRSFunction func(ctx context.Context, rs RuleSession, sessionCtx map[string]interface{}) (err error)

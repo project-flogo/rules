@@ -105,7 +105,9 @@
                 "evaluator": "checkForGrocery"
               }
             ],
-            "actionFunction": "groceryAction"
+            "actionService": {
+              "service": "FunctionService"
+            }
           },
           {
             "name": "furnitureCheckRule",
@@ -118,7 +120,23 @@
                 "evaluator": "checkForFurniture"
               }
             ],
-            "actionFunction": "furnitureAction"
+            "actionService": {
+              "service": "FunctionService1"
+            }
+          }
+        ],
+        "services": [
+          {
+            "name": "FunctionService",
+            "description": "function service for groceryAction",
+            "type": "function",
+            "function": "groceryAction"
+          },
+          {
+            "name": "FunctionService1",
+            "description": "function service",
+            "type": "function",
+            "function": "furnitureAction"
           }
         ]
       }
