@@ -24,7 +24,7 @@ func Test_7_Expr(t *testing.T) {
 	r1 := ruleapi.NewRule("r1")
 	r1.AddExprCondition("c1", "($.t1.p3 == $property['name'])", nil)
 	r1.AddExprCondition("c2", "($.t1.p1 == $property['age'])", nil)
-	r1.SetAction(a7)
+	r1.SetActionService(createActionServiceFromFunction(t, a7))
 	r1.SetContext(actionCount)
 
 	rs.AddRule(r1)

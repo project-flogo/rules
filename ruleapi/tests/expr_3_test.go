@@ -15,7 +15,7 @@ func Test_3_Expr(t *testing.T) {
 	rs, _ := createRuleSession()
 	r1 := ruleapi.NewRule("r1")
 	r1.AddExprCondition("c1", "($.t1.p1 > $.t2.p1) && ($.t1.p2 > $.t2.p2)", nil)
-	r1.SetAction(a3)
+	r1.SetActionService(createActionServiceFromFunction(t, a3))
 	r1.SetContext(actionCount)
 
 	rs.AddRule(r1)

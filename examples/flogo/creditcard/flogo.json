@@ -83,7 +83,9 @@
                 "evaluator": "cBadUser"
               }
             ],
-            "actionFunction": "aBadUser"
+            "actionService": {
+              "service": "FunctionService"
+            }
           },
           {
             "name": "NewUser",
@@ -96,7 +98,9 @@
                 "evaluator": "cNewUser"
               }
             ],
-            "actionFunction": "aNewUser"
+            "actionService": {
+              "service": "FunctionService1"
+            }
           },
           {
             "name": "NewUser1",
@@ -117,7 +121,9 @@
                 "evaluator": "cUserCreditScore"
               }
             ],
-            "actionFunction": "aApproveWithLowerLimit"
+            "actionService": {
+              "service": "FunctionService2"
+            }
           },
           {
             "name": "NewUser2",
@@ -138,7 +144,9 @@
                 "evaluator": "cUserHighCreditScore"
               }
             ],
-            "actionFunction": "aApproveWithHigherLimit"
+            "actionService": {
+              "service": "FunctionService3"
+            }
           },
           {
             "name": "Rejected",
@@ -159,7 +167,41 @@
                 "evaluator": "cUserLowCreditScore"
               }
             ],
-            "actionFunction": "aUserReject"
+            "actionService": {
+              "service": "FunctionService4"
+            }
+          }
+        ],
+        "services": [
+          {
+            "name": "FunctionService",
+            "description": "function service for aBadUser",
+            "type": "function",
+            "function": "aBadUser"
+          },
+          {
+            "name": "FunctionService1",
+            "description": "function service for aNewUser",
+            "type": "function",
+            "function": "aNewUser"
+          },
+          {
+            "name": "FunctionService2",
+            "description": "function service for aApproveWithLowerLimit",
+            "type": "function",
+            "function": "aApproveWithLowerLimit"
+          },
+          {
+            "name": "FunctionService3",
+            "description": "function service for aApproveWithHigherLimit",
+            "type": "function",
+            "function": "aApproveWithHigherLimit"
+          },
+          {
+            "name": "FunctionService4",
+            "description": "function service for aUserReject",
+            "type": "function",
+            "function": "aUserReject"
           }
         ]
       }

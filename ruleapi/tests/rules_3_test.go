@@ -19,14 +19,14 @@ func Test_Three(t *testing.T) {
 
 	rule := ruleapi.NewRule("R3")
 	rule.AddCondition("R3c1", []string{"t1.id"}, trueCondition, nil)
-	rule.SetAction(r3action)
+	rule.SetActionService(createActionServiceFromFunction(t, r3action))
 	rule.SetPriority(1)
 	rs.AddRule(rule)
 	t.Logf("Rule added: [%s]\n", rule.GetName())
 
 	rule1 := ruleapi.NewRule("R32")
 	rule1.AddCondition("R32c1", []string{"t1.p1"}, r3Condition, nil)
-	rule1.SetAction(r32action)
+	rule1.SetActionService(createActionServiceFromFunction(t, r32action))
 	rule1.SetPriority(1)
 	rule1.SetContext(actionMap)
 	rs.AddRule(rule1)

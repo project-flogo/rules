@@ -102,7 +102,9 @@
                 "expression" : "$.n1.name == 'Bob'"
               }
             ],
-            "actionFunction": "checkForBobAction"
+            "actionService": {
+              "service": "FunctionService"
+            }
           },
           {
             "name": "n1.name == Bob \u0026\u0026 n1.name == n2.name",
@@ -117,16 +119,20 @@
                 "expression" : "($.n1.name == 'Bob') \u0026\u0026 ($.n1.name == $.n2.name)"
               }
             ],
-            "actionFunction": "checkSameNamesAction"
+            "actionService": {
+              "service": "FunctionService1"
+            }
           },
           {
             "name": "env variable example",
             "conditions": [
               {
-                "expression" : "($.n1.name == $env['name'])"
+                "expression" : "($.n1.name == $env['simpleappname'])"
               }
             ],
-            "actionFunction": "envVarExampleAction"
+            "actionService": {
+              "service": "envVarExampleAction"
+            }
           },
           {
             "name": "flogo property example",
@@ -138,7 +144,35 @@
                 "expression" : "($.n1.name == $property['name'])"
               }
             ],
-            "actionFunction": "propertyExampleAction"
+            "actionService": {
+              "service": "propertyExampleAction"
+            }
+          }
+        ],
+        "services": [
+          {
+            "name": "FunctionService",
+            "description": "function service for checkForBobAction",
+            "type": "function",
+            "function": "checkForBobAction"
+          },
+          {
+            "name": "FunctionService1",
+            "description": "function service for checkSameNamesAction",
+            "type": "function",
+            "function": "checkSameNamesAction"
+          },
+          {
+            "name": "envVarExampleAction",
+            "description": "function service for envVarExampleAction",
+            "type": "function",
+            "function": "envVarExampleAction"
+          },
+          {
+            "name": "propertyExampleAction",
+            "description": "function service for propertyExampleAction",
+            "type": "function",
+            "function": "propertyExampleAction"
           }
         ]
       }
